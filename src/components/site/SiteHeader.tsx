@@ -72,7 +72,12 @@ export function SiteHeader() {
           </a>
           <Link
             href="/hub"
-            className="hidden items-center gap-1.5 rounded-full bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-[0_8px_24px_rgba(6,6,6,.25)] transition hover:bg-azure-deep sm:inline-flex"
+            className={cn(
+              "hidden items-center gap-1.5 rounded-full px-4 py-2 text-[0.82rem] font-semibold transition sm:inline-flex",
+              onDark
+                ? "bg-white text-ink shadow-[0_8px_24px_rgba(6,6,6,.25)] hover:bg-paper"
+                : "bg-azure text-white shadow-[0_8px_24px_rgba(6,6,6,.25)] hover:bg-azure-deep",
+            )}
           >
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>

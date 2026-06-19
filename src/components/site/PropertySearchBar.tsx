@@ -50,7 +50,9 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
       </select>
       <button
         type="submit"
-        className="inline-flex items-center justify-center gap-2 rounded-full bg-azure px-6 py-3 font-medium text-white transition hover:bg-azure-deep"
+        className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-medium transition ${
+          dark ? "bg-white text-ink hover:bg-paper" : "bg-azure text-white hover:bg-azure-deep"
+        }`}
       >
         <Search className="h-4 w-4" /> Search
       </button>
