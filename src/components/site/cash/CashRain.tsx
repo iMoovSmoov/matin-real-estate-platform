@@ -12,12 +12,12 @@ function Bill({ i }: { i: number }) {
   const dur = 10 + (i % 6) * 1.9;          // 10–19s
   const delay = -((i * 1.9) % 15);         // already mid-flight, staggered
   const depth = i % 3;                      // 0 near → 2 far
-  const scale = [1.08, 0.84, 0.62][depth];
-  const blur = [0, 1.1, 2.6][depth];
-  const opacity = [0.97, 0.82, 0.55][depth];
-  const rz = ((i * 47) % 50) - 25;
-  const bx = (i * 37) % 100;
-  const by = (i * 61) % 100;
+  const scale = [1.05, 0.82, 0.64][depth];
+  const blur = [0, 0.6, 1.7][depth];
+  const opacity = [0.98, 0.86, 0.6][depth];
+  const rz = ((i * 47) % 44) - 22;
+  const bx = 8 + ((i * 37) % 70);           // bias toward bill faces
+  const by = 8 + ((i * 61) % 70);
   return (
     <div
       className="absolute top-0 will-change-transform"
@@ -31,8 +31,8 @@ function Bill({ i }: { i: number }) {
       }}
     >
       <div
-        className="h-[46px] w-[108px] rounded-[4px] bg-cover shadow-[0_8px_22px_rgba(0,0,0,.45)] ring-1 ring-black/20 [transform-style:preserve-3d]"
-        style={{ backgroundImage: `url('${CASH}')`, backgroundSize: "260%", backgroundPosition: `${bx}% ${by}%` }}
+        className="h-[64px] w-[150px] rounded-[5px] bg-cover shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20 [transform-style:preserve-3d]"
+        style={{ backgroundImage: `url('${CASH}')`, backgroundSize: "165%", backgroundPosition: `${bx}% ${by}%` }}
       />
     </div>
   );
