@@ -58,7 +58,7 @@ export default function BuyPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-28">
+        <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow-light">Buy with Matin</span>
@@ -200,7 +200,7 @@ export default function BuyPage() {
       {/* ---------- CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-8 py-16 text-center text-white shadow-glow md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
               <span className="eyebrow-light">Ready when you are</span>

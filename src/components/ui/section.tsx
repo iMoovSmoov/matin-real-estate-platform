@@ -14,7 +14,7 @@ export function Section({
   id?: string;
 }) {
   return (
-    <section id={id} className={cn("py-20 md:py-28", className)}>
+    <section id={id} className={cn("py-14 md:py-20", className)}>
       {children}
     </section>
   );
@@ -57,7 +57,7 @@ export function SectionHeading({
         {title}
       </h2>
       {intro && (
-        <p className={cn("mt-5 text-lg leading-relaxed text-pretty", light ? "text-slate-300" : "text-slate")}>
+        <p className={cn("mt-4 text-base leading-relaxed text-pretty sm:text-lg sm:mt-5", light ? "text-slate-300" : "text-slate")}>
           {intro}
         </p>
       )}

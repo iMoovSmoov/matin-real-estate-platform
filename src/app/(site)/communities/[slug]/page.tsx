@@ -62,7 +62,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/45 to-ink/30" />
         </div>
-        <Container className="relative z-10 pb-12 pt-28">
+        <Container className="relative z-10 pb-12 pt-20 sm:pt-28">
           <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-[0.82rem] text-white/70">
             <Link href="/communities" className="hover:text-white">Communities</Link>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -88,7 +88,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
       {/* ---------- STATS ROW ---------- */}
       <div className="border-b border-ink/[0.07] bg-cloud">
         <Container>
-          <dl className="grid grid-cols-2 gap-y-6 py-10 sm:grid-cols-4 lg:grid-cols-7">
+          <dl className="grid grid-cols-2 gap-y-6 py-10 [&>*:last-child]:col-span-2 sm:grid-cols-4 sm:[&>*:last-child]:col-span-1 lg:grid-cols-7">
             {stats.map((s) => (
               <div key={s.label} className="px-2 text-center">
                 <s.icon className="mx-auto h-5 w-5 text-azure" />
@@ -139,7 +139,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
       {/* ---------- CTA ---------- */}
       <Section className="pb-24 pt-0">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-8 py-14 text-center text-white shadow-glow md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-12 text-center text-white shadow-glow sm:px-8 sm:py-14 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
               <h2 className="display-3 font-display text-white text-balance">Thinking about {community.name}?</h2>

@@ -63,7 +63,7 @@ export default function SellPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-28">
+        <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow-light">Sell with Matin</span>
@@ -98,12 +98,14 @@ export default function SellPage() {
       {/* ---------- INSTANT VALUE (LIVE AI) ---------- */}
       <Section id="instant-value">
         <Container>
-          <SectionHeading
-            eyebrow="Instant home value · live AI"
-            title="What's your home worth today?"
-            intro="Our AI market analyst drafts a real pricing opinion in seconds — then a broker builds your full, comp-by-comp CMA. No phone call required to start."
-            align="center"
-          />
+          <div className="pr-16 sm:pr-0">
+            <SectionHeading
+              eyebrow="Instant home value · live AI"
+              title="What's your home worth today?"
+              intro="Our AI market analyst drafts a real pricing opinion in seconds — then a broker builds your full, comp-by-comp CMA. No phone call required to start."
+              align="center"
+            />
+          </div>
           <div className="mt-14">
             <InstantValue />
           </div>
@@ -190,7 +192,7 @@ export default function SellPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
                 </div>
-                <div className="absolute -bottom-5 -left-5 rounded-2xl bg-cloud px-6 py-5 text-ink shadow-lift">
+                <div className="absolute bottom-0 left-0 rounded-2xl bg-cloud px-5 py-4 text-ink shadow-lift sm:-bottom-5 sm:-left-5 sm:px-6 sm:py-5">
                   <div className="flex items-center gap-2 text-azure">
                     <ClipboardCheck className="h-5 w-5" />
                     <span className="text-[0.78rem] font-semibold uppercase tracking-wide">No obligation</span>
@@ -254,7 +256,7 @@ export default function SellPage() {
       {/* ---------- CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-8 py-16 text-center text-white shadow-glow md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
               <span className="eyebrow-light">Two ways to sell, one trusted team</span>

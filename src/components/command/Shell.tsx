@@ -16,13 +16,7 @@ import {
   BarChart2,
   PlugZap,
   BrainCircuit,
-  MessageSquareText,
-  PenLine,
-  Calculator,
   FileSignature,
-  MessageCircle,
-  Megaphone,
-  PhoneCall,
   Search,
   Bell,
   Menu,
@@ -35,18 +29,14 @@ import { MatinMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
-type NavGroup = { label: string; items: NavItem[] };
+type NavGroup = { label: string; items: NavItem[]; alwaysOpen?: boolean };
 
 const NAV: NavGroup[] = [
   {
-    label: "OVERVIEW",
+    label: "HOME",
+    alwaysOpen: true,
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: "AGENT",
-    items: [
       { label: "My Workspace", href: "/hub/agent", icon: BrainCircuit },
     ],
   },
@@ -69,18 +59,9 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "AI STUDIO",
+    label: "AI",
     items: [
       { label: "AI Studio", href: "/hub/ai", icon: BrainCircuit },
-      { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
-      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenLine },
-      { label: "Marketing Kit", href: "/hub/ai/marketing-kit", icon: Megaphone },
-      { label: "CMA Generator", href: "/hub/ai/cma", icon: Calculator },
-      { label: "Agreements", href: "/hub/ai/agreements", icon: FileSignature },
-      { label: "Seller Intel", href: "/hub/ai/seller-intel", icon: PhoneCall },
-      { label: "Cash Offer Eval", href: "/hub/ai/cash-offer", icon: DollarSign },
-      { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
-      { label: "Ask Matin", href: "/hub/ai/ask", icon: MessageCircle },
     ],
   },
   {
@@ -189,10 +170,14 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {NAV.map((group) => {
           const isOpen = open[group.label];
-          const single = group.items.length === 1;
+          const noCollapse = group.items.length === 1 || group.alwaysOpen;
           return (
             <div key={group.label} className="pb-1">
-              {single ? null : (
+              {noCollapse ? (
+                <span className="mb-1 flex w-full items-center px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40">
+                  {group.label}
+                </span>
+              ) : (
                 <button
                   onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
                   className="mb-1 flex w-full items-center justify-between rounded-lg px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40 transition-colors hover:text-slate/70"
@@ -206,7 +191,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                   />
                 </button>
               )}
-              {(single || isOpen) && (
+              {(noCollapse || isOpen) && (
                 <ul className="mt-0.5 space-y-0.5">
                   {group.items.map((item) => {
                     const active = isActive(pathname, item.href);

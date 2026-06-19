@@ -302,7 +302,7 @@ export default function AboutPage() {
       </Section>
 
       {/* ---------- TECH-FORWARD FUTURE ---------- */}
-      <section className="relative overflow-hidden bg-ink py-24 text-white">
+      <section className="relative overflow-hidden bg-ink py-16 text-white sm:py-24">
         <div className="absolute inset-0 grid-tech opacity-60" />
         <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[rgba(210,160,80,0.15)] blur-3xl" />
         <Container className="relative">
