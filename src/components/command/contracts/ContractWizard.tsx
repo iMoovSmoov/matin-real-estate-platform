@@ -55,7 +55,7 @@ interface AuditEntry {
 const STEPS = [
   { n: 1, label: "Choose contract", icon: ScrollText, hint: "Pick the OREF document" },
   { n: 2, label: "Auto-fill", icon: Database, hint: "Pull from the CRM record" },
-  { n: 3, label: "AI draft", icon: Wand2, hint: "Claude writes the clauses" },
+  { n: 3, label: "AI draft", icon: Wand2, hint: "AI writes the clauses" },
   { n: 4, label: "Review & compliance", icon: ShieldCheck, hint: "Oregon & federal checks" },
   { n: 5, label: "Route for e-sign", icon: PenTool, hint: "Send to all parties" },
 ] as const;
@@ -659,8 +659,8 @@ function StepDraft({
       <StepHead
         icon={Wand2}
         eyebrow="Step 3"
-        title="Draft with Claude"
-        sub="Claude (Opus 4.8) writes Oregon-ready clause language from your terms and streams it live."
+        title="Draft with AI"
+        sub="AI writes Oregon-ready clause language from your terms and streams it live."
       />
 
       <div className="mt-4 flex items-center justify-between gap-3">
@@ -672,7 +672,7 @@ function StepDraft({
         >
           {drafting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Claude is drafting…
+              <Loader2 className="h-4 w-4 animate-spin" /> AI is drafting…
             </>
           ) : drafted ? (
             <>
@@ -680,7 +680,7 @@ function StepDraft({
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" /> Draft with Claude
+              <Sparkles className="h-4 w-4" /> Draft with AI
             </>
           )}
         </button>
@@ -717,7 +717,7 @@ function StepDraft({
               </span>
               <p className="mt-3 text-[0.9rem] font-semibold text-white">Ready to draft</p>
               <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/65">
-                Hit <span className="font-semibold text-azure-bright">Draft with Claude</span> to generate clause
+                Hit <span className="font-semibold text-azure-bright">Draft with AI</span> to generate clause
                 language from the auto-filled terms.
               </p>
             </div>

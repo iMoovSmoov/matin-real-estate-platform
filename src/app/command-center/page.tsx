@@ -43,7 +43,7 @@ const KPIS = [
 const PILLARS = [
   { n: 1, name: "Structured Data Systems", module: "CRM & Leads", href: "/command-center/crm", icon: Database, note: "Spreadsheets → live database" },
   { n: 2, name: "Centralized Dashboard", module: "Real-time Reporting", href: "/command-center/reporting", icon: Gauge, note: "One source of truth" },
-  { n: 3, name: "AI Integration", module: "AI Studio", href: "/command-center/ai", icon: Bot, note: "Claude in every workflow" },
+  { n: 3, name: "AI Integration", module: "AI Studio", href: "/command-center/ai", icon: Bot, note: "AI in every workflow" },
   { n: 4, name: "Automation", module: "Automation Studio", href: "/command-center/automations", icon: Workflow, note: "8 flows eliminating busywork" },
   { n: 5, name: "Contract Systems", module: "AI Agreements", href: "/command-center/ai/agreements", icon: FileSignature, note: "Listing & buyer agreements" },
   { n: 6, name: "AI Coaching", module: "Agent Coach", href: "/command-center/ai/coach", icon: GraduationCap, note: "Scenario role-play training" },
@@ -61,7 +61,7 @@ export default function DashboardPage() {
           <div>
             <div className="mb-2 flex items-center gap-2">
               <LiveDot tone="success" />
-              <SectionLabel>Operations Command Center · Live</SectionLabel>
+              <SectionLabel>Operations · Live</SectionLabel>
             </div>
             <h1 className="font-display text-3xl text-white md:text-[2.4rem]">
               Good morning, {company.founder.split(" ")[0]}.
@@ -197,8 +197,8 @@ export default function DashboardPage() {
       {/* 6 pillars system status */}
       <Panel>
         <PanelHeader
-          title="System Architecture — The 6 Pillars"
-          subtitle="Every capability in the job spec, mapped to a live module"
+          title="Platform modules"
+          subtitle="Every part of the brokerage, connected in one system"
           icon={<Gauge className="h-4 w-4" />}
           action={
             <span className="inline-flex items-center gap-1.5 rounded-lg bg-success/12 px-2.5 py-1 text-[0.72rem] font-semibold text-success ring-1 ring-inset ring-success/20">
@@ -220,8 +220,8 @@ export default function DashboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[0.62rem] font-bold uppercase tracking-wider text-slate-300/55">
-                      Pillar {p.n}
+                    <span className="text-[0.62rem] font-bold uppercase tracking-wider text-success/80">
+                      Live
                     </span>
                     <LiveDot tone="success" className="h-1.5 w-1.5" />
                   </div>

@@ -28,7 +28,7 @@ const buyingSteps = [
 
 const values = [
   { icon: TrendingUp, title: "The largest local dataset", body: "We run on the largest locally owned real-estate website in the Portland area — so you see more homes, sooner, with sharper comps behind every decision." },
-  { icon: Cpu, title: "AI-assisted negotiation", body: "Our Command Center pairs live market data with AI strategy, so your offer is priced to win without leaving money on the table." },
+  { icon: Cpu, title: "AI-assisted negotiation", body: "Our Matin Hub pairs live market data with AI strategy, so your offer is priced to win without leaving money on the table." },
   { icon: Users, title: "40+ full-time brokers", body: "Never a part-timer. A licensed OR & WA broker who knows your neighborhood by heart is in your corner from first tour to final signature." },
   { icon: ShieldCheck, title: "Fiduciary, full-service", body: "We represent you — start to close. Inspections, appraisal, lending, and closing are all coordinated and kept on schedule." },
   { icon: BadgeCheck, title: "Award-winning team", body: "Portland Business Journal fastest-growing, $130M+ closed, and 305+ families moved every year. Experience you can feel." },

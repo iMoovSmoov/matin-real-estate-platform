@@ -197,7 +197,7 @@ export function ContractCoach() {
       </div>
 
       <p className="border-t border-white/10 px-5 py-3 text-[0.68rem] text-slate-300/45">
-        Claude Opus 4.8 · AI-generated coaching for training only — not legal advice. Have counsel
+        AI · AI-generated coaching for training only — not legal advice. Have counsel
         review any binding agreement.
       </p>
     </div>

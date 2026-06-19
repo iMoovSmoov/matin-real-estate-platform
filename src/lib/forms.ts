@@ -55,7 +55,7 @@ export interface ReForm {
   description: string;
   /** The spreadsheet / Google Form / paper process this replaces. */
   replaces: string;
-  /** What Claude does on this form. */
+  /** What AI does on this form. */
   aiAssist: string;
   esign: boolean;
   /** Statute / regulatory note where relevant. */
@@ -322,7 +322,7 @@ export const intakeFlows: IntakeFlow[] = [
     replaces: "A Google Form dumping to a spreadsheet",
     fieldsCount: 9,
     routesTo: "CRM → auto-assign to best-fit broker",
-    aiStep: "Claude scores the lead, summarizes intent, and drafts the first reply.",
+    aiStep: "AI scores the lead, summarizes intent, and drafts the first reply.",
     submissionsThisMonth: 412,
     fields: [
       { name: "name", label: "Full name", type: "text", required: true },
@@ -342,7 +342,7 @@ export const intakeFlows: IntakeFlow[] = [
     replaces: "An email thread + a property-details spreadsheet",
     fieldsCount: 14,
     routesTo: "Listing record → photographer + MLS draft",
-    aiStep: "Claude drafts the MLS description and a launch marketing plan from the answers.",
+    aiStep: "AI drafts the MLS description and a launch marketing plan from the answers.",
     submissionsThisMonth: 38,
     fields: [
       { name: "address", label: "Property address", type: "text", required: true },
@@ -361,7 +361,7 @@ export const intakeFlows: IntakeFlow[] = [
     replaces: "Texts the listing agent has to chase down",
     fieldsCount: 6,
     routesTo: "Listing → seller feedback report",
-    aiStep: "Claude rolls up sentiment across showings into a weekly seller report.",
+    aiStep: "AI rolls up sentiment across showings into a weekly seller report.",
     submissionsThisMonth: 184,
     fields: [
       { name: "listing", label: "Listing", type: "text", autofill: true },
@@ -377,7 +377,7 @@ export const intakeFlows: IntakeFlow[] = [
     replaces: "A W-9 PDF + a vendor contacts spreadsheet",
     fieldsCount: 8,
     routesTo: "Vendor directory + accounting",
-    aiStep: "Claude validates the W-9 fields and de-dupes against existing vendors.",
+    aiStep: "AI validates the W-9 fields and de-dupes against existing vendors.",
     submissionsThisMonth: 11,
     fields: [
       { name: "company", label: "Company", type: "text", required: true },
@@ -394,7 +394,7 @@ export const intakeFlows: IntakeFlow[] = [
     replaces: "A paper clipboard with illegible handwriting",
     fieldsCount: 5,
     routesTo: "CRM → instant text follow-up",
-    aiStep: "Claude sends each visitor a personalized follow-up within 60 seconds.",
+    aiStep: "AI sends each visitor a personalized follow-up within 60 seconds.",
     submissionsThisMonth: 96,
     fields: [
       { name: "name", label: "Name", type: "text", required: true },

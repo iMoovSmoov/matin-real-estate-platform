@@ -5,7 +5,7 @@ export default function AskPage() {
     <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-6 md:py-8">
       <div className="mb-4">
         <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-azure-300/80">
-          Pillar 3 · AI Integration
+          Team Assistant
         </p>
         <h1 className="mt-1 font-display text-3xl text-white">Ask Matin</h1>
         <p className="mt-1.5 max-w-2xl text-[0.9rem] leading-relaxed text-slate-300">

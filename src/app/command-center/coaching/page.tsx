@@ -83,7 +83,7 @@ export default function CoachingPage() {
         <div className="relative">
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-azure-300/80">
-              <GraduationCap className="h-3.5 w-3.5" /> Pillar 6 · Coaching Academy
+              <GraduationCap className="h-3.5 w-3.5" /> Coaching Academy
             </span>
             <LiveDot tone="success" />
           </div>
@@ -98,7 +98,7 @@ export default function CoachingPage() {
               <Drama className="h-3 w-3" /> {scenarios.length} role-play scenarios
             </Pill>
             <Pill tone="success">
-              <Sparkles className="h-3 w-3" /> Claude Opus 4.8 coach
+              <Sparkles className="h-3 w-3" /> AI coach
             </Pill>
             <Pill tone="neutral">
               <Award className="h-3 w-3" /> Gamified leaderboard

@@ -142,7 +142,7 @@ function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
           </span>
           {form.oref && <Pill tone="azure">OREF</Pill>}
         </div>
-        <Pill tone={pillarTone[form.pillar]}>{form.pillar}</Pill>
+        
       </div>
 
       {/* Name + category */}

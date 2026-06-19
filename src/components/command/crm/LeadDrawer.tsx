@@ -236,7 +236,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   )}
                   {busy && !draft && (
                     <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate-300">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-azure-bright" /> Claude is drafting a personalized reply…
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-azure-bright" /> AI is drafting a personalized reply…
                     </div>
                   )}
                 </div>

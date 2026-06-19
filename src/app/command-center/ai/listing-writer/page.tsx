@@ -26,7 +26,7 @@ export default function ListingWriterPage() {
       <AiToolPanel
         tool="listing-description"
         title="Listing Writer"
-        pillar="Pillar 3 · AI Integration"
+        pillar="Marketing"
         description="Turn raw property facts into a vivid, MLS-ready listing description — lifestyle hook first, standout features woven in, fair-housing compliant. Load a real Matin listing to start."
         submitLabel="Write description"
         outputTitle="MLS description"

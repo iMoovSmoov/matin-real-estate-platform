@@ -196,7 +196,7 @@ export function AiToolPanel({
             >
               {busy ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Claude is writing…
+                  <Loader2 className="h-4 w-4 animate-spin" /> AI is writing…
                 </>
               ) : (
                 <>
@@ -264,7 +264,7 @@ function EmptyState({ submitLabel }: { submitLabel: string }) {
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-azure/10 text-azure-bright ring-1 ring-inset ring-azure/20">
         <Sparkles className="h-6 w-6" />
       </span>
-      <p className="mt-3 text-[0.9rem] font-semibold text-white">Powered by Claude Opus 4.8</p>
+      <p className="mt-3 text-[0.9rem] font-semibold text-white">Powered by AI</p>
       <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/70">
         Fill the form (or load a quick-fill example) and hit{" "}
         <span className="inline-flex items-center gap-1 font-semibold text-azure-bright">

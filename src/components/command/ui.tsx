@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Command Center — server-safe primitives (dark / tech / data-dense).
+   Matin Hub — server-safe primitives (dark / tech / data-dense).
    These are pure presentational components: no state, no client hooks, so
    they can be used in server components and inside client islands alike.
    ────────────────────────────────────────────────────────────────────────── */
@@ -236,7 +236,7 @@ export function LiveDot({
 export function Sparkline({
   data,
   className,
-  stroke = "#54a8ff",
+  stroke = "#c7a567",
   fill = true,
 }: {
   data: number[];

@@ -31,7 +31,7 @@ export default function LeadResponderPage() {
       <AiToolPanel
         tool="lead-responder"
         title="Lead Responder"
-        pillar="Pillar 3 · AI Integration"
+        pillar="Lead Conversion"
         description="Speed-to-lead wins deals. Draft a personalized, ready-to-send first reply that references the lead's area, price point, and intent — under 130 words, signed by the Matin team."
         submitLabel="Draft reply"
         outputTitle="Drafted reply"

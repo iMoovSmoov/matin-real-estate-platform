@@ -35,9 +35,9 @@ export function SiteHeader() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-all duration-500",
-        scrolled
-          ? "border-b border-ink/10 bg-cloud/85 backdrop-blur-xl py-2.5"
-          : "bg-transparent py-4",
+        onDark
+          ? "bg-transparent py-4"
+          : "border-b border-ink/10 bg-cloud/95 shadow-soft backdrop-blur-xl py-2.5",
       )}
     >
       <div className="container-x flex items-center justify-between gap-6">
@@ -74,7 +74,7 @@ export function SiteHeader() {
             href="/command-center"
             className="hidden items-center gap-1.5 rounded-full bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-[0_8px_24px_rgba(46,144,224,.35)] transition hover:bg-azure-deep sm:inline-flex"
           >
-            Command Center <ArrowRight className="h-3.5 w-3.5" />
+            Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <button
             className={cn("lg:hidden", onDark ? "text-white" : "text-ink")}
@@ -106,7 +106,7 @@ export function SiteHeader() {
             href="/command-center"
             className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-azure px-4 py-2.5 font-semibold text-white"
           >
-            Command Center <ArrowRight className="h-4 w-4" />
+            Matin Hub <ArrowRight className="h-4 w-4" />
           </Link>
         </nav>
       </div>

@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Zap,
-  ArrowRight,
-  Play,
-  CircleDot,
-  Workflow,
-  Activity,
-} from "lucide-react";
+import { Zap, Workflow, Activity, CircleDot, ArrowRight, Clock } from "lucide-react";
 import type { Automation } from "@/lib/types";
 import { cn, num, timeAgo } from "@/lib/utils";
 
@@ -26,6 +19,19 @@ function catTone(c: string) {
   return CATEGORY_TONE[c] ?? "bg-white/[0.06] text-slate-300 ring-white/12";
 }
 
+/** Plain-English outcome for each automation — what it does for the business
+ *  (not the underlying steps). */
+const OUTCOME: Record<string, string> = {
+  au1: "Every new lead gets a personal reply in under 60 seconds, then routes to the right agent.",
+  au2: "New listings go live with polished copy, marketing, and matched-buyer alerts — hands-off.",
+  au3: "Quiet seller leads receive a branded market analysis until they book an appointment.",
+  au4: "Every pending deal gets its checklist, deadlines tracked, and a daily risk check.",
+  au5: "Past clients get a timely home-value touch that reopens conversations.",
+  au6: "Closed clients are asked for a review and a referral at exactly the right moment.",
+  au7: "Each agent gets a personalized Monday coaching note built from their numbers.",
+  au8: "Showing feedback is collected and summarized into a clean seller report.",
+};
+
 export function AutomationStudio({ automations }: { automations: Automation[] }) {
   const [state, setState] = useState<Record<string, boolean>>(
     Object.fromEntries(automations.map((a) => [a.id, a.status === "active"])),
@@ -38,26 +44,26 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
     <div className="space-y-4">
       {/* Summary strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Mini icon={<Workflow className="h-4 w-4" />} label="Active flows" value={`${activeCount}/${automations.length}`} accent />
+        <Mini icon={<Workflow className="h-4 w-4" />} label="Active workflows" value={`${activeCount}/${automations.length}`} accent />
         <Mini icon={<Activity className="h-4 w-4" />} label="Runs this month" value={num(totalRuns)} />
         <Mini icon={<Zap className="h-4 w-4" />} label="Tasks automated" value="~3,100" />
-        <Mini icon={<CircleDot className="h-4 w-4" />} label="Avg time saved" value="11 hrs/wk" />
+        <Mini icon={<Clock className="h-4 w-4" />} label="Avg time saved" value="11 hrs/wk" />
       </div>
 
-      {/* Flows */}
-      <div className="space-y-3">
+      {/* Workflows */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {automations.map((a) => {
           const on = state[a.id];
           return (
             <div
               key={a.id}
               className={cn(
-                "rounded-2xl border bg-ink-900/70 p-4 transition-colors md:p-5",
+                "flex flex-col rounded-2xl border bg-ink-900/70 p-5 transition-colors",
                 on ? "border-white/10" : "border-white/[0.06] opacity-70",
               )}
             >
               {/* Header row */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span
                     className={cn(
@@ -68,22 +74,17 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
                     <Zap className="h-4 w-4" />
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-[0.95rem] font-semibold text-white">{a.name}</h3>
-                      <span className={cn("rounded-md px-2 py-0.5 text-[0.64rem] font-semibold ring-1 ring-inset", catTone(a.category))}>
-                        {a.category}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-[0.76rem] text-slate-300/65">
-                      {num(a.runsThisMonth)} runs this month · last ran {timeAgo(a.lastRunMins)}
-                    </p>
+                    <h3 className="text-[0.95rem] font-semibold text-white">{a.name}</h3>
+                    <span className={cn("mt-1 inline-block rounded-md px-2 py-0.5 text-[0.64rem] font-semibold ring-1 ring-inset", catTone(a.category))}>
+                      {a.category}
+                    </span>
                   </div>
                 </div>
 
                 {/* Toggle */}
                 <div className="flex items-center gap-2.5">
                   <span className={cn("text-[0.72rem] font-semibold", on ? "text-success" : "text-slate-300/55")}>
-                    {on ? "Active" : "Paused"}
+                    {on ? "On" : "Off"}
                   </span>
                   <button
                     role="switch"
@@ -105,61 +106,32 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
                 </div>
               </div>
 
-              {/* Flow nodes */}
-              <div className="mt-4 overflow-x-auto">
-                <div className="flex min-w-max items-stretch gap-1.5">
-                  {/* Trigger node */}
-                  <Node label="Trigger" text={a.trigger} kind="trigger" on={on} />
-                  {a.steps.map((step, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <ArrowRight className={cn("h-4 w-4 shrink-0", on ? "text-azure/60" : "text-slate-300/25")} />
-                      <Node label={`Step ${i + 1}`} text={step} kind="step" on={on} />
-                    </div>
-                  ))}
-                </div>
+              {/* Outcome */}
+              <p className="mt-4 text-[0.86rem] leading-relaxed text-slate-300/90">
+                {OUTCOME[a.id] ?? a.trigger}
+              </p>
+
+              {/* When → result */}
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/[0.07] bg-ink-800/40 px-3 py-2.5">
+                <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-slate-300/55">When</span>
+                <span className="min-w-0 flex-1 truncate text-[0.78rem] text-white">{a.trigger}</span>
+                <ArrowRight className={cn("h-3.5 w-3.5 shrink-0", on ? "text-azure-bright" : "text-slate-300/30")} />
+                <span className="shrink-0 text-[0.72rem] font-semibold text-azure-bright">Runs automatically</span>
+              </div>
+
+              {/* Stats */}
+              <div className="mt-3 flex items-center gap-4 text-[0.74rem] text-slate-300/65">
+                <span className="flex items-center gap-1.5">
+                  <CircleDot className="h-3.5 w-3.5 text-azure/70" /> {num(a.runsThisMonth)} runs this month
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-azure/70" /> last ran {timeAgo(a.lastRunMins)}
+                </span>
               </div>
             </div>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function Node({
-  label,
-  text,
-  kind,
-  on,
-}: {
-  label: string;
-  text: string;
-  kind: "trigger" | "step";
-  on: boolean;
-}) {
-  const trigger = kind === "trigger";
-  return (
-    <div
-      className={cn(
-        "flex w-[10.5rem] shrink-0 flex-col rounded-xl border px-3 py-2.5",
-        trigger
-          ? on
-            ? "border-azure/35 bg-azure/[0.08]"
-            : "border-white/10 bg-white/[0.03]"
-          : on
-            ? "border-white/12 bg-ink-800/70"
-            : "border-white/[0.06] bg-ink-800/40",
-      )}
-    >
-      <div className="mb-1 flex items-center gap-1.5">
-        {trigger ? (
-          <Play className={cn("h-3 w-3", on ? "text-azure-bright" : "text-slate-300/45")} />
-        ) : (
-          <CircleDot className={cn("h-3 w-3", on ? "text-azure-bright" : "text-slate-300/45")} />
-        )}
-        <span className="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-300/55">{label}</span>
-      </div>
-      <p className="text-[0.74rem] leading-snug text-white">{text}</p>
     </div>
   );
 }

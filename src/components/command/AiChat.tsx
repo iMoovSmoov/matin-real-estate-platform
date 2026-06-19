@@ -170,7 +170,7 @@ export function AiChat({
           </button>
         </form>
         <p className="mt-2 text-center text-[0.68rem] text-slate-300/45">
-          Claude Opus 4.8 · responses are AI-generated drafts for internal use
+          AI · responses are AI-generated drafts for internal use
         </p>
       </div>
     </div>

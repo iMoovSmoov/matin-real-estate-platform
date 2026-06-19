@@ -39,7 +39,7 @@ export default function AgreementsPage() {
       <AiToolPanel
         tool="agreement"
         title="Agreements"
-        pillar="Pillar 5 · Contract Systems"
+        pillar="Contracts"
         description="Generate clear, organized Oregon listing & buyer-representation agreement language from your terms — plain-English clauses with broker/legal-review flags. A drafting aid, not legal advice."
         submitLabel="Generate language"
         outputTitle="Agreement language"

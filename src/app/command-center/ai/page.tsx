@@ -18,42 +18,42 @@ const TOOLS = [
     href: "/command-center/ai/lead-responder",
     name: "Lead Responder",
     icon: MessageSquareText,
-    pillar: "Pillar 3 · AI Integration",
+    pillar: "Lead Conversion",
     desc: "Drafts a warm, personalized first reply to any inbound lead in seconds — referencing their area, budget, and intent.",
   },
   {
     href: "/command-center/ai/listing-writer",
     name: "Listing Writer",
     icon: PenSquare,
-    pillar: "Pillar 3 · AI Integration",
+    pillar: "Marketing",
     desc: "Turns raw property facts into vivid, MLS-ready, fair-housing-compliant listing copy — load any active listing to start.",
   },
   {
     href: "/command-center/ai/coach",
     name: "Agent Coach",
     icon: GraduationCap,
-    pillar: "Pillar 6 · AI Coaching",
+    pillar: "Coaching",
     desc: "Live scenario role-play and tactical feedback — objection handling, listing presentations, buyer consults.",
   },
   {
     href: "/command-center/ai/cma",
     name: "CMA Generator",
     icon: Calculator,
-    pillar: "Pillar 3 · AI Integration",
+    pillar: "Pricing",
     desc: "Produces a decisive comparative market analysis with a list-price range, comps talking points, and a recommendation.",
   },
   {
     href: "/command-center/ai/agreements",
     name: "Agreements",
     icon: FileSignature,
-    pillar: "Pillar 5 · Contract Systems",
+    pillar: "Contracts",
     desc: "Generates clear listing & buyer-representation agreement language from your terms, with broker-review flags.",
   },
   {
     href: "/command-center/ai/ask",
     name: "Ask Matin",
     icon: Sparkles,
-    pillar: "Pillar 3 · AI Integration",
+    pillar: "Team Assistant",
     desc: "The internal company copilot — policies, market knowledge, referrals, and quick email drafts for the whole team.",
   },
 ];
@@ -61,7 +61,7 @@ const TOOLS = [
 const TRUST = [
   { icon: Zap, label: "Streams live", note: "Token-by-token, no waiting" },
   { icon: ShieldCheck, label: "Grounded", note: "Knows Matin's data & playbook" },
-  { icon: Bot, label: "Opus 4.8", note: "Anthropic's frontier model" },
+  { icon: Bot, label: "AI", note: "Always-on intelligence" },
 ];
 
 export default function AiStudioPage() {
@@ -76,10 +76,10 @@ export default function AiStudioPage() {
             <SectionLabel>AI Studio</SectionLabel>
           </div>
           <h1 className="font-display text-3xl text-white md:text-[2.3rem]">
-            Claude is wired into every workflow.
+            AI is wired into every workflow.
           </h1>
           <p className="mt-2 text-[0.95rem] leading-relaxed text-slate-300">
-            Six purpose-built tools put Anthropic&apos;s Claude (Opus 4.8) directly into the hands of agents and
+            Six purpose-built tools put AI directly into the hands of agents and
             operations — drafting replies, writing listings, generating CMAs and contracts, and coaching the team.
             Every tool streams a live result and is grounded in Matin&apos;s real data.
           </p>
@@ -132,10 +132,9 @@ export default function AiStudioPage() {
 
       <Panel className="px-5 py-4">
         <p className="text-[0.8rem] leading-relaxed text-slate-300/80">
-          <span className="font-semibold text-white">How it works:</span> each tool posts to a streaming{" "}
-          <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.78rem] text-azure-300">/api/ai</code>{" "}
-          route that calls the Anthropic SDK with a tool-specific system prompt grounded in Matin&apos;s company
-          knowledge base, listings, and agent roster — with a graceful canned fallback so the demo never breaks.
+          <span className="font-semibold text-white">Grounded in Matin.</span> Every tool is trained on the
+          brokerage&apos;s real data — listings, agents, communities, and process — so the output is on-brand and
+          ready to use, not generic.
         </p>
       </Panel>
     </div>

@@ -20,13 +20,12 @@ import {
   Database,
   ScrollText,
   Trophy,
-  BookOpen,
   Search,
   Bell,
   Menu,
   X,
   ArrowLeft,
-  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn, initials } from "@/lib/utils";
@@ -36,10 +35,7 @@ type NavItem = { label: string; href: string; icon: React.ComponentType<{ classN
 type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
-  {
-    label: "Overview",
-    items: [{ label: "Dashboard", href: "/command-center", icon: LayoutDashboard }],
-  },
+  { label: "Overview", items: [{ label: "Dashboard", href: "/command-center", icon: LayoutDashboard }] },
   {
     label: "Pipeline",
     items: [
@@ -48,7 +44,7 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "AI Studio",
+    label: "AI Tools",
     items: [
       { label: "AI Studio", href: "/command-center/ai", icon: Bot },
       { label: "Lead Responder", href: "/command-center/ai/lead-responder", icon: MessageSquareText },
@@ -65,7 +61,6 @@ const NAV: NavGroup[] = [
       { label: "Forms & Data Flows", href: "/command-center/forms", icon: Database },
       { label: "Contract Builder", href: "/command-center/contracts", icon: ScrollText },
       { label: "Coaching Academy", href: "/command-center/coaching", icon: Trophy },
-      { label: "Playbook", href: "/command-center/playbook", icon: BookOpen },
     ],
   },
   {
@@ -80,82 +75,80 @@ const NAV: NavGroup[] = [
 
 function isActive(pathname: string, href: string) {
   if (href === "/command-center") return pathname === "/command-center";
-  // AI hub shouldn't stay highlighted on its sub-tools.
   if (href === "/command-center/ai") return pathname === "/command-center/ai";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function SidebarContent({
-  pathname,
-  onNavigate,
-}: {
-  pathname: string;
-  onNavigate?: () => void;
-}) {
+function groupHasActive(pathname: string, g: NavGroup) {
+  return g.items.some((i) => isActive(pathname, i.href));
+}
+
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  // Collapse long groups by default; expand short ones or the active group.
+  const [open, setOpen] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(NAV.map((g) => [g.label, g.items.length <= 3 || groupHasActive(pathname, g)])),
+  );
+
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex items-center gap-3 border-b border-white/10 px-5 py-[1.15rem]">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-azure/15 text-white ring-1 ring-inset ring-azure/25">
-          <MatinMark className="h-4 text-white" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-azure/15 text-azure-bright ring-1 ring-inset ring-azure/25">
+          <MatinMark className="h-4 text-azure-bright" />
         </span>
         <div className="min-w-0 leading-tight">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-[0.92rem] font-semibold tracking-tight text-white">
-              Command Center
-            </span>
-          </div>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="text-[0.62rem] font-medium uppercase tracking-[0.2em] text-slate-300/70">
-              Matin Ops
-            </span>
-            <span className="rounded bg-azure/15 px-1 py-px text-[0.55rem] font-bold uppercase tracking-wider text-azure-bright ring-1 ring-inset ring-azure/25">
-              Demo
-            </span>
-          </div>
+          <span className="block truncate font-display text-[1.05rem] text-white">Matin Hub</span>
+          <span className="block text-[0.6rem] font-medium uppercase tracking-[0.2em] text-slate-300/65">
+            Matin Real Estate
+          </span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-5">
-        {NAV.map((group) => (
-          <div key={group.label}>
-            <p className="px-3 pb-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-slate-300/55">
-              {group.label}
-            </p>
-            <ul className="space-y-0.5">
-              {group.items.map((item) => {
-                const active = isActive(pathname, item.href);
-                const Icon = item.icon;
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={onNavigate}
-                      className={cn(
-                        "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors",
-                        active
-                          ? "bg-azure/12 text-white ring-1 ring-inset ring-azure/25"
-                          : "text-slate-300 hover:bg-white/[0.05] hover:text-white",
-                      )}
-                    >
-                      {active && (
-                        <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-azure-bright" />
-                      )}
-                      <Icon
-                        className={cn(
-                          "h-[1.05rem] w-[1.05rem] shrink-0",
-                          active ? "text-azure-bright" : "text-slate-300 group-hover:text-white",
-                        )}
-                      />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        {NAV.map((group) => {
+          const isOpen = open[group.label];
+          const single = group.items.length === 1;
+          return (
+            <div key={group.label} className="pb-1">
+              {single ? null : (
+                <button
+                  onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-slate-300/55 transition-colors hover:text-slate-300"
+                >
+                  {group.label}
+                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isOpen ? "rotate-0" : "-rotate-90")} />
+                </button>
+              )}
+              {(single || isOpen) && (
+                <ul className="space-y-0.5 pt-0.5">
+                  {group.items.map((item) => {
+                    const active = isActive(pathname, item.href);
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={onNavigate}
+                          className={cn(
+                            "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors",
+                            active
+                              ? "bg-azure/12 text-white ring-1 ring-inset ring-azure/25"
+                              : "text-slate-300 hover:bg-white/[0.05] hover:text-white",
+                          )}
+                        >
+                          {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-azure-bright" />}
+                          <Icon className={cn("h-[1.05rem] w-[1.05rem] shrink-0", active ? "text-azure-bright" : "text-slate-300 group-hover:text-white")} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       {/* Footer status card */}
@@ -166,7 +159,7 @@ function SidebarContent({
             <span className="text-[0.74rem] font-semibold text-white">All systems operational</span>
           </div>
           <p className="mt-1 text-[0.68rem] leading-relaxed text-slate-300/70">
-            12 integrations · 8 automations · Claude Opus 4.8 online
+            12 integrations · 8 automations active
           </p>
         </div>
       </div>
@@ -188,11 +181,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-            aria-hidden
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden />
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[82vw] border-r border-white/10 bg-ink-900 shadow-2xl">
             <button
               onClick={() => setMobileOpen(false)}
@@ -209,7 +198,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/10 bg-ink/85 px-4 backdrop-blur-md md:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/10 bg-ink/90 px-4 backdrop-blur-md md:px-6">
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
@@ -218,7 +207,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Search */}
           <div className="relative hidden max-w-sm flex-1 items-center sm:flex">
             <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate-300/60" />
             <input
@@ -232,13 +220,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
-            {/* AI status chip */}
-            <div className="hidden items-center gap-2 rounded-full border border-success/25 bg-success/10 px-3 py-1.5 sm:flex">
-              <LiveDot tone="success" />
-              <span className="text-[0.74rem] font-semibold text-success">Claude connected</span>
-            </div>
-
-            {/* Notifications */}
             <button
               aria-label="Notifications"
               className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
@@ -249,7 +230,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </span>
             </button>
 
-            {/* User chip */}
             <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-azure to-azure-deep text-[0.66rem] font-bold text-white">
                 {initials("Alicia Kelly-Smith")}
@@ -263,19 +243,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Back-to-site strip */}
-        <div className="flex items-center justify-between border-b border-white/[0.06] bg-ink-900/40 px-4 py-1.5 md:px-6">
+        <div className="flex items-center border-b border-white/[0.06] bg-ink-900/40 px-4 py-1.5 md:px-6">
           <Link
             href="/"
             className="group inline-flex items-center gap-1.5 text-[0.72rem] font-medium text-slate-300/70 transition-colors hover:text-azure-bright"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-            Back to matinrealestate.com
+            Back to website
           </Link>
-          <div className="hidden items-center gap-1 text-[0.68rem] text-slate-300/45 sm:flex">
-            <span>Internal portfolio build</span>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-slate-300/70">AI Systems &amp; Technology Integrator</span>
-          </div>
         </div>
 
         <main className="flex-1">{children}</main>

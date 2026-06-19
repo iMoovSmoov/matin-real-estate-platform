@@ -20,12 +20,12 @@ export default function FormsPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>Pillar 1 · Structured Data Systems</SectionLabel>
+          <SectionLabel>Forms &amp; Data Flows</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">Forms &amp; Data Flows</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
           Spreadsheets &amp; Google Forms → structured, branded, AI-assisted data flows. Every form an
-          agent reaches for — fully branded, fully editable, with Claude auto-filling fields and drafting
+          agent reaches for — fully branded, fully editable, with AI auto-filling fields and drafting
           the language. The end of duplicate data entry.
         </p>
       </div>

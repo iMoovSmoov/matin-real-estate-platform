@@ -28,7 +28,7 @@ export default function CmaPage() {
       <AiToolPanel
         tool="cma"
         title="CMA Generator"
-        pillar="Pillar 3 · AI Integration"
+        pillar="Pricing"
         description="Generate a decisive comparative market analysis — a suggested list-price range with reasoning, comparable-sale talking points, current market posture, and a one-line recommendation."
         submitLabel="Generate CMA"
         outputTitle="Comparative market analysis"

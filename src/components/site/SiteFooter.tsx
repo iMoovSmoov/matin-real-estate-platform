@@ -34,7 +34,7 @@ const cols = [
       ["Contact", "/contact"],
       ["Blog & resources", "/blog"],
       ["Cash offer", "/sell#cash-offer"],
-      ["Command Center", "/command-center"],
+      ["Matin Hub", "/command-center"],
     ],
   },
 ];
@@ -122,7 +122,7 @@ export function SiteFooter() {
             © {company.founded}–2026 {company.name}. Equal Housing Opportunity. Licensed in OR & WA.
           </p>
           <p className="text-slate-300/70">
-            Demo build by an AI Systems &amp; Technology Integrator candidate · not Matin&apos;s production site.
+            {company.address.street}, {company.address.city}, {company.address.state} · {company.phone}
           </p>
         </div>
       </div>

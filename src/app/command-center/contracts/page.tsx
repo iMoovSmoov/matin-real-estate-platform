@@ -21,7 +21,7 @@ import { ContractWizard } from "@/components/command/contracts/ContractWizard";
    ────────────────────────────────────────────────────────────────────────── */
 
 export const metadata = {
-  title: "Contract Builder · Matin Command Center",
+  title: "Contract Builder · Matin Hub",
   description:
     "AI-powered listing and buyer agreement creation — drafted, compliance-checked, and routed for e-signature in minutes.",
 };
@@ -51,7 +51,7 @@ export default function ContractsPage() {
         <div className="relative max-w-2xl">
           <div className="mb-2 flex items-center gap-2">
             <LiveDot tone="success" />
-            <SectionLabel>Pillar 5 · Contract Systems</SectionLabel>
+            <SectionLabel>Contract Builder</SectionLabel>
           </div>
           <h1 className="flex items-center gap-3 font-display text-3xl text-white md:text-[2.3rem]">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-azure/15 text-azure-bright ring-1 ring-inset ring-azure/25">
@@ -61,13 +61,13 @@ export default function ContractsPage() {
           </h1>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-300">
             Listing &amp; buyer agreements, drafted and checked in minutes. Pick a form, auto-fill it from the CRM,
-            let Claude write the clause language, run automated Oregon &amp; federal compliance, and route the
+            let AI write the clause language, run automated Oregon &amp; federal compliance, and route the
             packet for e-signature — one guided flow, zero duplicate data entry.
           </p>
           <div className="mt-5 flex flex-wrap gap-2.5">
             {[
               { icon: Database, label: "Auto-fill from CRM" },
-              { icon: ScrollText, label: "Claude drafts the clauses" },
+              { icon: ScrollText, label: "AI drafts the clauses" },
               { icon: ShieldCheck, label: "Compliance-checked" },
               { icon: Stamp, label: "DocuSign / Dotloop e-sign" },
             ].map((t) => {

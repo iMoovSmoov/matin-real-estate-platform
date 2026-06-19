@@ -16,12 +16,12 @@ export default function CrmPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>Pillar 1 · Structured Data Systems</SectionLabel>
+          <SectionLabel>CRM &amp; Leads</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">CRM &amp; Leads</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
           Every lead in one structured database — scored, stage-tracked, and assigned. Open any lead to draft a
-          personalized AI reply in seconds. This is the spreadsheet-to-system upgrade, with Claude built in.
+          personalized AI reply in seconds. This is the spreadsheet-to-system upgrade, with AI built in.
         </p>
       </div>
 

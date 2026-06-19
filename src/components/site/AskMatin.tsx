@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageSquare, X, Send, Sparkles, Phone } from "lucide-react";
+import { X, Send, Sparkles, Phone } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export function AskMatin() {
           open && "rotate-90 scale-95",
         )}
       >
-        {open ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
+        {open ? <X className="h-6 w-6" /> : <MatinMark className="h-6 text-white" />}
         {pulse && !open && (
           <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-azure-bright opacity-75" />

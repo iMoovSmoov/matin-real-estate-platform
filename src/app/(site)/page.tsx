@@ -202,13 +202,13 @@ export default function HomePage() {
                 The most technologically advanced brokerage in Oregon
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
-                Behind every Matin client is the <strong className="text-white">Matin Command Center</strong> — a custom
+                Behind every Matin client is the <strong className="text-white">Matin Hub</strong> — a custom
                 platform that unifies our CRM, listings, transactions, marketing and AI into one seamless system. Real-time
                 dashboards, AI coaching, and automated workflows so our brokers spend their time on you.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="/command-center" variant="primary" size="lg">
-                  <Cpu className="h-4 w-4" /> Tour the Command Center
+                  <Cpu className="h-4 w-4" /> Tour the Matin Hub
                 </ButtonLink>
                 <ButtonLink href="/about" variant="outline-light" size="lg">
                   Our story
@@ -219,7 +219,7 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 {[
                   ["Structured data", "Spreadsheets → live databases"],
-                  ["AI integration", "Claude woven into the CRM"],
+                  ["AI integration", "AI woven into the CRM"],
                   ["Automation", "Speed-to-lead in under 60s"],
                   ["AI coaching", "Scenario training for brokers"],
                 ].map(([t, d]) => (

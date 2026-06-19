@@ -24,7 +24,7 @@ export default function ReportingPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>Pillar 2 · Centralized Dashboard</SectionLabel>
+          <SectionLabel>Reporting</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">Reporting</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">

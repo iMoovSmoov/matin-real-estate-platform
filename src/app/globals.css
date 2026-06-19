@@ -2,40 +2,42 @@
 
 /*
   MATIN REAL ESTATE — design system
-  Brand: obsidian navy + clean white + electric "Matin blue" (from their real brand).
-  Public site = light/airy with blue accent. Command Center = dark/tech with blue glow.
+  "Monochrome luxe": warm charcoal-black + ivory + a restrained brass accent,
+  grounded in Matin's real brand (black/white editorial luxury, warm photography).
+  Premium, inviting, corporate — not techy. Public site = light/ivory.
+  Matin Hub = warm charcoal (luxury dark), brass accents, no neon glow.
 */
 
 @theme {
-  /* Ink (obsidian navy scale) */
-  --color-ink: #0a0e14;
-  --color-ink-900: #0e131b;
-  --color-ink-800: #141a24;
-  --color-ink-700: #1c2532;
-  --color-ink-600: #273241;
-  --color-ink-500: #36465a;
+  /* Ink — warm charcoal-black scale */
+  --color-ink: #17150f;
+  --color-ink-900: #1f1c15;
+  --color-ink-800: #29251d;
+  --color-ink-700: #37322a;
+  --color-ink-600: #4a443a;
+  --color-ink-500: #6c6354;
 
-  /* Light neutrals (cool paper) */
-  --color-paper: #f4f6f9;
-  --color-paper-200: #e9edf2;
-  --color-mist: #dde3ea;
+  /* Light neutrals — warm ivory / cream */
+  --color-paper: #f6f3ec;
+  --color-paper-200: #efeae0;
+  --color-mist: #e3ddcf;
   --color-cloud: #ffffff;
 
-  --color-slate: #5d6b7d;        /* muted text on light */
-  --color-slate-300: #9fb0c2;    /* muted text on dark */
+  --color-slate: #6b6357;       /* warm taupe muted text on light */
+  --color-slate-300: #b1a895;   /* warm muted text on dark */
 
-  /* Matin blue */
-  --color-azure: #2e90e0;
-  --color-azure-bright: #54a8ff;
-  --color-azure-300: #8fc7ff;
-  --color-azure-deep: #1668ad;
-  --color-azure-ink: #0c2a45;
+  /* Accent — restrained brass / bronze (a whisper of warmth, never loud) */
+  --color-azure: #8f6f3c;
+  --color-azure-bright: #c9a86a;
+  --color-azure-300: #ddc690;
+  --color-azure-deep: #6e5429;
+  --color-azure-ink: #241b0e;
 
   /* Status */
-  --color-success: #2fa36b;
-  --color-danger: #e0564a;
-  --color-warn: #e0a64a;
-  --color-info: #4a8bd0;
+  --color-success: #4a7a59;
+  --color-danger: #b15546;
+  --color-warn: #bd8a3c;
+  --color-info: #5d7488;
 
   /* Type */
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -49,10 +51,10 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* Shadows */
-  --shadow-soft: 0 1px 2px rgba(10,14,20,.05), 0 8px 24px rgba(10,14,20,.07);
-  --shadow-lift: 0 2px 4px rgba(10,14,20,.06), 0 18px 50px rgba(10,14,20,.16);
-  --shadow-glow: 0 10px 44px rgba(46,144,224,.34);
+  /* Shadows (warm, soft — no neon) */
+  --shadow-soft: 0 1px 2px rgba(23,21,15,.05), 0 8px 24px rgba(23,21,15,.07);
+  --shadow-lift: 0 2px 4px rgba(23,21,15,.06), 0 18px 50px rgba(23,21,15,.16);
+  --shadow-glow: 0 12px 40px rgba(143,111,60,.20);
 
   --ease-out-soft: cubic-bezier(.16,1,.3,1);
 }
@@ -66,39 +68,41 @@
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "cv01";
   }
-  ::selection { background: var(--color-azure); color: #fff; }
+  ::selection { background: var(--color-ink); color: var(--color-paper); }
   h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
   ::-webkit-scrollbar { width: 11px; height: 11px; }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-ink) 24%, transparent);
+    background: color-mix(in oklab, var(--color-ink) 22%, transparent);
     border-radius: 99px; border: 3px solid transparent; background-clip: content-box;
   }
-  ::-webkit-scrollbar-thumb:hover { background: color-mix(in oklab, var(--color-ink) 40%, transparent); background-clip: content-box; }
+  ::-webkit-scrollbar-thumb:hover { background: color-mix(in oklab, var(--color-ink) 38%, transparent); background-clip: content-box; }
 }
 
 @layer components {
+  /* Eyebrow — tracked brass small-caps (editorial luxe) */
   .eyebrow {
     font-family: var(--font-sans); font-size: 0.72rem; font-weight: 600;
-    letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-azure-deep);
+    letter-spacing: 0.26em; text-transform: uppercase; color: var(--color-azure-deep);
   }
   .eyebrow-light { color: var(--color-azure-bright); }
   .rule-accent { height: 1px; width: 56px; background: linear-gradient(90deg, var(--color-azure), transparent); }
 
-  .display-1 { font-size: clamp(2.6rem, 6vw, 5.4rem); line-height: 1.0; }
-  .display-2 { font-size: clamp(2rem, 4.4vw, 3.7rem); line-height: 1.05; }
-  .display-3 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); line-height: 1.12; }
+  /* Display — lighter, more tracked to echo Matin's editorial serif */
+  .display-1 { font-size: clamp(2.6rem, 6vw, 5.2rem); line-height: 1.02; letter-spacing: -0.015em; }
+  .display-2 { font-size: clamp(2rem, 4.4vw, 3.6rem); line-height: 1.06; letter-spacing: -0.012em; }
+  .display-3 { font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.14; }
 
   .container-x { width: 100%; max-width: 1240px; margin-inline: auto; padding-inline: 1.25rem; }
   @media (min-width: 768px) { .container-x { padding-inline: 2rem; } }
 
   .glass {
-    background: color-mix(in oklab, #fff 6%, transparent);
-    border: 1px solid color-mix(in oklab, #fff 12%, transparent);
+    background: color-mix(in oklab, #fff 5%, transparent);
+    border: 1px solid color-mix(in oklab, #fff 11%, transparent);
     backdrop-filter: blur(12px);
   }
   .glass-blue {
-    background: color-mix(in oklab, var(--color-azure) 10%, transparent);
-    border: 1px solid color-mix(in oklab, var(--color-azure) 28%, transparent);
+    background: color-mix(in oklab, var(--color-azure) 9%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-azure) 26%, transparent);
   }
 
   .link-underline {
@@ -108,11 +112,12 @@
   }
   .link-underline:hover { background-size: 100% 1px; }
 
+  /* Faint warm grid texture (very subtle — not a tech overlay) */
   .grid-tech {
     background-image:
-      linear-gradient(color-mix(in oklab, var(--color-azure) 8%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklab, var(--color-azure) 8%, transparent) 1px, transparent 1px);
-    background-size: 44px 44px;
+      linear-gradient(color-mix(in oklab, var(--color-azure) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-azure) 5%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
   }
 }
 
@@ -128,4 +133,4 @@
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ken { from { transform: scale(1) translateY(0); } to { transform: scale(1.08) translateY(-1.5%); } }
-@keyframes pulsedot { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,144,224,.5); } 50% { opacity:.7; box-shadow: 0 0 0 7px rgba(46,144,224,0); } }
+@keyframes pulsedot { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(143,111,60,.5); } 50% { opacity:.7; box-shadow: 0 0 0 7px rgba(143,111,60,0); } }

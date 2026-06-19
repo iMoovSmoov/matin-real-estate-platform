@@ -10,12 +10,12 @@ export default function AutomationsPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="success" />
-          <SectionLabel>Pillar 4 · Automation</SectionLabel>
+          <SectionLabel>Automation Studio</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">Automation Studio</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
-          Visual, n8n-style workflows that eliminate busywork — from instant lead response to seller updates and
-          review requests. Each flow shows its trigger and every step; toggle any one on or off.
+          Automated workflows that handle the busywork — instant lead response, seller updates, transaction
+          tracking, and review requests. See what each one does, and switch it on or off.
         </p>
       </div>
 

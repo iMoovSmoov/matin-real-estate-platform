@@ -18,7 +18,7 @@ export default function TransactionsPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>Pillar 1 · Structured Data Systems</SectionLabel>
+          <SectionLabel>Transactions</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">Transactions</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">

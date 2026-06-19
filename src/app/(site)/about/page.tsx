@@ -30,7 +30,7 @@ const milestones = [
   { year: "2014", title: "Founded in West Linn", body: "Jordan Matin opens Matin Real Estate with a simple thesis: treat a brokerage like a tech company and clients win." },
   { year: "2018", title: "Built the largest local website", body: "We grow into the largest locally owned real-estate website in the Portland area — more homes, sooner, for every client." },
   { year: "2021", title: "Recognized for growth", body: "Named to the Portland Business Journal's Fastest Growing Private Companies as the team scales past 40 brokers." },
-  { year: "Today", title: "The Command Center era", body: "A custom platform unifies CRM, listings, transactions, marketing, and AI — so brokers spend their time on people, not paperwork." },
+  { year: "Today", title: "The Matin Hub era", body: "A custom platform unifies CRM, listings, transactions, marketing, and AI — so brokers spend their time on people, not paperwork." },
 ];
 
 // Put the founder first.
@@ -298,13 +298,13 @@ export default function AboutPage() {
                 Where we&apos;re headed next
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
-                The <strong className="text-white">Matin Command Center</strong> is our edge made tangible — a
+                The <strong className="text-white">Matin Hub</strong> is our edge made tangible — a
                 custom platform that unifies our CRM, listings, transactions, marketing, and AI into one
                 system. It&apos;s how a 40-person team delivers a boutique experience at scale.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="/command-center" variant="primary" size="lg">
-                  <Cpu className="h-4 w-4" /> Tour the Command Center
+                  <Cpu className="h-4 w-4" /> Tour the Matin Hub
                 </ButtonLink>
                 <ButtonLink href="/contact" variant="outline-light" size="lg">
                   Talk to our team
@@ -315,7 +315,7 @@ export default function AboutPage() {
               <div className="grid grid-cols-2 gap-4">
                 {[
                   [TrendingUp, "Live dashboards", "Decisions on real-time data"],
-                  [Sparkles, "AI woven in", "Claude inside the workflow"],
+                  [Sparkles, "AI woven in", "AI inside the workflow"],
                   [Building2, "Unified platform", "One system, every deal"],
                   [Quote, "AI coaching", "Scenario training for brokers"],
                 ].map(([Icon, t, d]) => {
