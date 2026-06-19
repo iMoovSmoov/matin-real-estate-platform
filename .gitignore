@@ -8,3 +8,8 @@ npm-debug.log*
 next-env.d.ts
 
 .vercel
+*.jpeg
+*.jpg
+*.png
+tmp/
+tmp-*.jpeg
