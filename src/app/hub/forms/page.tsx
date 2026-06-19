@@ -15,14 +15,14 @@ export default function FormsPage() {
       {/* Header */}
       <div>
         <SectionLabel className="mb-1.5">Forms</SectionLabel>
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">Forms</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
+        <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Forms</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate">
           Every form you need, pre-loaded and ready to fill.
         </p>
       </div>
 
       {/* Stat row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatTile
           label="Forms available"
           value={formCount}

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { ListingCard } from "@/components/site/ListingCard";
 import { communities, getCommunity, listingsInCommunity } from "@/lib/data";
-import { usd, num } from "@/lib/utils";
+import { usd, num, cn } from "@/lib/utils";
 
 export function generateStaticParams() {
   return communities.map((c) => ({ slug: c.slug }));
@@ -88,9 +88,16 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
       {/* ---------- STATS ROW ---------- */}
       <div className="border-b border-ink/[0.07] bg-cloud">
         <Container>
-          <dl className="grid grid-cols-2 gap-y-6 py-10 [&>*:last-child]:col-span-2 sm:grid-cols-4 sm:[&>*:last-child]:col-span-1 lg:grid-cols-7">
-            {stats.map((s) => (
-              <div key={s.label} className="px-2 text-center">
+          <dl className="grid grid-cols-2 gap-y-6 py-10 sm:grid-cols-4">
+            {stats.map((s, i) => (
+              <div
+                key={s.label}
+                className={cn(
+                  "px-2 text-center",
+                  // 7th item: span both columns on mobile so it's centered rather than left-orphaned
+                  i === 6 && "col-span-2 sm:col-span-1",
+                )}
+              >
                 <s.icon className="mx-auto h-5 w-5 text-azure" />
                 <dt className="mt-2 font-display text-2xl text-ink md:text-[1.7rem]">{s.value}</dt>
                 <dd className="mt-0.5 text-[0.76rem] leading-tight text-slate">{s.label}</dd>

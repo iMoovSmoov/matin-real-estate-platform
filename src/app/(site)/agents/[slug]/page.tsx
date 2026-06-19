@@ -66,19 +66,23 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
           <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
             {/* ===== MAIN ===== */}
             <div>
-              <div className="flex flex-col gap-8 sm:flex-row sm:items-end">
-                <div className="relative aspect-[4/5] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl shadow-lift ring-1 ring-ink/[0.06]">
-                  <Image
-                    src={agent.photo}
-                    alt={agent.name}
-                    fill
-                    priority
-                    sizes="280px"
-                    className="object-cover object-top"
-                  />
+              {/* Profile header — stack on mobile, side-by-side on sm+ */}
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">
+                {/* Headshot — circular on mobile, portrait card on sm+ */}
+                <div className="mx-auto sm:mx-0 shrink-0">
+                  <div className="relative h-36 w-36 overflow-hidden rounded-full shadow-lift ring-4 ring-cloud sm:h-auto sm:w-[220px] sm:rounded-2xl sm:ring-0 sm:shadow-lift sm:ring-1 sm:ring-ink/[0.06] sm:aspect-[4/5]">
+                    <Image
+                      src={agent.photo}
+                      alt={agent.name}
+                      fill
+                      priority
+                      sizes="(max-width: 640px) 144px, 220px"
+                      className="object-cover object-top"
+                    />
+                  </div>
                 </div>
-                <div className="pb-1">
-                  <div className="flex flex-wrap items-center gap-2">
+                <div className="pb-1 text-center sm:text-left">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                     {agent.leadership && <Badge tone="azure">Leadership</Badge>}
                     {agent.support && <Badge tone="neutral">Support team</Badge>}
                     {agent.licenses.map((lic) => (
@@ -89,7 +93,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                   <p className="mt-1.5 text-lg text-slate">{agent.title}</p>
                   <p className="mt-1 text-[0.92rem] text-slate">{agent.role}</p>
 
-                  <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.92rem]">
+                  <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[0.92rem] sm:justify-start">
                     <span className="flex items-center gap-1.5 font-medium text-ink">
                       <Star className="h-4 w-4 fill-azure text-azure" /> {agent.rating}
                       <span className="font-normal text-slate">({num(agent.reviews)} reviews)</span>
@@ -119,7 +123,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
               {/* Bio */}
               <div className="mt-12">
                 <h2 className="font-display text-2xl text-ink">About {agent.firstName}</h2>
-                <p className="mt-5 text-[1.02rem] leading-relaxed text-ink/85 text-pretty">{agent.bio}</p>
+                <p className="mt-5 max-w-prose text-[1.02rem] leading-relaxed text-ink/85 text-pretty">{agent.bio}</p>
               </div>
 
               {/* Specialties + languages */}
@@ -170,7 +174,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                   {agent.firstName}&apos;s active listings
                 </h2>
                 {myListings.length > 0 ? (
-                  <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {myListings.map((l) => (
                       <ListingCard key={l.id} listing={l} />
                     ))}

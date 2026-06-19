@@ -11,7 +11,7 @@ export function CommunityCard({ community, large = false }: { community: Communi
       className={`group block overflow-hidden rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure ${large ? "aspect-[4/5] md:aspect-auto" : ""}`}
     >
       {/* Image with overlay */}
-      <div className="relative overflow-hidden rounded-2xl aspect-[3/2] w-full">
+      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] w-full sm:aspect-[3/2]">
         <Image
           src={community.thumb}
           alt={community.name}
@@ -20,17 +20,17 @@ export function CommunityCard({ community, large = false }: { community: Communi
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {/* Gradient overlay + text */}
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent p-2.5 sm:p-4">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="font-display text-white font-semibold text-sm sm:text-base leading-tight">{community.name}</div>
-              <div className="text-[0.72rem] uppercase tracking-wider text-white/70">{community.state}</div>
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent p-3 sm:p-4">
+          <div className="flex items-end justify-between gap-1">
+            <div className="min-w-0">
+              <div className="font-display text-white font-semibold text-[0.82rem] leading-tight sm:text-base">{community.name}</div>
+              <div className="text-[0.65rem] uppercase tracking-wider text-white/60 sm:text-[0.72rem]">{community.state}</div>
             </div>
-            <ArrowUpRight className="h-5 w-5 text-white/0 -translate-y-1 transition-all duration-300 group-hover:translate-y-0 group-hover:text-white" />
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-white/0 -translate-y-0.5 transition-all duration-300 group-hover:translate-y-0 group-hover:text-white sm:h-5 sm:w-5" />
           </div>
-          <div className="mt-1 flex items-center gap-1.5 sm:gap-3 text-white/70 text-[0.62rem] sm:text-xs">
+          <div className="mt-1 flex items-center gap-1.5 text-white/65 text-[0.6rem] sm:text-[0.72rem]">
             <span>Median {compactUsd(community.medianPrice)}</span>
-            <span className="h-1 w-1 rounded-full bg-white/40" />
+            <span className="h-1 w-1 rounded-full bg-white/35" />
             <span>{community.activeListings} active</span>
           </div>
         </div>

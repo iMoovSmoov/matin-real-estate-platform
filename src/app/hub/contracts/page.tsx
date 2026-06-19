@@ -1,5 +1,5 @@
 import { FileSignature, ScrollText, Timer, Send, ArrowUpRight } from "lucide-react";
-import { Pill, Panel } from "@/components/command/ui";
+import { Pill, Panel, StatTile } from "@/components/command/ui";
 import { reForms } from "@/lib/forms";
 import { transactions, getAgent } from "@/lib/data";
 import { usd } from "@/lib/utils";
@@ -30,31 +30,6 @@ function stageStatus(stage: string): { tone: "success" | "azure" | "neutral"; la
   return { tone: "neutral", label: stage };
 }
 
-function Stat({
-  label,
-  value,
-  icon: Icon,
-  hint,
-}: {
-  label: string;
-  value: string;
-  icon: typeof ScrollText;
-  hint: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink/[0.08] bg-white p-4 backdrop-blur-md transition-colors hover:border-ink/15 hover:bg-white">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate">{label}</p>
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
-          <Icon className="h-4 w-4" />
-        </span>
-      </div>
-      <p className="mt-2 font-display text-2xl leading-none text-ink tabular-nums">{value}</p>
-      <p className="mt-1.5 text-[0.72rem] text-slate/70">{hint}</p>
-    </div>
-  );
-}
-
 export default function ContractsPage() {
   const recent = transactions.slice(0, 6);
 
@@ -67,8 +42,8 @@ export default function ContractsPage() {
             <FileSignature className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.2rem]">Contract Builder</h1>
-            <p className="mt-1.5 max-w-xl text-[0.92rem] leading-relaxed text-slate">
+            <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Contract Builder</h1>
+            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate">
               Pick a contract, auto-fill it, and send it for signature in minutes.
             </p>
           </div>
@@ -76,24 +51,25 @@ export default function ContractsPage() {
       </div>
 
       {/* Tight stat row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Stat
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <StatTile
           label="Contracts available"
           value={String(CONTRACT_FORMS.length)}
-          icon={ScrollText}
+          icon={<ScrollText className="h-4 w-4" />}
           hint="OREF + federal forms, e-sign ready"
         />
-        <Stat
+        <StatTile
           label="Avg time to draft"
           value="4 min"
-          icon={Timer}
+          icon={<Timer className="h-4 w-4" />}
           hint="AI-drafted, down from ~14 by hand"
         />
-        <Stat
+        <StatTile
           label="E-sign turnaround"
           value="2.3 hrs"
-          icon={Send}
+          icon={<Send className="h-4 w-4" />}
           hint="median time to all parties signed"
+          className="col-span-2 lg:col-span-1"
         />
       </div>
 
@@ -125,7 +101,7 @@ export default function ContractsPage() {
             return (
               <li
                 key={tx.id}
-                className="flex flex-wrap items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
+                className="flex flex-wrap items-center gap-3 px-5 py-3.5 transition-colors hover:bg-paper"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
                   <FileSignature className="h-4 w-4" />

@@ -75,7 +75,7 @@ export default function SellPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
+              <p className="mt-6 hidden max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:block sm:text-lg">
                 Cinematic marketing, the largest local audience, and sharp pricing — backed by a $2.4M
                 marketing engine and 40+ full-time brokers. Start with your home&apos;s value, free and
                 instant.
@@ -98,14 +98,12 @@ export default function SellPage() {
       {/* ---------- INSTANT VALUE (LIVE AI) ---------- */}
       <Section id="instant-value">
         <Container>
-          <div className="pr-16 sm:pr-0">
-            <SectionHeading
-              eyebrow="Instant home value · live AI"
-              title="What's your home worth today?"
-              intro="Our AI market analyst drafts a real pricing opinion in seconds — then a broker builds your full, comp-by-comp CMA. No phone call required to start."
-              align="center"
-            />
-          </div>
+          <SectionHeading
+            eyebrow="Instant home value · live AI"
+            title="What's your home worth today?"
+            intro="Our AI market analyst drafts a real pricing opinion in seconds — then a broker builds your full, comp-by-comp CMA. No phone call required to start."
+            align="center"
+          />
           <div className="mt-14">
             <InstantValue />
           </div>
@@ -121,7 +119,7 @@ export default function SellPage() {
             intro="The difference between listed and sold is exposure, presentation, and price. We engineer all three."
             align="center"
           />
-          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {advantages.map((a, i) => (
               <Reveal key={a.title} delay={(i % 3) * 0.08}>
                 <div className="group flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift">

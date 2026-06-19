@@ -177,22 +177,22 @@ const CATEGORY_ORDER = [
 function StatusPill({ status }: { status: IntegrationStatus }) {
   if (status === "connected") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-[0.68rem] font-semibold text-success ring-1 ring-inset ring-success/25">
+        <span className="h-1.5 w-1.5 rounded-full bg-success" />
         Connected
       </span>
     );
   }
   if (status === "available") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/20">
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+      <span className="inline-flex items-center gap-1 rounded-full bg-ink/[0.06] px-2.5 py-0.5 text-[0.68rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.08]">
+        <span className="h-1.5 w-1.5 rounded-full bg-slate" />
         Available
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-slate-400 ring-1 ring-inset ring-slate-200">
+    <span className="inline-flex items-center gap-1 rounded-full bg-paper px-2.5 py-0.5 text-[0.68rem] font-semibold text-slate ring-1 ring-inset ring-ink/[0.06]">
       Coming soon
     </span>
   );
@@ -206,10 +206,9 @@ function IntegrationCard({ item }: { item: Integration }) {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-2xl border bg-white p-5 shadow-soft transition-shadow hover:shadow-lift",
-        isConnected && "border-ink/[0.08]",
-        isAvailable && "border-ink/[0.08]",
-        isComingSoon && "border-ink/[0.05] opacity-70",
+        "flex flex-col rounded-xl bg-white p-5 ring-1 ring-ink/[0.06] transition-colors",
+        !isComingSoon && "hover:bg-paper hover:ring-ink/[0.10]",
+        isComingSoon && "opacity-70",
       )}
     >
       {/* Top row: icon + status */}

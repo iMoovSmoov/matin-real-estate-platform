@@ -55,10 +55,10 @@ export default function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-20 sm:pt-28">
+        <Container className="relative z-10 pb-16 pt-24 sm:pb-20 sm:pt-32">
           <div className="max-w-3xl">
             <Reveal>
-              <span className="eyebrow-light">Our story</span>
+              <span className="eyebrow eyebrow-light">Our story</span>
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
@@ -91,7 +91,7 @@ export default function AboutPage() {
       {/* ---------- STAT BAND ---------- */}
       <div className="border-y border-ink/[0.07] bg-cloud">
         <Container>
-          <dl className="grid grid-cols-2 [&>*:nth-child(5)]:col-span-2 divide-ink/[0.07] py-10 md:grid-cols-5 md:[&>*:nth-child(5)]:col-span-1 md:divide-x">
+          <dl className="grid grid-cols-2 [&>*:nth-child(5)]:col-span-2 divide-y divide-ink/[0.07] py-10 md:grid-cols-5 md:[&>*:nth-child(5)]:col-span-1 md:divide-x md:divide-y-0">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
                 <dt className="font-display text-4xl text-ink md:text-[2.6rem]">{n}</dt>
@@ -126,7 +126,7 @@ export default function AboutPage() {
                 eyebrow="Our mission"
                 title="Data-driven decisions. Human-led results."
               />
-              <div className="mt-7 space-y-5 text-[1.02rem] leading-relaxed text-slate">
+              <div className="mt-7 max-w-prose space-y-5 text-base leading-relaxed text-slate sm:text-[1.02rem]">
                 <p>
                   When {company.founder} founded Matin Real Estate in {company.founded}, the real-estate
                   industry still ran on spreadsheets, fax machines, and gut feel. He saw a better way: build
@@ -204,35 +204,35 @@ export default function AboutPage() {
                       className="object-cover object-top"
                     />
                   </div>
-                  <div className="flex flex-1 flex-col p-7">
+                  <div className="flex flex-1 flex-col p-6 sm:p-7">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="font-display text-2xl text-ink">{person.name}</h3>
-                        <div className="text-[0.9rem] text-azure-deep">{person.title}</div>
+                        <h3 className="font-display text-xl text-ink sm:text-2xl">{person.name}</h3>
+                        <div className="mt-0.5 text-[0.85rem] text-ink/60 sm:text-[0.9rem]">{person.title}</div>
                       </div>
-                      <Badge tone="azure">Leadership</Badge>
+                      <Badge tone="neutral">Leadership</Badge>
                     </div>
-                    <p className="mt-4 flex-1 text-[0.92rem] leading-relaxed text-slate">{person.bio}</p>
-                    <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 border-t border-ink/[0.07] pt-4 text-[0.82rem] text-ink/70">
+                    <p className="mt-4 flex-1 text-[0.9rem] leading-relaxed text-slate sm:text-[0.92rem]">{person.bio}</p>
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-ink/[0.07] pt-4 text-[0.8rem] text-ink/60">
                       <span className="flex items-center gap-1.5">
-                        <Star className="h-4 w-4 fill-azure text-azure" /> {person.rating} · {person.reviews} reviews
+                        <Star className="h-3.5 w-3.5 fill-current text-ink/70" /> {person.rating} · {person.reviews} reviews
                       </span>
                       <span>{person.yearsExperience} yrs experience</span>
                       <span>{num(person.homesSold)} homes sold</span>
                       <span>{compactUsd(person.volume)} volume</span>
                     </div>
-                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
                       <Link
                         href={`/agents/${person.slug}`}
-                        className="inline-flex items-center gap-1.5 text-[0.85rem] font-medium text-azure-deep link-underline"
+                        className="inline-flex items-center gap-1.5 text-[0.85rem] font-medium text-ink link-underline"
                       >
                         View profile <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                       <span className="text-ink/20">·</span>
-                      <a href={`tel:${person.phone}`} className="inline-flex items-center gap-1.5 text-[0.85rem] text-slate hover:text-ink">
+                      <a href={`tel:${person.phone}`} className="inline-flex items-center gap-1.5 text-[0.8rem] text-slate hover:text-ink">
                         <Phone className="h-3.5 w-3.5" /> {person.phone}
                       </a>
-                      <a href={`mailto:${person.email}`} className="inline-flex items-center gap-1.5 text-[0.85rem] text-slate hover:text-ink">
+                      <a href={`mailto:${person.email}`} className="inline-flex items-center gap-1.5 text-[0.8rem] text-slate hover:text-ink">
                         <Mail className="h-3.5 w-3.5" /> Email
                       </a>
                     </div>
@@ -271,7 +271,7 @@ export default function AboutPage() {
                 eyebrow="Recognition"
                 title="Honored for how fast we grow — and how well we serve"
               />
-              <p className="mt-6 text-[1.02rem] leading-relaxed text-slate">
+              <p className="mt-6 max-w-prose text-base leading-relaxed text-slate sm:text-[1.02rem]">
                 Growth is a byproduct of getting the fundamentals right: sharp pricing, relentless marketing,
                 and clients who refer their friends. The recognition is nice — the repeat business is the real
                 scoreboard.
@@ -281,7 +281,7 @@ export default function AboutPage() {
               {company.awards.map((award, i) => (
                 <Reveal key={award} delay={i * 0.08}>
                   <li className="flex items-center gap-4 rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06]">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-paper-200 text-ink">
                       <Trophy className="h-6 w-6" />
                     </div>
                     <span className="font-medium text-ink">{award}</span>
@@ -290,7 +290,7 @@ export default function AboutPage() {
               ))}
               <Reveal delay={company.awards.length * 0.08}>
                 <li className="flex items-center gap-4 rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06]">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-paper-200 text-ink">
                     <Star className="h-6 w-6 fill-current" />
                   </div>
                   <span className="font-medium text-ink">4.9-star average across 700+ client reviews</span>
@@ -308,11 +308,11 @@ export default function AboutPage() {
         <Container className="relative">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="eyebrow-light border-l-2 border-azure-bright pl-3">The platform behind the results</span>
+              <span className="eyebrow eyebrow-light border-l-2 border-white/40 pl-3">The platform behind the results</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 One system. Every deal.
               </h2>
-              <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">
                 The <strong className="text-white">Matin Hub</strong> is our proprietary platform — it
                 unifies CRM, listings, transactions, and marketing into one system. It&apos;s how a
                 40-broker team delivers a boutique experience at scale, without dropping a detail.

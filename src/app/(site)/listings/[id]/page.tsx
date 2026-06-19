@@ -86,9 +86,11 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* ---------- GALLERY ---------- */}
-      <Container className="pt-8">
-        <Gallery photos={listing.photos} alt={`${listing.address}, ${listing.city}`} />
-      </Container>
+      <div className="w-full overflow-hidden px-0 sm:px-6 lg:px-8 pt-8">
+        <div className="mx-auto max-w-screen-xl">
+          <Gallery photos={listing.photos} alt={`${listing.address}, ${listing.city}`} />
+        </div>
+      </div>
 
       <Section className="pt-8 md:pt-12 lg:pt-14">
         <Container>
@@ -105,14 +107,14 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                     </span>
                   )}
                 </div>
-                <h1 className="font-display text-3xl text-ink sm:text-4xl md:text-5xl lg:text-6xl leading-none tracking-tight">
+                <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl md:text-4xl lg:text-5xl leading-none tracking-tight">
                   {usd(listing.price)}
                 </h1>
-                <p className="mt-1 font-display text-base text-slate sm:text-lg">
-                  {listing.pricePerSqft > 0 && (
-                    <span className="mr-3 text-ink/50">${num(listing.pricePerSqft)}/sqft</span>
-                  )}
-                </p>
+                {listing.pricePerSqft > 0 && (
+                  <p className="mt-1 font-display text-base text-slate sm:text-lg">
+                    <span className="text-ink/50">${num(listing.pricePerSqft)}/sqft</span>
+                  </p>
+                )}
                 <p className="mt-3 flex items-center gap-1.5 text-base sm:text-lg text-ink/80">
                   <MapPin className="h-4 w-4 shrink-0 text-azure" /> {listing.address}
                 </p>
@@ -145,7 +147,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               {/* Description */}
               <div className="mt-8 sm:mt-12">
                 <h2 className="font-display text-xl sm:text-2xl text-ink">About this home</h2>
-                <p className="mt-4 sm:mt-5 text-[0.97rem] sm:text-[1.02rem] leading-relaxed text-ink/85 text-pretty">{listing.description}</p>
+                <p className="mt-4 sm:mt-5 max-w-prose text-base leading-relaxed text-ink/85 text-pretty">{listing.description}</p>
               </div>
 
               {/* Features */}

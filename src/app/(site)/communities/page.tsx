@@ -44,7 +44,7 @@ export default function CommunitiesPage() {
               <span className="rule-accent" />
               <span className="text-[0.85rem] text-slate">{list.length} communities</span>
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((c, i) => (
                 <Reveal key={c.slug} delay={(i % 4) * 0.06}>
                   <CommunityCard community={c} />

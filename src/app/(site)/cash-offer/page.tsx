@@ -68,7 +68,7 @@ export default function CashOfferPage() {
             </h1>
           </Reveal>
           <Reveal delay={0.16}>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300 text-pretty">
+            <p className="mx-auto mt-6 hidden max-w-2xl text-base leading-relaxed text-slate-300 text-pretty sm:block sm:text-lg">
               No repairs. No showings. No fees. Get a real, no-obligation cash offer and close in as little as
               seven days — backed by the largest locally owned brokerage in the Portland area.
             </p>
@@ -164,23 +164,25 @@ export default function CashOfferPage() {
       <Section className="bg-ink-900/60">
         <Container>
           <SectionHeading eyebrow="The difference" title="Cash Is King vs. the traditional sale" align="center" light />
-          <div className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-2xl border border-white/10">
-            <div className="grid grid-cols-[1.4fr_1fr_1fr] bg-ink-800/70 text-[0.8rem] font-semibold uppercase tracking-wider text-slate-300">
-              <div className="px-5 py-3.5" />
-              <div className="px-5 py-3.5 text-emerald-300">Cash Is King</div>
-              <div className="px-5 py-3.5 text-slate-300/70">Traditional sale</div>
-            </div>
-            {compare.map(([label, a, b], i) => (
-              <div key={label} className={`grid grid-cols-[1.4fr_1fr_1fr] items-center text-[0.9rem] ${i % 2 ? "bg-ink-900/40" : "bg-ink-900/70"}`}>
-                <div className="px-5 py-3.5 font-medium text-white">{label}</div>
-                <div className="flex items-center gap-2 px-5 py-3.5 text-emerald-300">
-                  <Check className="h-4 w-4 shrink-0" /> {a}
-                </div>
-                <div className="flex items-center gap-2 px-5 py-3.5 text-slate-300/70">
-                  <X className="h-4 w-4 shrink-0 text-slate-300/40" /> {b}
-                </div>
+          <div className="mx-auto mt-12 max-w-3xl overflow-x-auto rounded-2xl border border-white/10">
+            <div className="min-w-[520px]">
+              <div className="grid grid-cols-[1.4fr_1fr_1fr] bg-ink-800/70 text-[0.8rem] font-semibold uppercase tracking-wider text-slate-300">
+                <div className="px-5 py-3.5" />
+                <div className="px-5 py-3.5 text-emerald-300">Cash Is King</div>
+                <div className="px-5 py-3.5 text-slate-300/70">Traditional sale</div>
               </div>
-            ))}
+              {compare.map(([label, a, b], i) => (
+                <div key={label} className={`grid grid-cols-[1.4fr_1fr_1fr] items-center text-[0.9rem] ${i % 2 ? "bg-ink-900/40" : "bg-ink-900/70"}`}>
+                  <div className="px-5 py-3.5 font-medium text-white">{label}</div>
+                  <div className="flex items-center gap-2 px-5 py-3.5 text-emerald-300">
+                    <Check className="h-4 w-4 shrink-0" /> {a}
+                  </div>
+                  <div className="flex items-center gap-2 px-5 py-3.5 text-slate-300/70">
+                    <X className="h-4 w-4 shrink-0 text-slate-300/40" /> {b}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Phone } from "lucide-react";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Agent } from "@/lib/types";
 
@@ -8,35 +8,51 @@ export function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link
       href={`/agents/${agent.slug}`}
-      className="group block overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
+      className="group flex flex-col overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
     >
-      <div className="relative aspect-square sm:aspect-[4/5] overflow-hidden bg-paper-200">
+      {/* Photo — portrait (4:5) at all sizes */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-paper-200">
         <Image
           src={agent.photo}
           alt={agent.name}
           fill
-          sizes="(max-width: 768px) 50vw, 25vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/55 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-        <div className="absolute bottom-3 left-3 right-3 flex translate-y-2 items-center gap-2 text-white opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-          <Phone className="h-3.5 w-3.5" />
-          <span className="text-[0.78rem]">{agent.phone}</span>
-        </div>
-      </div>
-      <div className="p-3 sm:p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="font-medium text-sm sm:text-base text-ink leading-snug">{agent.name}</div>
-            <div className="text-[0.72rem] sm:text-[0.82rem] text-slate">{agent.title}</div>
+        {/* Persistent gradient at bottom for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
+        {/* Leadership badge pinned to top-right */}
+        {agent.leadership && (
+          <div className="absolute left-3 top-3">
+            <Badge tone="azure">Leadership</Badge>
           </div>
-          {agent.leadership && <Badge tone="azure">Leadership</Badge>}
+        )}
+      </div>
+
+      {/* Card body */}
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex-1">
+          <div className="font-semibold text-[0.95rem] leading-snug text-ink">{agent.name}</div>
+          <div className="mt-0.5 text-[0.8rem] text-slate">{agent.title}</div>
+          {agent.specialties.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {agent.specialties.slice(0, 2).map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full bg-paper px-2.5 py-0.5 text-[0.7rem] font-medium text-slate ring-1 ring-ink/[0.08]"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="mt-2 sm:mt-3 flex items-center justify-between border-t border-ink/[0.07] pt-2 sm:pt-3 text-[0.7rem] sm:text-[0.8rem] text-ink/70">
+
+        <div className="mt-3 flex items-center justify-between border-t border-ink/[0.07] pt-3 text-[0.78rem] text-ink/70">
           <span className="flex items-center gap-1">
             <Star className="h-3.5 w-3.5 fill-azure text-azure" /> {agent.rating}
           </span>
-          <span>{agent.licenses.join(" · ")}</span>
+          <span className="text-slate">{agent.licenses.join(" · ")}</span>
         </div>
       </div>
     </Link>

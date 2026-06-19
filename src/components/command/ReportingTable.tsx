@@ -73,14 +73,14 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
-      <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3.5">
+      <div className="flex flex-col gap-3 border-b border-ink/[0.08] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-[0.95rem] font-semibold text-ink">Per-Agent Production</h3>
           <p className="text-[0.74rem] text-slate/60">{rows.length} agents · sorted by {labelFor(sort)}</p>
         </div>
         <button
           onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-2 text-[0.78rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-paper"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-2 text-[0.78rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-paper sm:w-auto"
         >
           <Download className="h-3.5 w-3.5 text-ink" /> Export CSV
         </button>
@@ -99,7 +99,7 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
           </thead>
           <tbody className="divide-y divide-ink/[0.06]">
             {sorted.map((r) => (
-              <tr key={r.name} className="transition-colors hover:bg-white">
+              <tr key={r.name} className="transition-colors hover:bg-paper">
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2.5">
                     <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/[0.06]">

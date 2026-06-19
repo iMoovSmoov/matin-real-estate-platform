@@ -132,7 +132,7 @@ export function FormsLibrary() {
 
 function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
   return (
-    <div className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white sm:flex-row sm:items-center">
+    <div className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-paper sm:flex-row sm:items-center">
       {/* Code badge */}
       <div className="flex shrink-0 items-center gap-2">
         <span className="rounded-md bg-white px-2 py-1 font-mono text-[0.7rem] font-semibold text-ink/85 ring-1 ring-inset ring-ink/[0.06]">
@@ -164,11 +164,11 @@ function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
       <div className="hidden w-32 shrink-0 lg:block">
         <div className="mb-1 flex items-center justify-between text-[0.66rem] text-slate/60">
           <span>Used</span>
-          <span className="font-semibold tabular-nums text-slate-200">{form.popularity}%</span>
+          <span className="font-semibold tabular-nums text-slate">{form.popularity}%</span>
         </div>
         <div className="h-1 w-full overflow-hidden rounded-full bg-paper">
           <div
-            className="h-full rounded-full bg-white/70 transition-[width] duration-500"
+            className="h-full rounded-full bg-ink/30 transition-[width] duration-500"
             style={{ width: `${Math.max(0, Math.min(100, form.popularity))}%` }}
           />
         </div>

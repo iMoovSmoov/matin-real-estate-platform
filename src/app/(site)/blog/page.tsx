@@ -89,13 +89,13 @@ export default function BlogPage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="relative overflow-hidden bg-ink pb-20 pt-36 text-white md:pb-24">
+      <section className="relative overflow-hidden bg-ink pb-20 pt-24 text-white md:pb-24 md:pt-36">
         <div className="absolute inset-0 grid-tech opacity-50" />
         <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
         <Container className="relative">
           <div className="max-w-2xl">
             <Reveal>
-              <span className="eyebrow-light">Resources &amp; guides</span>
+              <span className="eyebrow eyebrow-light">Resources &amp; guides</span>
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
@@ -104,7 +104,7 @@ export default function BlogPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 text-lg leading-relaxed text-slate-300 text-pretty">
+              <p className="mt-6 text-base leading-relaxed text-slate-300 text-pretty sm:text-lg">
                 Straight-talking guides for Oregon and SW Washington buyers and sellers — written by the team
                 that closes hundreds of homes a year. No fluff, no jargon.
               </p>
@@ -177,10 +177,10 @@ export default function BlogPage() {
       {/* ---------- CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-8 py-16 text-center text-white shadow-glow md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-ink px-8 py-16 text-center text-white shadow-glow ring-1 ring-white/[0.06] md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
-              <span className="eyebrow-light">Still have questions?</span>
+              <span className="eyebrow eyebrow-light">Still have questions?</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 Get answers from a real broker — or our AI
               </h2>

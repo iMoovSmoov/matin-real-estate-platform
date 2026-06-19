@@ -112,7 +112,7 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  "rounded-lg px-3 py-2.5 text-[0.95rem] transition-colors",
+                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors",
                   active ? "bg-ink/[0.05] font-medium text-ink" : "text-ink/70 hover:bg-ink/5 hover:text-ink",
                 )}
               >
@@ -120,12 +120,12 @@ export function SiteHeader() {
               </Link>
             );
           })}
-          <Link href="/contact" className="rounded-lg px-3 py-2.5 text-ink/70 text-[0.95rem] hover:bg-ink/5 hover:text-ink">
+          <Link href="/contact" className="flex w-full items-center rounded-lg px-3 min-h-[44px] text-ink/70 text-[0.95rem] hover:bg-ink/5 hover:text-ink">
             Contact
           </Link>
           <Link
             href="/hub"
-            className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-azure px-4 py-2.5 font-semibold text-white"
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-azure px-4 min-h-[44px] font-semibold text-white"
           >
             Matin Hub <ArrowRight className="h-4 w-4" />
           </Link>

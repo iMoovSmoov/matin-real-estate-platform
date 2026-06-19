@@ -70,7 +70,7 @@ export default function BuyPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
+              <p className="mt-6 hidden max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:block sm:text-lg">
                 Off-market access, expert negotiation, and 40+ brokers who live where they sell — so you win
                 the home you love without overpaying.
               </p>
@@ -104,7 +104,7 @@ export default function BuyPage() {
             align="center"
           />
           <div className="mt-14">
-            <ProcessSteps steps={buyingSteps} />
+            <ProcessSteps steps={buyingSteps} className="lg:grid-cols-3" />
           </div>
         </Container>
       </Section>
@@ -118,7 +118,7 @@ export default function BuyPage() {
             intro="A brokerage built like a tech company — so your search is faster, your offers are smarter, and your close is smoother."
             align="center"
           />
-          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {values.map((v, i) => (
               <Reveal key={v.title} delay={(i % 3) * 0.08}>
                 <div className="group flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift">

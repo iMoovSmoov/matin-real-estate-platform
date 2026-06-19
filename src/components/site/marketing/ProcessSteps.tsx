@@ -20,7 +20,7 @@ export function ProcessSteps({
   className?: string;
 }) {
   return (
-    <ol className={cn("grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4", className)}>
+    <ol className={cn("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4", className)}>
       {steps.map((step, i) => (
         <Reveal key={step.title} delay={(i % 4) * 0.08}>
           <li className="group relative flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift">

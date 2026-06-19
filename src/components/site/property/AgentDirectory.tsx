@@ -76,7 +76,7 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
             </button>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
+        <div className="grid grid-cols-2 gap-2 [&>*:last-child]:col-span-2 sm:grid-cols-3 sm:[&>*:last-child]:col-span-1 lg:flex">
           <FilterSelect value={specialty} onChange={setSpecialty} placeholder="Any specialty">
             {specialties.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -110,7 +110,7 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
 
       {/* ---------- GRID ---------- */}
       {results.length > 0 ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {results.map((a) => (
             <AgentCard key={a.slug} agent={a} />
           ))}

@@ -66,7 +66,7 @@ export default function ContactPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 text-lg leading-relaxed text-slate-300 text-pretty">
+              <p className="mt-6 hidden text-base leading-relaxed text-slate-300 text-pretty sm:block sm:text-lg">
                 Buying, selling, or just exploring your options — tell us where you are and a Matin broker
                 will reach out within one business day. Prefer to talk now? Call{" "}
                 <a href={`tel:+1${phoneRaw}`} className="font-medium text-azure-bright link-underline">

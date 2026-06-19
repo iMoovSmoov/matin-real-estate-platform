@@ -35,7 +35,7 @@ export function BlogGrid({ posts, categories }: { posts: Post[]; categories: str
               className={cn(
                 "rounded-full px-4 py-2 text-[0.85rem] font-medium transition",
                 on
-                  ? "bg-azure text-white shadow-[0_8px_24px_rgba(46,144,224,.26)]"
+                  ? "bg-azure text-white shadow-soft"
                   : "bg-cloud text-ink/70 ring-1 ring-ink/10 hover:ring-ink/30",
               )}
             >
@@ -66,8 +66,8 @@ export function BlogGrid({ posts, categories }: { posts: Post[]; categories: str
                 </div>
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-display text-lg leading-snug text-ink">{p.title}</h3>
-                <p className="mt-2 flex-1 text-[0.9rem] leading-relaxed text-slate">{p.excerpt}</p>
+                <h3 className="line-clamp-2 font-display text-lg leading-snug text-ink">{p.title}</h3>
+                <p className="mt-2 flex-1 line-clamp-3 text-[0.9rem] leading-relaxed text-slate">{p.excerpt}</p>
                 <div className="mt-5 flex items-center justify-between border-t border-ink/[0.07] pt-4">
                   <span className="flex items-center gap-1.5 text-[0.8rem] text-slate">
                     <Clock className="h-3.5 w-3.5 text-azure" /> {p.readTime}
