@@ -72,7 +72,7 @@ export function SiteHeader() {
           </a>
           <Link
             href="/hub"
-            className="hidden items-center gap-1.5 rounded-full bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-[0_8px_24px_rgba(46,144,224,.35)] transition hover:bg-azure-deep sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-[0_8px_24px_rgba(6,6,6,.25)] transition hover:bg-azure-deep sm:inline-flex"
           >
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>

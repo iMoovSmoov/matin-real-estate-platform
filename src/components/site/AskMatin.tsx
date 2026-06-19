@@ -57,7 +57,7 @@ export function AskMatin() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Open Matin concierge"
         className={cn(
-          "fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-azure text-white shadow-[0_10px_40px_rgba(46,144,224,.5)] transition-all duration-300 hover:scale-105",
+          "fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-azure text-white shadow-[0_10px_40px_rgba(6,6,6,.4)] transition-all duration-300 hover:scale-105",
           open && "rotate-90 scale-95",
         )}
       >

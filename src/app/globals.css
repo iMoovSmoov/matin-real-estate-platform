@@ -26,8 +26,8 @@
   --color-slate: #62626a;       /* muted text on light */
   --color-slate-300: #c3c3c9;   /* bright muted text on dark (legible white-ish) */
 
-  /* Accent — monochrome: white on dark, near-black on light */
-  --color-azure: #6e6e76;
+  /* Accent — brand black (matches Matin logo) */
+  --color-azure: #060606;
   --color-azure-bright: #ffffff;
   --color-azure-300: #e2e2e5;
   --color-azure-deep: #1c1c1f;
