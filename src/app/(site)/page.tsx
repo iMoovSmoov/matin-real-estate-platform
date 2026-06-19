@@ -99,7 +99,7 @@ export default function HomePage() {
       <div className="border-y border-ink/[0.07] bg-paper border-b border-ink/[0.06]">
         <div className="h-[2px] bg-gradient-to-r from-transparent via-ink/20 to-transparent" />
         <Container>
-          <dl className="grid grid-cols-2 divide-ink/[0.07] py-7 sm:grid-cols-3 md:grid-cols-5 md:divide-x md:py-10">
+          <dl className="grid grid-cols-2 [&>*:nth-child(5)]:col-span-2 divide-ink/[0.07] py-7 sm:grid-cols-5 sm:[&>*:nth-child(5)]:col-span-1 md:divide-x md:py-10">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
                 <dt className="font-display text-[2rem] text-ink sm:text-4xl md:text-5xl">{n}</dt>

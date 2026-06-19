@@ -52,10 +52,10 @@ export default function AboutPage() {
             sizes="100vw"
             className="ken-burns object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-28">
+        <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow-light">Our story</span>
@@ -195,7 +195,7 @@ export default function AboutPage() {
             {orderedLeadership.map((person, i) => (
               <Reveal key={person.slug} delay={i * 0.1}>
                 <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-shadow duration-300 hover:shadow-lift sm:flex-row">
-                  <div className="relative aspect-[4/5] w-full shrink-0 bg-paper-200 sm:aspect-auto sm:w-56">
+                  <div className="relative aspect-[3/2] w-full shrink-0 bg-paper-200 sm:aspect-auto sm:w-56">
                     <Image
                       src={person.photo}
                       alt={person.name}
@@ -304,7 +304,7 @@ export default function AboutPage() {
       {/* ---------- TECH-FORWARD FUTURE ---------- */}
       <section className="relative overflow-hidden bg-ink py-24 text-white">
         <div className="absolute inset-0 grid-tech opacity-60" />
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
+        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[rgba(210,160,80,0.15)] blur-3xl" />
         <Container className="relative">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>

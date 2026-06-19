@@ -23,7 +23,7 @@ export default function CommunitiesPage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <div className="border-b border-ink/[0.07] bg-gradient-to-b from-paper-200/70 to-paper pt-28 pb-12">
+      <div className="border-b border-ink/[0.07] bg-gradient-to-b from-paper-200/70 to-paper pt-20 sm:pt-28 pb-8 sm:pb-12">
         <Container>
           <span className="eyebrow">Explore communities</span>
           <h1 className="display-2 mt-4 max-w-3xl font-display text-ink text-balance">
