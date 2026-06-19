@@ -53,18 +53,18 @@ export function FormsLibrary() {
           icon={<FileText className="h-4 w-4" />}
           action={
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300/60" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/60" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search forms…"
-                className="w-44 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-8 pr-7 text-[0.8rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/30 focus:outline-none sm:w-56"
+                className="w-44 rounded-lg border border-ink/[0.08] bg-white py-1.5 pl-8 pr-7 text-[0.8rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/20 focus:outline-none sm:w-56"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300/50 transition-colors hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate/50 transition-colors hover:text-ink"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -74,7 +74,7 @@ export function FormsLibrary() {
         />
 
         {/* Category chips */}
-        <div className="flex flex-wrap gap-2 border-b border-white/10 px-5 py-3.5">
+        <div className="flex flex-wrap gap-2 border-b border-ink/[0.08] px-5 py-3.5">
           {(["All", ...FORM_CATEGORIES] as Filter[]).map((c) => {
             const on = filter === c;
             return (
@@ -84,15 +84,15 @@ export function FormsLibrary() {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
-                    ? "border-white/30 bg-white/[0.12] text-white"
-                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25 hover:bg-white/[0.06] hover:text-white",
+                    ? "border-ink/20 bg-ink/[0.08] text-ink"
+                    : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
                 )}
               >
                 {c}
                 <span
                   className={cn(
                     "rounded px-1 text-[0.66rem] tabular-nums",
-                    on ? "bg-white/15 text-white" : "bg-white/[0.06] text-slate-300/70",
+                    on ? "bg-ink/10 text-ink" : "bg-white text-slate/70",
                   )}
                 >
                   {counts.get(c) ?? 0}
@@ -103,20 +103,20 @@ export function FormsLibrary() {
         </div>
 
         {/* Form rows */}
-        <div className="divide-y divide-white/[0.06]">
+        <div className="divide-y divide-ink/[0.06]">
           {visible.map((form) => (
             <FormRow key={form.code} form={form} onUse={() => setActive(form)} />
           ))}
           {visible.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-              <Search className="h-6 w-6 text-slate-300/40" />
-              <p className="text-[0.86rem] text-slate-300">No forms match “{query}”.</p>
+              <Search className="h-6 w-6 text-slate/40" />
+              <p className="text-[0.86rem] text-slate">No forms match “{query}”.</p>
               <button
                 onClick={() => {
                   setQuery("");
                   setFilter("All");
                 }}
-                className="text-[0.78rem] font-semibold text-white hover:underline"
+                className="text-[0.78rem] font-semibold text-ink hover:underline"
               >
                 Clear filters
               </button>
@@ -132,14 +132,14 @@ export function FormsLibrary() {
 
 function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
   return (
-    <div className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white/[0.025] sm:flex-row sm:items-center">
+    <div className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white sm:flex-row sm:items-center">
       {/* Code badge */}
       <div className="flex shrink-0 items-center gap-2">
-        <span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[0.7rem] font-semibold text-white/85 ring-1 ring-inset ring-white/10">
+        <span className="rounded-md bg-white px-2 py-1 font-mono text-[0.7rem] font-semibold text-ink/85 ring-1 ring-inset ring-ink/[0.06]">
           {form.code}
         </span>
         {form.oref && (
-          <span className="rounded-md bg-white/[0.1] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">
+          <span className="rounded-md bg-ink/[0.06] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink ring-1 ring-inset ring-ink/[0.08]">
             OREF
           </span>
         )}
@@ -148,25 +148,25 @@ function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
       {/* Name + meta */}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h4 className="font-sans text-[0.94rem] font-semibold leading-snug text-white">
+          <h4 className="font-sans text-[0.94rem] font-semibold leading-snug text-ink">
             {form.name}
           </h4>
-          <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate-300/60">
+          <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate/60">
             {form.category}
           </span>
         </div>
-        <p className="mt-1 truncate text-[0.78rem] text-slate-300/80">
-          Replaces <span className="text-slate-300">{form.replaces}</span>
+        <p className="mt-1 truncate text-[0.78rem] text-slate/80">
+          Replaces <span className="text-slate">{form.replaces}</span>
         </p>
       </div>
 
       {/* Popularity */}
       <div className="hidden w-32 shrink-0 lg:block">
-        <div className="mb-1 flex items-center justify-between text-[0.66rem] text-slate-300/60">
+        <div className="mb-1 flex items-center justify-between text-[0.66rem] text-slate/60">
           <span>Used</span>
           <span className="font-semibold tabular-nums text-slate-200">{form.popularity}%</span>
         </div>
-        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-paper">
           <div
             className="h-full rounded-full bg-white/70 transition-[width] duration-500"
             style={{ width: `${Math.max(0, Math.min(100, form.popularity))}%` }}
@@ -191,7 +191,7 @@ function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
       {/* Use form */}
       <button
         onClick={onUse}
-        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-white px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-ink px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition-colors hover:bg-ink-700"
       >
         Use form <ArrowRight className="h-3.5 w-3.5" />
       </button>

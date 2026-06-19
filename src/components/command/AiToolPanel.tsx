@@ -98,27 +98,27 @@ export function AiToolPanel({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
       {/* ── Input column ── */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+      <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <Wand2 className="h-5 w-5" />
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-xl text-white">{title}</h2>
+              <h2 className="font-display text-xl text-ink">{title}</h2>
               {pillar && (
-                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-slate-300/70 ring-1 ring-inset ring-white/10">
+                <span className="rounded bg-white px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-slate/70 ring-1 ring-inset ring-ink/[0.06]">
                   {pillar}
                 </span>
               )}
             </div>
-            <p className="mt-1 text-[0.86rem] leading-relaxed text-slate-300">{description}</p>
+            <p className="mt-1 text-[0.86rem] leading-relaxed text-slate">{description}</p>
           </div>
         </div>
 
         {presets && presets.length > 0 && (
           <div className="mt-5">
-            <p className="mb-2 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-slate-300/55">
+            <p className="mb-2 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-slate/55">
               {presetLabel}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -127,10 +127,10 @@ export function AiToolPanel({
                   key={p.label}
                   type="button"
                   onClick={() => applyPreset(p)}
-                  className="group inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
+                  className="group inline-flex items-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:border-ink/20 hover:bg-paper hover:text-ink"
                   title={p.hint}
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-white" />
+                  <Sparkles className="h-3.5 w-3.5 text-ink" />
                   {p.label}
                 </button>
               ))}
@@ -147,7 +147,7 @@ export function AiToolPanel({
         >
           {fields.map((f) => (
             <div key={f.name} className={cn("flex flex-col gap-1.5", (f.full || f.type === "textarea") && "sm:col-span-2")}>
-              <label htmlFor={`f-${f.name}`} className="text-[0.72rem] font-semibold text-slate-300">
+              <label htmlFor={`f-${f.name}`} className="text-[0.72rem] font-semibold text-slate">
                 {f.label}
               </label>
               {f.type === "textarea" ? (
@@ -157,20 +157,20 @@ export function AiToolPanel({
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
                   rows={3}
-                  className="resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none"
+                  className="resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none"
                 />
               ) : f.type === "select" ? (
                 <select
                   id={`f-${f.name}`}
                   value={values[f.name] ?? ""}
                   onChange={(e) => set(f.name, e.target.value)}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white transition-colors focus:border-white/40 focus:outline-none"
+                  className="rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none"
                 >
-                  <option value="" className="bg-white/[0.06]">
+                  <option value="" className="bg-white">
                     Select…
                   </option>
                   {f.options?.map((o) => (
-                    <option key={o} value={o} className="bg-white/[0.06]">
+                    <option key={o} value={o} className="bg-white">
                       {o}
                     </option>
                   ))}
@@ -182,7 +182,7 @@ export function AiToolPanel({
                   value={values[f.name] ?? ""}
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none"
+                  className="rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none"
                 />
               )}
             </div>
@@ -192,7 +192,7 @@ export function AiToolPanel({
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[0.88rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.88rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy ? (
                 <>
@@ -209,33 +209,33 @@ export function AiToolPanel({
       </div>
 
       {/* ── Output column ── */}
-      <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.045]">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5">
+      <div className="flex flex-col rounded-2xl border border-ink/[0.08] bg-white">
+        <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3.5">
           <div className="flex items-center gap-2">
-            {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-white" />}
-            <span className="text-[0.84rem] font-semibold text-white">{outputTitle}</span>
-            {busy && <span className="text-[0.72rem] text-slate-300/70">streaming live</span>}
+            {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-ink" />}
+            <span className="text-[0.84rem] font-semibold text-ink">{outputTitle}</span>
+            {busy && <span className="text-[0.72rem] text-slate/70">streaming live</span>}
           </div>
           {output && !busy && (
             <div className="flex items-center gap-1.5">
               {printable && (
                 <button
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
                 >
                   <Printer className="h-3.5 w-3.5" /> Print
                 </button>
               )}
               <button
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </button>
               <button
                 onClick={run}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Regenerate
               </button>
@@ -249,7 +249,7 @@ export function AiToolPanel({
           ) : (
             <div className="prose-none">
               <AiMarkdown text={output} />
-              {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />}
+              {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />}
             </div>
           )}
         </div>
@@ -261,13 +261,13 @@ export function AiToolPanel({
 function EmptyState({ submitLabel }: { submitLabel: string }) {
   return (
     <div className="flex h-full min-h-[16rem] flex-col items-center justify-center text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/12">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper text-ink ring-1 ring-inset ring-ink/[0.06]">
         <Sparkles className="h-6 w-6" />
       </span>
-      <p className="mt-3 text-[0.9rem] font-semibold text-white">Powered by AI</p>
-      <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/70">
+      <p className="mt-3 text-[0.9rem] font-semibold text-ink">Powered by AI</p>
+      <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate/70">
         Fill the form (or load a quick-fill example) and hit{" "}
-        <span className="inline-flex items-center gap-1 font-semibold text-white">
+        <span className="inline-flex items-center gap-1 font-semibold text-ink">
           {submitLabel} <ArrowRight className="h-3 w-3" />
         </span>{" "}
         to stream a result live.

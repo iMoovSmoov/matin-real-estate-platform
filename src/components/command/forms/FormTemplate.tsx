@@ -107,7 +107,7 @@ export function FormTemplate({ form, onClose }: { form: ReForm | null; onClose: 
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(760px,96vw)] flex-col border-l border-white/10 bg-ink shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out print:static print:w-full print:border-0 print:shadow-none",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(760px,96vw)] flex-col border-l border-ink/[0.08] bg-ink shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out print:static print:w-full print:border-0 print:shadow-none",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -226,59 +226,59 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
   return (
     <>
       {/* Header / toolbar */}
-      <div className="relative shrink-0 border-b border-white/10 bg-white/[0.03] px-5 py-4 print:hidden">
+      <div className="relative shrink-0 border-b border-ink/[0.08] bg-white px-5 py-4 print:hidden">
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.04] hover:text-ink"
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="flex items-center gap-2 pr-10">
-          <FilePen className="h-4 w-4 text-white" />
-          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/80">
+          <FilePen className="h-4 w-4 text-ink" />
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-ink/80">
             {form.code}
           </span>
           {form.oref && <Pill tone="neutral">OREF</Pill>}
         </div>
-        <h2 className="mt-1 font-display text-xl leading-tight text-white">{form.name}</h2>
+        <h2 className="mt-1 font-display text-xl leading-tight text-ink">{form.name}</h2>
 
         {/* Toolbar */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {/* Auto-fill: record picker + button */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] p-1">
+          <div className="flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white p-1">
             <div className="relative">
               <select
                 value={recordKey}
                 onChange={(e) => setRecordKey(e.target.value)}
-                className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-white focus:outline-none"
+                className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-ink focus:outline-none"
                 aria-label="Source record for auto-fill"
               >
-                <option value="" className="bg-ink text-white">
+                <option value="" className="bg-ink text-ink">
                   Pick a listing or lead…
                 </option>
-                <optgroup label="Listings" className="bg-ink text-white">
+                <optgroup label="Listings" className="bg-ink text-ink">
                   {records.listings.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink text-white">
+                    <option key={r.key} value={r.key} className="bg-ink text-ink">
                       {r.label}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Leads" className="bg-ink text-white">
+                <optgroup label="Leads" className="bg-ink text-ink">
                   {records.leads.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink text-white">
+                    <option key={r.key} value={r.key} className="bg-ink text-ink">
                       {r.label}
                     </option>
                   ))}
                 </optgroup>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300/60" />
+              <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/60" />
             </div>
             <button
               onClick={runAutofill}
               disabled={!recordKey}
-              className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-2.5 py-1 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Wand2 className="h-3.5 w-3.5" /> Auto-fill
             </button>
@@ -310,7 +310,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {(filledFrom || saved || sent) && (
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
             {filledFrom && (
-              <span className="inline-flex items-center gap-1.5 font-medium text-white">
+              <span className="inline-flex items-center gap-1.5 font-medium text-ink">
                 <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
               </span>
             )}
@@ -331,7 +331,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
       {/* Scrollable document body */}
       <div className="flex-1 overflow-y-auto bg-ink px-5 py-5 print:overflow-visible">
         {/* The branded paper */}
-        <article className="mx-auto max-w-[640px] rounded-2xl border border-white/10 bg-white text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
+        <article className="mx-auto max-w-[640px] rounded-2xl border border-ink/[0.08] bg-ink text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
           {/* Document letterhead */}
           <div className="flex items-start justify-between gap-4 border-b-2 border-slate-900/90 px-8 pb-5 pt-8">
             <div className="flex items-center gap-3 text-slate-900">
@@ -349,7 +349,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               </div>
               <h3 className="mt-0.5 font-display text-lg leading-tight text-slate-900">{form.name}</h3>
               {form.oref && (
-                <div className="mt-1 inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
+                <div className="mt-1 inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink">
                   OREF standard form
                 </div>
               )}
@@ -392,18 +392,18 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
 
         {/* AI drafted clause / copy panel */}
         {(aiOut || aiBusy) && (
-          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-md print:hidden">
-            <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-              <Sparkles className="h-4 w-4 text-white" />
-              <span className="text-[0.82rem] font-semibold text-white">
+          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-ink/12 bg-white backdrop-blur-md print:hidden">
+            <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
+              <Sparkles className="h-4 w-4 text-ink" />
+              <span className="text-[0.82rem] font-semibold text-ink">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>
-              {aiBusy && <span className="text-[0.72rem] text-slate-300/70">streaming live</span>}
+              {aiBusy && <span className="text-[0.72rem] text-slate/70">streaming live</span>}
             </div>
             <div className="px-4 py-3">
               <AiMarkdown text={aiOut} />
               {aiBusy && (
-                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />
+                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />
               )}
             </div>
           </div>
@@ -426,7 +426,7 @@ function ToolbarButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1.5 text-[0.76rem] font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-ink/12 bg-white px-2.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/15 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
     >
       {children}
     </button>
@@ -448,7 +448,7 @@ function DocField({
 }) {
   const full = field.type === "textarea" || field.type === "signature";
   const inputCls =
-    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-300 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/20";
+    "w-full rounded-md border border-slate-300 bg-ink px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/20";
 
   return (
     <div className={cn("flex flex-col gap-1", full && "sm:col-span-2")}>
@@ -458,7 +458,7 @@ function DocField({
           {field.required && <span className="text-danger">*</span>}
         </label>
         {field.autofill && (
-          <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
+          <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-ink print:hidden">
             <Wand2 className="h-2.5 w-2.5" /> auto
           </span>
         )}
@@ -478,7 +478,7 @@ function DocField({
           <span
             className={cn(
               "font-display text-lg italic",
-              signed ? "text-slate-900" : "text-slate-300",
+              signed ? "text-slate-900" : "text-slate",
             )}
           >
             {signed ? "Matin Real Estate" : "Sign here"}

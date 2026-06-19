@@ -226,7 +226,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-white/10 bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -234,20 +234,20 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
         {lead && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 pb-4 pt-5">
+            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-ink-800 to-ink-900 px-5 pb-4 pt-5">
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
               >
                 <X className="h-4 w-4" />
               </button>
               <div className="flex items-start gap-3 pr-10">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-base font-bold text-ink">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-ink text-base font-bold text-white">
                   {initials(lead.name)}
                 </span>
                 <div className="min-w-0">
-                  <h2 className="truncate font-display text-2xl text-white">{lead.name}</h2>
+                  <h2 className="truncate font-display text-2xl text-ink">{lead.name}</h2>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {/* Stage selector */}
                     <div className="relative">
@@ -264,7 +264,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                       {stageOpen && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setStageOpen(false)} aria-hidden />
-                          <div className="absolute left-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-white/12 bg-ink-800 py-1 shadow-xl">
+                          <div className="absolute left-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-ink/10 bg-ink-800 py-1 shadow-xl">
                             {LEAD_STAGES.map((s) => (
                               <button
                                 key={s}
@@ -274,12 +274,12 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                                   if (s !== currentStage) flash(`Moved to ${s}`);
                                 }}
                                 className={cn(
-                                  "flex w-full items-center justify-between px-3 py-1.5 text-left text-[0.8rem] transition-colors hover:bg-white/[0.06]",
-                                  s === currentStage ? "text-white" : "text-slate-300",
+                                  "flex w-full items-center justify-between px-3 py-1.5 text-left text-[0.8rem] transition-colors hover:bg-white",
+                                  s === currentStage ? "text-ink" : "text-slate",
                                 )}
                               >
                                 {s}
-                                {s === currentStage && <Check className="h-3.5 w-3.5 text-white" />}
+                                {s === currentStage && <Check className="h-3.5 w-3.5 text-ink" />}
                               </button>
                             ))}
                           </div>
@@ -300,19 +300,19 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               <div className="mt-4 grid grid-cols-3 gap-2">
                 <a
                   href={`tel:${lead.phone.replace(/[^\d+]/g, "")}`}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
                 >
                   <Phone className="h-3.5 w-3.5" /> Call
                 </a>
                 <button
                   onClick={() => flash(`Texting ${lead.firstName}…`)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
                 >
                   <MessageSquare className="h-3.5 w-3.5" /> Text
                 </button>
                 <a
                   href={`mailto:${lead.email}`}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
                 >
                   <Mail className="h-3.5 w-3.5" /> Email
                 </a>
@@ -348,40 +348,40 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
 
               {/* Assigned agent */}
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3">
-                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
+                <div className="flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-3.5 py-3">
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/[0.06]">
                     <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[0.66rem] uppercase tracking-wider text-slate-300/55">Assigned to</p>
-                    <p className="truncate text-[0.86rem] font-semibold text-white">{agent.name}</p>
+                    <p className="text-[0.66rem] uppercase tracking-wider text-slate/55">Assigned to</p>
+                    <p className="truncate text-[0.86rem] font-semibold text-ink">{agent.name}</p>
                   </div>
                 </div>
               )}
 
               {/* AI summary */}
-              <div className="rounded-xl border border-white/12 bg-white/[0.04] px-4 py-3">
+              <div className="rounded-xl border border-ink/10 bg-white px-4 py-3">
                 <div className="mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-white" />
-                  <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-white/80">AI lead summary</span>
+                  <Sparkles className="h-3.5 w-3.5 text-ink" />
+                  <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-ink/80">AI lead summary</span>
                 </div>
-                <p className="text-[0.85rem] leading-relaxed text-slate-300">{lead.aiSummary}</p>
+                <p className="text-[0.85rem] leading-relaxed text-slate">{lead.aiSummary}</p>
               </div>
 
               {/* ── Draft reply ── */}
-              <div className="rounded-xl border border-white/10 bg-white/[0.04]">
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
+              <div className="rounded-xl border border-ink/[0.08] bg-white">
+                <div className="flex items-center justify-between gap-2 border-b border-ink/[0.08] px-4 py-2.5">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-white" />
-                    <span className="text-[0.82rem] font-semibold text-white">Draft reply</span>
+                    <Sparkles className="h-4 w-4 text-ink" />
+                    <span className="text-[0.82rem] font-semibold text-ink">Draft reply</span>
                   </div>
                   {draft && !busy && (
                     <div className="flex items-center gap-1.5">
-                      <button onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
+                      <button onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-ink/[0.08] px-2 py-1 text-[0.7rem] text-slate transition-colors hover:bg-white hover:text-ink">
                         {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                         {copied ? "Copied" : "Copy"}
                       </button>
-                      <button onClick={generate} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
+                      <button onClick={generate} className="inline-flex items-center gap-1 rounded-md border border-ink/[0.08] px-2 py-1 text-[0.7rem] text-slate transition-colors hover:bg-white hover:text-ink">
                         <RefreshCw className="h-3 w-3" /> Redo
                       </button>
                     </div>
@@ -392,7 +392,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   {!draft && !busy ? (
                     <button
                       onClick={generate}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink-700"
                     >
                       <Sparkles className="h-4 w-4" /> Draft a reply with AI
                     </button>
@@ -404,24 +404,24 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                         readOnly={busy}
                         rows={6}
                         placeholder="Your reply…"
-                        className="min-h-[7rem] w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-3.5 py-3 text-[0.85rem] leading-relaxed text-slate-200 placeholder:text-slate-300/40 focus:border-white/30 focus:outline-none"
+                        className="min-h-[7rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-ink/60 px-3.5 py-3 text-[0.85rem] leading-relaxed text-slate-200 placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                       />
                       {busy ? (
-                        <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate-300">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> AI is drafting a personalized reply…
+                        <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-ink" /> AI is drafting a personalized reply…
                         </div>
                       ) : (
                         <div className="mt-2.5 flex items-center gap-2">
                           <button
                             onClick={sendReply}
                             disabled={!draft.trim()}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:opacity-40"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
                           >
                             <Send className="h-3.5 w-3.5" /> Send to {lead.firstName}
                           </button>
                           <button
                             onClick={copy}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-ink/12 bg-white px-3 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
                           >
                             {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                             {copied ? "Copied" : "Copy"}
@@ -436,21 +436,21 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               {/* ── Communication timeline ── */}
               <div>
                 <div className="mb-2.5 flex items-center gap-2">
-                  <CalendarClock className="h-4 w-4 text-white" />
-                  <h3 className="text-[0.84rem] font-semibold text-white">Communication history</h3>
+                  <CalendarClock className="h-4 w-4 text-ink" />
+                  <h3 className="text-[0.84rem] font-semibold text-ink">Communication history</h3>
                 </div>
                 <ol className="relative space-y-3.5 pl-1">
-                  <span className="absolute bottom-2 left-[10px] top-2 w-px bg-white/10" aria-hidden />
+                  <span className="absolute bottom-2 left-[10px] top-2 w-px bg-ink/[0.06]" aria-hidden />
                   {timeline.map((e) => {
                     const Icon = KIND_ICON[e.kind];
                     return (
                       <li key={e.id} className="relative flex gap-3">
-                        <span className="relative z-10 mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-ink-800 text-white ring-1 ring-inset ring-white/15">
+                        <span className="relative z-10 mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-ink-800 text-ink ring-1 ring-inset ring-ink/[0.08]">
                           <Icon className="h-3 w-3" />
                         </span>
                         <div className="min-w-0 flex-1 pt-0.5">
                           <p className="text-[0.82rem] leading-snug text-slate-200">{e.label}</p>
-                          <p className="mt-0.5 text-[0.7rem] text-slate-300/55">
+                          <p className="mt-0.5 text-[0.7rem] text-slate/55">
                             {e.minsAgo === 0 ? "just now" : timeAgo(e.minsAgo)}
                           </p>
                         </div>
@@ -461,10 +461,10 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               </div>
 
               {/* ── Log a note ── */}
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+              <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
                 <div className="mb-2 flex items-center gap-1.5">
-                  <StickyNote className="h-3.5 w-3.5 text-white" />
-                  <span className="text-[0.78rem] font-semibold text-white">Log a note</span>
+                  <StickyNote className="h-3.5 w-3.5 text-ink" />
+                  <span className="text-[0.78rem] font-semibold text-ink">Log a note</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <textarea
@@ -478,12 +478,12 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                     }}
                     rows={2}
                     placeholder="Add a note about this lead…"
-                    className="min-h-[2.5rem] flex-1 resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.82rem] text-white placeholder:text-slate-300/40 focus:border-white/30 focus:outline-none"
+                    className="min-h-[2.5rem] flex-1 resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                   />
                   <button
                     onClick={logNote}
                     disabled={!noteText.trim()}
-                    className="shrink-0 rounded-lg bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:opacity-40"
+                    className="shrink-0 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
                   >
                     Save
                   </button>
@@ -500,7 +500,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               aria-live="polite"
             >
               {toast && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-ink-800 px-3.5 py-1.5 text-[0.78rem] font-medium text-white shadow-lg">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 bg-ink-800 px-3.5 py-1.5 text-[0.78rem] font-medium text-ink shadow-lg">
                   <Check className="h-3.5 w-3.5 text-success" /> {toast}
                 </span>
               )}
@@ -514,12 +514,12 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
 
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2">
-      <div className="flex items-center gap-1.5 text-slate-300/55">
+    <div className="rounded-lg border border-ink/[0.06] bg-white/[0.02] px-3 py-2">
+      <div className="flex items-center gap-1.5 text-slate/55">
         {icon}
         <span className="text-[0.62rem] font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <p className="mt-0.5 truncate text-[0.82rem] font-medium text-white">{value}</p>
+      <p className="mt-0.5 truncate text-[0.82rem] font-medium text-ink">{value}</p>
     </div>
   );
 }

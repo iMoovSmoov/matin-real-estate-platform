@@ -109,9 +109,9 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
 
   return (
     <>
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md">
+      <div className="rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-3.5 md:px-5">
+        <div className="flex flex-wrap items-center gap-2 border-b border-ink/[0.08] px-4 py-3.5 md:px-5">
           {FILTERS.map((f) => {
             const on = filter === f;
             const isRisk = f === "At-risk";
@@ -122,20 +122,20 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
-                    ? "border-white/30 bg-white/[0.12] text-white"
-                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25 hover:bg-white/[0.06] hover:text-white",
+                    ? "border-ink/20 bg-ink/[0.08] text-ink"
+                    : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
                 )}
               >
                 {isRisk && (
                   <AlertTriangle
-                    className={cn("h-3 w-3", on ? "text-white" : "text-danger")}
+                    className={cn("h-3 w-3", on ? "text-ink" : "text-danger")}
                   />
                 )}
                 {f}
                 <span
                   className={cn(
                     "rounded px-1 text-[0.66rem] tabular-nums",
-                    on ? "bg-white/15 text-white" : "bg-white/[0.06] text-slate-300/70",
+                    on ? "bg-ink/10 text-ink" : "bg-white text-slate/70",
                   )}
                 >
                   {counts.get(f) ?? 0}
@@ -146,7 +146,7 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
         </div>
 
         {/* Column header (md+) */}
-        <div className="hidden border-b border-white/10 px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate-300/50 md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4">
+        <div className="hidden border-b border-ink/[0.08] px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate/50 md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4">
           <span>Property / Client</span>
           <span>Price</span>
           <span>Agent</span>
@@ -156,17 +156,17 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
         </div>
 
         {/* Rows */}
-        <div className="divide-y divide-white/[0.06]">
+        <div className="divide-y divide-ink/[0.06]">
           {visible.map((t) => (
             <TransactionRow key={t.id} t={t} onOpen={() => setActive(t)} />
           ))}
           {visible.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-              <ClipboardList className="h-6 w-6 text-slate-300/40" />
-              <p className="text-[0.86rem] text-slate-300">No {filter.toLowerCase()} transactions.</p>
+              <ClipboardList className="h-6 w-6 text-slate/40" />
+              <p className="text-[0.86rem] text-slate">No {filter.toLowerCase()} transactions.</p>
               <button
                 onClick={() => setFilter("All")}
-                className="text-[0.78rem] font-semibold text-white hover:underline"
+                className="text-[0.78rem] font-semibold text-ink hover:underline"
               >
                 Show all
               </button>
@@ -191,16 +191,16 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white/[0.03] md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5"
+      className="group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5"
     >
       {/* Property / client */}
       <div className="flex items-start gap-3 md:items-center">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-white ring-1 ring-inset ring-white/10 md:mt-0">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] md:mt-0">
           <TypeIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <p className="truncate text-[0.88rem] font-semibold leading-snug text-white">
+            <p className="truncate text-[0.88rem] font-semibold leading-snug text-ink">
               {t.address}
             </p>
             {t.riskFlag && (
@@ -209,40 +209,40 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
               </Pill>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[0.74rem] text-slate-300/70">
-            {t.client} · {type.label} · <span className="text-slate-300/55">{t.stage}</span>
+          <p className="mt-0.5 truncate text-[0.74rem] text-slate/70">
+            {t.client} · {type.label} · <span className="text-slate/55">{t.stage}</span>
           </p>
         </div>
       </div>
 
       {/* Price */}
       <div className="mt-2 md:mt-0">
-        <span className="font-display text-[0.98rem] text-white tabular-nums">{usd(t.price)}</span>
-        <span className="ml-2 text-[0.7rem] text-slate-300/50 md:hidden">{daysLabel(t.closeDateDaysOut)}</span>
+        <span className="font-display text-[0.98rem] text-ink tabular-nums">{usd(t.price)}</span>
+        <span className="ml-2 text-[0.7rem] text-slate/50 md:hidden">{daysLabel(t.closeDateDaysOut)}</span>
       </div>
 
       {/* Agent */}
       <div className="mt-2 flex items-center gap-2 md:mt-0">
         {agent ? (
           <>
-            <span className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.08] text-[0.6rem] font-semibold text-white ring-1 ring-inset ring-white/10">
+            <span className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.6rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
               {agent.photo ? (
                 <Image src={agent.photo} alt={agent.name} fill sizes="24px" className="object-cover" />
               ) : (
                 initials(agent.name)
               )}
             </span>
-            <span className="truncate text-[0.76rem] text-slate-300/80">{agent.firstName}</span>
+            <span className="truncate text-[0.76rem] text-slate/80">{agent.firstName}</span>
           </>
         ) : (
-          <span className="text-[0.76rem] text-slate-300/40">—</span>
+          <span className="text-[0.76rem] text-slate/40">—</span>
         )}
       </div>
 
       {/* Progress */}
       <div className="mt-2.5 flex items-center gap-2 md:mt-0">
         <ProgressBar value={pct} tone={progressTone(t)} className="flex-1" />
-        <span className="shrink-0 text-[0.68rem] text-slate-300/60 tabular-nums">{pct}%</span>
+        <span className="shrink-0 text-[0.68rem] text-slate/60 tabular-nums">{pct}%</span>
       </div>
 
       {/* Closes */}
@@ -250,7 +250,7 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
         <span
           className={cn(
             "inline-flex items-center justify-end gap-1 text-[0.76rem] tabular-nums",
-            overdue ? "text-danger" : soon ? "text-warn" : "text-slate-300/75",
+            overdue ? "text-danger" : soon ? "text-warn" : "text-slate/75",
           )}
         >
           <CalendarClock className="h-3 w-3" />
@@ -259,7 +259,7 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Chevron */}
-      <div className="hidden justify-end text-slate-300/30 transition-colors group-hover:text-white md:flex">
+      <div className="hidden justify-end text-slate/30 transition-colors group-hover:text-ink md:flex">
         <ArrowRight className="h-4 w-4" />
       </div>
     </button>
@@ -290,7 +290,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
       />
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-white/10 bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -298,18 +298,18 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
         {tx && type && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-5">
+            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-5">
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-white/5 hover:text-white"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink"
               >
                 <X className="h-4 w-4" />
               </button>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">
                 {type.label} · {tx.stage} · {tx.id}
               </p>
-              <h2 className="mt-1 pr-8 font-display text-2xl text-white">{tx.address}</h2>
+              <h2 className="mt-1 pr-8 font-display text-2xl text-ink">{tx.address}</h2>
 
               {/* Risk banner */}
               {tx.riskFlag && (
@@ -319,7 +319,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                     <p className="text-[0.72rem] font-semibold uppercase tracking-wider text-danger">
                       At risk
                     </p>
-                    <p className="mt-0.5 text-[0.82rem] text-white">{tx.riskFlag}</p>
+                    <p className="mt-0.5 text-[0.82rem] text-ink">{tx.riskFlag}</p>
                   </div>
                 </div>
               )}
@@ -352,8 +352,8 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
 
               {/* Lead agent */}
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3.5 py-3">
-                  <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.08] text-[0.74rem] font-semibold text-white ring-1 ring-inset ring-white/10">
+                <div className="flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-3.5 py-3">
+                  <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.74rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
                     {agent.photo ? (
                       <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
                     ) : (
@@ -361,8 +361,8 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                     )}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[0.7rem] uppercase tracking-wider text-slate-300/55">Lead agent</p>
-                    <p className="truncate text-[0.86rem] font-semibold text-white">{agent.name}</p>
+                    <p className="text-[0.7rem] uppercase tracking-wider text-slate/55">Lead agent</p>
+                    <p className="truncate text-[0.86rem] font-semibold text-ink">{agent.name}</p>
                   </div>
                 </div>
               )}
@@ -370,10 +370,10 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               {/* Smart checklist */}
               <div>
                 <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-white">
-                    <ClipboardList className="h-4 w-4 text-white" /> Smart checklist
+                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
+                    <ClipboardList className="h-4 w-4 text-ink" /> Smart checklist
                   </span>
-                  <span className="text-[0.74rem] text-slate-300/70 tabular-nums">
+                  <span className="text-[0.74rem] text-slate/70 tabular-nums">
                     {doneCount}/{total} complete
                   </span>
                 </div>
@@ -381,12 +381,12 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
 
                 {/* Next outstanding item */}
                 {nextItem && (
-                  <div className="mb-2.5 flex items-center gap-2.5 rounded-lg border border-white/20 bg-white/[0.08] px-3 py-2">
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-white" />
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">
+                  <div className="mb-2.5 flex items-center gap-2.5 rounded-lg border border-ink/15 bg-paper px-3 py-2">
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ink" />
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">
                       Next:
                     </span>
-                    <span className="truncate text-[0.82rem] font-medium text-white">{nextItem.label}</span>
+                    <span className="truncate text-[0.82rem] font-medium text-ink">{nextItem.label}</span>
                   </div>
                 )}
 
@@ -401,22 +401,22 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                           c.done
                             ? "bg-white/[0.02]"
                             : isNext
-                              ? "bg-white/[0.06] ring-1 ring-inset ring-white/20"
+                              ? "bg-white ring-1 ring-inset ring-ink/10"
                               : "bg-white/[0.02]",
                         )}
                       >
                         {c.done ? (
                           <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                         ) : (
-                          <Circle className="h-4 w-4 shrink-0 text-slate-300/40" />
+                          <Circle className="h-4 w-4 shrink-0 text-slate/40" />
                         )}
                         <span
                           className={cn(
                             c.done
                               ? "text-success line-through decoration-success/30"
                               : isNext
-                                ? "font-medium text-white"
-                                : "text-slate-300",
+                                ? "font-medium text-ink"
+                                : "text-slate",
                           )}
                         >
                           {c.label}
@@ -430,10 +430,10 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               {/* Documents */}
               <div>
                 <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-white">
-                    <FileText className="h-4 w-4 text-white" /> Documents
+                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
+                    <FileText className="h-4 w-4 text-ink" /> Documents
                   </span>
-                  <span className="text-[0.74rem] text-slate-300/70 tabular-nums">
+                  <span className="text-[0.74rem] text-slate/70 tabular-nums">
                     {docs.filter((d) => d.status === "signed" || d.status === "received").length}/
                     {docs.length} in
                   </span>
@@ -470,10 +470,10 @@ function Fact({
         ? "text-danger"
         : tone === "warn"
           ? "text-warn"
-          : "text-white";
+          : "text-ink";
   return (
-    <div className="rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-2">
-      <div className="flex items-center gap-1.5 text-slate-300/55">
+    <div className="rounded-lg border border-ink/[0.06] bg-white px-3 py-2">
+      <div className="flex items-center gap-1.5 text-slate/55">
         {icon}
         <span className="text-[0.64rem] font-semibold uppercase tracking-wider">{label}</span>
       </div>
@@ -574,15 +574,15 @@ function DocRow({ doc }: { doc: TxDoc }) {
   const meta = DOC_STATUS_META[doc.status];
   const Icon = meta.icon;
   return (
-    <li className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
+    <li className="flex items-center justify-between gap-3 rounded-lg border border-ink/[0.06] bg-white/[0.02] px-3 py-2.5">
       <div className="flex min-w-0 items-center gap-2.5">
         <Icon
           className={cn(
             "h-4 w-4 shrink-0",
-            meta.tone === "success" ? "text-success" : meta.tone === "warn" ? "text-warn" : "text-slate-300/45",
+            meta.tone === "success" ? "text-success" : meta.tone === "warn" ? "text-warn" : "text-slate/45",
           )}
         />
-        <span className="truncate text-[0.82rem] text-white">{doc.name}</span>
+        <span className="truncate text-[0.82rem] text-ink">{doc.name}</span>
       </div>
       <Pill tone={meta.tone}>{meta.label}</Pill>
     </li>

@@ -26,8 +26,8 @@ export default function ReportingPage() {
           <LiveDot tone="azure" />
           <SectionLabel>Reporting</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-white">Reporting</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
+        <h1 className="font-display text-3xl text-ink">Reporting</h1>
+        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
           Real-time reporting across the brokerage — volume, closings, lead conversion, and per-agent production.
           One source of truth, exportable in a click.
         </p>

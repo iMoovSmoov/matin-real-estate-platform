@@ -4,11 +4,11 @@ export default function AskPage() {
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-6 md:py-8">
       <div className="mb-4">
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/70">
+        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
           Team Assistant
         </p>
-        <h1 className="mt-1 font-display text-3xl text-white">Ask Matin</h1>
-        <p className="mt-1.5 max-w-2xl text-[0.9rem] leading-relaxed text-slate-300">
+        <h1 className="mt-1 font-display text-3xl text-ink">Ask Matin</h1>
+        <p className="mt-1.5 max-w-2xl text-[0.9rem] leading-relaxed text-slate">
           The internal company copilot for brokers and staff — policies, market knowledge, referrals, and quick
           drafts, grounded in Matin&apos;s knowledge base, listings, and agent roster.
         </p>

@@ -74,18 +74,18 @@ export function ContractCoach() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.045]">
+    <div className="rounded-2xl border border-ink/[0.08] bg-white">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+      <div className="flex items-start justify-between gap-4 border-b border-ink/[0.08] px-5 py-4">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <PenTool className="h-4 w-4" />
           </span>
           <div>
-            <h3 className="font-sans text-[0.95rem] font-semibold tracking-tight text-white">
+            <h3 className="font-sans text-[0.95rem] font-semibold tracking-tight text-ink">
               Contract Coach
             </h3>
-            <p className="mt-0.5 text-[0.78rem] text-slate-300">
+            <p className="mt-0.5 text-[0.78rem] text-slate">
               Paste a clause or agreement section — get a risk read, specific fixes, and a stronger
               rewrite.
             </p>
@@ -100,13 +100,13 @@ export function ContractCoach() {
         {/* Editor side */}
         <div className="flex flex-col">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-300/80">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/80">
               Your draft
             </p>
             {draft && (
               <button
                 onClick={() => setDraft("")}
-                className="inline-flex items-center gap-1 text-[0.72rem] text-slate-300/70 transition-colors hover:text-white"
+                className="inline-flex items-center gap-1 text-[0.72rem] text-slate/70 transition-colors hover:text-ink"
               >
                 <Eraser className="h-3 w-3" /> Clear
               </button>
@@ -115,7 +115,7 @@ export function ContractCoach() {
 
           {/* Sample loader chips */}
           <div className="mb-2.5 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1 text-[0.72rem] text-slate-300/60">
+            <span className="inline-flex items-center gap-1 text-[0.72rem] text-slate/60">
               <FileText className="h-3 w-3" /> Load a sample:
             </span>
             {SAMPLES.map((s) => (
@@ -125,7 +125,7 @@ export function ContractCoach() {
                   setDraft(s.text);
                   setOutput("");
                 }}
-                className="rounded-full border border-white/12 bg-white/[0.03] px-3 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
+                className="rounded-full border border-ink/10 bg-white px-3 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:bg-paper hover:text-ink"
               >
                 {s.label}
               </button>
@@ -137,13 +137,13 @@ export function ContractCoach() {
             onChange={(e) => setDraft(e.target.value)}
             rows={12}
             placeholder="Write or paste a contingency clause, counter-offer paragraph, or any agreement language you want sharpened…"
-            className="min-h-[16rem] flex-1 resize-y rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-[0.86rem] leading-relaxed text-white placeholder:text-slate-300/35 focus:border-white/40 focus:outline-none"
+            className="min-h-[16rem] flex-1 resize-y rounded-xl border border-ink/10 bg-white px-4 py-3 text-[0.86rem] leading-relaxed text-ink placeholder:text-slate/35 focus:border-ink/40 focus:outline-none"
           />
 
           <button
             onClick={coach}
             disabled={busy || !draft.trim()}
-            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Sparkles className="h-4 w-4" />
             {busy ? "Coaching your draft…" : "Coach my draft"}
@@ -153,13 +153,13 @@ export function ContractCoach() {
         {/* Critique side */}
         <div className="flex flex-col">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-300/80">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/80">
               Coaching critique
             </p>
             {output && !busy && (
               <button
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
               >
                 {copied ? (
                   <>
@@ -176,19 +176,19 @@ export function ContractCoach() {
 
           <div
             className={cn(
-              "min-h-[18rem] flex-1 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5",
+              "min-h-[18rem] flex-1 overflow-y-auto rounded-xl border border-ink/[0.08] bg-white px-4 py-3.5",
               !output && "grid place-items-center",
             )}
           >
             {output ? (
               <AiMarkdown text={output} />
             ) : busy ? (
-              <div className="flex items-center gap-2 text-[0.82rem] text-slate-300/70">
+              <div className="flex items-center gap-2 text-[0.82rem] text-slate/70">
                 <LiveDot tone="azure" /> Reading your clause…
               </div>
             ) : (
-              <div className="px-4 text-center text-[0.82rem] leading-relaxed text-slate-300/55">
-                <PenTool className="mx-auto mb-2 h-5 w-5 text-white/60" />
+              <div className="px-4 text-center text-[0.82rem] leading-relaxed text-slate/55">
+                <PenTool className="mx-auto mb-2 h-5 w-5 text-ink/60" />
                 Your assessment, fixes, and a stronger rewrite will stream here.
               </div>
             )}
@@ -196,7 +196,7 @@ export function ContractCoach() {
         </div>
       </div>
 
-      <p className="border-t border-white/10 px-5 py-3 text-[0.68rem] text-slate-300/45">
+      <p className="border-t border-ink/[0.08] px-5 py-3 text-[0.68rem] text-slate/45">
         AI · AI-generated coaching for training only — not legal advice. Have counsel
         review any binding agreement.
       </p>

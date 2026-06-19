@@ -42,15 +42,15 @@ function Stat({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md transition-colors hover:border-white/25 hover:bg-white/[0.06]">
+    <div className="rounded-2xl border border-ink/[0.08] bg-white p-4 backdrop-blur-md transition-colors hover:border-ink/15 hover:bg-white">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate-300">{label}</p>
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.06] text-white ring-1 ring-inset ring-white/10">
+        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate">{label}</p>
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <p className="mt-2 font-display text-2xl leading-none text-white tabular-nums">{value}</p>
-      <p className="mt-1.5 text-[0.72rem] text-slate-300/70">{hint}</p>
+      <p className="mt-2 font-display text-2xl leading-none text-ink tabular-nums">{value}</p>
+      <p className="mt-1.5 text-[0.72rem] text-slate/70">{hint}</p>
     </div>
   );
 }
@@ -63,12 +63,12 @@ export default function ContractsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/12">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-paper text-ink ring-1 ring-inset ring-ink/[0.06]">
             <FileSignature className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="font-display text-3xl text-white md:text-[2.2rem]">Contract Builder</h1>
-            <p className="mt-1.5 max-w-xl text-[0.92rem] leading-relaxed text-slate-300">
+            <h1 className="font-display text-3xl text-ink md:text-[2.2rem]">Contract Builder</h1>
+            <p className="mt-1.5 max-w-xl text-[0.92rem] leading-relaxed text-slate">
               Pick a contract, auto-fill it, and send it for signature in minutes.
             </p>
           </div>
@@ -102,22 +102,22 @@ export default function ContractsPage() {
 
       {/* Recent contracts */}
       <Panel>
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
               <ScrollText className="h-4 w-4" />
             </span>
             <div>
-              <h3 className="text-[0.95rem] font-semibold text-white">Recent contracts</h3>
-              <p className="text-[0.76rem] text-slate-300/70">Documents across active transactions</p>
+              <h3 className="text-[0.95rem] font-semibold text-ink">Recent contracts</h3>
+              <p className="text-[0.76rem] text-slate/70">Documents across active transactions</p>
             </div>
           </div>
-          <span className="hidden items-center gap-1.5 text-[0.76rem] font-medium text-white sm:inline-flex">
+          <span className="hidden items-center gap-1.5 text-[0.76rem] font-medium text-ink sm:inline-flex">
             View all <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
         </div>
 
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="divide-y divide-ink/[0.06]">
           {recent.map((tx) => {
             const agent = getAgent(tx.agentSlug);
             const st = stageStatus(tx.stage);
@@ -127,18 +127,18 @@ export default function ContractsPage() {
                 key={tx.id}
                 className="flex flex-wrap items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-white ring-1 ring-inset ring-white/10">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
                   <FileSignature className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[0.88rem] font-semibold text-white">{tx.address}</p>
-                  <p className="truncate text-[0.76rem] text-slate-300/70">
+                  <p className="truncate text-[0.88rem] font-semibold text-ink">{tx.address}</p>
+                  <p className="truncate text-[0.76rem] text-slate/70">
                     {isListing ? "Listing Agreement" : "Sale Agreement"} · {tx.client}
                   </p>
                 </div>
                 <div className="hidden text-right sm:block">
-                  <p className="text-[0.82rem] font-semibold tabular-nums text-white">{usd(tx.price)}</p>
-                  <p className="text-[0.72rem] text-slate-300/55">{agent?.name ?? "—"}</p>
+                  <p className="text-[0.82rem] font-semibold tabular-nums text-ink">{usd(tx.price)}</p>
+                  <p className="text-[0.72rem] text-slate/55">{agent?.name ?? "—"}</p>
                 </div>
                 <Pill tone={st.tone}>{st.label}</Pill>
               </li>

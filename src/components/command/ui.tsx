@@ -23,8 +23,8 @@ export function Panel({
   return (
     <Tag
       className={cn(
-        "relative rounded-2xl border border-white/10 bg-white/[0.045] backdrop-blur-md",
-        glow && "shadow-glow",
+        "relative rounded-2xl border border-ink/[0.07] bg-white shadow-soft",
+        glow && "shadow-lift",
         className,
       )}
     >
@@ -50,22 +50,22 @@ export function PanelHeader({
   return (
     <div
       className={cn(
-        "flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4",
+        "flex items-start justify-between gap-4 border-b border-ink/[0.08] px-5 py-4",
         className,
       )}
     >
       <div className="flex items-start gap-3">
         {icon && (
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             {icon}
           </span>
         )}
         <div className="min-w-0">
-          <h3 className="truncate font-sans text-[0.95rem] font-semibold tracking-tight text-white">
+          <h3 className="truncate font-sans text-[0.95rem] font-semibold tracking-tight text-ink">
             {title}
           </h3>
           {subtitle && (
-            <p className="mt-0.5 truncate text-[0.78rem] text-slate-300">{subtitle}</p>
+            <p className="mt-0.5 truncate text-[0.78rem] text-slate">{subtitle}</p>
           )}
         </div>
       </div>
@@ -85,7 +85,7 @@ export function SectionLabel({
   return (
     <p
       className={cn(
-        "text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-300/80",
+        "text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/80",
         className,
       )}
     >
@@ -105,11 +105,11 @@ export function Pill({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    azure: "bg-white/[0.1] text-white ring-white/15",
+    azure: "bg-ink/[0.06] text-ink ring-ink/[0.08]",
     success: "bg-success/12 text-success ring-success/25",
     danger: "bg-danger/12 text-danger ring-danger/25",
     warn: "bg-warn/15 text-warn ring-warn/25",
-    neutral: "bg-white/[0.06] text-slate-300 ring-white/12",
+    neutral: "bg-white text-slate ring-ink/[0.06]",
   };
   return (
     <span
@@ -146,30 +146,30 @@ export function StatTile({
 }) {
   const dir = delta?.dir ?? "up";
   const deltaColor =
-    dir === "up" ? "text-success" : dir === "down" ? "text-danger" : "text-slate-300";
+    dir === "up" ? "text-success" : dir === "down" ? "text-danger" : "text-slate";
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-white/20",
-        accent && "bg-white/[0.06]",
+        "group relative overflow-hidden rounded-2xl border border-ink/[0.07] bg-white p-4 shadow-soft transition-colors hover:border-ink/15",
+        accent && "bg-white",
         className,
       )}
     >
       {accent && (
-        <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-white/[0.12] blur-2xl" />
+        <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-ink/[0.08] blur-2xl" />
       )}
       <div className="relative flex items-start justify-between gap-2">
-        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate-300">
+        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate">
           {label}
         </p>
         {icon && (
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.06] text-white ring-1 ring-inset ring-white/10">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
             {icon}
           </span>
         )}
       </div>
       <div className="relative mt-2 flex items-end gap-2">
-        <span className="font-display text-2xl leading-none text-white tabular-nums">
+        <span className="font-display text-2xl leading-none text-ink tabular-nums">
           {value}
         </span>
         {delta && (
@@ -179,7 +179,7 @@ export function StatTile({
           </span>
         )}
       </div>
-      {hint && <p className="relative mt-1 text-[0.72rem] text-slate-300/70">{hint}</p>}
+      {hint && <p className="relative mt-1 text-[0.72rem] text-slate/70">{hint}</p>}
     </div>
   );
 }
@@ -195,13 +195,13 @@ export function ProgressBar({
   tone?: "azure" | "success" | "warn" | "danger";
 }) {
   const tones: Record<string, string> = {
-    azure: "bg-gradient-to-r from-azure-deep to-azure-bright",
+    azure: "bg-ink",
     success: "bg-success",
     warn: "bg-warn",
     danger: "bg-danger",
   };
   return (
-    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]", className)}>
+    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-paper", className)}>
       <div
         className={cn("h-full rounded-full transition-[width] duration-500", tones[tone])}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
@@ -220,7 +220,7 @@ export function LiveDot({
 }) {
   const tones: Record<string, string> = {
     success: "bg-success",
-    azure: "bg-white",
+    azure: "bg-ink",
     warn: "bg-warn",
     danger: "bg-danger",
   };
@@ -238,7 +238,7 @@ export function LiveDot({
 export function Sparkline({
   data,
   className,
-  stroke = "#f0f0f2",
+  stroke = "#1a1a1a",
   fill = true,
 }: {
   data: number[];
@@ -281,7 +281,7 @@ export function GlowBlob({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute rounded-full bg-white/[0.12] blur-3xl",
+        "pointer-events-none absolute rounded-full bg-ink/[0.08] blur-3xl",
         className,
       )}
     />

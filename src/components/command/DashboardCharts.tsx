@@ -25,26 +25,26 @@ type TipProps = {
   fmt?: (v: number, name: string) => string;
 };
 
-const GRID = "#1c2532";
-const AXIS = "#5d6b7d";
-const AZURE = "#f0f0f2";
-const AZURE_DEEP = "#9a9aa0";
+const GRID = "#ebebea";
+const AXIS = "#8a8a90";
+const AZURE = "#1a1a1a";
+const AZURE_DEEP = "#8a8a90";
 const SUCCESS = "#2fa36b";
 
 /* ── Shared dark tooltip ─────────────────────────────────────────────── */
 function DarkTooltip({ active, payload, label, fmt }: TipProps) {
   if (!active || !payload || payload.length === 0) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.06]/95 px-3 py-2 text-[0.78rem] shadow-xl backdrop-blur">
+    <div className="rounded-lg border border-ink/[0.08] bg-white/95 px-3 py-2 text-[0.78rem] shadow-xl backdrop-blur">
       {label != null && (
-        <p className="mb-1 font-semibold text-white">{String(label)}</p>
+        <p className="mb-1 font-semibold text-ink">{String(label)}</p>
       )}
       <div className="space-y-0.5">
         {payload.map((p, i) => (
-          <div key={i} className="flex items-center gap-2 text-slate-300">
+          <div key={i} className="flex items-center gap-2 text-slate">
             <span className="h-2 w-2 rounded-sm" style={{ background: p.color ?? AZURE }} />
             <span className="capitalize">{p.name}</span>
-            <span className="ml-auto font-semibold tabular-nums text-white">
+            <span className="ml-auto font-semibold tabular-nums text-ink">
               {fmt ? fmt(Number(p.value), String(p.name)) : num(Number(p.value))}
             </span>
           </div>
@@ -86,7 +86,7 @@ export function VolumeAreaChart() {
           strokeWidth={2}
           fill="url(#volFill)"
           dot={false}
-          activeDot={{ r: 4, fill: AZURE, stroke: "#0a0e14", strokeWidth: 2 }}
+          activeDot={{ r: 4, fill: AZURE, stroke: "#ffffff", strokeWidth: 2 }}
         />
       </AreaChart>
     </ResponsiveContainer>
@@ -102,7 +102,7 @@ export function VolumeBarsChart() {
         <XAxis dataKey="month" {...axisProps} />
         <YAxis {...axisProps} width={44} tickFormatter={(v) => compactUsd(Number(v))} />
         <Tooltip
-          cursor={{ fill: "#ffffff08" }}
+          cursor={{ fill: "#0000000a" }}
           content={<DarkTooltip fmt={(v, n) => (n === "volume" ? compactUsd(v) : num(v))} />}
         />
         <Bar dataKey="volume" name="volume" fill={AZURE} radius={[4, 4, 0, 0]} maxBarSize={26} />
@@ -120,7 +120,7 @@ export function LeadsBySourceChart() {
         <CartesianGrid stroke={GRID} horizontal={false} />
         <XAxis type="number" {...axisProps} />
         <YAxis type="category" dataKey="source" {...axisProps} width={84} />
-        <Tooltip cursor={{ fill: "#ffffff08" }} content={<DarkTooltip />} />
+        <Tooltip cursor={{ fill: "#0000000a" }} content={<DarkTooltip />} />
         <Bar dataKey="count" name="leads" radius={[0, 4, 4, 0]} maxBarSize={16}>
           {data.map((_, i) => (
             <Cell key={i} fill={i % 2 === 0 ? AZURE : AZURE_DEEP} />
@@ -140,7 +140,7 @@ export function PipelineByStageChart() {
         <XAxis dataKey="stage" {...axisProps} interval={0} angle={-20} textAnchor="end" height={52} />
         <YAxis {...axisProps} width={44} tickFormatter={(v) => compactUsd(Number(v))} />
         <Tooltip
-          cursor={{ fill: "#ffffff08" }}
+          cursor={{ fill: "#0000000a" }}
           content={<DarkTooltip fmt={(v, n) => (n === "value" ? compactUsd(v) : num(v))} />}
         />
         <Bar dataKey="value" name="value" fill={AZURE} radius={[4, 4, 0, 0]} maxBarSize={34}>
@@ -164,7 +164,7 @@ export function ConversionFunnelChart() {
         <XAxis type="number" {...axisProps} hide />
         <YAxis type="category" dataKey="stage" {...axisProps} width={96} />
         <Tooltip
-          cursor={{ fill: "#ffffff08" }}
+          cursor={{ fill: "#0000000a" }}
           content={<DarkTooltip fmt={(v) => num(v)} />}
         />
         <Bar dataKey="count" name="count" radius={[0, 4, 4, 0]} maxBarSize={22}>
@@ -211,7 +211,7 @@ export function ClosingsBarChart() {
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="month" {...axisProps} />
         <YAxis {...axisProps} width={32} />
-        <Tooltip cursor={{ fill: "#ffffff08" }} content={<DarkTooltip />} />
+        <Tooltip cursor={{ fill: "#0000000a" }} content={<DarkTooltip />} />
         <Bar dataKey="closings" name="closings" fill={SUCCESS} radius={[4, 4, 0, 0]} maxBarSize={26} />
       </BarChart>
     </ResponsiveContainer>

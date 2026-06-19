@@ -77,18 +77,18 @@ export default function CoachingPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Header / hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.03] to-white/[0.05] px-6 py-7">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/[0.12] blur-3xl" />
+      <div className="relative overflow-hidden rounded-2xl border border-ink/[0.08] bg-gradient-to-br from-ink/[0.04] via-ink/[0.02] to-ink/[0.03] px-6 py-7">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-ink/[0.08] blur-3xl" />
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.5]" />
         <div className="relative">
           <div className="mb-2 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/70">
+            <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
               <GraduationCap className="h-3.5 w-3.5" /> Coaching Academy
             </span>
             <LiveDot tone="success" />
           </div>
-          <h1 className="font-display text-3xl text-white md:text-[2.4rem]">Coaching Academy</h1>
-          <p className="mt-1.5 max-w-2xl text-[0.92rem] leading-relaxed text-slate-300">
+          <h1 className="font-display text-3xl text-ink md:text-[2.4rem]">Coaching Academy</h1>
+          <p className="mt-1.5 max-w-2xl text-[0.92rem] leading-relaxed text-slate">
             AI scenario training &amp; contract-writing coaching for every broker. Drill live
             role-plays against a tireless AI client, sharpen your agreement language, and climb the
             board — built for {company.name}.
@@ -142,7 +142,7 @@ export default function CoachingPage() {
       <section>
         <div className="mb-2.5 flex items-center gap-2">
           <SectionLabel>Live Scenario Training</SectionLabel>
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-ink/[0.06]" />
         </div>
         <ScenarioTrainer />
       </section>
@@ -151,7 +151,7 @@ export default function CoachingPage() {
       <section>
         <div className="mb-2.5 flex items-center gap-2">
           <SectionLabel>Contract-Writing Coach</SectionLabel>
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-ink/[0.06]" />
         </div>
         <ContractCoach />
       </section>
@@ -160,7 +160,7 @@ export default function CoachingPage() {
       <section>
         <div className="mb-2.5 flex items-center gap-2">
           <SectionLabel>Academy Leaderboard</SectionLabel>
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-ink/[0.06]" />
         </div>
         <Panel>
           <PanelHeader
@@ -168,12 +168,12 @@ export default function CoachingPage() {
             subtitle="Ranked by avg score · practice streaks & drills completed"
             icon={<Trophy className="h-4 w-4" />}
             action={
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.1] px-2.5 py-1 text-[0.72rem] font-semibold text-white ring-1 ring-inset ring-white/12">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-ink/[0.06] px-2.5 py-1 text-[0.72rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
                 <TrendingUp className="h-3.5 w-3.5" /> This season
               </span>
             }
           />
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-ink/[0.06]">
             {leaderboard.map((s, i) => {
               const medal = MEDALS[i];
               return (
@@ -184,25 +184,25 @@ export default function CoachingPage() {
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-display text-[0.92rem] tabular-nums ring-1 ring-inset",
                       medal
                         ? `${medal.bg} ${medal.text} ${medal.ring}`
-                        : "bg-white/[0.05] text-slate-300/70 ring-white/10",
+                        : "bg-white text-slate/70 ring-ink/[0.06]",
                     )}
                   >
                     {i < 3 ? <Trophy className="h-4 w-4" /> : i + 1}
                   </span>
 
                   {/* Avatar initials */}
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.7rem] font-bold text-white ring-1 ring-inset ring-white/10">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.7rem] font-bold text-ink ring-1 ring-inset ring-ink/[0.06]">
                     {initials(s.name)}
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">
-                      <p className="truncate text-[0.86rem] font-semibold text-white">{s.name}</p>
+                      <p className="truncate text-[0.86rem] font-semibold text-ink">{s.name}</p>
                       <div className="flex shrink-0 items-center gap-2">
                         <Pill tone="warn">
                           <Flame className="h-3 w-3" /> {s.streak}d
                         </Pill>
-                        <span className="font-display text-[0.95rem] text-white tabular-nums">
+                        <span className="font-display text-[0.95rem] text-ink tabular-nums">
                           {s.score}
                         </span>
                       </div>
@@ -213,7 +213,7 @@ export default function CoachingPage() {
                         tone={scoreTone(s.score)}
                         className="flex-1"
                       />
-                      <span className="shrink-0 text-[0.7rem] text-slate-300/70 tabular-nums">
+                      <span className="shrink-0 text-[0.7rem] text-slate/70 tabular-nums">
                         {num(s.completed)} drills
                       </span>
                     </div>
@@ -222,11 +222,11 @@ export default function CoachingPage() {
               );
             })}
           </ul>
-          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-5 py-3">
-            <p className="text-[0.72rem] text-slate-300/55">
+          <div className="flex items-center justify-between gap-3 border-t border-ink/[0.08] px-5 py-3">
+            <p className="text-[0.72rem] text-slate/55">
               Scores blend conversation grades, completion, and streak consistency.
             </p>
-            <span className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-white">
+            <span className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink">
               <LiveDot tone="azure" /> Updates as agents drill
             </span>
           </div>

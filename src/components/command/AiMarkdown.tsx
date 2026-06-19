@@ -17,7 +17,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
   return tokens.map((tok, i) => {
     if (tok.startsWith("**") && tok.endsWith("**")) {
       return (
-        <strong key={`${keyBase}-b-${i}`} className="font-semibold text-white">
+        <strong key={`${keyBase}-b-${i}`} className="font-semibold text-ink">
           {tok.slice(2, -2)}
         </strong>
       );
@@ -26,7 +26,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
       return (
         <code
           key={`${keyBase}-c-${i}`}
-          className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[0.82em] text-white/80"
+          className="rounded bg-paper px-1.5 py-0.5 font-mono text-[0.82em] text-ink/80"
         >
           {tok.slice(1, -1)}
         </code>
@@ -34,7 +34,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
     }
     if (tok.startsWith("_") && tok.endsWith("_") && tok.length > 2) {
       return (
-        <em key={`${keyBase}-i-${i}`} className="text-slate-300">
+        <em key={`${keyBase}-i-${i}`} className="text-slate">
           {tok.slice(1, -1)}
         </em>
       );
@@ -56,7 +56,7 @@ export function AiMarkdown({ text }: { text: string }) {
     blocks.push(
       <ul key={key} className="my-2 space-y-1.5">
         {items.map((b, i) => (
-          <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate-300">
+          <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate">
             <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-azure" />
             <span>{renderInline(b, `${key}-${i}`)}</span>
           </li>
@@ -72,10 +72,10 @@ export function AiMarkdown({ text }: { text: string }) {
     blocks.push(
       <ol key={key} className="my-2 space-y-1.5">
         {items.map((b, i) => (
-          <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate-300">
+          <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate">
             <span
               aria-hidden
-              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/[0.1] text-[0.68rem] font-semibold text-white ring-1 ring-inset ring-white/12"
+              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-ink/[0.06] text-[0.68rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]"
             >
               {i + 1}
             </span>
@@ -101,13 +101,13 @@ export function AiMarkdown({ text }: { text: string }) {
     }
     if (line.trim() === "---" || line.trim() === "***") {
       flushLists(key);
-      blocks.push(<hr key={key} className="my-4 border-white/10" />);
+      blocks.push(<hr key={key} className="my-4 border-ink/[0.08]" />);
       return;
     }
     if (line.startsWith("### ")) {
       flushLists(key);
       blocks.push(
-        <h4 key={key} className="mt-4 font-sans text-[0.82rem] font-semibold uppercase tracking-wider text-white/80">
+        <h4 key={key} className="mt-4 font-sans text-[0.82rem] font-semibold uppercase tracking-wider text-ink/80">
           {renderInline(line.slice(4), key)}
         </h4>,
       );
@@ -116,7 +116,7 @@ export function AiMarkdown({ text }: { text: string }) {
     if (line.startsWith("## ")) {
       flushLists(key);
       blocks.push(
-        <h3 key={key} className="mt-5 font-display text-lg text-white first:mt-0">
+        <h3 key={key} className="mt-5 font-display text-lg text-ink first:mt-0">
           {renderInline(line.slice(3), key)}
         </h3>,
       );
@@ -125,7 +125,7 @@ export function AiMarkdown({ text }: { text: string }) {
     if (line.startsWith("# ")) {
       flushLists(key);
       blocks.push(
-        <h2 key={key} className="mt-5 font-display text-xl text-white first:mt-0">
+        <h2 key={key} className="mt-5 font-display text-xl text-ink first:mt-0">
           {renderInline(line.slice(2), key)}
         </h2>,
       );
@@ -136,7 +136,7 @@ export function AiMarkdown({ text }: { text: string }) {
       blocks.push(
         <blockquote
           key={key}
-          className="my-3 rounded-r-xl border-l-2 border-azure bg-azure/[0.08] px-4 py-2.5 text-[0.86rem] leading-relaxed text-slate-300"
+          className="my-3 rounded-r-xl border-l-2 border-azure bg-azure/[0.08] px-4 py-2.5 text-[0.86rem] leading-relaxed text-slate"
         >
           {renderInline(line.slice(2), key)}
         </blockquote>,
@@ -156,7 +156,7 @@ export function AiMarkdown({ text }: { text: string }) {
     }
     flushLists(key);
     blocks.push(
-      <p key={key} className="text-[0.9rem] leading-relaxed text-slate-300">
+      <p key={key} className="text-[0.9rem] leading-relaxed text-slate">
         {renderInline(line, key)}
       </p>,
     );

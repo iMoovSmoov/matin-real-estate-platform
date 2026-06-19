@@ -125,17 +125,17 @@ export function ScenarioTrainer() {
   /* ── Library view ─────────────────────────────────────────────────────── */
   if (!active) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/[0.045]">
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+      <div className="rounded-2xl border border-ink/[0.08] bg-white">
+        <div className="flex items-start justify-between gap-4 border-b border-ink/[0.08] px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
               <Drama className="h-4 w-4" />
             </span>
             <div>
-              <h3 className="font-sans text-[0.95rem] font-semibold tracking-tight text-white">
+              <h3 className="font-sans text-[0.95rem] font-semibold tracking-tight text-ink">
                 Scenario Trainer
               </h3>
-              <p className="mt-0.5 text-[0.78rem] text-slate-300">
+              <p className="mt-0.5 text-[0.78rem] text-slate">
                 Pick a scenario — the AI plays the client, you run the conversation live.
               </p>
             </div>
@@ -156,8 +156,8 @@ export function ScenarioTrainer() {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.74rem] font-medium transition-colors",
                   on
-                    ? "border-white/30 bg-white/[0.12] text-white"
-                    : "border-white/12 bg-white/[0.03] text-slate-300 hover:border-white/30 hover:text-white",
+                    ? "border-ink/20 bg-ink/[0.08] text-ink"
+                    : "border-ink/10 bg-white text-slate hover:border-ink/20 hover:text-ink",
                 )}
               >
                 {c}
@@ -172,20 +172,20 @@ export function ScenarioTrainer() {
             <button
               key={s.id}
               onClick={() => start(s)}
-              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all hover:border-white/30 hover:bg-azure/[0.06]"
+              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 text-left transition-all hover:border-ink/20 hover:bg-azure/[0.06]"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Pill tone="azure">{s.category}</Pill>
                   <Pill tone={DIFF_TONE[s.difficulty]}>{s.difficulty}</Pill>
                 </div>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-white ring-1 ring-inset ring-white/10 transition-colors group-hover:bg-white/[0.12]">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] transition-colors group-hover:bg-ink/[0.08]">
                   <Play className="h-3.5 w-3.5" />
                 </span>
               </div>
-              <p className="text-[0.92rem] font-semibold text-white">{s.title}</p>
-              <p className="text-[0.78rem] leading-relaxed text-slate-300/85">{s.summary}</p>
-              <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-white opacity-80 transition-opacity group-hover:opacity-100">
+              <p className="text-[0.92rem] font-semibold text-ink">{s.title}</p>
+              <p className="text-[0.78rem] leading-relaxed text-slate/85">{s.summary}</p>
+              <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink opacity-80 transition-opacity group-hover:opacity-100">
                 Start role-play <Play className="h-3 w-3" />
               </p>
             </button>
@@ -197,18 +197,18 @@ export function ScenarioTrainer() {
 
   /* ── Active role-play view ────────────────────────────────────────────── */
   return (
-    <div className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
+    <div className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
+      <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.12] ring-1 ring-inset ring-white/15">
-            <Drama className="h-4 w-4 text-white" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.08] ring-1 ring-inset ring-ink/[0.08]">
+            <Drama className="h-4 w-4 text-ink" />
           </span>
           <div className="min-w-0 leading-tight">
-            <div className="flex items-center gap-2 truncate font-semibold text-white">
+            <div className="flex items-center gap-2 truncate font-semibold text-ink">
               <span className="truncate">{active.title}</span>
             </div>
-            <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-slate-300">
+            <div className="mt-0.5 flex items-center gap-2 text-[0.72rem] text-slate">
               <LiveDot tone="success" />
               <span className="truncate">
                 {active.category} · {active.difficulty}
@@ -218,7 +218,7 @@ export function ScenarioTrainer() {
         </div>
         <button
           onClick={reset}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
         >
           <RotateCcw className="h-3.5 w-3.5" /> New scenario
         </button>
@@ -227,7 +227,7 @@ export function ScenarioTrainer() {
       {/* Transcript */}
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5 md:px-6">
         {messages.length === 0 && (
-          <div className="flex items-center gap-2 text-[0.8rem] text-slate-300/70">
+          <div className="flex items-center gap-2 text-[0.8rem] text-slate/70">
             <LiveDot tone="azure" /> Putting the client in character…
           </div>
         )}
@@ -240,8 +240,8 @@ export function ScenarioTrainer() {
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
                 m.role === "user"
-                  ? "bg-white text-white"
-                  : "bg-white/[0.1] text-white ring-1 ring-inset ring-white/12",
+                  ? "bg-ink text-ink"
+                  : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
               )}
             >
               {m.role === "user" ? "YOU" : <Bot className="h-4 w-4" />}
@@ -250,8 +250,8 @@ export function ScenarioTrainer() {
               className={cn(
                 "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
                 m.role === "user"
-                  ? "rounded-tr-sm bg-azure text-white"
-                  : "rounded-tl-sm bg-white/[0.05] text-slate-300 ring-1 ring-inset ring-white/10",
+                  ? "rounded-tr-sm bg-azure text-ink"
+                  : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
               )}
             >
               {m.role === "assistant" ? (
@@ -269,13 +269,13 @@ export function ScenarioTrainer() {
       </div>
 
       {/* Composer + score */}
-      <div className="border-t border-white/10 bg-ink-900 px-4 py-3.5 md:px-6">
+      <div className="border-t border-ink/[0.08] bg-ink-900 px-4 py-3.5 md:px-6">
         {!scored && messages.length >= 2 && (
           <div className="mb-2.5 flex justify-center">
             <button
               onClick={getScore}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.08] px-3.5 py-1.5 text-[0.76rem] font-semibold text-white transition-colors hover:border-white/35 hover:bg-white/[0.12] disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-paper px-3.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.08] disabled:opacity-40"
             >
               <Award className="h-3.5 w-3.5" /> Get my score &amp; feedback
             </button>
@@ -286,7 +286,7 @@ export function ScenarioTrainer() {
             e.preventDefault();
             send(input);
           }}
-          className="flex items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.04] py-2 pl-4 pr-2 focus-within:border-white/30"
+          className="flex items-end gap-2 rounded-2xl border border-ink/10 bg-white py-2 pl-4 pr-2 focus-within:border-ink/20"
         >
           <textarea
             value={input}
@@ -299,18 +299,18 @@ export function ScenarioTrainer() {
             }}
             rows={1}
             placeholder="Type your line to the client…"
-            className="max-h-32 flex-1 resize-none bg-transparent py-1.5 text-[0.88rem] text-white placeholder:text-slate-300/40 focus:outline-none"
+            className="max-h-32 flex-1 resize-none bg-transparent py-1.5 text-[0.88rem] text-ink placeholder:text-slate/40 focus:outline-none"
           />
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-azure text-white transition-colors hover:bg-paper-200 disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-azure text-ink transition-colors hover:bg-ink-700 disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
           </button>
         </form>
-        <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[0.68rem] text-slate-300/45">
-          <Flame className="h-3 w-3 text-white/80/60" /> Coaching notes appear in [brackets] after each
+        <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[0.68rem] text-slate/45">
+          <Flame className="h-3 w-3 text-ink/80/60" /> Coaching notes appear in [brackets] after each
           reply · stay sharp
         </p>
       </div>

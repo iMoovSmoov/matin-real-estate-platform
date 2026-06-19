@@ -237,18 +237,18 @@ export function ContractWizard() {
     : 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md">
+    <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
       {/* Working bar: what's being built + live status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] bg-white px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <FileSignature className="h-4 w-4" />
           </span>
           <div className="min-w-0 leading-tight">
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate-300/60">
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-slate/60">
               Preparing
             </p>
-            <p className="truncate text-[0.9rem] font-semibold text-white">
+            <p className="truncate text-[0.9rem] font-semibold text-ink">
               {form ? form.name : "Choose a contract to begin"}
             </p>
           </div>
@@ -277,7 +277,7 @@ export function ContractWizard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]">
         {/* ── Left · set it up ── */}
-        <aside className="space-y-6 border-b border-white/10 p-5 lg:border-b-0 lg:border-r lg:p-6">
+        <aside className="space-y-6 border-b border-ink/[0.08] p-5 lg:border-b-0 lg:border-r lg:p-6">
           {/* Contract picker */}
           <section>
             <SectionHead icon={ScrollText} title="Contract" sub="Pick the document to prepare." />
@@ -292,18 +292,18 @@ export function ContractWizard() {
                     className={cn(
                       "group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
                       active
-                        ? "border-white/30 bg-white/[0.08]"
-                        : "border-white/10 bg-white/[0.04] hover:border-white/25 hover:bg-white/[0.06]",
+                        ? "border-ink/20 bg-paper"
+                        : "border-ink/[0.08] bg-white hover:border-ink/15 hover:bg-white",
                     )}
                   >
-                    <span className="shrink-0 rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-white ring-1 ring-inset ring-white/10">
+                    <span className="shrink-0 rounded bg-white px-1.5 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-ink ring-1 ring-inset ring-ink/[0.06]">
                       {f.code}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[0.84rem] font-semibold text-white">{f.name}</span>
-                      <span className="block truncate text-[0.72rem] text-slate-300/65">{f.category}</span>
+                      <span className="block truncate text-[0.84rem] font-semibold text-ink">{f.name}</span>
+                      <span className="block truncate text-[0.72rem] text-slate/65">{f.category}</span>
                     </span>
-                    {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />}
+                    {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-ink" />}
                   </button>
                 );
               })}
@@ -321,7 +321,7 @@ export function ContractWizard() {
               <select
                 value={recordId}
                 onChange={(e) => chooseRecord(e.target.value)}
-                className="mt-3 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[0.84rem] text-white transition-colors focus:border-white/30 focus:outline-none"
+                className="mt-3 w-full rounded-lg border border-ink/[0.08] bg-white px-3 py-2.5 text-[0.84rem] text-ink transition-colors focus:border-ink/20 focus:outline-none"
               >
                 <option value="" className="bg-ink">Select a listing or lead…</option>
                 <optgroup label="Listings" className="bg-ink">
@@ -341,9 +341,9 @@ export function ContractWizard() {
               </select>
 
               {record && filledCount > 0 && (
-                <p className="mt-2.5 flex items-center gap-1.5 text-[0.74rem] text-slate-300/80">
-                  <Sparkles className="h-3.5 w-3.5 text-white" />
-                  <span className="font-semibold text-white">{filledCount} field{filledCount === 1 ? "" : "s"}</span>{" "}
+                <p className="mt-2.5 flex items-center gap-1.5 text-[0.74rem] text-slate/80">
+                  <Sparkles className="h-3.5 w-3.5 text-ink" />
+                  <span className="font-semibold text-ink">{filledCount} field{filledCount === 1 ? "" : "s"}</span>{" "}
                   auto-filled from CRM — edit anything below.
                 </p>
               )}
@@ -351,7 +351,7 @@ export function ContractWizard() {
               {/* The form's fields (pre-filled + editable) */}
               <div className="mt-3 space-y-3">
                 {editableFields.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-white/12 bg-white/[0.01] px-3 py-4 text-center text-[0.78rem] text-slate-300/65">
+                  <p className="rounded-lg border border-dashed border-ink/10 bg-white/[0.01] px-3 py-4 text-center text-[0.78rem] text-slate/65">
                     Pick a record above and this contract&apos;s fields fill themselves.
                   </p>
                 )}
@@ -373,11 +373,11 @@ export function ContractWizard() {
         <div className="min-h-[34rem] space-y-6 p-5 md:p-6">
           {!form ? (
             <div className="flex min-h-[28rem] flex-col items-center justify-center text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.06] text-white ring-1 ring-inset ring-white/10">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
                 <FileText className="h-7 w-7" />
               </span>
-              <p className="mt-4 text-[1rem] font-semibold text-white">Pick a contract to start</p>
-              <p className="mt-1.5 max-w-sm text-[0.84rem] leading-relaxed text-slate-300/70">
+              <p className="mt-4 text-[1rem] font-semibold text-ink">Pick a contract to start</p>
+              <p className="mt-1.5 max-w-sm text-[0.84rem] leading-relaxed text-slate/70">
                 Choose a document on the left. It auto-fills from a record, AI drafts the language,
                 we check compliance, and you send it for signature — all on this screen.
               </p>
@@ -393,7 +393,7 @@ export function ContractWizard() {
                       <button
                         type="button"
                         onClick={() => setEditing((e) => !e)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-medium text-white transition-colors hover:border-white/25 hover:bg-white/[0.06]"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/12 bg-white px-3 py-2 text-[0.78rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-white"
                       >
                         <PenTool className="h-3.5 w-3.5" /> {editing ? "Preview" : "Edit text"}
                       </button>
@@ -402,7 +402,7 @@ export function ContractWizard() {
                       type="button"
                       onClick={runDraft}
                       disabled={drafting}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-[0.84rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-[0.84rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {drafting ? (
                         <>
@@ -422,12 +422,12 @@ export function ContractWizard() {
                 </div>
 
                 {/* Document surface */}
-                <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03]">
-                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
+                <div className="mt-4 rounded-xl border border-ink/[0.08] bg-white">
+                  <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      {drafting ? <LiveDot tone="azure" /> : <FileSignature className="h-3.5 w-3.5 text-white" />}
-                      <span className="text-[0.8rem] font-semibold text-white">{form.code} · {form.name}</span>
-                      {drafting && <span className="text-[0.7rem] text-slate-300/65">streaming live</span>}
+                      {drafting ? <LiveDot tone="azure" /> : <FileSignature className="h-3.5 w-3.5 text-ink" />}
+                      <span className="text-[0.8rem] font-semibold text-ink">{form.code} · {form.name}</span>
+                      {drafting && <span className="text-[0.7rem] text-slate/65">streaming live</span>}
                     </div>
                     {drafted && !drafting && (
                       <Pill tone="success">
@@ -438,9 +438,9 @@ export function ContractWizard() {
                   <div className="max-h-[24rem] overflow-y-auto px-5 py-4">
                     {!drafted ? (
                       <div className="flex min-h-[12rem] flex-col items-center justify-center text-center">
-                        <p className="text-[0.9rem] font-semibold text-white">Ready to draft</p>
-                        <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/65">
-                          Hit <span className="font-semibold text-white">Draft with AI</span> to generate clause
+                        <p className="text-[0.9rem] font-semibold text-ink">Ready to draft</p>
+                        <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate/65">
+                          Hit <span className="font-semibold text-ink">Draft with AI</span> to generate clause
                           language from the {record ? "auto-filled" : "entered"} terms.
                         </p>
                       </div>
@@ -449,19 +449,19 @@ export function ContractWizard() {
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         rows={16}
-                        className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-[0.8rem] leading-relaxed text-white focus:border-white/30 focus:outline-none"
+                        className="w-full resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 font-mono text-[0.8rem] leading-relaxed text-ink focus:border-ink/20 focus:outline-none"
                       />
                     ) : (
                       <div>
                         <AiMarkdown text={draft} />
                         {drafting && (
-                          <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />
+                          <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />
                         )}
                       </div>
                     )}
                   </div>
                 </div>
-                <p className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-slate-300/55">
+                <p className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-slate/55">
                   <AlertTriangle className="h-3 w-3 text-warn" />
                   AI drafting aid — final language is reviewed by the principal broker. Not legal advice.
                 </p>
@@ -489,11 +489,11 @@ export function ContractWizard() {
 
                 <div className="mt-3">
                   <div className="mb-2 flex items-center gap-2">
-                    <Users className="h-3.5 w-3.5 text-white" />
+                    <Users className="h-3.5 w-3.5 text-ink" />
                     <SectionLabel>Recipients</SectionLabel>
                   </div>
                   {recipients.length === 0 ? (
-                    <p className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 text-[0.8rem] text-slate-300/70">
+                    <p className="rounded-lg border border-ink/[0.08] bg-white/[0.02] px-4 py-3 text-[0.8rem] text-slate/70">
                       No recipients yet — attach a record or fill in the party names above.
                     </p>
                   ) : (
@@ -501,15 +501,15 @@ export function ContractWizard() {
                       {recipients.map((r, i) => (
                         <li
                           key={i}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-ink/[0.08] bg-white/[0.02] px-4 py-3"
                         >
                           <div className="flex min-w-0 items-center gap-3">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.1] text-[0.72rem] font-semibold text-white ring-1 ring-inset ring-white/12">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.06] text-[0.72rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
                               {r.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
                             </span>
                             <div className="min-w-0 leading-tight">
-                              <p className="truncate text-[0.85rem] font-semibold text-white">{r.name}</p>
-                              <p className="truncate text-[0.74rem] text-slate-300/65">{r.email}</p>
+                              <p className="truncate text-[0.85rem] font-semibold text-ink">{r.name}</p>
+                              <p className="truncate text-[0.74rem] text-slate/65">{r.email}</p>
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
@@ -537,7 +537,7 @@ export function ContractWizard() {
                       </p>
                     )}
                     {!drafted && (
-                      <p className="mb-3 flex items-center gap-1.5 text-[0.78rem] text-slate-300/70">
+                      <p className="mb-3 flex items-center gap-1.5 text-[0.78rem] text-slate/70">
                         <FileText className="h-3.5 w-3.5" />
                         Draft the document before sending.
                       </p>
@@ -546,7 +546,7 @@ export function ContractWizard() {
                       type="button"
                       onClick={sendForSignature}
                       disabled={!compliance?.ready || !drafted || recipients.length === 0}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-[0.88rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-[0.88rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Send className="h-4 w-4" /> Send for e-signature
                     </button>
@@ -558,29 +558,29 @@ export function ContractWizard() {
                         <CheckCircle2 className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-[0.95rem] font-semibold text-white">Sent for e-signature</p>
-                        <p className="text-[0.78rem] text-slate-300/80">
+                        <p className="text-[0.95rem] font-semibold text-ink">Sent for e-signature</p>
+                        <p className="text-[0.78rem] text-slate/80">
                           All {recipients.length} parties notified. You&apos;ll be alerted as each one signs.
                         </p>
                       </div>
                     </div>
 
                     {/* Audit line */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03]">
-                      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
-                        <ShieldCheck className="h-3.5 w-3.5 text-white" />
-                        <span className="text-[0.8rem] font-semibold text-white">Audit trail</span>
-                        <span className="ml-auto text-[0.7rem] text-slate-300/55">tamper-evident</span>
+                    <div className="rounded-xl border border-ink/[0.08] bg-white">
+                      <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-2.5">
+                        <ShieldCheck className="h-3.5 w-3.5 text-ink" />
+                        <span className="text-[0.8rem] font-semibold text-ink">Audit trail</span>
+                        <span className="ml-auto text-[0.7rem] text-slate/55">tamper-evident</span>
                       </div>
-                      <ul className="divide-y divide-white/[0.06]">
+                      <ul className="divide-y divide-ink/[0.06]">
                         {audit.map((a, i) => (
                           <li key={i} className="flex items-start gap-3 px-4 py-2.5">
-                            <span className="mt-0.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
+                            <span className="mt-0.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
                             <div className="min-w-0 flex-1">
-                              <p className="text-[0.8rem] text-slate-300">
-                                <span className="font-semibold text-white">{a.who}</span> — {a.action}
+                              <p className="text-[0.8rem] text-slate">
+                                <span className="font-semibold text-ink">{a.who}</span> — {a.action}
                               </p>
-                              <p className="font-mono text-[0.68rem] text-slate-300/50">{a.ts}</p>
+                              <p className="font-mono text-[0.68rem] text-slate/50">{a.ts}</p>
                             </div>
                           </li>
                         ))}
@@ -609,17 +609,17 @@ function FieldInput({
   onChange: (v: string) => void;
 }) {
   const base =
-    "w-full rounded-lg border bg-white/[0.03] px-3 py-2 text-[0.84rem] text-white placeholder:text-slate-300/40 transition-colors focus:outline-none";
+    "w-full rounded-lg border bg-white px-3 py-2 text-[0.84rem] text-ink placeholder:text-slate/40 transition-colors focus:outline-none";
   const ring = autofilled
-    ? "border-white/25 bg-white/[0.05] focus:border-white/40"
-    : "border-white/10 focus:border-white/30 focus:bg-white/[0.05]";
+    ? "border-ink/15 bg-white focus:border-ink/40"
+    : "border-ink/[0.08] focus:border-ink/20 focus:bg-white";
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate-300">
+      <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate">
         {field.label}
-        {field.required && <span className="text-white">*</span>}
+        {field.required && <span className="text-ink">*</span>}
         {autofilled && (
-          <span className="inline-flex items-center gap-0.5 rounded bg-white/[0.1] px-1 py-px text-[0.56rem] font-semibold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15">
+          <span className="inline-flex items-center gap-0.5 rounded bg-ink/[0.06] px-1 py-px text-[0.56rem] font-semibold uppercase tracking-wide text-ink ring-1 ring-inset ring-ink/[0.08]">
             <Sparkles className="h-2.5 w-2.5" /> CRM
           </span>
         )}
@@ -664,12 +664,12 @@ function SectionHead({
 }) {
   return (
     <div className="flex items-start gap-2.5">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-white ring-1 ring-inset ring-white/12">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-paper text-ink ring-1 ring-inset ring-ink/[0.06]">
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0">
-        <h3 className="font-display text-[1.05rem] leading-tight text-white">{title}</h3>
-        <p className="mt-0.5 text-[0.78rem] leading-snug text-slate-300/75">{sub}</p>
+        <h3 className="font-display text-[1.05rem] leading-tight text-ink">{title}</h3>
+        <p className="mt-0.5 text-[0.78rem] leading-snug text-slate/75">{sub}</p>
       </div>
     </div>
   );

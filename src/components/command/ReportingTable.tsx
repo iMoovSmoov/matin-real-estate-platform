@@ -72,24 +72,24 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5">
+    <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
+      <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3.5">
         <div>
-          <h3 className="text-[0.95rem] font-semibold text-white">Per-Agent Production</h3>
-          <p className="text-[0.74rem] text-slate-300/60">{rows.length} agents · sorted by {labelFor(sort)}</p>
+          <h3 className="text-[0.95rem] font-semibold text-ink">Per-Agent Production</h3>
+          <p className="text-[0.74rem] text-slate/60">{rows.length} agents · sorted by {labelFor(sort)}</p>
         </div>
         <button
           onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.08]"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-2 text-[0.78rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-paper"
         >
-          <Download className="h-3.5 w-3.5 text-white" /> Export CSV
+          <Download className="h-3.5 w-3.5 text-ink" /> Export CSV
         </button>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-left">
           <thead>
-            <tr className="border-b border-white/10 text-[0.68rem] uppercase tracking-wider text-slate-300/55">
+            <tr className="border-b border-ink/[0.08] text-[0.68rem] uppercase tracking-wider text-slate/55">
               <Th label="Agent" sortKey="name" sort={sort} asc={asc} onClick={toggle} />
               <Th label="Homes sold" sortKey="homesSold" sort={sort} asc={asc} onClick={toggle} align="right" />
               <Th label="Volume" sortKey="volume" sort={sort} asc={asc} onClick={toggle} align="right" />
@@ -97,27 +97,27 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
               <Th label="Rating" sortKey="rating" sort={sort} asc={asc} onClick={toggle} align="right" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.06]">
+          <tbody className="divide-y divide-ink/[0.06]">
             {sorted.map((r) => (
-              <tr key={r.name} className="transition-colors hover:bg-white/[0.03]">
+              <tr key={r.name} className="transition-colors hover:bg-white">
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
+                    <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/[0.06]">
                       <Image src={r.photo} alt={r.name} fill sizes="32px" className="object-cover" />
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-[0.84rem] font-semibold text-white">{r.name}</p>
-                      <p className="truncate text-[0.7rem] text-slate-300/55">{r.title}</p>
+                      <p className="truncate text-[0.84rem] font-semibold text-ink">{r.name}</p>
+                      <p className="truncate text-[0.7rem] text-slate/55">{r.title}</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-3 text-right text-[0.82rem] text-slate-300 tabular-nums">{num(r.homesSold)}</td>
-                <td className="px-5 py-3 text-right text-[0.84rem] font-semibold text-white tabular-nums">{usd(r.volume)}</td>
-                <td className="px-5 py-3 text-right text-[0.82rem] text-slate-300 tabular-nums">{r.activeListings}</td>
+                <td className="px-5 py-3 text-right text-[0.82rem] text-slate tabular-nums">{num(r.homesSold)}</td>
+                <td className="px-5 py-3 text-right text-[0.84rem] font-semibold text-ink tabular-nums">{usd(r.volume)}</td>
+                <td className="px-5 py-3 text-right text-[0.82rem] text-slate tabular-nums">{r.activeListings}</td>
                 <td className="px-5 py-3 text-right">
-                  <span className="inline-flex items-center justify-end gap-1 text-[0.82rem] text-white tabular-nums">
+                  <span className="inline-flex items-center justify-end gap-1 text-[0.82rem] text-ink tabular-nums">
                     <Star className="h-3 w-3 fill-warn text-warn" /> {r.rating.toFixed(2)}
-                    <span className="text-[0.7rem] text-slate-300/50">({r.reviews})</span>
+                    <span className="text-[0.7rem] text-slate/50">({r.reviews})</span>
                   </span>
                 </td>
               </tr>
@@ -153,7 +153,7 @@ function Th({
     <th className={cn("px-5 py-3 font-semibold", align === "right" && "text-right")}>
       <button
         onClick={() => onClick(sortKey)}
-        className={cn("inline-flex items-center gap-1 hover:text-white", active && "text-white", align === "right" && "flex-row-reverse")}
+        className={cn("inline-flex items-center gap-1 hover:text-ink", active && "text-ink", align === "right" && "flex-row-reverse")}
       >
         {label}
         <ArrowUpDown className={cn("h-3 w-3", active ? "opacity-100" : "opacity-30")} />

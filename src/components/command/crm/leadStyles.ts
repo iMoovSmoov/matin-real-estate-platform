@@ -8,14 +8,14 @@ import type { LeadStage } from "@/lib/types";
    a hot lead, a won deal, a lost deal. */
 
 const STAGE: Record<LeadStage, string> = {
-  New: "bg-white/[0.12] text-white ring-white/20",
-  Nurture: "bg-white/[0.06] text-slate-300 ring-white/12",
-  Active: "bg-white/[0.1] text-white ring-white/15",
-  Showing: "bg-white/[0.1] text-white ring-white/15",
-  Offer: "bg-white/[0.12] text-white ring-white/20",
-  "Under Contract": "bg-white/[0.12] text-white ring-white/20",
+  New: "bg-ink/[0.08] text-ink ring-ink/10",
+  Nurture: "bg-white text-slate ring-ink/[0.06]",
+  Active: "bg-ink/[0.06] text-ink ring-ink/[0.08]",
+  Showing: "bg-ink/[0.06] text-ink ring-ink/[0.08]",
+  Offer: "bg-ink/[0.08] text-ink ring-ink/10",
+  "Under Contract": "bg-ink/[0.08] text-ink ring-ink/10",
   Closed: "bg-success/12 text-success ring-success/30",
-  Lost: "bg-white/[0.04] text-slate-300/60 ring-white/10",
+  Lost: "bg-white text-slate/60 ring-ink/[0.06]",
 };
 
 export const LEAD_STAGES: LeadStage[] = [
@@ -30,17 +30,17 @@ export const LEAD_STAGES: LeadStage[] = [
 ];
 
 export function stageTone(stage: string): string {
-  return STAGE[stage as LeadStage] ?? "bg-white/[0.06] text-slate-300 ring-white/12";
+  return STAGE[stage as LeadStage] ?? "bg-white text-slate ring-ink/[0.06]";
 }
 
 /** Small status dot for a stage — neutral white, except won (green) / lost (faded). */
 const STAGE_DOT: Record<LeadStage, string> = {
-  New: "bg-white",
-  Nurture: "bg-white/50",
-  Active: "bg-white",
-  Showing: "bg-white",
-  Offer: "bg-white",
-  "Under Contract": "bg-white",
+  New: "bg-ink",
+  Nurture: "bg-ink/[0.04]0",
+  Active: "bg-ink",
+  Showing: "bg-ink",
+  Offer: "bg-ink",
+  "Under Contract": "bg-ink",
   Closed: "bg-success",
   Lost: "bg-slate-300/40",
 };
@@ -53,7 +53,7 @@ export function stageDot(stage: string): string {
     the middle band stays monochrome. */
 export function scoreTone(score: number): string {
   if (score >= 80) return "bg-success/12 text-success ring-success/30";
-  if (score >= 50) return "bg-white/[0.1] text-white ring-white/15";
+  if (score >= 50) return "bg-ink/[0.06] text-ink ring-ink/[0.08]";
   return "bg-danger/12 text-danger ring-danger/30";
 }
 

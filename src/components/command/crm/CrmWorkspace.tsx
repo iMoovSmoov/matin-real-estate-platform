@@ -100,16 +100,16 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
               className={cn(
                 "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
                 on
-                  ? "border-white/25 bg-white/[0.1] text-white"
-                  : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.06] hover:text-white",
+                  ? "border-ink/15 bg-ink/[0.06] text-ink"
+                  : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
               )}
             >
-              <Icon className={cn("h-3.5 w-3.5", on ? "text-white" : "text-slate-300")} />
+              <Icon className={cn("h-3.5 w-3.5", on ? "text-ink" : "text-slate")} />
               {sl.label}
               <span
                 className={cn(
                   "rounded-md px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums",
-                  on ? "bg-white text-ink" : "bg-white/[0.08] text-slate-300",
+                  on ? "bg-ink text-white" : "bg-paper text-slate",
                 )}
               >
                 {counts[sl.id]}
@@ -122,37 +122,37 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       {/* Search + sort */}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300/55" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/55" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, email, area, tag…"
-            className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-9 pr-3 text-[0.84rem] text-white placeholder:text-slate-300/40 focus:border-white/30 focus:outline-none"
+            className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-3 text-[0.84rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
           />
         </div>
         <SortSelect value={sort} onChange={setSort} />
       </div>
 
       {/* Inbox */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-md">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-          <p className="flex items-center gap-2 text-[0.78rem] font-semibold text-white">
+      <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
+        <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-2.5">
+          <p className="flex items-center gap-2 text-[0.78rem] font-semibold text-ink">
             <list.icon className="h-3.5 w-3.5" />
             {list.label}
           </p>
-          <p className="text-[0.72rem] text-slate-300/60 tabular-nums">
+          <p className="text-[0.72rem] text-slate/60 tabular-nums">
             {filtered.length} {filtered.length === 1 ? "lead" : "leads"}
           </p>
         </div>
 
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="divide-y divide-ink/[0.06]">
           {filtered.map((l) => (
             <LeadRow key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
             <li className="px-4 py-14 text-center">
-              <p className="text-[0.86rem] text-slate-300/70">No leads in this list.</p>
-              <p className="mt-1 text-[0.76rem] text-slate-300/45">Try another smart list or clear your search.</p>
+              <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
+              <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
             </li>
           )}
         </ul>
@@ -173,16 +173,16 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
     <li>
       <button
         onClick={onOpen}
-        className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+        className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white"
       >
         {/* unread rail */}
-        <span className={cn("h-9 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-white" : "bg-transparent")} aria-hidden />
+        <span className={cn("h-9 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
 
         {/* avatar */}
-        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[0.72rem] font-bold text-ink">
+        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-bold text-white">
           {initials(lead.name)}
           {hot && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-900 ring-1 ring-white/15">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-900 ring-1 ring-ink/[0.08]">
               <Flame className="h-2.5 w-2.5 text-success" />
             </span>
           )}
@@ -191,28 +191,28 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
         {/* name + meta */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate text-[0.88rem] font-semibold text-white">{lead.name}</p>
+            <p className="truncate text-[0.88rem] font-semibold text-ink">{lead.name}</p>
             {lead.unread > 0 && (
-              <span className="shrink-0 rounded-full bg-white px-1.5 py-px text-[0.62rem] font-bold text-ink tabular-nums">
+              <span className="shrink-0 rounded-full bg-ink px-1.5 py-px text-[0.62rem] font-bold text-white tabular-nums">
                 {lead.unread}
               </span>
             )}
           </div>
-          <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.74rem] text-slate-300/65">
+          <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.74rem] text-slate/65">
             <span className="truncate">{lead.intent}</span>
-            <span className="text-slate-300/30">·</span>
+            <span className="text-slate/30">·</span>
             <span className="truncate">{lead.community}</span>
-            <span className="text-slate-300/30">·</span>
+            <span className="text-slate/30">·</span>
             <span className="shrink-0">{lead.source}</span>
           </p>
         </div>
 
         {/* budget */}
         <div className="hidden w-24 shrink-0 text-right md:block">
-          <p className="text-[0.78rem] font-medium text-white tabular-nums">
+          <p className="text-[0.78rem] font-medium text-ink tabular-nums">
             {compactUsd(lead.budgetMin)}–{compactUsd(lead.budgetMax)}
           </p>
-          <p className="text-[0.66rem] text-slate-300/45">budget</p>
+          <p className="text-[0.66rem] text-slate/45">budget</p>
         </div>
 
         {/* stage */}
@@ -228,15 +228,15 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
 
         {/* last contact */}
         <div className="hidden w-16 shrink-0 text-right lg:block">
-          <p className={cn("text-[0.74rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate-300/70")}>
+          <p className={cn("text-[0.74rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/70")}>
             {lead.lastContactDaysAgo === 0 ? "today" : timeAgo(lead.lastContactDaysAgo * 60 * 24)}
           </p>
-          <p className="text-[0.62rem] text-slate-300/40">last touch</p>
+          <p className="text-[0.62rem] text-slate/40">last touch</p>
         </div>
 
         {/* agent */}
         {agent ? (
-          <span className="relative hidden h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10 xl:block" title={agent.name}>
+          <span className="relative hidden h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/[0.06] xl:block" title={agent.name}>
             <Image src={agent.photo} alt={agent.name} fill sizes="28px" className="object-cover" />
           </span>
         ) : (
@@ -256,11 +256,11 @@ function SortSelect({ value, onChange }: { value: SortKey; onChange: (v: SortKey
   };
   return (
     <div className="relative shrink-0">
-      <ArrowUpDown className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300/55" />
+      <ArrowUpDown className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/55" />
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as SortKey)}
-        className="h-9 appearance-none rounded-lg border border-white/10 bg-white/[0.03] pl-8 pr-8 text-[0.82rem] font-medium text-white focus:border-white/30 focus:outline-none"
+        className="h-9 appearance-none rounded-lg border border-ink/[0.08] bg-white pl-8 pr-8 text-[0.82rem] font-medium text-ink focus:border-ink/20 focus:outline-none"
         aria-label="Sort leads"
       >
         {(Object.keys(labels) as SortKey[]).map((k) => (
@@ -269,7 +269,7 @@ function SortSelect({ value, onChange }: { value: SortKey; onChange: (v: SortKey
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300/50" />
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/50" />
     </div>
   );
 }

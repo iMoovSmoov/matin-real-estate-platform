@@ -134,7 +134,7 @@ const STATE_META: Record<
 > = {
   pass: { icon: CheckCircle2, ring: "bg-success/12 ring-success/25", text: "text-success", pillTone: "success", word: "Pass" },
   warn: { icon: AlertTriangle, ring: "bg-danger/12 ring-danger/25", text: "text-danger", pillTone: "danger", word: "Needs attention" },
-  na: { icon: MinusCircle, ring: "bg-white/[0.05] ring-white/10", text: "text-slate-300/55", pillTone: "neutral", word: "N/A" },
+  na: { icon: MinusCircle, ring: "bg-white ring-ink/[0.06]", text: "text-slate/55", pillTone: "neutral", word: "N/A" },
 };
 
 export function ComplianceCheck({
@@ -166,12 +166,12 @@ export function ComplianceCheck({
           {result.ready ? <ShieldCheck className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
         </span>
         <div className="min-w-0">
-          <p className="text-[0.95rem] font-semibold text-white">
+          <p className="text-[0.95rem] font-semibold text-ink">
             {result.ready
               ? "Ready to send"
               : `${result.warnings} item${result.warnings === 1 ? "" : "s"} need attention`}
           </p>
-          <p className="text-[0.78rem] text-slate-300/80">
+          <p className="text-[0.78rem] text-slate/80">
             {result.ready
               ? `All ${result.applicable} applicable Oregon & federal checks pass.`
               : "Resolve the flagged items below to unblock sending."}
@@ -187,7 +187,7 @@ export function ComplianceCheck({
           return (
             <li
               key={i}
-              className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
+              className="flex items-start gap-3 rounded-xl border border-ink/[0.08] bg-white/[0.02] px-4 py-3"
             >
               <span
                 className={cn(
@@ -203,19 +203,19 @@ export function ComplianceCheck({
                   <span
                     className={cn(
                       "text-[0.86rem] font-semibold",
-                      row.state === "na" ? "text-slate-300/70" : "text-white",
+                      row.state === "na" ? "text-slate/70" : "text-ink",
                     )}
                   >
                     {row.label}
                   </span>
                   <Pill tone={meta.pillTone}>{meta.word}</Pill>
                   {row.statute && (
-                    <span className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wide text-slate-300/60 ring-1 ring-inset ring-white/10">
+                    <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wide text-slate/60 ring-1 ring-inset ring-ink/[0.06]">
                       {row.statute}
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-[0.78rem] leading-relaxed text-slate-300/80">{row.detail}</p>
+                <p className="mt-1 text-[0.78rem] leading-relaxed text-slate/80">{row.detail}</p>
               </div>
             </li>
           );
