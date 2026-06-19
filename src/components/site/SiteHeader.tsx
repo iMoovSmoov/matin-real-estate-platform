@@ -50,7 +50,7 @@ export function SiteHeader() {
       </a>
 
       <div className="container-x flex items-center justify-between gap-6">
-        <Link href="/" className={cn("transition-colors", onDark ? "text-white" : "text-ink")}>
+        <Link href="/" className="text-ink transition-colors">
           <Logo className="h-9" />
         </Link>
 

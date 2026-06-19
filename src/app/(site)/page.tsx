@@ -46,16 +46,16 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center"
+            className="object-cover object-[center_25%] sm:object-center"
           />
         </div>
 
         {/* Gradient: dark at BOTTOM on all sizes — text sits in the desk/floor area, logo above stays clear */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
         {/* Subtle gold warmth at center-bottom */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
         {/* Noise texture for film grain premium feel */}
-        <div className="absolute inset-0 opacity-[0.025] mix-blend-overlay"
+        <div className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-overlay"
           style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }} />
 
         {/* Content: always anchored to bottom — sits in desk area, never covers logo wall */}

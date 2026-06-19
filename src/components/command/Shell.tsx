@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -25,7 +24,6 @@ import {
   Building2,
   Settings,
   LogOut,
-  HelpCircle,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { NotificationCenter } from "@/components/command/NotificationCenter";
@@ -88,23 +86,19 @@ function groupHasActive(pathname: string, g: NavGroup) {
   return g.items.some((i) => isActive(pathname, i.href));
 }
 
-function AgentPhoto({ size = "sm" }: { size?: "sm" | "md" }) {
+/* Avatar circle with "AS" initials for Alicia Smith */
+function UserAvatar({ size = "sm" }: { size?: "sm" | "md" }) {
   const dim = size === "md" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-7 w-7 sm:h-8 sm:w-8";
   return (
-    <div
+    <span
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-full ring-2 ring-ink/20",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-ink font-semibold text-white",
         dim,
+        size === "sm" ? "text-[0.62rem]" : "text-[0.7rem]",
       )}
     >
-      <Image
-        src="/matin/agents/jordan-matin.jpg"
-        alt="Jordan Matin"
-        fill
-        className="object-cover object-top"
-        sizes="36px"
-      />
-    </div>
+      AS
+    </span>
   );
 }
 
@@ -129,32 +123,39 @@ function ProfileDropdown() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="User menu"
+        aria-expanded={open}
         className={cn(
-          "flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 shadow-sm transition-colors hover:border-ink/20 md:pr-3",
+          "flex items-center gap-2 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-2 shadow-sm transition-colors hover:border-ink/20 md:pr-3",
           open && "border-ink/20 bg-paper",
         )}
       >
-        <AgentPhoto size="sm" />
+        <UserAvatar size="sm" />
         <div className="hidden leading-tight md:block">
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-            <span className="text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
+            <span className="text-[0.78rem] font-semibold text-ink">Alicia Smith</span>
           </div>
-          <div className="text-[0.63rem] text-slate/60">Oregon Principal Broker</div>
+          <div className="text-[0.63rem] text-slate/60">Lead Listing Specialist</div>
         </div>
-        <ChevronDown className={cn("hidden h-3 w-3 shrink-0 text-slate/40 transition-transform md:block", open && "rotate-180")} />
+        <ChevronDown
+          className={cn(
+            "hidden h-3 w-3 shrink-0 text-slate/40 transition-transform duration-150 md:block",
+            open && "rotate-180",
+          )}
+        />
       </button>
 
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
           {/* User header */}
           <div className="flex items-center gap-2.5 border-b border-ink/[0.07] px-4 py-3">
-            <AgentPhoto size="sm" />
+            <UserAvatar size="sm" />
             <div className="min-w-0 leading-tight">
-              <p className="truncate text-[0.82rem] font-semibold text-ink">Jordan Matin</p>
-              <p className="truncate text-[0.68rem] text-slate/60">Principal Broker</p>
+              <p className="truncate text-[0.82rem] font-semibold text-ink">Alicia Smith</p>
+              <p className="truncate text-[0.68rem] text-slate/60">Lead Listing Specialist</p>
             </div>
           </div>
+
           {/* Menu items */}
           <div className="py-1">
             <Link
@@ -162,7 +163,7 @@ function ProfileDropdown() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
             >
-              <AgentPhoto size="sm" />
+              <Settings className="h-4 w-4 shrink-0 text-slate/40" />
               My Profile
             </Link>
             <Link
@@ -170,24 +171,19 @@ function ProfileDropdown() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
             >
-              <Settings className="h-4 w-4 shrink-0 text-slate/50" />
+              <Settings className="h-4 w-4 shrink-0 text-slate/40" />
               Settings
             </Link>
-            <a
-              href="#"
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
-            >
-              <HelpCircle className="h-4 w-4 shrink-0 text-slate/50" />
-              Help
-            </a>
           </div>
+
+          {/* Divider + Sign out */}
           <div className="border-t border-ink/[0.07] py-1">
             <Link
               href="/"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-red-600 transition-colors hover:bg-red-50"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-slate/70 transition-colors hover:bg-paper hover:text-ink"
             >
-              <LogOut className="h-4 w-4 shrink-0" />
+              <LogOut className="h-4 w-4 shrink-0 text-slate/40" />
               Sign out
             </Link>
           </div>
@@ -287,24 +283,29 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         <Link
           href="/hub/settings"
           onClick={onNavigate}
-          className="group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium text-slate/70 transition-all duration-100 hover:bg-ink/[0.04] hover:text-ink"
+          className={cn(
+            "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-all duration-100",
+            isActive(pathname, "/hub/settings")
+              ? "border-l-[3px] border-azure bg-azure/[0.07] pl-[0.625rem] text-ink shadow-[inset_0_0_0_1px_rgb(0,0,0,0.04)]"
+              : "text-slate/70 hover:bg-ink/[0.04] hover:text-ink",
+          )}
         >
-          <Settings className="h-4 w-4 shrink-0 text-slate/50 group-hover:text-ink" />
+          <Settings
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              isActive(pathname, "/hub/settings") ? "text-azure" : "text-slate/50 group-hover:text-ink",
+            )}
+          />
           <span className="truncate">Settings</span>
         </Link>
         <div className="flex items-center gap-2.5 rounded-xl border border-ink/[0.06] bg-paper/60 px-3 py-2.5">
-          <AgentPhoto size="sm" />
+          <UserAvatar size="sm" />
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-              <span className="truncate text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
+              <span className="truncate text-[0.78rem] font-semibold text-ink">Alicia Smith</span>
             </div>
-            <a
-              href="tel:+15037615616"
-              className="block text-[0.64rem] text-slate/55 transition-colors hover:text-ink"
-            >
-              (503) 761-5616
-            </a>
+            <span className="block text-[0.64rem] text-slate/55">Lead Listing Specialist</span>
           </div>
         </div>
       </div>
