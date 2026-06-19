@@ -49,6 +49,8 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
+          {/* warm ambient glow — gives the office photo depth + vibrancy */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_50%,rgba(210,160,80,0.08),transparent)]" />
         </div>
 
         <Container className="relative z-10 pt-20 sm:pt-28">
