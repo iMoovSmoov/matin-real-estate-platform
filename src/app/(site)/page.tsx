@@ -151,7 +151,7 @@ export default function HomePage() {
             intro="From West Linn bluffs to Lake Oswego lakefront and the Vancouver waterfront — we live where we sell."
             align="center"
           />
-          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
             {popularCommunities.map((c, i) => (
               <Reveal key={c.slug} delay={(i % 6) * 0.05}>
                 <CommunityCard community={c} />
@@ -255,7 +255,7 @@ export default function HomePage() {
       </section>
 
       {/* ---------- AGENTS TEASER ---------- */}
-      <Section>
+      <Section className="pb-14 md:pb-16">
         <Container>
           <div className="flex flex-col items-center text-center">
             <SectionHeading
@@ -284,7 +284,7 @@ export default function HomePage() {
       {/* ---------- TESTIMONIALS ---------- */}
       <Section className="bg-paper-200/60 pt-0">
         <Container>
-          <SectionHeading eyebrow="Client stories" title="People who trusted us with the biggest move of their lives" align="center" className="pt-20 md:pt-28" />
+          <SectionHeading eyebrow="Client stories" title="People who trusted us with the biggest move of their lives" align="center" className="pt-14 md:pt-20" />
           <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-5">
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
