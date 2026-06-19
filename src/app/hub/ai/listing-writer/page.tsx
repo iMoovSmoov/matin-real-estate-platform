@@ -4,6 +4,23 @@ import { useState } from "react";
 import { listings, getCommunity } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 
+// One-click demo example using first active listing
+const EXAMPLE_LISTING = listings.find((l) => l.status !== "Sold") ?? listings[0];
+const TRY_EXAMPLE: Preset = {
+  label: "Try with active listing",
+  values: {
+    address: EXAMPLE_LISTING.address,
+    city: `${EXAMPLE_LISTING.city}, ${EXAMPLE_LISTING.state}`,
+    type: EXAMPLE_LISTING.type,
+    beds: String(EXAMPLE_LISTING.beds),
+    baths: String(EXAMPLE_LISTING.baths),
+    sqft: String(EXAMPLE_LISTING.sqft),
+    yearBuilt: String(EXAMPLE_LISTING.yearBuilt),
+    price: `$${EXAMPLE_LISTING.price.toLocaleString()}`,
+    features: EXAMPLE_LISTING.features?.slice(0, 4).join(", ") ?? "Renovated kitchen, hardwood floors, mountain views",
+  },
+};
+
 // Build presets from the full listings array
 const ALL_PRESETS: (Preset & { id: string })[] = listings.map((l) => {
   const community = getCommunity(l.communitySlug)?.name ?? l.city;
@@ -76,6 +93,7 @@ export default function ListingWriterPage() {
         description="Turn raw property facts into a vivid, MLS-ready listing description — lifestyle hook first, standout features woven in, fair-housing compliant."
         submitLabel="Write description"
         outputTitle="MLS description"
+        tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         initial={initial}
         fields={[
           { name: "address", label: "Address", placeholder: "8457 NW Lakeshore Ave", full: true },
@@ -92,6 +110,7 @@ export default function ListingWriterPage() {
             type: "textarea",
             placeholder: "ADU / guest suite, mountain views, hardwoods…",
             full: true,
+            optional: true,
           },
         ]}
       />

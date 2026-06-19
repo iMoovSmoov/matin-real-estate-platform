@@ -139,6 +139,34 @@ export default function LeadResponderPage() {
     }
   }
 
+  async function tryExampleAndRun() {
+    if (busy || !leads[0]) return;
+    const lead = leads[0];
+    const filled: FormValues = {
+      name: lead.name,
+      source: lead.source,
+      intent: lead.intent,
+      area: lead.community,
+      budget: formatBudget(lead.budgetMin, lead.budgetMax),
+      timeline: deriveTimeline(lead),
+      message: lead.aiSummary ?? "",
+    };
+    setCrmValue(lead.id);
+    setLoadedName(lead.firstName);
+    setValues(filled);
+    setOutput("");
+    setTouched(true);
+    setBusy(true);
+    try {
+      await streamAi(
+        { tool: "lead-responder", input: filled },
+        (_chunk, full) => setOutput(full),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   /* ── copy ───────────────────────────────────────────────────────────── */
 
   async function copy() {
@@ -193,6 +221,22 @@ export default function LeadResponderPage() {
               </p>
             </div>
           </div>
+
+          {/* ── One-click example ── */}
+          {!loadedName && (
+            <button
+              type="button"
+              onClick={tryExampleAndRun}
+              disabled={busy}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-azure/30 bg-azure/[0.07] px-4 py-2.5 text-[0.84rem] font-semibold text-azure transition-colors hover:bg-azure/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {busy ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</>
+              ) : (
+                <><Wand2 className="h-4 w-4" /> Try with live CRM lead</>
+              )}
+            </button>
+          )}
 
           {/* ── CRM loader ── */}
           <div className="mt-5">

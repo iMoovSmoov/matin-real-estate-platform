@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { sellerLeads } from "@/lib/data";
-import { AiToolPanel } from "@/components/command/AiToolPanel";
+import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 
 // Derive motivation keyword from free-text motivation field
 function motivationKeyword(text: string): string {
@@ -15,6 +15,27 @@ function motivationKeyword(text: string): string {
   if (t.includes("inherit") || t.includes("estate") || t.includes("probate") || t.includes("passing")) return "Estate";
   return "Other";
 }
+
+// One-click demo using first seller lead
+const FIRST = sellerLeads[0];
+const TRY_EXAMPLE: Preset = FIRST
+  ? {
+      label: "Try with pipeline seller",
+      values: {
+        address: FIRST.address,
+        city: FIRST.city,
+        beds: String(FIRST.beds),
+        baths: String(FIRST.baths),
+        sqft: String(FIRST.sqft),
+        yearBuilt: String(FIRST.yearBuilt),
+        estValue: String(FIRST.estValue),
+        condition: FIRST.condition,
+        motivation: motivationKeyword(FIRST.motivation),
+        timeline: FIRST.timeline,
+        notes: FIRST.notes ?? "",
+      },
+    }
+  : { label: "Try with example", values: {} };
 
 export default function CashOfferPage() {
   const [selectedId, setSelectedId] = useState<string>("");
@@ -79,6 +100,7 @@ export default function CashOfferPage() {
       <AiToolPanel
         key={selectedId || "__blank__"}
         tool="cash-offer"
+        tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         title="Cash Offer Evaluator"
         pillar="Acquisitions"
         description="Build a full cash offer evaluation — estimated ARV, wholesale range, net-to-seller breakdown, and a recommended offer. Load a pipeline lead or enter property details manually."

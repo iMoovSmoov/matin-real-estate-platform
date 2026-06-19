@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { sellerLeads } from "@/lib/data";
-import { AiToolPanel } from "@/components/command/AiToolPanel";
+import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 
 // Derive motivation keyword from free-text motivation field
 function motivationKeyword(text: string): string {
@@ -15,6 +15,23 @@ function motivationKeyword(text: string): string {
   if (t.includes("inherit") || t.includes("estate") || t.includes("probate") || t.includes("passing")) return "Estate";
   return "Other";
 }
+
+// One-click demo using first seller lead
+const FIRST_LEAD = sellerLeads[0];
+const TRY_EXAMPLE: Preset = FIRST_LEAD
+  ? {
+      label: "Try with pipeline seller",
+      values: {
+        address: FIRST_LEAD.address,
+        city: FIRST_LEAD.city,
+        estValue: String(FIRST_LEAD.estValue),
+        condition: FIRST_LEAD.condition,
+        motivation: motivationKeyword(FIRST_LEAD.motivation),
+        timeline: FIRST_LEAD.timeline,
+        notes: FIRST_LEAD.notes ?? "",
+      },
+    }
+  : { label: "Try with example", values: {} };
 
 export default function SellerIntelPage() {
   const [selectedId, setSelectedId] = useState<string>("");
@@ -90,6 +107,7 @@ export default function SellerIntelPage() {
       <AiToolPanel
         key={selectedId || "__blank__"}
         tool="seller-intel"
+        tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         title="Seller Intel"
         pillar="Acquisitions"
         description="Generate a seller intelligence brief — cash offer range, cash vs. list comparison table, a ready-to-use phone script, and urgency signals. Print it before your first call."
@@ -125,6 +143,7 @@ export default function SellerIntelPage() {
             type: "textarea",
             placeholder: "Tenant occupied, pre-inspection done, family coordinating sale…",
             full: true,
+            optional: true,
           },
         ]}
       />

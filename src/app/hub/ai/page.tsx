@@ -6,6 +6,9 @@ import {
   BarChart2,
   FileSignature,
   MessageCircle,
+  Megaphone,
+  DollarSign,
+  PhoneCall,
   ArrowUpRight,
 } from "lucide-react";
 
@@ -15,35 +18,56 @@ const TOOLS = [
     name: "Lead Responder",
     icon: MessageSquareText,
     pillar: "Lead Conversion",
-    desc: "Drafts a warm, personalized first reply to any inbound lead in seconds — referencing their area, budget, and intent.",
+    desc: "Drafts a warm, personalized first reply to any inbound lead in seconds — referencing their area, budget, and intent. Loads directly from CRM.",
   },
   {
     href: "/hub/ai/listing-writer",
     name: "Listing Writer",
     icon: PenLine,
     pillar: "Marketing",
-    desc: "Turns raw property facts into vivid, MLS-ready, fair-housing-compliant listing copy — load any active listing to start.",
+    desc: "Turns raw property facts into vivid, MLS-ready, fair-housing-compliant listing copy — load any active listing to auto-fill.",
   },
   {
-    href: "/hub/ai/coach",
-    name: "Agent Coach",
-    icon: GraduationCap,
-    pillar: "Coaching",
-    desc: "Live scenario role-play and tactical feedback — objection handling, listing presentations, buyer consults.",
+    href: "/hub/ai/marketing-kit",
+    name: "Marketing Kit",
+    icon: Megaphone,
+    pillar: "Marketing",
+    desc: "One click generates five assets: MLS description, Instagram caption, Facebook post, email blast, and open house invite.",
   },
   {
     href: "/hub/ai/cma",
     name: "CMA Generator",
     icon: BarChart2,
     pillar: "Pricing",
-    desc: "Produces a decisive comparative market analysis with a list-price range, comps talking points, and a recommendation.",
+    desc: "Produces a decisive comparative market analysis with a list-price range, comps talking points, and a one-line recommendation.",
   },
   {
     href: "/hub/ai/agreements",
     name: "Agreements",
     icon: FileSignature,
     pillar: "Contracts",
-    desc: "Generates clear listing & buyer-representation agreement language from your terms, with broker-review flags.",
+    desc: "Generates clear listing & buyer-representation agreement clause language with broker-review flags. Loads from CRM buyer agreements.",
+  },
+  {
+    href: "/hub/ai/seller-intel",
+    name: "Seller Intel",
+    icon: PhoneCall,
+    pillar: "Acquisitions",
+    desc: "Pre-call intelligence brief — cash offer range, cash vs. list table, phone script opener, and urgency signals. Loads from the pipeline.",
+  },
+  {
+    href: "/hub/ai/cash-offer",
+    name: "Cash Offer Eval",
+    icon: DollarSign,
+    pillar: "Acquisitions",
+    desc: "Estimates ARV, deductions, and net-to-seller range for any property. Full breakdown table ready to share with sellers.",
+  },
+  {
+    href: "/hub/ai/coach",
+    name: "Agent Coach",
+    icon: GraduationCap,
+    pillar: "Coaching",
+    desc: "Live scenario role-play and tactical feedback — objection handling, listing presentations, buyer consults, and more.",
   },
   {
     href: "/hub/ai/ask",
@@ -61,7 +85,7 @@ export default function AiStudioPage() {
       <div className="pb-2">
         <h1 className="font-display text-3xl text-ink md:text-[2.3rem]">AI Toolkit</h1>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-slate">
-          Six purpose-built tools. Pick what you need — AI handles the rest.
+          Nine purpose-built tools — each connected to your CRM, listings, and pipeline. Pick a tool, load your data, and generate in one click.
         </p>
       </div>
 

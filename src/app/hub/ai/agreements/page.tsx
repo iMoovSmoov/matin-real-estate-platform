@@ -2,7 +2,24 @@
 
 import { useState } from "react";
 import { buyerAgreements } from "@/lib/data";
-import { AiToolPanel } from "@/components/command/AiToolPanel";
+import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
+
+// One-click demo using first buyer agreement
+const FIRST_BUYER = buyerAgreements[0];
+const TRY_EXAMPLE: Preset = FIRST_BUYER
+  ? {
+      label: "Try with buyer agreement",
+      values: {
+        docType: "Buyer Representation Agreement",
+        party: `Buyer — ${FIRST_BUYER.name}`,
+        property: `${FIRST_BUYER.areas.join(" / ")} metro · up to $${FIRST_BUYER.budgetMax.toLocaleString()}`,
+        price: `$${FIRST_BUYER.budgetMin.toLocaleString()} – $${FIRST_BUYER.budgetMax.toLocaleString()}`,
+        commission: "2.5% buyer-side, seller-paid where available",
+        term: FIRST_BUYER.timeline === "Immediately" ? "60 days exclusive" : "90 days exclusive",
+        special: FIRST_BUYER.notes ?? "Pre-approved buyer, immediate timeline.",
+      },
+    }
+  : { label: "Try with example", values: {} };
 
 const OREGON_DOC_TYPES = [
   "Buyer Representation Agreement",
@@ -86,6 +103,7 @@ export default function AgreementsPage() {
       <AiToolPanel
         key={selectedId || "__blank__"}
         tool="agreement"
+        tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         title="Agreements"
         pillar="Contracts"
         description="Generate clear, organized Oregon listing & buyer-representation agreement language from your terms — plain-English clauses with broker/legal-review flags. A drafting aid, not legal advice."
@@ -101,21 +119,22 @@ export default function AgreementsPage() {
             options: OREGON_DOC_TYPES,
             full: true,
           },
-          { name: "party", label: "Party", placeholder: "Seller — Logan Lopez" },
+          { name: "party", label: "Client name", placeholder: "Seller — Logan Lopez  or  Buyer — Sarah Kim" },
           {
             name: "property",
             label: "Property / area",
             placeholder: "8457 NW Lakeshore Ave, Vancouver, WA",
           },
           { name: "price", label: "Price / budget range", placeholder: "$1,580,000" },
-          { name: "commission", label: "Commission", placeholder: "2.5% listing side" },
-          { name: "term", label: "Term", placeholder: "6 months exclusive" },
+          { name: "commission", label: "Commission", placeholder: "2.5% listing side", optional: true },
+          { name: "term", label: "Term", placeholder: "6 months exclusive", optional: true },
           {
             name: "special",
             label: "Special terms",
             type: "textarea",
             placeholder: "Photography included, staging consult, contingencies, earnest money…",
             full: true,
+            optional: true,
           },
         ]}
       />

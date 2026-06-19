@@ -5,6 +5,22 @@ import { listings, getCommunity } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 import { Building2, CheckCircle2 } from "lucide-react";
 
+// ── One-click demo example ───────────────────────────────────────────────────
+const EXAMPLE = listings.find((l) => l.status !== "Sold") ?? listings[0];
+const TRY_EXAMPLE: Preset = {
+  label: "Try with active listing",
+  values: {
+    address: EXAMPLE.address,
+    city: `${EXAMPLE.city}, ${EXAMPLE.state}`,
+    beds: String(EXAMPLE.beds),
+    baths: String(EXAMPLE.baths),
+    sqft: String(EXAMPLE.sqft),
+    yearBuilt: String(EXAMPLE.yearBuilt),
+    notes: EXAMPLE.features?.slice(0, 3).join(", ") ?? "",
+    target: `$${EXAMPLE.price.toLocaleString()}`,
+  },
+};
+
 // ── Presets (non-sold, up to 4) for quick-fill buttons ──────────────────────
 const presets: Preset[] = listings
   .filter((l) => l.status !== "Sold")
@@ -123,6 +139,7 @@ export default function CmaPage() {
           reportBannerLabel="COMPARATIVE MARKET ANALYSIS"
           reportBannerSub="Prepared by Matin Real Estate · (503) 622-9624"
           externalPreset={presetOverride ?? undefined}
+          tryExample={!loadedAddress ? TRY_EXAMPLE : undefined}
           fields={[
             {
               name: "address",
@@ -161,6 +178,7 @@ export default function CmaPage() {
               type: "textarea",
               placeholder: "Recently renovated kitchen, river frontage…",
               full: true,
+              optional: true,
             },
             {
               name: "target",
@@ -168,6 +186,7 @@ export default function CmaPage() {
               placeholder: "$1,370,000",
               full: true,
               prefix: "$",
+              optional: true,
             },
           ]}
       />

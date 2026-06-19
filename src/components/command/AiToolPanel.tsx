@@ -25,6 +25,8 @@ export type Field = {
   full?: boolean;
   /** Optional prefix symbol rendered inside the input (e.g. "$" for currency fields) */
   prefix?: string;
+  /** When true, renders a lighter "(optional)" badge next to the label */
+  optional?: boolean;
 };
 
 export type Preset = {
@@ -49,6 +51,7 @@ export function AiToolPanel({
   reportBannerLabel,
   reportBannerSub,
   externalPreset,
+  tryExample,
 }: {
   tool: string;
   title: string;
@@ -69,6 +72,8 @@ export function AiToolPanel({
   reportBannerSub?: string;
   /** An externally-driven preset (e.g. from a "load from DB" selector on the host page) */
   externalPreset?: Preset;
+  /** One-click demo: fills all fields with realistic sample data and auto-runs the AI */
+  tryExample?: Preset;
 }) {
   const blank = Object.fromEntries(fields.map((f) => [f.name, initial[f.name] ?? ""]));
   const [values, setValues] = useState<Record<string, string>>(blank);
@@ -112,6 +117,21 @@ export function AiToolPanel({
     setTouched(false);
   }
 
+  async function tryExampleAndRun() {
+    if (!tryExample || busy) return;
+    const filled = { ...blank, ...tryExample.values };
+    setValues(filled);
+    setOutput("");
+    setDocDate("");
+    setTouched(true);
+    setBusy(true);
+    try {
+      await streamAi({ tool, input: filled }, (_chunk, full) => setOutput(full));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function run() {
     if (busy) return;
     setBusy(true);
@@ -149,7 +169,7 @@ export function AiToolPanel({
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <Wand2 className="h-5 w-5" />
           </span>
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h2 className="font-display text-xl text-ink">{title}</h2>
               {pillar && (
@@ -161,6 +181,22 @@ export function AiToolPanel({
             <p className="mt-1 text-[0.86rem] leading-relaxed text-slate">{description}</p>
           </div>
         </div>
+
+        {/* One-click "Try example" — fills all fields + auto-runs */}
+        {tryExample && (
+          <button
+            type="button"
+            onClick={tryExampleAndRun}
+            disabled={busy}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-azure/30 bg-azure/[0.07] px-4 py-2.5 text-[0.84rem] font-semibold text-azure transition-colors hover:bg-azure/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {busy ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</>
+            ) : (
+              <><Wand2 className="h-4 w-4" /> {tryExample.label ?? "Try with example data"}</>
+            )}
+          </button>
+        )}
 
         {presets && presets.length > 0 && (
           <div className="mt-5">
@@ -201,9 +237,14 @@ export function AiToolPanel({
             >
               <label
                 htmlFor={`f-${f.name}`}
-                className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70"
+                className="flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70"
               >
                 {f.label}
+                {f.optional && (
+                  <span className="text-[0.6rem] font-normal normal-case tracking-normal text-slate/40">
+                    optional
+                  </span>
+                )}
               </label>
               {f.type === "textarea" ? (
                 <textarea
