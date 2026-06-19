@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Home, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
+import { Home, Loader2, ShieldCheck, ArrowRight, TrendingUp } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/site/marketing/AiMarkdown";
@@ -83,7 +83,7 @@ export function InstantValue() {
         className="rounded-3xl bg-cloud p-7 shadow-lift ring-1 ring-ink/[0.06] md:p-8"
       >
         <div className="flex items-center gap-2 text-azure">
-          <Sparkles className="h-5 w-5" />
+          <TrendingUp className="h-5 w-5" />
           <span className="eyebrow text-azure">Instant home value · AI</span>
         </div>
         <h3 className="mt-3 font-display text-2xl text-ink">Tell us about your home</h3>
@@ -184,7 +184,7 @@ export function InstantValue() {
           <div className="flex items-center justify-between gap-3 border-b border-ink/[0.07] pb-4">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-azure/10 text-azure">
-                <Sparkles className="h-4.5 w-4.5" />
+                <Home className="h-4 w-4" />
               </span>
               <div>
                 <div className="text-[0.92rem] font-semibold text-ink">Matin Market Analyst</div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   PenTool,
-  Sparkles,
+  Wand2,
   ShieldCheck,
   Copy,
   Check,
@@ -145,7 +145,7 @@ export function ContractCoach() {
             disabled={busy || !draft.trim()}
             className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Sparkles className="h-4 w-4" />
+            <Wand2 className="h-4 w-4" />
             {busy ? "Coaching your draft…" : "Coach my draft"}
           </button>
         </div>

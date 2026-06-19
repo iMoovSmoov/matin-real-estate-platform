@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   X,
-  Sparkles,
+  Wand2,
   Wand2,
   Save,
   Send,
@@ -285,7 +285,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           </div>
 
           <ToolbarButton onClick={generate} disabled={aiBusy}>
-            {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
             Generate with AI
           </ToolbarButton>
 
@@ -394,7 +394,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {(aiOut || aiBusy) && (
           <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-ink/12 bg-white backdrop-blur-md print:hidden">
             <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
-              <Sparkles className="h-4 w-4 text-ink" />
+              <Wand2 className="h-4 w-4 text-ink" />
               <span className="text-[0.82rem] font-semibold text-ink">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>

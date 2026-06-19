@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, RotateCcw, Bot } from "lucide-react";
+import { Send, RotateCcw, Bot } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn, initials } from "@/lib/utils";
@@ -74,7 +74,7 @@ export function AiChat({
           </span>
           <div className="leading-tight">
             <div className="flex items-center gap-1.5 font-semibold text-ink">
-              {title} <Sparkles className="h-3.5 w-3.5 text-ink/80" />
+              {title}
             </div>
             <div className="mt-0.5 flex items-center gap-1.5 text-[0.72rem] text-slate">
               <LiveDot tone="success" /> {subtitle}

@@ -11,7 +11,7 @@ import {
   Database,
   PenTool,
   Users,
-  Sparkles,
+  Wand2,
   Loader2,
   RefreshCw,
   Building2,
@@ -342,7 +342,7 @@ export function ContractWizard() {
 
               {record && filledCount > 0 && (
                 <p className="mt-2.5 flex items-center gap-1.5 text-[0.74rem] text-slate/80">
-                  <Sparkles className="h-3.5 w-3.5 text-ink" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                   <span className="font-semibold text-ink">{filledCount} field{filledCount === 1 ? "" : "s"}</span>{" "}
                   auto-filled from CRM — edit anything below.
                 </p>
@@ -414,7 +414,7 @@ export function ContractWizard() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-4 w-4" /> Draft with AI
+                          <Wand2 className="h-4 w-4" /> Draft with AI
                         </>
                       )}
                     </button>
@@ -620,7 +620,7 @@ function FieldInput({
         {field.required && <span className="text-ink">*</span>}
         {autofilled && (
           <span className="inline-flex items-center gap-0.5 rounded bg-ink/[0.06] px-1 py-px text-[0.56rem] font-semibold uppercase tracking-wide text-ink ring-1 ring-inset ring-ink/[0.08]">
-            <Sparkles className="h-2.5 w-2.5" /> CRM
+            <Database className="h-2.5 w-2.5" /> CRM
           </span>
         )}
       </label>

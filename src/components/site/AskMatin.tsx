@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Send, Sparkles, Phone } from "lucide-react";
+import { X, Send, Phone } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
@@ -85,7 +85,7 @@ export function AskMatin() {
           </div>
           <div className="leading-tight">
             <div className="flex items-center gap-1.5 font-semibold">
-              Ask Matin <Sparkles className="h-3.5 w-3.5 text-azure-300" />
+              Ask Matin
             </div>
             <div className="flex items-center gap-1.5 text-[0.72rem] text-white/80">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> AI concierge · replies instantly

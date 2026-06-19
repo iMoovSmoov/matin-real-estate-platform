@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ArrowRight, Award, ShieldCheck, TrendingUp, Sparkles, Cpu, Quote, Star,
+  ArrowRight, Award, ShieldCheck, TrendingUp, Cpu, Quote, Star, Database, Zap, GraduationCap, BrainCircuit,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -218,15 +218,16 @@ export default function HomePage() {
             <Reveal delay={0.1}>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  ["Structured data", "Spreadsheets → live databases"],
-                  ["AI integration", "AI woven into the CRM"],
-                  ["Automation", "Speed-to-lead in under 60s"],
-                  ["AI coaching", "Scenario training for brokers"],
-                ].map(([t, d]) => (
-                  <div key={t} className="glass rounded-2xl p-5">
-                    <Sparkles className="h-5 w-5 text-azure-bright" />
-                    <div className="mt-3 font-display text-lg text-white">{t}</div>
-                    <div className="mt-1 text-[0.84rem] text-slate-300">{d}</div>
+                  ["Structured data", "Spreadsheets → live databases", Database],
+                  ["AI integration", "AI woven into the CRM", BrainCircuit],
+                  ["Automation", "Speed-to-lead in under 60s", Zap],
+                  ["AI coaching", "Scenario training for brokers", GraduationCap],
+                ].map(([t, d, Icon]) => (
+                  <div key={t as string} className="glass rounded-2xl p-5">
+                    {/* @ts-expect-error dynamic icon */}
+                    <Icon className="h-5 w-5 text-azure-bright" />
+                    <div className="mt-3 font-display text-lg text-white">{t as string}</div>
+                    <div className="mt-1 text-[0.84rem] text-slate-300">{d as string}</div>
                   </div>
                 ))}
               </div>

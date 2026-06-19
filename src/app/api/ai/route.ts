@@ -12,17 +12,17 @@ const MODEL = process.env.MATIN_AI_MODEL || "claude-opus-4-8";
 const EFFORT = process.env.MATIN_AI_EFFORT || "low";
 
 const MAX_TOKENS: Record<AiTool, number> = {
-  "ask-matin": 700,
-  concierge: 700,
-  "lead-responder": 700,
-  "listing-description": 900,
-  coach: 1100,
-  cma: 1600,
-  agreement: 1600,
-  "marketing-kit": 1400,
-  "seller-intel": 1000,
-  "contract-extractor": 1400,
-  "cash-offer-eval": 900,
+  "ask-matin": 800,
+  concierge: 800,
+  "lead-responder": 600,
+  "listing-description": 800,
+  coach: 1200,
+  cma: 2500,
+  agreement: 2500,
+  "marketing-kit": 2000,
+  "seller-intel": 1500,
+  "contract-extractor": 2500,
+  "cash-offer-eval": 1500,
 };
 
 function textStream(text: string) {

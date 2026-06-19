@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowRight, Clock, BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, Clock, BookOpen } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
@@ -193,7 +193,7 @@ export default function BlogPage() {
                   Talk to a broker <ArrowRight className="h-4 w-4" />
                 </ButtonLink>
                 <ButtonLink href="/sell" variant="outline-light" size="lg">
-                  <Sparkles className="h-4 w-4" /> Get your home value
+                  <ArrowRight className="h-4 w-4" /> Get your home value
                 </ButtonLink>
               </div>
             </div>
