@@ -42,11 +42,16 @@ const NAV: NavGroup[] = [
     label: "OVERVIEW",
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
-      { label: "My Workspace", href: "/hub/agent", icon: LayoutDashboard },
     ],
   },
   {
-    label: "CLIENTS & DEALS",
+    label: "AGENT",
+    items: [
+      { label: "My Workspace", href: "/hub/agent", icon: BrainCircuit },
+    ],
+  },
+  {
+    label: "CLIENTS",
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
       { label: "Cash Offers", href: "/hub/cash-offer", icon: DollarSign },
@@ -55,7 +60,16 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "AI TOOLS",
+    label: "TOOLS",
+    items: [
+      { label: "Forms", href: "/hub/forms", icon: ClipboardList },
+      { label: "Contract Builder", href: "/hub/contracts", icon: FilePlus2 },
+      { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
+      { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
+    ],
+  },
+  {
+    label: "AI STUDIO",
     items: [
       { label: "AI Studio", href: "/hub/ai", icon: BrainCircuit },
       { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
@@ -67,15 +81,6 @@ const NAV: NavGroup[] = [
       { label: "Cash Offer Eval", href: "/hub/ai/cash-offer", icon: DollarSign },
       { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
       { label: "Ask Matin", href: "/hub/ai/ask", icon: MessageCircle },
-    ],
-  },
-  {
-    label: "TOOLS",
-    items: [
-      { label: "Forms", href: "/hub/forms", icon: ClipboardList },
-      { label: "Contract Builder", href: "/hub/contracts", icon: FilePlus2 },
-      { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
-      { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
     ],
   },
   {
@@ -190,7 +195,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
               {single ? null : (
                 <button
                   onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-slate/40 transition-colors hover:text-slate/70"
+                  className="mb-1 flex w-full items-center justify-between rounded-lg px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40 transition-colors hover:text-slate/70"
                 >
                   {group.label}
                   <ChevronDown
@@ -220,7 +225,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                         >
                           <Icon
                             className={cn(
-                              "h-[1.05rem] w-[1.05rem] shrink-0 transition-colors",
+                              "h-4 w-4 shrink-0 transition-colors",
                               active ? "text-azure" : "text-slate/50 group-hover:text-ink",
                             )}
                           />

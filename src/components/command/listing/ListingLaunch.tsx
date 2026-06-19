@@ -126,7 +126,7 @@ function ListingCard({
       className={cn(
         "w-full rounded-xl border p-3 text-left transition-colors",
         isSelected
-          ? "border-ink/30 bg-ink/[0.04]"
+          ? "border-ink/30 bg-ink/[0.04] border-l-4 border-l-ink pl-2.5"
           : "border-ink/[0.07] bg-white hover:border-ink/15 hover:bg-ink/[0.02]",
       )}
     >
@@ -163,30 +163,33 @@ function ChecklistTab({
   return (
     <div>
       {/* tab bar */}
-      <div className="flex gap-1 border-b border-ink/[0.08] pb-0">
+      <div className="flex gap-0.5 border-b border-ink/[0.08] pb-0">
         {CHECKLIST_TABS.map((tab) => {
           const { done, total } = sectionCount(
             listing.checklist[tab.key],
             tab.key,
             overrides,
           );
+          const isActive = activeTab === tab.key;
           return (
             <button
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "relative px-3 py-2 text-[0.8rem] font-medium transition-colors",
-                activeTab === tab.key
-                  ? "text-ink after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-ink"
-                  : "text-slate hover:text-ink",
+                "relative rounded-t-lg px-3 py-2 text-[0.8rem] font-medium transition-colors",
+                isActive
+                  ? "bg-ink text-white"
+                  : "text-slate hover:bg-ink/[0.04] hover:text-ink",
               )}
             >
               {tab.label}
               <span
                 className={cn(
                   "ml-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[0.62rem] font-semibold",
-                  done === total
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : done === total
                     ? "bg-success/12 text-success"
                     : "bg-ink/[0.06] text-slate",
                 )}
@@ -429,8 +432,9 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
       {/* ── Right pane ─────────────────────────────────────────────────────── */}
       <div className="min-w-0 flex-1">
         {!selectedListing ? (
-          <Panel className="flex h-64 items-center justify-center">
-            <p className="text-[0.85rem] text-slate">Select a listing to get started.</p>
+          <Panel className="flex h-64 flex-col items-center justify-center gap-3">
+            <p className="text-[0.88rem] font-medium text-slate">Select a listing to view details</p>
+            <p className="text-[0.78rem] text-slate/50">Pick a listing from the left to see the checklist, broker status, and marketing kit.</p>
           </Panel>
         ) : (
           <div className="space-y-4">
@@ -678,19 +682,20 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-5">
                   <button
                     type="button"
                     disabled={kitLoading[selectedListing.id]}
                     onClick={() => handleGenerateKit(selectedListing)}
                     className={cn(
-                      "rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white transition-opacity",
+                      "flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-[0.9rem] font-semibold text-white shadow-sm transition-opacity",
                       kitLoading[selectedListing.id]
                         ? "cursor-not-allowed opacity-50"
-                        : "hover:opacity-90",
+                        : "hover:opacity-90 active:scale-[0.99]",
                     )}
                   >
-                    {kitLoading[selectedListing.id] ? "Generating..." : "Generate Kit"}
+                    <Wand2 className="h-4 w-4" />
+                    {kitLoading[selectedListing.id] ? "Generating marketing kit…" : "Generate Marketing Kit"}
                   </button>
                 </div>
 

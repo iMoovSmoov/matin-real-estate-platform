@@ -184,8 +184,10 @@ function SlideOver({
   onToast: (msg: string) => void;
 }) {
   const [reminderSent, setReminderSent] = useState(false);
+  const [agreementSent, setAgreementSent] = useState(false);
 
   function handleSendAgreement() {
+    setAgreementSent(true);
     onToast("Agreement sent via DocuSign");
   }
 
@@ -310,13 +312,35 @@ function SlideOver({
           {/* 3. Action buttons */}
           <section>
             {buyer.agreementStatus === "Not Signed" && (
-              <button
-                onClick={handleSendAgreement}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90"
-              >
-                <Send className="h-4 w-4" />
-                Send Agreement
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleSendAgreement}
+                  disabled={agreementSent}
+                  className={cn(
+                    "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[0.85rem] font-medium transition-colors",
+                    agreementSent
+                      ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 cursor-default"
+                      : "bg-ink text-white hover:bg-ink/90",
+                  )}
+                >
+                  {agreementSent ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Sent via DocuSign
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Send Agreement
+                    </>
+                  )}
+                </button>
+                {agreementSent && (
+                  <p className="text-center text-[0.75rem] text-slate/60">
+                    Agreement delivered — awaiting buyer signature.
+                  </p>
+                )}
+              </div>
             )}
             {buyer.agreementStatus === "Sent" && (
               <div className="space-y-2">

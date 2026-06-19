@@ -5,18 +5,14 @@ import {
   DollarSign,
   UserPlus,
   Target,
-  ArrowUpRight,
   ArrowRight,
   Database,
-  Bot,
   FileSignature,
   MessageSquareText,
   PenSquare,
   Calculator,
   Users,
   Clock,
-  Home,
-  CheckCircle2,
   TriangleAlert,
   AlertCircle,
   Calendar,
@@ -25,13 +21,10 @@ import {
   Timer,
 } from "lucide-react";
 import { metrics, agentLeaderboard, salesAgents, company } from "@/lib/data";
-import { usd, compactUsd, num } from "@/lib/utils";
+import { usd, compactUsd } from "@/lib/utils";
 import {
   Panel,
   PanelHeader,
-  StatTile,
-  LiveDot,
-  ProgressBar,
 } from "@/components/command/ui";
 import {
   VolumeAreaChart,
@@ -67,7 +60,7 @@ const ALERTS = [
   },
 ];
 
-/** 6 KPI tiles */
+/** 4 KPI tiles — simplified to the four most actionable metrics */
 const KPIS = [
   {
     label: "MTD Volume",
@@ -87,29 +80,13 @@ const KPIS = [
     chip: null,
   },
   {
-    label: "Listings Active",
-    value: "12",
-    delta: { value: "3 under offer", dir: "up" as const },
-    icon: <Home className="h-4 w-4" />,
-    href: null,
-    chip: null,
-  },
-  {
-    label: "Avg Days to Close",
-    value: "28",
-    delta: { value: "team avg: 34", dir: "up" as const },
-    icon: <Clock className="h-4 w-4" />,
-    href: null,
-    chip: null,
-  },
-  {
     label: "Speed to Lead",
     value: "4 min",
     delta: null,
     icon: <Zap className="h-4 w-4" />,
     accent: false,
     href: null,
-    chip: { label: "Team goal: <5 min", tone: "green" as const },
+    chip: { label: "Goal: <5 min", tone: "green" as const },
   },
   {
     label: "Stale Leads",
@@ -306,7 +283,7 @@ export default function DashboardPage() {
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-display text-2xl text-ink sm:text-[2rem]">
+            <h1 className="font-display text-xl text-ink sm:text-2xl md:text-3xl">
               Good morning, Jordan.
             </h1>
             <p className="mt-0.5 text-[0.85rem] text-slate/60">{today}</p>
@@ -339,8 +316,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── KPI tiles (2x3 → 6x1) ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {/* ── KPI tiles (2x2 → 4x1) ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {KPIS.map((kpi) => {
           const inner = (
             <div
@@ -572,6 +549,12 @@ export default function DashboardPage() {
             Full report
           </Link>
         </div>
+        {LEADERBOARD.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+            <Users className="h-8 w-8 text-slate/30" />
+            <p className="text-[0.88rem] text-slate">No leaderboard data this month yet.</p>
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px]">
             <thead>
@@ -666,6 +649,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* ── Source ROI chart ────────────────────────────────────────────────── */}
@@ -692,6 +676,12 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
+        {SOURCE_ROI.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+            <TrendingUp className="h-8 w-8 text-slate/30" />
+            <p className="text-[0.88rem] text-slate">No marketing channel data available yet.</p>
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px]">
             <thead>
@@ -750,7 +740,7 @@ export default function DashboardPage() {
                       {row.spend === 0 ? (
                         <span className="font-semibold text-emerald-600">Organic</span>
                       ) : (
-                        compactUsd(row.spend)
+                        usd(row.spend)
                       )}
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -775,6 +765,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* ── Agent Response Time Ranking ─────────────────────────────────────── */}
@@ -795,6 +786,13 @@ export default function DashboardPage() {
             Full report
           </Link>
         </div>
+        {RESPONSE_RANKING.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+            <Clock className="h-8 w-8 text-slate/30" />
+            <p className="text-[0.88rem] text-slate">No response time data available yet.</p>
+            <p className="text-[0.76rem] text-slate/55">Data will appear once agents start receiving leads.</p>
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[480px]">
             <thead>
@@ -870,6 +868,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* ── Footer ─────────────────────────────────────────────────────────── */}

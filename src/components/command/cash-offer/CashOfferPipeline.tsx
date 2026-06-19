@@ -52,7 +52,8 @@ const STAGE_HEADER_TONE: Record<SellerLeadStage, string> = {
   "Dead":                 "bg-slate-50  text-slate-500  border-slate-200",
 };
 
-const DEAD_OR_TERMINAL: SellerLeadStage[] = ["Dead", "Accepted", "Converted to Listing"];
+/** Stages excluded from the "active deals" KPI count. */
+const ACTIVE_EXCLUDED: SellerLeadStage[] = ["Dead", "Accepted", "Converted to Listing"];
 
 /* ── Helpers ─────────────────────────────────────────────────────────────────── */
 
@@ -472,11 +473,11 @@ export default function CashOfferPipeline() {
 
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
-  // Derived stats
-  const activeCount = leads.filter((l) => !DEAD_OR_TERMINAL.includes(l.stage)).length;
+  // Derived stats — "active" means not Dead, not Accepted, not Converted
+  const activeCount = leads.filter((l) => !ACTIVE_EXCLUDED.includes(l.stage)).length;
   const acceptedCount = leads.filter((l) => l.stage === "Accepted").length;
   const portfolioValue = leads
-    .filter((l) => !DEAD_OR_TERMINAL.includes(l.stage))
+    .filter((l) => !ACTIVE_EXCLUDED.includes(l.stage))
     .reduce((sum, l) => sum + l.estValue, 0);
 
   function handleStageChange(id: string, stage: SellerLeadStage) {
@@ -533,12 +534,13 @@ export default function CashOfferPipeline() {
 
       {/* Kanban board — horizontally scrollable */}
       <div className="overflow-x-auto pb-4">
-        <div className="inline-flex min-w-max gap-4">
+        <div className="inline-flex gap-4" style={{ minWidth: "max-content" }}>
           {STAGES.map((stage) => {
             const stageLeads = leads.filter((l) => l.stage === stage);
             const headerTone = STAGE_HEADER_TONE[stage];
+            const isDead = stage === "Dead";
             return (
-              <div key={stage} className="w-[240px] shrink-0">
+              <div key={stage} className="w-[260px] shrink-0" style={{ minWidth: 220 }}>
                 {/* Column header */}
                 <div
                   className={cn(
@@ -558,7 +560,9 @@ export default function CashOfferPipeline() {
                 <div className="space-y-2">
                   {stageLeads.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-ink/[0.08] px-3 py-6 text-center">
-                      <p className="text-[0.72rem] text-slate/50">No leads</p>
+                      <p className="text-[0.72rem] text-slate/50">
+                        {isDead ? "No dead deals this month" : "No leads"}
+                      </p>
                     </div>
                   ) : (
                     stageLeads.map((lead) => (

@@ -10,12 +10,13 @@ import {
   Flame,
   CheckCircle2,
   Circle,
-  ChevronRight,
+  ArrowRight,
   Target,
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
 import { Panel, PanelHeader, Pill } from "@/components/command/ui";
+import { cn } from "@/lib/utils";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -261,7 +262,7 @@ function TaskCard({
       {/* Priority dot */}
       <span
         className={[
-          "mt-[7px] h-2 w-2 shrink-0 rounded-full",
+          "mt-[5px] h-2.5 w-2.5 shrink-0 rounded-full",
           PRIORITY_DOT[task.priority],
         ].join(" ")}
       />
@@ -283,10 +284,10 @@ function TaskCard({
       {!task.done && (
         <Link
           href={task.href}
-          className="ml-1 shrink-0 text-[0.76rem] font-semibold text-azure transition-colors hover:underline"
+          className="ml-1 shrink-0 inline-flex items-center gap-0.5 text-[0.76rem] font-semibold text-azure transition-colors hover:text-azure/70 hover:underline"
         >
           Do it
-          <ChevronRight className="inline h-3.5 w-3.5" />
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       )}
     </div>
@@ -332,8 +333,26 @@ function LeadCard({ lead }: { lead: HotLead }) {
   );
 }
 
+function DaysToCloseChip({ days }: { days: number }) {
+  const cls =
+    days <= 3
+      ? "bg-red-50 text-red-700 ring-red-200"
+      : days <= 10
+      ? "bg-amber-50 text-amber-700 ring-amber-200"
+      : "bg-slate-50 text-slate-600 ring-slate-200";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset",
+        cls,
+      )}
+    >
+      {days}d to close
+    </span>
+  );
+}
+
 function DealCard({ deal }: { deal: Deal }) {
-  const urgency = deal.daysToClose <= 3 ? "text-danger" : deal.daysToClose <= 10 ? "text-warn" : "text-slate";
   return (
     <div className="flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
@@ -348,9 +367,7 @@ function DealCard({ deal }: { deal: Deal }) {
           <Calendar className="mr-1 inline h-3.5 w-3.5 text-slate/60" />
           {deal.nextDeadline}
         </p>
-        <span className={["text-[0.73rem] font-semibold tabular-nums", urgency].join(" ")}>
-          {deal.daysToClose}d to close
-        </span>
+        <DaysToCloseChip days={deal.daysToClose} />
       </div>
     </div>
   );
@@ -359,28 +376,28 @@ function DealCard({ deal }: { deal: Deal }) {
 function ApptRow({ appt }: { appt: Appointment }) {
   return (
     <li className="flex items-start gap-3 px-5 py-3.5">
-      {/* Time */}
+      {/* Time — bold and fixed-width */}
       <div className="w-[4.5rem] shrink-0 text-right">
-        <span className="text-[0.76rem] font-semibold tabular-nums text-slate">{appt.time}</span>
+        <span className="text-[0.8rem] font-bold tabular-nums text-ink">{appt.time}</span>
       </div>
       {/* Dot */}
-      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink/15" />
+      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-ink/20" />
       {/* Content */}
       <div className="min-w-0 flex-1">
-        <p className="text-[0.85rem] font-semibold leading-snug text-ink">{appt.client}</p>
-        <p className="mt-0.5 text-[0.73rem] text-slate">{appt.note}</p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[0.85rem] font-semibold leading-snug text-ink">{appt.client}</p>
           <Pill tone={APPT_PILL[appt.type]}>{appt.type}</Pill>
-          {(appt.type === "Call" || appt.type === "Showing") && (
-            <a
-              href={`tel:${appt.phone}`}
-              className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-azure transition-colors hover:underline"
-            >
-              <Phone className="h-3 w-3" />
-              Dial
-            </a>
-          )}
         </div>
+        <p className="mt-0.5 text-[0.73rem] text-slate">{appt.note}</p>
+        {(appt.type === "Call" || appt.type === "Showing") && (
+          <a
+            href={`tel:${appt.phone}`}
+            className="mt-1 inline-flex items-center gap-1 text-[0.72rem] font-medium text-azure transition-colors hover:underline"
+          >
+            <Phone className="h-3 w-3" />
+            Dial
+          </a>
+        )}
       </div>
     </li>
   );
@@ -419,17 +436,18 @@ export default function AgentWorkspace() {
           </p>
         </div>
 
-        {/* Response time badge pair */}
-        <div className="flex shrink-0 items-center gap-3">
-          <div className="flex flex-col items-end gap-1">
-            <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[0.76rem] font-semibold text-success ring-1 ring-inset ring-success/20">
-              <Clock className="h-3.5 w-3.5" />
-              Your avg: 4 min
-            </span>
-            <span className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.76rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
-              Team avg: 18 min
-            </span>
-          </div>
+        {/* Response time badges */}
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <p className="text-[0.64rem] font-semibold uppercase tracking-wider text-slate/50">
+            Response time
+          </p>
+          <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[0.76rem] font-semibold text-success ring-1 ring-inset ring-success/20">
+            <Clock className="h-3.5 w-3.5" />
+            You: 4 min avg
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.76rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
+            Team: 18 min avg
+          </span>
         </div>
       </div>
 
@@ -464,11 +482,26 @@ export default function AgentWorkspace() {
               </Link>
             }
           />
-          <div className="grid gap-4 p-5 sm:grid-cols-3">
+          {HOT_LEADS.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+              <Target className="h-8 w-8 text-slate/30" />
+              <p className="text-[0.88rem] text-slate">No hot leads right now — great work.</p>
+              <Link
+                href="/hub/crm"
+                className="rounded-lg bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/80"
+              >
+                View all leads
+              </Link>
+            </div>
+          ) : (
+          <div className="flex gap-4 overflow-x-auto p-5 sm:grid sm:grid-cols-3 sm:overflow-visible">
             {HOT_LEADS.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} />
+              <div key={lead.id} className="min-w-[80vw] sm:min-w-0">
+                <LeadCard lead={lead} />
+              </div>
             ))}
           </div>
+          )}
         </Panel>
       </section>
 
