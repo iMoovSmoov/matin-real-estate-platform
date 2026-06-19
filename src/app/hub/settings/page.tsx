@@ -95,14 +95,14 @@ const NOTIF_ROWS: NotifRow[] = [
   },
 ];
 
-type NotifState = Record<string, Record<string, boolean>>;
+type NotifState = Record<string, Record<Channel, boolean>>;
 
 function buildDefaultNotifs(): NotifState {
   const defaults: NotifState = {};
   NOTIF_ROWS.forEach((row) => {
-    defaults[row.key] = {};
+    defaults[row.key] = {} as Record<Channel, boolean>;
     row.channels.forEach((ch) => {
-      defaults[row.key][ch] = ch === "email";
+      defaults[row.key][ch] = true;
     });
   });
   return defaults;
@@ -122,10 +122,10 @@ type Integration = {
 const INTEGRATIONS: Integration[] = [
   {
     id: "rmls",
-    name: "MLS (RMLS)",
+    name: "RMLS",
     description: "Regional Multiple Listing Service — Oregon & SW Washington",
     connected: true,
-    colorClass: "bg-azure/10 text-azure",
+    colorClass: "bg-ink/[0.07] text-ink",
     initials: "MLS",
   },
   {
@@ -135,22 +135,6 @@ const INTEGRATIONS: Integration[] = [
     connected: false,
     colorClass: "bg-amber-100 text-amber-700",
     initials: "DS",
-  },
-  {
-    id: "zillow",
-    name: "Zillow",
-    description: "Lead import and listing syndication",
-    connected: false,
-    colorClass: "bg-blue-100 text-blue-700",
-    initials: "ZI",
-  },
-  {
-    id: "realtor",
-    name: "Realtor.com",
-    description: "Lead import and listing syndication",
-    connected: false,
-    colorClass: "bg-red-100 text-red-700",
-    initials: "RC",
   },
   {
     id: "gcal",
@@ -167,6 +151,14 @@ const INTEGRATIONS: Integration[] = [
     connected: false,
     colorClass: "bg-orange-100 text-orange-700",
     initials: "ZP",
+  },
+  {
+    id: "zillow",
+    name: "Zillow",
+    description: "Lead import and listing syndication",
+    connected: false,
+    colorClass: "bg-blue-100 text-blue-700",
+    initials: "ZI",
   },
 ];
 
@@ -193,12 +185,12 @@ function Toast({ message, onDone }: { message: string; onDone: () => void }) {
 function ProfileTab() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
-    name: "Jordan Matin",
-    title: "Principal Broker",
-    phone: "(503) 761-5616",
-    email: "jordan@matinrealestate.com",
-    bio: "Oregon and SW Washington real estate specialist with 15+ years helping buyers, sellers, and investors navigate the Portland metro market.",
-    license: "200109384",
+    name: "Alicia Smith",
+    title: "Lead Listing Specialist",
+    phone: "",
+    email: "",
+    bio: "",
+    license: "",
   });
 
   function handleSave() {
@@ -316,25 +308,14 @@ function ProfileTab() {
       </div>
 
       {/* Brokerage info — read only */}
-      <div className="rounded-2xl border border-ink/[0.06] bg-paper/60 p-6">
-        <h2 className="mb-4 font-display text-[1.05rem] font-semibold text-ink">Brokerage information</h2>
-        <p className="mb-3 text-[0.76rem] text-slate/60">
-          These fields are managed by your brokerage administrator.
+      <div className="rounded-2xl border border-ink/[0.06] bg-paper/60 px-5 py-4">
+        <p className="text-[0.82rem] text-slate/70">
+          <span className="font-semibold text-ink">Brokerage:</span> Matin Real Estate
+          <span className="mx-2 text-ink/20">|</span>
+          <span className="font-semibold text-ink">MLS:</span> RMLS
+          <span className="mx-2 text-ink/20">|</span>
+          <span className="font-semibold text-ink">License:</span> Oregon &amp; Washington
         </p>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { label: "Brokerage", value: "Matin Real Estate" },
-            { label: "MLS ID", value: "RMLS-JM-2009" },
-            { label: "License state(s)", value: "Oregon · Washington" },
-          ].map((field) => (
-            <div key={field.label}>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-wide text-slate/50">
-                {field.label}
-              </p>
-              <p className="mt-1 text-[0.9rem] font-medium text-ink">{field.value}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -346,7 +327,7 @@ function NotificationsTab() {
   const [notifs, setNotifs] = useState<NotifState>(buildDefaultNotifs);
   const [saved, setSaved] = useState(false);
 
-  function toggle(rowKey: string, channel: string) {
+  function toggle(rowKey: string, channel: Channel) {
     setNotifs((prev) => ({
       ...prev,
       [rowKey]: {
@@ -361,7 +342,8 @@ function NotificationsTab() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  const CHANNEL_LABELS: Record<string, string> = {
+  const ALL_CHANNELS: Channel[] = ["email", "push", "sms"];
+  const CHANNEL_LABELS: Record<Channel, string> = {
     email: "Email",
     push: "Push",
     sms: "SMS",
@@ -376,7 +358,7 @@ function NotificationsTab() {
             <p className="text-[0.72rem] font-bold uppercase tracking-widest text-slate/50">Notification</p>
           </div>
           <div className="flex gap-6 pr-1">
-            {["email", "push", "sms"].map((ch) => (
+            {ALL_CHANNELS.map((ch) => (
               <p key={ch} className="w-10 text-center text-[0.72rem] font-bold uppercase tracking-widest text-slate/50">
                 {CHANNEL_LABELS[ch]}
               </p>
@@ -398,7 +380,7 @@ function NotificationsTab() {
               <p className="mt-0.5 text-[0.74rem] text-slate/60">{row.desc}</p>
             </div>
             <div className="flex gap-6 pr-1">
-              {(["email", "push", "sms"] as const).map((ch) => (
+              {ALL_CHANNELS.map((ch) => (
                 <div key={ch} className="flex w-10 items-center justify-center">
                   {row.channels.includes(ch) ? (
                     <Toggle
@@ -441,8 +423,6 @@ function NotificationsTab() {
 /* ── Appearance Tab ─────────────────────────────────────────────────────────── */
 
 function AppearanceTab() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
   const [landing, setLanding] = useState<"dashboard" | "workspace" | "crm">("dashboard");
   const [saved, setSaved] = useState(false);
 
@@ -458,108 +438,61 @@ function AppearanceTab() {
         <h2 className="mb-1 font-display text-[1.05rem] font-semibold text-ink">Theme</h2>
         <p className="mb-4 text-[0.76rem] text-slate/60">Choose how Matin Hub looks to you.</p>
         <div className="flex gap-3">
-          {[
-            { id: "light" as const, label: "Light", available: true },
-            { id: "dark" as const, label: "Dark", available: false },
-          ].map((opt) => (
-            <button
-              key={opt.id}
-              onClick={() => opt.available && setTheme(opt.id)}
-              disabled={!opt.available}
-              className={cn(
-                "relative flex w-32 flex-col items-start gap-2 rounded-xl border-2 p-4 transition-all",
-                !opt.available && "cursor-not-allowed opacity-50",
-                theme === opt.id && opt.available
-                  ? "border-azure bg-azure/[0.04]"
-                  : "border-ink/[0.1] bg-paper hover:border-ink/20",
-              )}
-            >
-              {/* Thumbnail preview */}
-              <div className={cn(
-                "h-10 w-full rounded-lg border",
-                opt.id === "light" ? "border-ink/[0.1] bg-white" : "border-ink/20 bg-ink/80",
-              )}>
-                <div className={cn(
-                  "m-1.5 h-1.5 w-8 rounded-full",
-                  opt.id === "light" ? "bg-ink/20" : "bg-white/20",
-                )} />
-                <div className={cn(
-                  "mx-1.5 mt-1 h-1 w-5 rounded-full",
-                  opt.id === "light" ? "bg-ink/10" : "bg-white/10",
-                )} />
-              </div>
-              <span className="text-[0.82rem] font-medium text-ink">{opt.label}</span>
-              {!opt.available && (
-                <span className="absolute right-2 top-2 rounded-full bg-slate/10 px-1.5 py-0.5 text-[0.58rem] font-semibold text-slate/60">
-                  Soon
-                </span>
-              )}
-              {theme === opt.id && opt.available && (
-                <span className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-azure text-white">
-                  <Check className="h-2.5 w-2.5" />
-                </span>
-              )}
-            </button>
-          ))}
+          {/* Light — selected */}
+          <button
+            className="relative flex w-32 flex-col items-start gap-2 rounded-xl border-2 border-ink bg-ink/[0.03] p-4 transition-all"
+          >
+            <div className="h-10 w-full rounded-lg border border-ink/[0.1] bg-white">
+              <div className="m-1.5 h-1.5 w-8 rounded-full bg-ink/20" />
+              <div className="mx-1.5 mt-1 h-1 w-5 rounded-full bg-ink/10" />
+            </div>
+            <span className="text-[0.82rem] font-medium text-ink">Light</span>
+            <span className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-ink text-white">
+              <Check className="h-2.5 w-2.5" />
+            </span>
+          </button>
+
+          {/* Dark — locked */}
+          <button
+            disabled
+            className="relative flex w-32 cursor-not-allowed flex-col items-start gap-2 rounded-xl border-2 border-ink/[0.1] bg-paper p-4 opacity-60 transition-all"
+          >
+            <div className="h-10 w-full rounded-lg border border-ink/20 bg-ink/80">
+              <div className="m-1.5 h-1.5 w-8 rounded-full bg-white/20" />
+              <div className="mx-1.5 mt-1 h-1 w-5 rounded-full bg-white/10" />
+            </div>
+            <span className="text-[0.82rem] font-medium text-ink">Dark</span>
+            <span className="absolute right-2 top-2 rounded-full bg-slate/10 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-slate/60">
+              Coming soon
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Density */}
+      {/* Default page */}
       <div className="rounded-2xl border border-ink/[0.08] bg-white p-6 shadow-[0_1px_4px_rgb(0,0,0,0.04)]">
-        <h2 className="mb-1 font-display text-[1.05rem] font-semibold text-ink">Density</h2>
-        <p className="mb-4 text-[0.76rem] text-slate/60">Adjust how much content fits on screen.</p>
-        <div className="flex gap-3">
-          {[
-            { id: "comfortable" as const, label: "Comfortable", desc: "More spacing" },
-            { id: "compact" as const, label: "Compact", desc: "Tighter rows" },
-          ].map((opt) => (
+        <h2 className="mb-1 font-display text-[1.05rem] font-semibold text-ink">Default page</h2>
+        <p className="mb-4 text-[0.76rem] text-slate/60">Which page opens when you enter Matin Hub.</p>
+        <div className="flex flex-wrap gap-2.5">
+          {(
+            [
+              { id: "dashboard" as const, label: "Dashboard" },
+              { id: "workspace" as const, label: "My Workspace" },
+              { id: "crm" as const, label: "CRM" },
+            ] as const
+          ).map((opt) => (
             <button
               key={opt.id}
-              onClick={() => setDensity(opt.id)}
+              onClick={() => setLanding(opt.id)}
               className={cn(
-                "flex flex-col items-start rounded-xl border-2 px-4 py-3 transition-all",
-                density === opt.id
-                  ? "border-azure bg-azure/[0.04]"
-                  : "border-ink/[0.1] bg-paper hover:border-ink/20",
+                "rounded-lg border px-4 py-2.5 text-[0.88rem] font-medium transition-all",
+                landing === opt.id
+                  ? "border-ink bg-ink text-white shadow-sm"
+                  : "border-ink/[0.1] bg-paper text-ink hover:border-ink/25 hover:bg-ink/[0.04]",
               )}
             >
-              <span className="text-[0.84rem] font-semibold text-ink">{opt.label}</span>
-              <span className="text-[0.72rem] text-slate/60">{opt.desc}</span>
+              {opt.label}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Default landing page */}
-      <div className="rounded-2xl border border-ink/[0.08] bg-white p-6 shadow-[0_1px_4px_rgb(0,0,0,0.04)]">
-        <h2 className="mb-1 font-display text-[1.05rem] font-semibold text-ink">Default landing page</h2>
-        <p className="mb-4 text-[0.76rem] text-slate/60">Which page opens when you enter the Hub.</p>
-        <div className="space-y-2">
-          {[
-            { id: "dashboard" as const, label: "Dashboard", href: "/hub" },
-            { id: "workspace" as const, label: "My Workspace", href: "/hub/agent" },
-            { id: "crm" as const, label: "CRM", href: "/hub/crm" },
-          ].map((opt) => (
-            <label key={opt.id} className="flex cursor-pointer items-center gap-3 rounded-xl border border-ink/[0.07] bg-paper px-4 py-3 transition-colors hover:bg-white">
-              <span className={cn(
-                "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
-                landing === opt.id ? "border-azure bg-azure" : "border-ink/20 bg-white",
-              )}>
-                {landing === opt.id && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                )}
-              </span>
-              <input
-                type="radio"
-                name="landing"
-                value={opt.id}
-                checked={landing === opt.id}
-                onChange={() => setLanding(opt.id)}
-                className="sr-only"
-              />
-              <span className="text-[0.86rem] font-medium text-ink">{opt.label}</span>
-              <span className="ml-auto text-[0.72rem] text-slate/50">{opt.href}</span>
-            </label>
           ))}
         </div>
       </div>

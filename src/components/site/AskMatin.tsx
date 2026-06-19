@@ -160,11 +160,12 @@ export function AskMatin() {
         <div className="border-t border-white/[0.07] px-3 py-3">
           <form
             onSubmit={(e) => { e.preventDefault(); send(input); }}
+            noValidate
             className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] pl-4 pr-1.5 py-1.5 transition focus-within:border-white/20 focus-within:bg-white/[0.07]"
           >
             <input
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value.slice(0, 500))}
               placeholder="Ask anything…"
               aria-label="Message to Matin concierge"
               className="flex-1 bg-transparent text-[0.85rem] text-white placeholder:text-white/35 focus:outline-none"
@@ -178,6 +179,11 @@ export function AskMatin() {
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </form>
+          {input.length > 0 && (
+            <p className={cn("mt-1 text-right text-[0.65rem] tabular-nums", input.length >= 500 ? "text-red-400" : "text-white/30")}>
+              {input.length} / 500
+            </p>
+          )}
           <a
             href="tel:+15036229624"
             className="mt-2.5 flex items-center justify-center gap-1.5 text-[0.7rem] text-white/35 transition hover:text-white/65"
