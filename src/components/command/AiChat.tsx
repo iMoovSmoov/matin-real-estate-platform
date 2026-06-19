@@ -69,12 +69,12 @@ export function AiChat({
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-azure/15 ring-1 ring-inset ring-azure/25">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.12] ring-1 ring-inset ring-white/15">
             <MatinMark className="h-4 text-white" />
           </span>
           <div className="leading-tight">
             <div className="flex items-center gap-1.5 font-semibold text-white">
-              {title} <Sparkles className="h-3.5 w-3.5 text-azure-300" />
+              {title} <Sparkles className="h-3.5 w-3.5 text-white/80" />
             </div>
             <div className="mt-0.5 flex items-center gap-1.5 text-[0.72rem] text-slate-300">
               <LiveDot tone="success" /> {subtitle}
@@ -83,7 +83,7 @@ export function AiChat({
         </div>
         <button
           onClick={reset}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
         >
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </button>
@@ -97,8 +97,8 @@ export function AiChat({
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
                 m.role === "user"
-                  ? "bg-gradient-to-br from-azure to-azure-deep text-white"
-                  : "bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20",
+                  ? "bg-white text-white"
+                  : "bg-white/[0.1] text-white ring-1 ring-inset ring-white/12",
               )}
             >
               {m.role === "user" ? initials(userLabel) : <Bot className="h-4 w-4" />}
@@ -130,7 +130,7 @@ export function AiChat({
               <button
                 key={c.label}
                 onClick={() => send(c.text)}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-3.5 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:border-azure/50 hover:bg-azure/10 hover:text-white"
+                className="rounded-full border border-white/12 bg-white/[0.04] px-3.5 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:border-white/35 hover:bg-white/[0.08] hover:text-white"
               >
                 {c.label}
               </button>
@@ -146,7 +146,7 @@ export function AiChat({
             e.preventDefault();
             send(input);
           }}
-          className="flex items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.04] py-2 pl-4 pr-2 focus-within:border-azure/50"
+          className="flex items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.04] py-2 pl-4 pr-2 focus-within:border-white/30"
         >
           <textarea
             value={input}
@@ -164,7 +164,7 @@ export function AiChat({
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-azure text-white transition-colors hover:bg-azure-bright disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-azure text-white transition-colors hover:bg-paper-200 disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
           </button>
@@ -183,7 +183,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="h-1.5 w-1.5 animate-bounce rounded-full bg-azure-bright/70"
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70"
           style={{ animationDelay: `${i * 120}ms` }}
         />
       ))}

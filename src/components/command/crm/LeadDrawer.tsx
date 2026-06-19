@@ -111,7 +111,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                 <X className="h-4 w-4" />
               </button>
               <div className="flex items-start gap-3 pr-8">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure to-azure-deep text-base font-bold text-white">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-base font-bold text-white">
                   {initials(lead.name)}
                 </span>
                 <div className="min-w-0">
@@ -168,8 +168,8 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               {/* AI summary */}
               <div className="rounded-xl border border-azure/20 bg-azure/[0.06] px-4 py-3">
                 <div className="mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-azure-bright" />
-                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-azure-300">AI lead summary</span>
+                  <Sparkles className="h-3.5 w-3.5 text-white" />
+                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-white/80">AI lead summary</span>
                 </div>
                 <p className="text-[0.86rem] leading-relaxed text-slate-300">{lead.aiSummary}</p>
               </div>
@@ -178,7 +178,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               <div className="rounded-xl border border-white/10 bg-white/[0.04]">
                 <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-azure-bright" />
+                    <Sparkles className="h-4 w-4 text-white" />
                     <span className="text-[0.84rem] font-semibold text-white">AI first reply</span>
                   </div>
                   {draft && !busy && (
@@ -198,7 +198,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   {!draft && !busy ? (
                     <button
                       onClick={generate}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-azure px-4 py-2.5 text-[0.85rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200"
                     >
                       <Sparkles className="h-4 w-4" /> Draft AI reply
                     </button>
@@ -206,7 +206,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                     <>
                       <div className="min-h-[7rem] whitespace-pre-wrap rounded-lg border border-white/10 bg-ink/60 px-3.5 py-3 text-[0.86rem] leading-relaxed text-slate-200">
                         {draft}
-                        {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-azure-bright align-middle" />}
+                        {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />}
                       </div>
                       {!busy && (
                         <div className="mt-2.5 flex items-center gap-2">
@@ -236,7 +236,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   )}
                   {busy && !draft && (
                     <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate-300">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-azure-bright" /> AI is drafting a personalized reply…
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> AI is drafting a personalized reply…
                     </div>
                   )}
                 </div>

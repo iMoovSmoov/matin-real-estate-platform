@@ -71,12 +71,12 @@ export function IntakeFlows() {
 
 function FlowCard({ flow, onPreview }: { flow: IntakeFlow; onPreview: () => void }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-azure/30">
+    <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-white/20">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="font-sans text-[0.95rem] font-semibold text-white">{flow.name}</h4>
-            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.62rem] text-azure-300 ring-1 ring-inset ring-white/10">
+            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.62rem] text-white/80 ring-1 ring-inset ring-white/10">
               {flow.code}
             </span>
           </div>
@@ -119,7 +119,7 @@ function FlowCard({ flow, onPreview }: { flow: IntakeFlow; onPreview: () => void
         <Pill tone="azure">{flow.fieldsCount} structured fields</Pill>
         <button
           onClick={onPreview}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-semibold text-slate-300 transition-colors hover:border-azure/45 hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-semibold text-slate-300 transition-colors hover:border-white/30 hover:text-white"
         >
           Preview form <ArrowRight className="h-3.5 w-3.5" />
         </button>
@@ -143,10 +143,10 @@ function PipeNode({
     <div
       className={cn(
         "flex min-w-0 flex-1 flex-col gap-0.5 rounded-lg px-2.5 py-2",
-        accent ? "bg-azure/[0.08] ring-1 ring-inset ring-azure/20" : "bg-white/[0.02]",
+        accent ? "bg-azure/[0.08] ring-1 ring-inset ring-white/12" : "bg-white/[0.02]",
       )}
     >
-      <div className={cn("flex items-center gap-1", accent ? "text-azure-bright" : "text-slate-300/70")}>
+      <div className={cn("flex items-center gap-1", accent ? "text-white" : "text-slate-300/70")}>
         {icon}
         <span className="text-[0.62rem] font-semibold uppercase tracking-wider">{label}</span>
       </div>
@@ -242,7 +242,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
       <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-4">
         <div>
           <div className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4 text-azure-bright" />
+            <ClipboardList className="h-4 w-4 text-white" />
             <SectionLabel>Intake flow · {flow.code}</SectionLabel>
           </div>
           <h2 className="mt-1 font-display text-xl text-white">{flow.name}</h2>
@@ -273,7 +273,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
             <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-slate-300/60">
               Live preview
             </span>
-            <span className="inline-flex items-center gap-1 text-[0.7rem] text-azure-bright">
+            <span className="inline-flex items-center gap-1 text-[0.7rem] text-white">
               <Wand2 className="h-3 w-3" /> {flow.aiStep.split(".")[0]}.
             </span>
           </div>
@@ -288,7 +288,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
             </div>
           ))}
 
-          <button className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-azure px-4 py-2.5 text-[0.84rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright">
+          <button className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[0.84rem] font-semibold text-ink transition-colors hover:bg-paper-200">
             <Send className="h-3.5 w-3.5" /> Submit
           </button>
         </div>
@@ -301,7 +301,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
             </span>
             <button
               onClick={add}
-              className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.72rem] font-semibold text-slate-300 transition-colors hover:border-azure/45 hover:text-white"
+              className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.72rem] font-semibold text-slate-300 transition-colors hover:border-white/30 hover:text-white"
             >
               <Plus className="h-3 w-3" /> Add
             </button>
@@ -334,7 +334,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
                 <input
                   value={f.label}
                   onChange={(e) => rename(f._id, e.target.value)}
-                  className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-[0.78rem] text-white focus:border-azure/40 focus:bg-white/[0.04] focus:outline-none"
+                  className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-[0.78rem] text-white focus:border-white/35 focus:bg-white/[0.04] focus:outline-none"
                   aria-label="Field label"
                 />
                 <select
@@ -370,14 +370,14 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-white/[0.05] px-5 py-3.5">
         <div className="flex items-center gap-2 text-[0.78rem] text-slate-300">
           <Link2 className="h-3.5 w-3.5 text-slate-300/60" />
-          <code className="rounded bg-white/[0.06] px-2 py-1 font-mono text-[0.74rem] text-azure-300">
+          <code className="rounded bg-white/[0.06] px-2 py-1 font-mono text-[0.74rem] text-white/80">
             {link}
           </code>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={copyLink}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-semibold text-slate-300 transition-colors hover:border-azure/45 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-semibold text-slate-300 transition-colors hover:border-white/30 hover:text-white"
           >
             {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? "Copied" : "Copy link"}
@@ -387,7 +387,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
               setPublished(true);
               setTimeout(() => setPublished(false), 2600);
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-azure px-3.5 py-1.5 text-[0.8rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
           >
             {published ? <Check className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
             {published ? "Published" : "Publish"}
@@ -405,7 +405,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
 
 function PreviewControl({ field }: { field: ReFormField }) {
   const cls =
-    "w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.82rem] text-white placeholder:text-slate-300/40 focus:border-azure/50 focus:bg-white/[0.05] focus:outline-none";
+    "w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.82rem] text-white placeholder:text-slate-300/40 focus:border-white/40 focus:bg-white/[0.05] focus:outline-none";
   if (field.type === "textarea")
     return <textarea rows={3} placeholder="Your answer…" className={cn(cls, "resize-y")} />;
   if (field.type === "select")
@@ -424,7 +424,7 @@ function PreviewControl({ field }: { field: ReFormField }) {
   if (field.type === "checkbox")
     return (
       <label className="inline-flex items-center gap-2 text-[0.82rem] text-slate-300">
-        <input type="checkbox" className="h-4 w-4 rounded border-white/20 bg-transparent text-azure" /> Yes
+        <input type="checkbox" className="h-4 w-4 rounded border-white/20 bg-transparent text-white" /> Yes
       </label>
     );
   return (

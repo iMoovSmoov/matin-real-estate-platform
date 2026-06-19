@@ -65,7 +65,7 @@ export function FormsLibrary() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search forms…"
-                className="w-44 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-8 pr-3 text-[0.8rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-azure/50 focus:bg-white/[0.05] focus:outline-none sm:w-56"
+                className="w-44 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-8 pr-3 text-[0.8rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none sm:w-56"
               />
             </div>
           }
@@ -82,7 +82,7 @@ export function FormsLibrary() {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
-                    ? "border-azure/50 bg-azure/15 text-white"
+                    ? "border-white/30 bg-white/[0.12] text-white"
                     : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:text-white",
                 )}
               >
@@ -114,7 +114,7 @@ export function FormsLibrary() {
                   setQuery("");
                   setFilter("All");
                 }}
-                className="text-[0.78rem] font-semibold text-azure-bright hover:underline"
+                className="text-[0.78rem] font-semibold text-white hover:underline"
               >
                 Clear filters
               </button>
@@ -132,12 +132,12 @@ function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-left transition-all hover:border-azure/40 hover:bg-white/[0.055] hover:shadow-glow"
+      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-left transition-all hover:border-white/30 hover:bg-white/[0.055] hover:shadow-glow"
     >
       {/* Top row: code + tags */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.66rem] font-semibold text-azure-300 ring-1 ring-inset ring-white/10">
+          <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.66rem] font-semibold text-white/80 ring-1 ring-inset ring-white/10">
             {form.code}
           </span>
           {form.oref && <Pill tone="azure">OREF</Pill>}
@@ -173,7 +173,7 @@ function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
 
       {/* AI assist */}
       <div className="mt-2 flex items-start gap-1.5">
-        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-azure-bright" />
+        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white" />
         <p className="text-[0.76rem] leading-snug text-slate-300">{form.aiAssist}</p>
       </div>
 
@@ -191,7 +191,7 @@ function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
             </Pill>
           )}
         </div>
-        <span className="inline-flex items-center gap-1 text-[0.74rem] font-semibold text-azure-bright opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="inline-flex items-center gap-1 text-[0.74rem] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
           Open template <ArrowRight className="h-3.5 w-3.5" />
         </span>
       </div>

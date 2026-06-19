@@ -100,7 +100,7 @@ export function AiToolPanel({
       {/* ── Input column ── */}
       <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
             <Wand2 className="h-5 w-5" />
           </span>
           <div>
@@ -127,10 +127,10 @@ export function AiToolPanel({
                   key={p.label}
                   type="button"
                   onClick={() => applyPreset(p)}
-                  className="group inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-azure/45 hover:bg-azure/10 hover:text-white"
+                  className="group inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
                   title={p.hint}
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-azure-bright" />
+                  <Sparkles className="h-3.5 w-3.5 text-white" />
                   {p.label}
                 </button>
               ))}
@@ -157,14 +157,14 @@ export function AiToolPanel({
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
                   rows={3}
-                  className="resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-azure/50 focus:bg-white/[0.05] focus:outline-none"
+                  className="resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none"
                 />
               ) : f.type === "select" ? (
                 <select
                   id={`f-${f.name}`}
                   value={values[f.name] ?? ""}
                   onChange={(e) => set(f.name, e.target.value)}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white transition-colors focus:border-azure/50 focus:outline-none"
+                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white transition-colors focus:border-white/40 focus:outline-none"
                 >
                   <option value="" className="bg-white/[0.06]">
                     Select…
@@ -182,7 +182,7 @@ export function AiToolPanel({
                   value={values[f.name] ?? ""}
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-azure/50 focus:bg-white/[0.05] focus:outline-none"
+                  className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none"
                 />
               )}
             </div>
@@ -192,7 +192,7 @@ export function AiToolPanel({
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-azure px-4 py-2.5 text-[0.88rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[0.88rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy ? (
                 <>
@@ -212,7 +212,7 @@ export function AiToolPanel({
       <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.045]">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5">
           <div className="flex items-center gap-2">
-            {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-azure-bright" />}
+            {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-white" />}
             <span className="text-[0.84rem] font-semibold text-white">{outputTitle}</span>
             {busy && <span className="text-[0.72rem] text-slate-300/70">streaming live</span>}
           </div>
@@ -221,21 +221,21 @@ export function AiToolPanel({
               {printable && (
                 <button
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
                 >
                   <Printer className="h-3.5 w-3.5" /> Print
                 </button>
               )}
               <button
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </button>
               <button
                 onClick={run}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Regenerate
               </button>
@@ -249,7 +249,7 @@ export function AiToolPanel({
           ) : (
             <div className="prose-none">
               <AiMarkdown text={output} />
-              {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-azure-bright align-middle" />}
+              {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />}
             </div>
           )}
         </div>
@@ -261,13 +261,13 @@ export function AiToolPanel({
 function EmptyState({ submitLabel }: { submitLabel: string }) {
   return (
     <div className="flex h-full min-h-[16rem] flex-col items-center justify-center text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-azure/10 text-azure-bright ring-1 ring-inset ring-azure/20">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/12">
         <Sparkles className="h-6 w-6" />
       </span>
       <p className="mt-3 text-[0.9rem] font-semibold text-white">Powered by AI</p>
       <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/70">
         Fill the form (or load a quick-fill example) and hit{" "}
-        <span className="inline-flex items-center gap-1 font-semibold text-azure-bright">
+        <span className="inline-flex items-center gap-1 font-semibold text-white">
           {submitLabel} <ArrowRight className="h-3 w-3" />
         </span>{" "}
         to stream a result live.

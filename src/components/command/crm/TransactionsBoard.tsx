@@ -69,7 +69,7 @@ export function TransactionsBoard({ transactions }: { transactions: Transaction[
                       <button
                         key={t.id}
                         onClick={() => setActive(t)}
-                        className="group rounded-xl border border-white/10 bg-white/[0.055] p-3.5 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
+                        className="group rounded-xl border border-white/10 bg-white/[0.055] p-3.5 text-left transition-all hover:border-white/30 hover:bg-azure/[0.05]"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[0.82rem] font-semibold leading-snug text-white">{t.address}</p>
@@ -151,7 +151,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               >
                 <X className="h-4 w-4" />
               </button>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-azure-300/80">{tx.stage} · {tx.type}</p>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">{tx.stage} · {tx.type}</p>
               <h2 className="mt-1 pr-8 font-display text-2xl text-white">{tx.address}</h2>
               {tx.riskFlag && (
                 <span className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-warn/15 px-2.5 py-1 text-[0.72rem] font-semibold text-warn ring-1 ring-inset ring-warn/25">
@@ -193,7 +193,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               <div>
                 <div className="mb-2.5 flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-white">
-                    <ClipboardList className="h-4 w-4 text-azure-bright" /> Transaction checklist
+                    <ClipboardList className="h-4 w-4 text-white" /> Transaction checklist
                   </span>
                   <span className="text-[0.72rem] text-slate-300/60 tabular-nums">
                     {doneCount}/{tx.checklist.length}

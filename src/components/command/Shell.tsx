@@ -145,8 +145,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                               : "text-slate-300 hover:bg-white/[0.05] hover:text-white",
                           )}
                         >
-                          {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-azure-bright" />}
-                          <Icon className={cn("h-[1.05rem] w-[1.05rem] shrink-0", active ? "text-azure-bright" : "text-slate-300 group-hover:text-white")} />
+                          {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-white" />}
+                          <Icon className={cn("h-[1.05rem] w-[1.05rem] shrink-0", active ? "text-white" : "text-slate-300 group-hover:text-white")} />
                           <span className="truncate">{item.label}</span>
                         </Link>
                       </li>
@@ -218,7 +218,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <input
               type="text"
               placeholder="Search leads, listings, agents…"
-              className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.04] pl-9 pr-16 text-[0.85rem] text-white placeholder:text-slate-300/45 transition-colors focus:border-azure/50 focus:bg-white/[0.06] focus:outline-none"
+              className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.04] pl-9 pr-16 text-[0.85rem] text-white placeholder:text-slate-300/45 transition-colors focus:border-white/40 focus:bg-white/[0.06] focus:outline-none"
             />
             <kbd className="pointer-events-none absolute right-2.5 rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[0.6rem] font-medium text-slate-300/60">
               ⌘K
@@ -246,7 +246,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-white/10 bg-ink-900 shadow-2xl">
                     <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                       <span className="text-[0.84rem] font-semibold text-white">Notifications</span>
-                      <span className="rounded-md bg-azure/15 px-1.5 py-0.5 text-[0.62rem] font-semibold text-azure-bright">
+                      <span className="rounded-md bg-white/[0.12] px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
                         {NOTIFICATIONS.length} new
                       </span>
                     </div>
@@ -256,7 +256,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                           <span
                             className={cn(
                               "mt-1 h-2 w-2 shrink-0 rounded-full",
-                              n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-azure-bright",
+                              n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-white",
                             )}
                           />
                           <div className="min-w-0">
@@ -269,7 +269,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     <Link
                       href="/hub/crm"
                       onClick={() => setNotifOpen(false)}
-                      className="block border-t border-white/10 px-4 py-2.5 text-center text-[0.76rem] font-semibold text-azure-bright hover:bg-white/[0.03]"
+                      className="block border-t border-white/10 px-4 py-2.5 text-center text-[0.76rem] font-semibold text-white hover:bg-white/[0.03]"
                     >
                       View all in CRM
                     </Link>
@@ -279,7 +279,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-azure to-azure-deep text-[0.66rem] font-bold text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[0.66rem] font-bold text-ink">
                 {initials("Alicia Kelly-Smith")}
               </span>
               <div className="hidden leading-tight md:block">
@@ -294,7 +294,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center border-b border-white/[0.06] bg-white/[0.025] px-4 py-1.5 md:px-6">
           <Link
             href="/"
-            className="group inline-flex items-center gap-1.5 text-[0.72rem] font-medium text-slate-300/70 transition-colors hover:text-azure-bright"
+            className="group inline-flex items-center gap-1.5 text-[0.72rem] font-medium text-slate-300/70 transition-colors hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
             Back to website

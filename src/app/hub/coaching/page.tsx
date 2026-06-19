@@ -78,11 +78,11 @@ export default function CoachingPage() {
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Header / hero */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.03] to-white/[0.05] px-6 py-7">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/[0.12] blur-3xl" />
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.5]" />
         <div className="relative">
           <div className="mb-2 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-azure-300/80">
+            <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/70">
               <GraduationCap className="h-3.5 w-3.5" /> Coaching Academy
             </span>
             <LiveDot tone="success" />
@@ -168,7 +168,7 @@ export default function CoachingPage() {
             subtitle="Ranked by avg score · practice streaks & drills completed"
             icon={<Trophy className="h-4 w-4" />}
             action={
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-azure/12 px-2.5 py-1 text-[0.72rem] font-semibold text-azure-bright ring-1 ring-inset ring-azure/20">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.1] px-2.5 py-1 text-[0.72rem] font-semibold text-white ring-1 ring-inset ring-white/12">
                 <TrendingUp className="h-3.5 w-3.5" /> This season
               </span>
             }
@@ -226,7 +226,7 @@ export default function CoachingPage() {
             <p className="text-[0.72rem] text-slate-300/55">
               Scores blend conversation grades, completion, and streak consistency.
             </p>
-            <span className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure-bright">
+            <span className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-white">
               <LiveDot tone="azure" /> Updates as agents drill
             </span>
           </div>

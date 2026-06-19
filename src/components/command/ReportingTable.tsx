@@ -80,9 +80,9 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
         </div>
         <button
           onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:border-azure/40 hover:bg-azure/10"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.08]"
         >
-          <Download className="h-3.5 w-3.5 text-azure-bright" /> Export CSV
+          <Download className="h-3.5 w-3.5 text-white" /> Export CSV
         </button>
       </div>
 
@@ -153,7 +153,7 @@ function Th({
     <th className={cn("px-5 py-3 font-semibold", align === "right" && "text-right")}>
       <button
         onClick={() => onClick(sortKey)}
-        className={cn("inline-flex items-center gap-1 hover:text-white", active && "text-azure-bright", align === "right" && "flex-row-reverse")}
+        className={cn("inline-flex items-center gap-1 hover:text-white", active && "text-white", align === "right" && "flex-row-reverse")}
       >
         {label}
         <ArrowUpDown className={cn("h-3 w-3", active ? "opacity-100" : "opacity-30")} />

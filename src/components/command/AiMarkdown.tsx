@@ -26,7 +26,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
       return (
         <code
           key={`${keyBase}-c-${i}`}
-          className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[0.82em] text-azure-300"
+          className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[0.82em] text-white/80"
         >
           {tok.slice(1, -1)}
         </code>
@@ -75,7 +75,7 @@ export function AiMarkdown({ text }: { text: string }) {
           <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate-300">
             <span
               aria-hidden
-              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-azure/12 text-[0.68rem] font-semibold text-azure-bright ring-1 ring-inset ring-azure/20"
+              className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/[0.1] text-[0.68rem] font-semibold text-white ring-1 ring-inset ring-white/12"
             >
               {i + 1}
             </span>
@@ -107,7 +107,7 @@ export function AiMarkdown({ text }: { text: string }) {
     if (line.startsWith("### ")) {
       flushLists(key);
       blocks.push(
-        <h4 key={key} className="mt-4 font-sans text-[0.82rem] font-semibold uppercase tracking-wider text-azure-300">
+        <h4 key={key} className="mt-4 font-sans text-[0.82rem] font-semibold uppercase tracking-wider text-white/80">
           {renderInline(line.slice(4), key)}
         </h4>,
       );

@@ -260,7 +260,7 @@ export function ContractWizard() {
       {/* Summary header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-5 py-3.5">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
             <FileSignature className="h-4 w-4" />
           </span>
           <div className="leading-tight">
@@ -306,7 +306,7 @@ export function ContractWizard() {
                     onClick={() => open && setStep(s.n)}
                     className={cn(
                       "group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors",
-                      active && "bg-azure/[0.12] ring-1 ring-inset ring-azure/25",
+                      active && "bg-azure/[0.12] ring-1 ring-inset ring-white/15",
                       !active && open && "hover:bg-white/[0.04]",
                       !open && "cursor-not-allowed opacity-40",
                     )}
@@ -317,7 +317,7 @@ export function ContractWizard() {
                         done
                           ? "bg-success/15 text-success ring-success/25"
                           : active
-                            ? "bg-azure/20 text-azure-bright ring-azure/30"
+                            ? "bg-white/[0.12] text-white ring-white/15"
                             : "bg-white/[0.05] text-slate-300/70 ring-white/10",
                       )}
                     >
@@ -400,7 +400,7 @@ export function ContractWizard() {
                 type="button"
                 onClick={() => canNext && setStep((s) => Math.min(5, s + 1))}
                 disabled={!canNext}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-50"
                 title={!canNext ? gateHint(step) : undefined}
               >
                 Continue <ArrowRight className="h-4 w-4" />
@@ -446,12 +446,12 @@ function StepChoose({ selected, onChoose }: { selected: string; onChoose: (c: st
               className={cn(
                 "group relative flex flex-col rounded-xl border p-4 text-left transition-all",
                 active
-                  ? "border-azure/45 bg-azure/[0.08] shadow-glow"
-                  : "border-white/10 bg-white/[0.02] hover:-translate-y-0.5 hover:border-azure/30 hover:bg-azure/[0.04]",
+                  ? "border-white/30 bg-azure/[0.08] shadow-glow"
+                  : "border-white/10 bg-white/[0.02] hover:-translate-y-0.5 hover:border-white/20 hover:bg-azure/[0.04]",
               )}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.64rem] font-semibold uppercase tracking-wide text-azure-300 ring-1 ring-inset ring-white/10">
+                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.64rem] font-semibold uppercase tracking-wide text-white/80 ring-1 ring-inset ring-white/10">
                   {f.code}
                 </span>
                 <span
@@ -475,7 +475,7 @@ function StepChoose({ selected, onChoose }: { selected: string; onChoose: (c: st
               </div>
               {f.compliance && (
                 <p className="mt-2 flex items-start gap-1.5 text-[0.7rem] leading-snug text-slate-300/65">
-                  <ShieldCheck className="mt-px h-3 w-3 shrink-0 text-azure-bright" />
+                  <ShieldCheck className="mt-px h-3 w-3 shrink-0 text-white" />
                   {f.compliance}
                 </p>
               )}
@@ -520,7 +520,7 @@ function StepAutofill({
         <select
           value={recordId}
           onChange={(e) => onPick(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[0.85rem] text-white transition-colors focus:border-azure/50 focus:outline-none"
+          className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[0.85rem] text-white transition-colors focus:border-white/40 focus:outline-none"
         >
           <option value="" className="bg-white/[0.06]">Select a CRM record…</option>
           <optgroup label="Listings" className="bg-white/[0.06]">
@@ -557,7 +557,7 @@ function StepAutofill({
       ) : (
         <div className="mt-5 space-y-3">
           <div className="flex items-center gap-2 rounded-lg border border-azure/20 bg-azure/[0.06] px-3 py-2">
-            <Sparkles className="h-4 w-4 shrink-0 text-azure-bright" />
+            <Sparkles className="h-4 w-4 shrink-0 text-white" />
             <p className="text-[0.8rem] font-medium text-white">
               Auto-filled from CRM — no duplicate entry.{" "}
               <span className="font-normal text-slate-300/75">Highlighted fields came straight from the record; edit anything inline.</span>
@@ -597,15 +597,15 @@ function FieldInput({
   const base =
     "w-full rounded-lg border bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white placeholder:text-slate-300/40 transition-colors focus:outline-none";
   const ring = autofilled
-    ? "border-azure/40 bg-azure/[0.06] focus:border-azure/60"
-    : "border-white/10 focus:border-azure/50 focus:bg-white/[0.05]";
+    ? "border-white/25 bg-azure/[0.06] focus:border-azure/60"
+    : "border-white/10 focus:border-white/40 focus:bg-white/[0.05]";
   return (
     <div className={cn("flex flex-col gap-1.5", field.type === "textarea" && "sm:col-span-2")}>
       <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-slate-300">
         {field.label}
-        {field.required && <span className="text-azure-bright">*</span>}
+        {field.required && <span className="text-white">*</span>}
         {autofilled && (
-          <span className="inline-flex items-center gap-0.5 rounded bg-azure/12 px-1 py-px text-[0.58rem] font-semibold uppercase tracking-wide text-azure-bright ring-1 ring-inset ring-azure/25">
+          <span className="inline-flex items-center gap-0.5 rounded bg-white/[0.1] px-1 py-px text-[0.58rem] font-semibold uppercase tracking-wide text-white ring-1 ring-inset ring-white/15">
             <Sparkles className="h-2.5 w-2.5" /> auto
           </span>
         )}
@@ -668,7 +668,7 @@ function StepDraft({
           type="button"
           onClick={onDraft}
           disabled={drafting}
-          className="inline-flex items-center gap-2 rounded-xl bg-azure px-4 py-2.5 text-[0.86rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[0.86rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {drafting ? (
             <>
@@ -688,7 +688,7 @@ function StepDraft({
           <button
             type="button"
             onClick={() => setEditing((e) => !e)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
           >
             <PenTool className="h-3.5 w-3.5" /> {editing ? "Preview" : "Edit text"}
           </button>
@@ -699,7 +699,7 @@ function StepDraft({
       <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04]">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
           <div className="flex items-center gap-2">
-            {drafting ? <LiveDot tone="azure" /> : <FileSignature className="h-3.5 w-3.5 text-azure-bright" />}
+            {drafting ? <LiveDot tone="azure" /> : <FileSignature className="h-3.5 w-3.5 text-white" />}
             <span className="text-[0.8rem] font-semibold text-white">Document preview</span>
             {drafting && <span className="text-[0.7rem] text-slate-300/65">streaming live</span>}
           </div>
@@ -712,12 +712,12 @@ function StepDraft({
         <div className="max-h-[26rem] overflow-y-auto px-5 py-4">
           {!drafted ? (
             <div className="flex min-h-[14rem] flex-col items-center justify-center text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-azure/10 text-azure-bright ring-1 ring-inset ring-azure/20">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/12">
                 <Wand2 className="h-6 w-6" />
               </span>
               <p className="mt-3 text-[0.9rem] font-semibold text-white">Ready to draft</p>
               <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate-300/65">
-                Hit <span className="font-semibold text-azure-bright">Draft with AI</span> to generate clause
+                Hit <span className="font-semibold text-white">Draft with AI</span> to generate clause
                 language from the auto-filled terms.
               </p>
             </div>
@@ -726,13 +726,13 @@ function StepDraft({
               value={draft}
               onChange={(e) => onEdit(e.target.value)}
               rows={16}
-              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-[0.8rem] leading-relaxed text-slate-200 focus:border-azure/50 focus:outline-none"
+              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-[0.8rem] leading-relaxed text-slate-200 focus:border-white/40 focus:outline-none"
             />
           ) : (
             <div>
               <AiMarkdown text={draft} />
               {drafting && (
-                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-azure-bright align-middle" />
+                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />
               )}
             </div>
           )}
@@ -797,7 +797,7 @@ function StepSign({
       {/* Recipients */}
       <div className="mt-5">
         <div className="mb-2 flex items-center gap-2">
-          <Users className="h-3.5 w-3.5 text-azure-bright" />
+          <Users className="h-3.5 w-3.5 text-white" />
           <SectionLabel>Recipients</SectionLabel>
         </div>
         {recipients.length === 0 ? (
@@ -812,7 +812,7 @@ function StepSign({
                 className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-azure/12 text-[0.72rem] font-semibold text-azure-bright ring-1 ring-inset ring-azure/20">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.1] text-[0.72rem] font-semibold text-white ring-1 ring-inset ring-white/12">
                     {r.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
                   </span>
                   <div className="leading-tight">
@@ -848,7 +848,7 @@ function StepSign({
             type="button"
             onClick={onSend}
             disabled={!ready || recipients.length === 0}
-            className="inline-flex items-center gap-2 rounded-xl bg-azure px-5 py-2.5 text-[0.88rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[0.88rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Stamp className="h-4 w-4" /> Send via DocuSign / Dotloop
           </button>
@@ -871,14 +871,14 @@ function StepSign({
           {/* Audit log */}
           <div className="rounded-xl border border-white/10 bg-white/[0.04]">
             <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-azure-bright" />
+              <ShieldCheck className="h-3.5 w-3.5 text-white" />
               <span className="text-[0.8rem] font-semibold text-white">Audit log</span>
               <span className="ml-auto text-[0.7rem] text-slate-300/55">tamper-evident</span>
             </div>
             <ul className="divide-y divide-white/[0.06]">
               {audit.map((a, i) => (
                 <li key={i} className="flex items-start gap-3 px-4 py-2.5">
-                  <span className="mt-0.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-azure-bright" />
+                  <span className="mt-0.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
                   <div className="min-w-0 flex-1">
                     <p className="text-[0.8rem] text-slate-200">
                       <span className="font-semibold text-white">{a.who}</span> — {a.action}
@@ -909,11 +909,11 @@ function StepHead({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
         <Icon className="h-5 w-5" />
       </span>
       <div>
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-azure-300/80">{eyebrow}</p>
+        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-white/70">{eyebrow}</p>
         <h2 className="font-display text-xl text-white">{title}</h2>
         <p className="mt-1 max-w-2xl text-[0.84rem] leading-relaxed text-slate-300/85">{sub}</p>
       </div>

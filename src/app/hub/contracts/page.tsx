@@ -46,7 +46,7 @@ export default function ContractsPage() {
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Hero header */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.04] px-6 py-7">
-        <div className="pointer-events-none absolute -right-12 top-0 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 top-0 h-56 w-56 rounded-full bg-white/[0.12] blur-3xl" />
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.4]" />
         <div className="relative max-w-2xl">
           <div className="mb-2 flex items-center gap-2">
@@ -54,7 +54,7 @@ export default function ContractsPage() {
             <SectionLabel>Contract Builder</SectionLabel>
           </div>
           <h1 className="flex items-center gap-3 font-display text-3xl text-white md:text-[2.3rem]">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-azure/15 text-azure-bright ring-1 ring-inset ring-azure/25">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.12] text-white ring-1 ring-inset ring-white/15">
               <FileSignature className="h-6 w-6" />
             </span>
             AI Contract Builder
@@ -77,7 +77,7 @@ export default function ContractsPage() {
                   key={t.label}
                   className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2"
                 >
-                  <Icon className="h-4 w-4 text-azure-bright" />
+                  <Icon className="h-4 w-4 text-white" />
                   <span className="text-[0.8rem] font-semibold text-white">{t.label}</span>
                 </div>
               );
@@ -125,7 +125,7 @@ export default function ContractsPage() {
       <Panel>
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
               <ScrollText className="h-4 w-4" />
             </span>
             <div>
@@ -133,7 +133,7 @@ export default function ContractsPage() {
               <p className="text-[0.76rem] text-slate-300/70">Documents generated across active transactions</p>
             </div>
           </div>
-          <span className="hidden items-center gap-1.5 text-[0.76rem] font-medium text-azure-bright sm:inline-flex">
+          <span className="hidden items-center gap-1.5 text-[0.76rem] font-medium text-white sm:inline-flex">
             View all <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
         </div>
@@ -148,7 +148,7 @@ export default function ContractsPage() {
                 key={tx.id}
                 className="flex flex-wrap items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-azure-bright ring-1 ring-inset ring-white/10">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] text-white ring-1 ring-inset ring-white/10">
                   <FileSignature className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">

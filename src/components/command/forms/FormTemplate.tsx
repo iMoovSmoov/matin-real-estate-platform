@@ -269,8 +269,8 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         </button>
 
         <div className="flex items-center gap-2 pr-10">
-          <FilePen className="h-4 w-4 text-azure-bright" />
-          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-azure-300">
+          <FilePen className="h-4 w-4 text-white" />
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/80">
             Editable template · {form.code}
           </span>
           {form.oref && <Pill tone="azure">OREF</Pill>}
@@ -311,7 +311,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             <button
               onClick={runAutofill}
               disabled={!recordKey}
-              className="inline-flex items-center gap-1.5 rounded-md bg-azure/15 px-2.5 py-1 text-[0.76rem] font-semibold text-azure-bright ring-1 ring-inset ring-azure/25 transition-colors hover:bg-azure/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-white/[0.12] px-2.5 py-1 text-[0.76rem] font-semibold text-white ring-1 ring-inset ring-white/15 transition-colors hover:bg-azure/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Wand2 className="h-3.5 w-3.5" /> AI auto-fill
             </button>
@@ -342,7 +342,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {/* Inline confirmations */}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
           {filledFrom && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-azure-bright">
+            <span className="inline-flex items-center gap-1.5 font-medium text-white">
               <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
             </span>
           )}
@@ -380,7 +380,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               </div>
               <h3 className="mt-0.5 font-display text-lg leading-tight text-slate-900">{form.name}</h3>
               {form.oref && (
-                <div className="mt-1 inline-flex items-center gap-1 rounded bg-azure/10 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-azure-deep">
+                <div className="mt-1 inline-flex items-center gap-1 rounded bg-white/[0.08] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
                   OREF standard form
                 </div>
               )}
@@ -390,7 +390,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           {/* Compliance strip */}
           {form.compliance && (
             <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-8 py-2.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-azure-deep" />
+              <ShieldCheck className="h-3.5 w-3.5 text-white" />
               <span className="text-[0.72rem] text-slate-500">{form.compliance}</span>
             </div>
           )}
@@ -418,7 +418,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             {/* Add custom field — proves "fully customizable" */}
             <button
               onClick={addField}
-              className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-[0.76rem] font-semibold text-slate-500 transition-colors hover:border-azure hover:text-azure-deep print:hidden"
+              className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-[0.76rem] font-semibold text-slate-500 transition-colors hover:border-azure hover:text-white print:hidden"
             >
               <Plus className="h-3.5 w-3.5" /> Add custom field
             </button>
@@ -440,7 +440,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {(aiOut || aiBusy) && (
           <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-azure/25 bg-azure/[0.06] print:hidden">
             <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-              <Sparkles className="h-4 w-4 text-azure-bright" />
+              <Sparkles className="h-4 w-4 text-white" />
               <span className="text-[0.82rem] font-semibold text-white">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>
@@ -449,7 +449,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             <div className="px-4 py-3">
               <AiMarkdown text={aiOut} />
               {aiBusy && (
-                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-azure-bright align-middle" />
+                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />
               )}
             </div>
           </div>
@@ -477,8 +477,8 @@ function ToolbarButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.76rem] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         accent
-          ? "bg-azure text-white shadow-glow hover:bg-azure-bright"
-          : "border border-white/10 bg-white/[0.04] text-slate-300 hover:border-azure/40 hover:text-white",
+          ? "bg-azure text-ink hover:bg-paper-200"
+          : "border border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30 hover:text-white",
       )}
     >
       {children}
@@ -507,7 +507,7 @@ function DocField({
 }) {
   const full = field.type === "textarea" || field.type === "signature";
   const inputCls =
-    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-300 focus:border-azure focus:outline-none focus:ring-1 focus:ring-azure/30";
+    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-300 focus:border-azure focus:outline-none focus:ring-1 focus:ring-white/15";
 
   return (
     <div className={cn("group/field flex flex-col gap-1", full && "sm:col-span-2")}>
@@ -528,7 +528,7 @@ function DocField({
 
         <div className="flex items-center gap-1">
           {field.autofill && (
-            <span className="inline-flex items-center gap-1 rounded bg-azure/10 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-azure-deep print:hidden">
+            <span className="inline-flex items-center gap-1 rounded bg-white/[0.08] px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
               <Wand2 className="h-2.5 w-2.5" /> auto
             </span>
           )}
@@ -572,7 +572,7 @@ function DocField({
           <span
             className={cn(
               "font-display text-lg italic",
-              signed ? "text-azure-deep" : "text-slate-300",
+              signed ? "text-white" : "text-slate-300",
             )}
           >
             {signed ? "Matin Real Estate" : "Sign here"}
@@ -604,7 +604,7 @@ function DocField({
             type="checkbox"
             checked={value === "yes"}
             onChange={(e) => onChange(e.target.checked ? "yes" : "")}
-            className="h-4 w-4 rounded border-slate-300 text-azure focus:ring-azure/30"
+            className="h-4 w-4 rounded border-slate-300 text-white focus:ring-white/15"
           />
           Yes
         </label>

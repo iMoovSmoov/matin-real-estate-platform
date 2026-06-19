@@ -57,7 +57,7 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Greeting / hero */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.03] to-white/[0.05] px-6 py-7">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/[0.12] blur-3xl" />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="font-display text-3xl text-white md:text-[2.4rem]">
@@ -77,9 +77,9 @@ export default function DashboardPage() {
             </Link>
             <Link
               href="/hub/ai"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:border-azure/40 hover:bg-white/[0.07]"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.07]"
             >
-              <Bot className="h-4 w-4 text-azure-bright" /> AI Studio
+              <Bot className="h-4 w-4 text-white" /> AI Studio
             </Link>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
             subtitle="Top producers by closed volume"
             icon={<TrendingUp className="h-4 w-4" />}
             action={
-              <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure-bright hover:text-azure-300">
+              <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-white hover:text-white">
                 Full report →
               </Link>
             }

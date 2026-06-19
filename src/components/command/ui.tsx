@@ -56,7 +56,7 @@ export function PanelHeader({
     >
       <div className="flex items-start gap-3">
         {icon && (
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
             {icon}
           </span>
         )}
@@ -105,7 +105,7 @@ export function Pill({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    azure: "bg-azure/12 text-azure-bright ring-azure/25",
+    azure: "bg-white/[0.1] text-white ring-white/15",
     success: "bg-success/12 text-success ring-success/25",
     danger: "bg-danger/12 text-danger ring-danger/25",
     warn: "bg-warn/15 text-warn ring-warn/25",
@@ -150,20 +150,20 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-azure/30",
-        accent && "bg-azure/[0.07]",
+        "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-white/20",
+        accent && "bg-white/[0.06]",
         className,
       )}
     >
       {accent && (
-        <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-azure/20 blur-2xl" />
+        <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-white/[0.12] blur-2xl" />
       )}
       <div className="relative flex items-start justify-between gap-2">
         <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate-300">
           {label}
         </p>
         {icon && (
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.06] text-azure-bright ring-1 ring-inset ring-white/10">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.06] text-white ring-1 ring-inset ring-white/10">
             {icon}
           </span>
         )}
@@ -220,7 +220,7 @@ export function LiveDot({
 }) {
   const tones: Record<string, string> = {
     success: "bg-success",
-    azure: "bg-azure-bright",
+    azure: "bg-white",
     warn: "bg-warn",
     danger: "bg-danger",
   };
@@ -281,7 +281,7 @@ export function GlowBlob({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute rounded-full bg-azure/20 blur-3xl",
+        "pointer-events-none absolute rounded-full bg-white/[0.12] blur-3xl",
         className,
       )}
     />

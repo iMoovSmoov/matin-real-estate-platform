@@ -9,13 +9,13 @@
 */
 
 @theme {
-  /* Ink — true near-black scale (depth via value, not muddy gray) */
-  --color-ink: #090909;
-  --color-ink-900: #0f0f11;
-  --color-ink-800: #161618;
-  --color-ink-700: #1f1f22;
-  --color-ink-600: #2c2c30;
-  --color-ink-500: #50505a;
+  /* Ink — true black scale */
+  --color-ink: #060606;
+  --color-ink-900: #0d0d0e;
+  --color-ink-800: #161617;
+  --color-ink-700: #232325;
+  --color-ink-600: #34343a;
+  --color-ink-500: #5a5a64;
 
   /* Light neutrals — clean white / light gray */
   --color-paper: #f6f6f5;
@@ -26,12 +26,12 @@
   --color-slate: #62626a;       /* muted text on light */
   --color-slate-300: #c3c3c9;   /* bright muted text on dark (legible white-ish) */
 
-  /* Accent — monochrome: mid-gray works on both; white for dark accents, near-black for light */
+  /* Accent — monochrome: white on dark, near-black on light */
   --color-azure: #6e6e76;
-  --color-azure-bright: #f4f4f5;/* near-white: dark-surface accents/icons/active */
-  --color-azure-300: #d6d6da;
-  --color-azure-deep: #29292c;  /* near-black: light-surface eyebrows/hover */
-  --color-azure-ink: #151517;
+  --color-azure-bright: #ffffff;
+  --color-azure-300: #e2e2e5;
+  --color-azure-deep: #1c1c1f;
+  --color-azure-ink: #131315;
 
   /* Functional status only */
   --color-success: #56a07d;

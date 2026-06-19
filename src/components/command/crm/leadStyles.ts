@@ -4,9 +4,9 @@ import type { LeadStage } from "@/lib/types";
    the kanban board, and the drawer so the visual language stays consistent. */
 
 const STAGE: Record<LeadStage, string> = {
-  New: "bg-azure/12 text-azure-bright ring-azure/25",
+  New: "bg-white/[0.1] text-white ring-white/15",
   Nurture: "bg-warn/15 text-warn ring-warn/25",
-  Active: "bg-azure/15 text-azure-300 ring-azure/30",
+  Active: "bg-white/[0.12] text-white/80 ring-white/15",
   Showing: "bg-info/15 text-info ring-info/30",
   Offer: "bg-warn/15 text-warn ring-warn/30",
   "Under Contract": "bg-success/12 text-success ring-success/25",
@@ -30,7 +30,7 @@ export function stageTone(stage: string): string {
 }
 
 const STAGE_DOT: Record<LeadStage, string> = {
-  New: "bg-azure-bright",
+  New: "bg-white",
   Nurture: "bg-warn",
   Active: "bg-azure-300",
   Showing: "bg-info",
@@ -46,7 +46,7 @@ export function stageDot(stage: string): string {
 
 export function scoreTone(score: number): string {
   if (score >= 80) return "bg-success/12 text-success ring-success/25";
-  if (score >= 60) return "bg-azure/12 text-azure-bright ring-azure/25";
+  if (score >= 60) return "bg-white/[0.1] text-white ring-white/15";
   if (score >= 40) return "bg-warn/15 text-warn ring-warn/25";
   return "bg-danger/12 text-danger ring-danger/25";
 }

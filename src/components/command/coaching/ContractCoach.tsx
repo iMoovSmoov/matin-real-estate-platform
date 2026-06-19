@@ -78,7 +78,7 @@ export function ContractCoach() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.1] text-white ring-1 ring-inset ring-white/12">
             <PenTool className="h-4 w-4" />
           </span>
           <div>
@@ -125,7 +125,7 @@ export function ContractCoach() {
                   setDraft(s.text);
                   setOutput("");
                 }}
-                className="rounded-full border border-white/12 bg-white/[0.03] px-3 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-azure/45 hover:bg-azure/10 hover:text-white"
+                className="rounded-full border border-white/12 bg-white/[0.03] px-3 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
               >
                 {s.label}
               </button>
@@ -137,13 +137,13 @@ export function ContractCoach() {
             onChange={(e) => setDraft(e.target.value)}
             rows={12}
             placeholder="Write or paste a contingency clause, counter-offer paragraph, or any agreement language you want sharpened…"
-            className="min-h-[16rem] flex-1 resize-y rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-[0.86rem] leading-relaxed text-white placeholder:text-slate-300/35 focus:border-azure/50 focus:outline-none"
+            className="min-h-[16rem] flex-1 resize-y rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-[0.86rem] leading-relaxed text-white placeholder:text-slate-300/35 focus:border-white/40 focus:outline-none"
           />
 
           <button
             onClick={coach}
             disabled={busy || !draft.trim()}
-            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-azure px-4 py-2.5 text-[0.85rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Sparkles className="h-4 w-4" />
             {busy ? "Coaching your draft…" : "Coach my draft"}
@@ -159,7 +159,7 @@ export function ContractCoach() {
             {output && !busy && (
               <button
                 onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-azure/40 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:border-white/30 hover:text-white"
               >
                 {copied ? (
                   <>
@@ -188,7 +188,7 @@ export function ContractCoach() {
               </div>
             ) : (
               <div className="px-4 text-center text-[0.82rem] leading-relaxed text-slate-300/55">
-                <PenTool className="mx-auto mb-2 h-5 w-5 text-azure-bright/60" />
+                <PenTool className="mx-auto mb-2 h-5 w-5 text-white/60" />
                 Your assessment, fixes, and a stronger rewrite will stream here.
               </div>
             )}

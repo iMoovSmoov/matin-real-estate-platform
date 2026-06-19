@@ -79,7 +79,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search name, area, tag…"
-              className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.04] pl-9 pr-3 text-[0.84rem] text-white placeholder:text-slate-300/45 focus:border-azure/50 focus:outline-none"
+              className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.04] pl-9 pr-3 text-[0.84rem] text-white placeholder:text-slate-300/45 focus:border-white/40 focus:outline-none"
             />
           </div>
           <Select value={stage} onChange={setStage} options={["All", ...LEAD_STAGES]} />
@@ -149,13 +149,13 @@ function TableView({
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure to-azure-deep text-[0.62rem] font-bold text-white">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[0.62rem] font-bold text-white">
                         {initials(l.name)}
                       </span>
                       <div className="min-w-0">
                         <p className="flex items-center gap-1.5 truncate text-[0.84rem] font-semibold text-white">
                           {l.name}
-                          {l.unread > 0 && <span className="h-1.5 w-1.5 rounded-full bg-azure-bright" title={`${l.unread} unread`} />}
+                          {l.unread > 0 && <span className="h-1.5 w-1.5 rounded-full bg-white" title={`${l.unread} unread`} />}
                         </p>
                         <p className="truncate text-[0.72rem] text-slate-300/60">{l.intent}</p>
                       </div>
@@ -233,7 +233,7 @@ function Th({
   const activeSort = sort === sortKey;
   return (
     <th className="px-4 py-3 font-semibold">
-      <button onClick={() => toggleSort(sortKey)} className={cn("inline-flex items-center gap-1 hover:text-white", activeSort && "text-azure-bright")}>
+      <button onClick={() => toggleSort(sortKey)} className={cn("inline-flex items-center gap-1 hover:text-white", activeSort && "text-white")}>
         {label}
         <ArrowUpDown className={cn("h-3 w-3", activeSort ? "opacity-100" : "opacity-30")} />
         {activeSort && <span className="text-[0.6rem]">{asc ? "↑" : "↓"}</span>}
@@ -264,7 +264,7 @@ function KanbanView({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => voi
                   <button
                     key={l.id}
                     onClick={() => onOpen(l)}
-                    className="group rounded-xl border border-white/10 bg-white/[0.055] p-3 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
+                    className="group rounded-xl border border-white/10 bg-white/[0.055] p-3 text-left transition-all hover:border-white/30 hover:bg-azure/[0.05]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="truncate text-[0.82rem] font-semibold text-white">{l.name}</p>
@@ -274,7 +274,7 @@ function KanbanView({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => voi
                       </span>
                     </div>
                     <p className="mt-1 text-[0.72rem] text-slate-300/65">{l.intent} · {l.community}</p>
-                    <p className="mt-1.5 text-[0.74rem] font-medium text-azure-300 tabular-nums">
+                    <p className="mt-1.5 text-[0.74rem] font-medium text-white/80 tabular-nums">
                       {compactUsd(l.budgetMin)}–{compactUsd(l.budgetMax)}
                     </p>
                     {l.tags.length > 0 && (
@@ -303,7 +303,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 appearance-none rounded-lg border border-white/10 bg-white/[0.04] pl-3 pr-8 text-[0.82rem] font-medium text-white focus:border-azure/50 focus:outline-none"
+        className="h-9 appearance-none rounded-lg border border-white/10 bg-white/[0.04] pl-3 pr-8 text-[0.82rem] font-medium text-white focus:border-white/40 focus:outline-none"
       >
         {options.map((o) => (
           <option key={o} value={o} className="bg-white/[0.06]">
