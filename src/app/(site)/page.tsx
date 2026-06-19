@@ -101,7 +101,7 @@ export default function HomePage() {
         </div>
 
         {/* scroll-down indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
+        <div className="absolute bottom-[calc(56px+2rem)] sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
           <span className="text-[0.65rem] uppercase tracking-widest">Scroll</span>
           <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
         </div>

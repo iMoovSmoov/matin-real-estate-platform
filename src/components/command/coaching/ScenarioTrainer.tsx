@@ -286,7 +286,7 @@ export function ScenarioTrainer() {
 
   /* ── Active role-play view ────────────────────────────────────────────── */
   return (
-    <div className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
+    <div className="flex h-[calc(100dvh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
@@ -329,7 +329,7 @@ export function ScenarioTrainer() {
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
                 m.role === "user"
-                  ? "bg-ink text-white"
+                  ? "bg-ink text-ink"
                   : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
               )}
             >

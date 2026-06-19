@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -15,30 +16,37 @@ import {
   BarChart2,
   PlugZap,
   BrainCircuit,
+  MessageSquareText,
+  PenLine,
+  Calculator,
   FileSignature,
+  MessageCircle,
+  Megaphone,
+  PhoneCall,
   Search,
+  Bell,
   Menu,
   X,
   ArrowLeft,
   ChevronDown,
   Building2,
-  Settings,
-  LogOut,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
-import { NotificationCenter } from "@/components/command/NotificationCenter";
-import { CommandPalette, CommandPaletteProvider, useCommandPalette } from "@/components/command/CommandPalette";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
-type NavGroup = { label: string; items: NavItem[]; alwaysOpen?: boolean };
+type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
   {
-    label: "HOME",
-    alwaysOpen: true,
+    label: "OVERVIEW",
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "AGENT",
+    items: [
       { label: "My Workspace", href: "/hub/agent", icon: BrainCircuit },
     ],
   },
@@ -61,9 +69,18 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "AI",
+    label: "AI STUDIO",
     items: [
       { label: "AI Studio", href: "/hub/ai", icon: BrainCircuit },
+      { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
+      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenLine },
+      { label: "Marketing Kit", href: "/hub/ai/marketing-kit", icon: Megaphone },
+      { label: "CMA Generator", href: "/hub/ai/cma", icon: Calculator },
+      { label: "Agreements", href: "/hub/ai/agreements", icon: FileSignature },
+      { label: "Seller Intel", href: "/hub/ai/seller-intel", icon: PhoneCall },
+      { label: "Cash Offer Eval", href: "/hub/ai/cash-offer", icon: DollarSign },
+      { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
+      { label: "Ask Matin", href: "/hub/ai/ask", icon: MessageCircle },
     ],
   },
   {
@@ -75,6 +92,43 @@ const NAV: NavGroup[] = [
   },
 ];
 
+const NOTIFICATIONS = [
+  {
+    title: "New lead — Sarah M. from Zillow",
+    meta: "Lake Oswego · Buyer inquiry · 2m ago",
+    tone: "azure" as const,
+  },
+  {
+    title: "Offer accepted — 8457 NW Lakeshore",
+    meta: "Listed at $1.15M · congrats · 18m ago",
+    tone: "success" as const,
+  },
+  {
+    title: "Inspection deadline this week",
+    meta: "TX-4003 · due in 2 days · action needed",
+    tone: "warn" as const,
+  },
+  {
+    title: "5-star review from the Harrisons",
+    meta: "West Linn · just posted on Google · 1h ago",
+    tone: "success" as const,
+  },
+  {
+    title: "Kim Tran opened your CMA",
+    meta: "Lake Oswego lead · viewed 3 pages · 2h ago",
+    tone: "azure" as const,
+  },
+  {
+    title: "Showing scheduled — 1204 NW Lovejoy",
+    meta: "Tomorrow 10 AM · Buyer: Chen family · 3h ago",
+    tone: "azure" as const,
+  },
+  {
+    title: "Buyer agreement missing — Reyes family",
+    meta: "Showing tomorrow, agreement not signed",
+    tone: "warn" as const,
+  },
+];
 
 function isActive(pathname: string, href: string) {
   if (href === "/hub") return pathname === "/hub";
@@ -86,109 +140,22 @@ function groupHasActive(pathname: string, g: NavGroup) {
   return g.items.some((i) => isActive(pathname, i.href));
 }
 
-/* Avatar circle with "AS" initials for Alicia Smith */
-function UserAvatar({ size = "sm" }: { size?: "sm" | "md" }) {
+function AgentPhoto({ size = "sm" }: { size?: "sm" | "md" }) {
   const dim = size === "md" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-7 w-7 sm:h-8 sm:w-8";
   return (
-    <span
+    <div
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full bg-ink font-semibold text-white",
+        "relative shrink-0 overflow-hidden rounded-full ring-2 ring-ink/20",
         dim,
-        size === "sm" ? "text-[0.62rem]" : "text-[0.7rem]",
       )}
     >
-      AS
-    </span>
-  );
-}
-
-function ProfileDropdown() {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-label="User menu"
-        aria-expanded={open}
-        className={cn(
-          "flex items-center gap-2 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-2 shadow-sm transition-colors hover:border-ink/20 md:pr-3",
-          open && "border-ink/20 bg-paper",
-        )}
-      >
-        <UserAvatar size="sm" />
-        <div className="hidden leading-tight md:block">
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-            <span className="text-[0.78rem] font-semibold text-ink">Alicia Smith</span>
-          </div>
-          <div className="text-[0.63rem] text-slate/60">Lead Listing Specialist</div>
-        </div>
-        <ChevronDown
-          className={cn(
-            "hidden h-3 w-3 shrink-0 text-slate/40 transition-transform duration-150 md:block",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-          {/* User header */}
-          <div className="flex items-center gap-2.5 border-b border-ink/[0.07] px-4 py-3">
-            <UserAvatar size="sm" />
-            <div className="min-w-0 leading-tight">
-              <p className="truncate text-[0.82rem] font-semibold text-ink">Alicia Smith</p>
-              <p className="truncate text-[0.68rem] text-slate/60">Lead Listing Specialist</p>
-            </div>
-          </div>
-
-          {/* Menu items */}
-          <div className="py-1">
-            <Link
-              href="/hub/settings#profile"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
-            >
-              <Settings className="h-4 w-4 shrink-0 text-slate/40" />
-              My Profile
-            </Link>
-            <Link
-              href="/hub/settings"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
-            >
-              <Settings className="h-4 w-4 shrink-0 text-slate/40" />
-              Settings
-            </Link>
-          </div>
-
-          {/* Divider + Sign out */}
-          <div className="border-t border-ink/[0.07] py-1">
-            <Link
-              href="/"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-slate/70 transition-colors hover:bg-paper hover:text-ink"
-            >
-              <LogOut className="h-4 w-4 shrink-0 text-slate/40" />
-              Sign out
-            </Link>
-          </div>
-        </div>
-      )}
+      <Image
+        src="/matin/agents/jordan-matin.jpg"
+        alt="Jordan Matin"
+        fill
+        className="object-cover object-top"
+        sizes="36px"
+      />
     </div>
   );
 }
@@ -222,14 +189,10 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {NAV.map((group) => {
           const isOpen = open[group.label];
-          const noCollapse = group.items.length === 1 || group.alwaysOpen;
+          const single = group.items.length === 1;
           return (
             <div key={group.label} className="pb-1">
-              {noCollapse ? (
-                <span className="mb-1 flex w-full items-center px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40">
-                  {group.label}
-                </span>
-              ) : (
+              {single ? null : (
                 <button
                   onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
                   className="mb-1 flex w-full items-center justify-between rounded-lg px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40 transition-colors hover:text-slate/70"
@@ -243,7 +206,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                   />
                 </button>
               )}
-              {(noCollapse || isOpen) && (
+              {(single || isOpen) && (
                 <ul className="mt-0.5 space-y-0.5">
                   {group.items.map((item) => {
                     const active = isActive(pathname, item.href);
@@ -278,34 +241,21 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         })}
       </nav>
 
-      {/* Footer — settings + user */}
-      <div className="border-t border-ink/[0.08] p-3 space-y-1">
-        <Link
-          href="/hub/settings"
-          onClick={onNavigate}
-          className={cn(
-            "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-all duration-100",
-            isActive(pathname, "/hub/settings")
-              ? "border-l-[3px] border-azure bg-azure/[0.07] pl-[0.625rem] text-ink shadow-[inset_0_0_0_1px_rgb(0,0,0,0.04)]"
-              : "text-slate/70 hover:bg-ink/[0.04] hover:text-ink",
-          )}
-        >
-          <Settings
-            className={cn(
-              "h-4 w-4 shrink-0 transition-colors",
-              isActive(pathname, "/hub/settings") ? "text-azure" : "text-slate/50 group-hover:text-ink",
-            )}
-          />
-          <span className="truncate">Settings</span>
-        </Link>
+      {/* Footer — user + phone */}
+      <div className="border-t border-ink/[0.08] p-3">
         <div className="flex items-center gap-2.5 rounded-xl border border-ink/[0.06] bg-paper/60 px-3 py-2.5">
-          <UserAvatar size="sm" />
+          <AgentPhoto size="sm" />
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-              <span className="truncate text-[0.78rem] font-semibold text-ink">Alicia Smith</span>
+              <span className="truncate text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
             </div>
-            <span className="block text-[0.64rem] text-slate/55">Lead Listing Specialist</span>
+            <a
+              href="tel:+15037615616"
+              className="block text-[0.64rem] text-slate/55 transition-colors hover:text-ink"
+            >
+              (503) 761-5616
+            </a>
           </div>
         </div>
       </div>
@@ -313,22 +263,10 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   );
 }
 
-function ShellInner({ children }: { children: React.ReactNode }) {
+export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { setOpen: openPalette } = useCommandPalette();
-
-  // Global Cmd+K / Ctrl+K listener
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        openPalette(true);
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [openPalette]);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
@@ -369,39 +307,99 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Search — clicking opens the palette */}
-          <button
-            onClick={() => openPalette(true)}
-            className="relative hidden max-w-sm flex-1 items-center sm:flex h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-[0.85rem] text-slate/40 transition-all hover:border-azure/30 hover:ring-2 hover:ring-azure/10 cursor-text"
-            aria-label="Open command palette"
-          >
+          {/* Search */}
+          <div className="relative hidden max-w-sm flex-1 items-center sm:flex">
             <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate/50" />
-            <span className="truncate">Search leads, listings, agents…</span>
+            <input
+              type="text"
+              placeholder="Search leads, listings, agents…"
+              className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-[0.85rem] text-ink placeholder:text-slate/40 transition-all focus:border-azure/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-azure/10"
+            />
             <kbd className="pointer-events-none absolute right-2.5 rounded border border-ink/[0.08] bg-paper px-1.5 py-0.5 text-[0.6rem] font-medium text-slate/50">
               ⌘K
             </kbd>
-          </button>
-
-          {/* Mobile search icon */}
-          <button
-            onClick={() => openPalette(true)}
-            aria-label="Search"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink sm:hidden"
-          >
-            <Search className="h-5 w-5" />
-          </button>
+          </div>
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
             {/* Notifications */}
-            <NotificationCenter />
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen((o) => !o)}
+                aria-label="Notifications"
+                className={cn(
+                  "relative flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-ink/[0.04] hover:text-ink",
+                  notifOpen ? "bg-ink/[0.06] text-ink" : "text-slate",
+                )}
+              >
+                <Bell className="h-[1.1rem] w-[1.1rem]" />
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.56rem] font-bold text-white ring-2 ring-paper">
+                  {NOTIFICATIONS.length}
+                </span>
+              </button>
 
-            {/* User dropdown */}
-            <ProfileDropdown />
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} aria-hidden />
+                  <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-[22rem]">
+                    <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3">
+                      <span className="text-[0.84rem] font-semibold text-ink">Notifications</span>
+                      <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[0.62rem] font-bold text-danger">
+                        {NOTIFICATIONS.length} new
+                      </span>
+                    </div>
+                    <ul className="max-h-[22rem] divide-y divide-ink/[0.05] overflow-y-auto">
+                      {NOTIFICATIONS.map((n, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-3 px-4 py-3 transition-colors hover:bg-paper/60 cursor-pointer"
+                        >
+                          <span
+                            className={cn(
+                              "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                              n.tone === "success"
+                                ? "bg-success"
+                                : n.tone === "warn"
+                                  ? "bg-warn"
+                                  : "bg-azure",
+                            )}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-[0.82rem] font-medium leading-snug text-ink">
+                              {n.title}
+                            </p>
+                            <p className="mt-0.5 text-[0.72rem] text-slate/60">{n.meta}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/hub/crm"
+                      onClick={() => setNotifOpen(false)}
+                      className="block border-t border-ink/[0.07] px-4 py-2.5 text-center text-[0.76rem] font-semibold text-azure transition-colors hover:bg-paper/60"
+                    >
+                      View all in CRM
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* User pill */}
+            <div className="flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 shadow-sm md:pr-3">
+              <AgentPhoto size="sm" />
+              <div className="hidden leading-tight md:block">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
+                </div>
+                <div className="text-[0.63rem] text-slate/60">Oregon Principal Broker</div>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -418,17 +416,6 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
         <main className="flex-1 overflow-x-hidden">{children}</main>
       </div>
-
-      {/* Global command palette */}
-      <CommandPalette />
     </div>
-  );
-}
-
-export function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <CommandPaletteProvider>
-      <ShellInner>{children}</ShellInner>
-    </CommandPaletteProvider>
   );
 }

@@ -96,6 +96,16 @@ export function SiteHeader() {
           >
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>
+          <a
+            href="tel:+15036229624"
+            aria-label="Call Matin Real Estate"
+            className={cn(
+              "flex items-center sm:hidden",
+              onDark ? "text-white/90" : "text-ink/80",
+            )}
+          >
+            <Phone className="h-5 w-5" />
+          </a>
           <button
             className={cn("lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2 rounded-sm", onDark ? "text-white" : "text-ink")}
             onClick={() => setMenu((m) => !m)}

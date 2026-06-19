@@ -641,13 +641,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Tab bar */}
-      <div ref={tabsRef} className="flex gap-0.5 border-b border-ink/[0.08]">
+      <div ref={tabsRef} className="flex gap-0.5 overflow-x-auto scrollbar-hide pb-px border-b border-ink/[0.08]">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={cn(
-              "flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-[0.86rem] font-medium transition-colors",
+              "shrink-0 whitespace-nowrap flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-[0.86rem] font-medium transition-colors",
               tab === id
                 ? "border-b-2 border-ink -mb-px text-ink"
                 : "text-slate/60 hover:text-ink",

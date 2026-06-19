@@ -126,67 +126,37 @@ const KIND_ICON: Record<TimelineKind, typeof MessageSquare> = {
   registered: UserPlus,
 };
 
-/* ── Response time badge ─────────────────────────────────────────────────────
-   Shows the lead's last response time with urgency color coding.
-   0 = no contact → red, <5 min → emerald, 5-15 min → amber, >15 min → red. */
+/* ── Speed-to-lead badge ─────────────────────────────────────────────────────
+   Shows the lead's age in human-readable form with urgency color coding.
+   Green = responded within 5 min, Red = over 30 min or still pending.   */
 function SpeedToLeadBadge({ minutes }: { minutes: number }) {
-  // No contact yet — red
-  if (minutes === 0) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-red-600 ring-1 ring-inset ring-red-200">
-        <Clock className="h-3 w-3" />
-        No contact yet
-      </span>
-    );
-  }
+  const urgent = minutes < 5;
+  const overdue = minutes >= 30;
 
-  // Under 5 min — emerald
-  if (minutes < 5) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-emerald-600 ring-1 ring-inset ring-emerald-200">
-        <Clock className="h-3 w-3" />
-        {minutes}m response
-      </span>
-    );
-  }
-
-  // 5–15 min — amber
-  if (minutes <= 15) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-amber-600 ring-1 ring-inset ring-amber-200">
-        <Clock className="h-3 w-3" />
-        {minutes}m response
-      </span>
-    );
-  }
-
-  // Over 15 min — red
   if (minutes < 60) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-red-600 ring-1 ring-inset ring-red-200">
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold ring-1 ring-inset",
+          urgent
+            ? "bg-success/10 text-success ring-success/25"
+            : overdue
+            ? "bg-danger/10 text-danger ring-danger/25"
+            : "bg-warn/10 text-warn ring-warn/20",
+        )}
+      >
         <Clock className="h-3 w-3" />
-        {minutes}m response
+        {minutes} {minutes === 1 ? "minute" : "minutes"} old — respond now!
       </span>
     );
   }
 
-  // Within the day
-  if (minutes < 1440) {
-    const hrs = Math.round(minutes / 60);
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-red-600 ring-1 ring-inset ring-red-200">
-        <Clock className="h-3 w-3" />
-        Responded {hrs}h ago
-      </span>
-    );
-  }
-
-  // Over a day — red
-  const days = Math.floor(minutes / 1440);
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-red-600 ring-1 ring-inset ring-red-200">
+    <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-[0.72rem] font-semibold text-danger ring-1 ring-inset ring-danger/25">
       <Clock className="h-3 w-3" />
-      Last contact: {days} {days === 1 ? "day" : "days"} ago
+      Lead age: {hrs}h {mins}m
     </span>
   );
 }
@@ -306,7 +276,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink sm:right-4 sm:top-4"
+                className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink sm:right-4 sm:top-4"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -318,7 +288,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   {/* Lead name + speed-to-lead badge */}
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="truncate font-display text-2xl text-ink">{lead.name}</h2>
-                    {lead.responseMinutes !== undefined && (
+                    {lead.responseMinutes !== undefined && lead.responseMinutes < 1440 && (
                       <SpeedToLeadBadge minutes={lead.responseMinutes} />
                     )}
                   </div>
@@ -370,8 +340,8 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                 </div>
               </div>
 
-              {/* Quick comms actions — always 3 columns */}
-              <div className="mt-4 grid grid-cols-3 gap-2">
+              {/* Quick comms actions — full-width on mobile, 3-col on sm */}
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-1.5">
                 <a
                   href={`tel:${lead.phone.replace(/[^\d+]/g, "")}`}
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-ink/12 bg-white py-2.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper min-h-[44px]"
@@ -434,31 +404,27 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               )}
 
               {/* ── AI Lead Intel callout ── */}
-              <div className="rounded-lg bg-paper p-4">
-                <p className="mb-1.5 text-[0.68rem] font-bold uppercase tracking-widest text-slate/55">AI Intel</p>
-                <p className="text-[0.85rem] leading-relaxed text-ink/80">
+              <div className="rounded-r-xl border-l-4 border-azure bg-azure/[0.06] p-4 mb-5">
+                <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-wide text-azure">AI Intel</p>
+                <p className="text-[0.85rem] leading-relaxed text-slate">
                   {lead.aiSummary || (() => {
                     const views = lead.propertyViews?.length ?? 0;
                     return `${lead.firstName} has viewed ${views} ${views === 1 ? "property" : "properties"}${lead.community ? ` in ${lead.community}` : ""}. Budget aligns with median price. High email engagement — 3 opens in 48 hours.`;
                   })()}
                 </p>
                 {lead.nextBestAction && (
-                  <div className="mt-2.5 flex items-start gap-1.5 rounded-md bg-white px-3 py-2 ring-1 ring-inset ring-ink/[0.06]">
-                    <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-azure" />
-                    <p className="text-[0.81rem] font-semibold text-ink">
-                      <span className="font-normal text-slate/60">Next: </span>{lead.nextBestAction}
-                    </p>
-                  </div>
+                  <p className="mt-2 text-[0.82rem] font-semibold text-ink">
+                    <span className="text-slate/60">Best action: </span>{lead.nextBestAction}
+                  </p>
                 )}
               </div>
 
               {/* ── Likely Seller banner ── */}
               {lead.likelySeller === true && (
-                <div className="flex items-start gap-2 rounded-r-lg border-l-4 border-amber-400 bg-amber-50 px-3 py-3">
+                <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
                   <Home className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[0.83rem] font-semibold leading-snug text-amber-900">Likely Seller</p>
-                    <p className="mt-0.5 text-[0.79rem] leading-snug text-amber-900/80">
+                    <p className="text-[0.83rem] leading-snug text-amber-800">
                       This contact may have selling intent. Consider pitching a free home valuation.
                     </p>
                     <a
@@ -526,9 +492,9 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         readOnly={busy}
-                        rows={6}
+                        rows={4}
                         placeholder="Your reply…"
-                        className="min-h-[7rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-paper px-3.5 py-3 text-[0.85rem] leading-relaxed text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+                        className="min-h-[5rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-paper px-3.5 py-3 text-[0.85rem] leading-relaxed text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                       />
                       {busy ? (
                         <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate">
@@ -590,26 +556,28 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   <StickyNote className="h-3.5 w-3.5 text-ink" />
                   <span className="text-[0.78rem] font-semibold text-ink">Log a note</span>
                 </div>
-                <textarea
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                      e.preventDefault();
-                      logNote();
-                    }
-                  }}
-                  rows={3}
-                  placeholder="Add a note about this lead… (⌘↵ to save)"
-                  className="w-full resize-y rounded-lg border border-ink/[0.08] bg-paper px-3 py-2.5 text-[0.82rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
-                />
-                <button
-                  onClick={logNote}
-                  disabled={!noteText.trim()}
-                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-ink/90 disabled:opacity-40"
-                >
-                  Save note
-                </button>
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        logNote();
+                      }
+                    }}
+                    rows={2}
+                    placeholder="Add a note about this lead…"
+                    className="min-h-[2.5rem] flex-1 resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+                  />
+                  <button
+                    onClick={logNote}
+                    disabled={!noteText.trim()}
+                    className="shrink-0 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -636,12 +604,12 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
 
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-ink/[0.07] bg-paper px-3 py-2.5">
-      <div className="flex items-center gap-1.5 text-slate/50">
+    <div className="rounded-lg border border-ink/[0.06] bg-white/[0.02] px-3 py-2">
+      <div className="flex items-center gap-1.5 text-slate/55">
         {icon}
         <span className="text-[0.62rem] font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <p className="mt-1 truncate text-[0.83rem] font-semibold text-ink">{value}</p>
+      <p className="mt-0.5 truncate text-[0.82rem] font-medium text-ink">{value}</p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import {
   Search,
@@ -16,14 +16,12 @@ import {
   SlidersHorizontal,
   UserPlus,
   ChevronRight,
-  X,
 } from "lucide-react";
 import type { Lead } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { cn, compactUsd, initials, timeAgo } from "@/lib/utils";
 import { LeadDrawer } from "@/components/command/crm/LeadDrawer";
 import { stageTone, scoreTone } from "@/components/command/crm/leadStyles";
-import { EmptyState } from "@/components/command/ui/EmptyState";
 
 type SortKey = "score" | "recency" | "name";
 
@@ -72,22 +70,18 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   const [sort, setSort] = useState<SortKey>("recency");
   const [active, setActive] = useState<Lead | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [manualLeads, setManualLeads] = useState<Lead[]>([]);
-
-  const allLeads = useMemo(() => [...manualLeads, ...leads], [manualLeads, leads]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const sl of SMART_LISTS) c[sl.id] = allLeads.filter(sl.match).length;
+    for (const sl of SMART_LISTS) c[sl.id] = leads.filter(sl.match).length;
     return c;
-  }, [allLeads]);
+  }, [leads]);
 
   const list = SMART_LISTS.find((l) => l.id === listId) ?? SMART_LISTS[SMART_LISTS.length - 1];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const rows = allLeads.filter((l) => {
+    const rows = leads.filter((l) => {
       if (!list.match(l)) return false;
       if (q) {
         const hay = `${l.name} ${l.email} ${l.community} ${l.intent} ${l.source} ${l.tags.join(" ")}`.toLowerCase();
@@ -107,7 +101,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       }
     });
     return rows;
-  }, [allLeads, list, query, sort]);
+  }, [leads, list, query, sort]);
 
   return (
     <div>
@@ -143,18 +137,15 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
         </div>
 
         {/* Add lead — always visible, high tap target */}
-        <button
-          onClick={() => setAddLeadOpen(true)}
-          className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-ink px-3.5 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90 shrink-0 sm:w-auto sm:justify-start"
-        >
+        <button className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90 shrink-0">
           <UserPlus className="h-3.5 w-3.5" />
-          <span>Add lead</span>
+          <span className="hidden sm:inline">Add lead</span>
         </button>
       </div>
 
       {/* ── Smart lists (desktop always visible; mobile collapsible) ──────────── */}
       <div className={cn("mb-3", !filtersOpen && "hidden sm:block")}>
-        <div className="-mx-1 flex flex-wrap gap-2 px-1 pb-1">
+        <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1">
           {SMART_LISTS.map((sl) => {
             const on = sl.id === listId;
             const Icon = sl.icon;
@@ -166,7 +157,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
                   setFiltersOpen(false);
                 }}
                 className={cn(
-                  "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
+                  "inline-flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
                   on
                     ? "border-ink bg-ink text-white"
                     : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink",
@@ -210,21 +201,10 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadCard key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            allLeads.length === 0 ? (
-              <EmptyState
-                icon={UserPlus}
-                title="Your lead pipeline is empty"
-                description="Import leads from Zillow, Realtor.com, or add them manually. Your first lead is one click away."
-                action={{ label: "Add first lead", onClick: () => setAddLeadOpen(true) }}
-              />
-            ) : (
-              <EmptyState
-                icon={Inbox}
-                title="No leads found"
-                description="Try adjusting your filters, or add your first lead to get started."
-                action={{ label: "Clear filters", onClick: () => { setQuery(""); setListId("all"); } }}
-              />
-            )
+            <div className="px-4 py-14 text-center">
+              <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
+              <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
+            </div>
           )}
         </div>
 
@@ -234,103 +214,47 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadRow key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            <li>
-              {allLeads.length === 0 ? (
-                <EmptyState
-                  icon={UserPlus}
-                  title="Your lead pipeline is empty"
-                  description="Import leads from Zillow, Realtor.com, or add them manually. Your first lead is one click away."
-                  action={{ label: "Add first lead", onClick: () => setAddLeadOpen(true) }}
-                />
-              ) : (
-                <EmptyState
-                  icon={Inbox}
-                  title="No leads found"
-                  description="Try adjusting your filters, or add your first lead to get started."
-                  action={{ label: "Clear filters", onClick: () => { setQuery(""); setListId("all"); } }}
-                />
-              )}
+            <li className="px-4 py-14 text-center">
+              <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
+              <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
             </li>
           )}
         </ul>
       </div>
 
       <LeadDrawer lead={active} onClose={() => setActive(null)} />
-      <AddLeadSlideOver
-        open={addLeadOpen}
-        onClose={() => setAddLeadOpen(false)}
-        onAdd={(lead) => {
-          setManualLeads((prev) => [lead, ...prev]);
-          setAddLeadOpen(false);
-        }}
-      />
     </div>
   );
 }
 
 /* ── Response time dot + label ─────────────────────────────────────────────── */
+function formatResponseTime(minutes: number): string {
+  if (minutes < 5) return "< 5 min";
+  if (minutes < 60) return `${minutes} min`;
+  const hrs = minutes / 60;
+  if (hrs < 24) return `${hrs % 1 === 0 ? hrs : hrs.toFixed(1)} hrs`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
+}
+
 function ResponseDot({ minutes }: { minutes: number }) {
-  // No contact yet — red
-  if (minutes === 0) {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        <span className="text-[0.68rem] font-medium text-red-600">No contact yet</span>
-      </span>
-    );
-  }
-  // Under 5 min — emerald
-  if (minutes < 5) {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        <span className="text-[0.68rem] font-medium text-emerald-600 tabular-nums">
-          {minutes}m response
-        </span>
-      </span>
-    );
-  }
-  // 5–15 min — amber
-  if (minutes <= 15) {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-        <span className="text-[0.68rem] font-medium text-amber-600 tabular-nums">
-          {minutes}m response
-        </span>
-      </span>
-    );
-  }
-  // 16–59 min — red
-  if (minutes < 60) {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        <span className="text-[0.68rem] font-medium text-red-600 tabular-nums">
-          {minutes}m response
-        </span>
-      </span>
-    );
-  }
-  // Within the day
-  if (minutes < 1440) {
-    const hrs = Math.round(minutes / 60);
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        <span className="text-[0.68rem] font-medium text-red-600 tabular-nums">
-          Responded {hrs}h ago
-        </span>
-      </span>
-    );
-  }
-  // Over a day — red
-  const days = Math.floor(minutes / 1440);
+  const color =
+    minutes <= 5
+      ? "bg-success"
+      : minutes <= 30
+      ? "bg-warn"
+      : "bg-danger";
+  const textColor =
+    minutes <= 5
+      ? "text-success"
+      : minutes <= 30
+      ? "text-warn"
+      : "text-danger";
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-      <span className="text-[0.68rem] font-medium text-red-600 tabular-nums">
-        Last contact: {days} {days === 1 ? "day" : "days"} ago
+      <span className={cn("h-1.5 w-1.5 rounded-full", color)} />
+      <span className={cn("text-[0.68rem] font-medium tabular-nums", textColor)}>
+        {formatResponseTime(minutes)}
       </span>
     </span>
   );
@@ -359,68 +283,50 @@ function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
         )}
       </span>
 
-      {/* Main content — max 3 lines */}
+      {/* Main content */}
       <div className="min-w-0 flex-1">
-        {/* Line 1: name + status pill */}
+        {/* Name row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1.5">
-            <p className="truncate text-[0.88rem] font-bold text-ink">{lead.name}</p>
+            <p className="truncate text-[0.88rem] font-semibold text-ink">{lead.name}</p>
             {lead.unread > 0 && (
               <span className="shrink-0 rounded-full bg-ink px-1.5 py-px text-[0.62rem] font-bold text-white tabular-nums">
                 {lead.unread}
               </span>
             )}
           </div>
-          <span className={cn("shrink-0 rounded-md px-1.5 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset", stageStatusPill(lead.stage))}>
-            {lead.stage}
+          <span className={cn("shrink-0 rounded-md px-1.5 py-px text-[0.72rem] font-semibold ring-1 ring-inset", scoreTone(lead.score))}>
+            {lead.score}
           </span>
         </div>
 
-        {/* Line 2: last contact date + source */}
-        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-          <span className={cn("text-[0.72rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/55")}>
-            {lead.lastContactDaysAgo === 0 ? "contacted today" : `${lead.lastContactDaysAgo}d ago`}
-          </span>
-          <span className="text-[0.66rem] text-slate/30">·</span>
-          <span className={cn("rounded-full px-2 py-0.5 text-[0.66rem] font-semibold ring-1 ring-inset", sourceBadge(lead.source))}>
+        {/* Source badge + budget */}
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <span className={cn("rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ring-1 ring-inset", sourceBadge(lead.source))}>
             {lead.source}
           </span>
-          <span className="text-[0.72rem] font-medium text-ink tabular-nums">
+          <span className="text-[0.75rem] font-medium text-ink tabular-nums">
             {compactUsd(lead.budgetMin)}–{compactUsd(lead.budgetMax)}
           </span>
         </div>
 
-        {/* Line 3: next action */}
+        {/* Next action chip */}
         {lead.nextBestAction && (
-          <div className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-azure/[0.07] px-2 py-0.5">
+          <div className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-azure/[0.07] px-2 py-0.5">
             <ChevronRight className="h-3 w-3 shrink-0 text-azure" />
             <span className="truncate text-[0.7rem] font-medium text-azure">
-              {lead.nextBestAction.length > 45 ? lead.nextBestAction.slice(0, 45) + "…" : lead.nextBestAction}
+              {lead.nextBestAction.length > 40 ? lead.nextBestAction.slice(0, 40) + "…" : lead.nextBestAction}
             </span>
           </div>
         )}
+
+        {/* Last touch */}
+        <p className={cn("mt-1 text-[0.72rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/55")}>
+          {lead.lastContactDaysAgo === 0 ? "contacted today" : `${lead.lastContactDaysAgo}d ago`}
+        </p>
       </div>
     </button>
   );
-}
-
-/* ── Map score label to status pill color ──────────────────────────────────── */
-function stageStatusPill(stage: string): string {
-  switch (stage) {
-    case "New":
-      return "bg-blue-50 text-blue-700 ring-blue-200";
-    case "Active":
-    case "Showing":
-    case "Offer":
-    case "Under Contract":
-      return "bg-amber-50 text-amber-700 ring-amber-200";
-    case "Closed":
-      return "bg-emerald-50 text-emerald-700 ring-emerald-200";
-    case "Lost":
-      return "bg-slate-100 text-slate-500 ring-slate-200";
-    default:
-      return "bg-slate-100 text-slate-600 ring-slate-200";
-  }
 }
 
 /* ── A single inbox row ────────────────────────────────────────────────────── */
@@ -545,292 +451,5 @@ function SortSelect({ value, onChange }: { value: SortKey; onChange: (v: SortKey
       </select>
       <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/50" />
     </div>
-  );
-}
-
-/* ── Add Lead Slide-Over ────────────────────────────────────────────────────── */
-type AddLeadFields = {
-  name: string;
-  phone: string;
-  email: string;
-  source: string;
-  budgetMin: string;
-  budgetMax: string;
-  areas: string;
-  notes: string;
-};
-
-const BLANK_FIELDS: AddLeadFields = {
-  name: "",
-  phone: "",
-  email: "",
-  source: "Website",
-  budgetMin: "",
-  budgetMax: "",
-  areas: "",
-  notes: "",
-};
-
-const LEAD_SOURCES = [
-  "Website",
-  "Zillow",
-  "Referral",
-  "Google",
-  "Facebook",
-  "Cold Call",
-  "Open House",
-  "Other",
-] as const;
-
-function AddLeadSlideOver({
-  open,
-  onClose,
-  onAdd,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onAdd: (lead: Lead) => void;
-}) {
-  const [fields, setFields] = useState<AddLeadFields>(BLANK_FIELDS);
-  const [errors, setErrors] = useState<Partial<AddLeadFields>>({});
-  const nameRef = useRef<HTMLInputElement>(null);
-
-  // Reset form when opened
-  const [wasOpen, setWasOpen] = useState(false);
-  if (open && !wasOpen) {
-    setWasOpen(true);
-    setFields(BLANK_FIELDS);
-    setErrors({});
-    // Focus name after transition
-    setTimeout(() => nameRef.current?.focus(), 320);
-  }
-  if (!open && wasOpen) setWasOpen(false);
-
-  function set(key: keyof AddLeadFields, val: string) {
-    setFields((f) => ({ ...f, [key]: val }));
-    if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
-  }
-
-  function validate(): boolean {
-    const next: Partial<AddLeadFields> = {};
-    if (!fields.name.trim()) next.name = "Full name is required";
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  }
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const fullName = fields.name.trim();
-    const firstName = fullName.split(" ")[0] ?? fullName;
-    const now = Date.now();
-
-    const lead: Lead = {
-      id: `manual-${now}`,
-      name: fullName,
-      firstName,
-      email: fields.email.trim() || `${firstName.toLowerCase()}@unknown.com`,
-      phone: fields.phone.trim() || "—",
-      source: fields.source,
-      stage: "New",
-      score: 55,
-      intent: "Buy",
-      budgetMin: parseInt(fields.budgetMin) || 0,
-      budgetMax: parseInt(fields.budgetMax) || 0,
-      communitySlug: fields.areas.trim().toLowerCase().replace(/\s+/g, "-") || "unknown",
-      community: fields.areas.trim() || "Unknown",
-      assignedAgent: "",
-      createdDaysAgo: 0,
-      lastContactDaysAgo: 0,
-      tags: [],
-      aiSummary: fields.notes.trim() || `New lead added manually via Command Center. Source: ${fields.source}.`,
-      unread: 0,
-      nextBestAction: "Send intro email within 5 minutes",
-      responseMinutes: undefined,
-    };
-
-    onAdd(lead);
-    setFields(BLANK_FIELDS);
-    setErrors({});
-  }
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className={cn(
-          "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={onClose}
-        aria-hidden
-      />
-
-      {/* Panel */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.5)] transition-transform duration-300 ease-out sm:w-[440px]",
-          open ? "translate-x-0" : "translate-x-full",
-        )}
-        aria-hidden={!open}
-        aria-label="Add lead"
-      >
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 py-4">
-          <div className="flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-ink" />
-            <h2 className="font-display text-xl text-ink">Add lead</h2>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={submit} className="flex flex-1 flex-col overflow-y-auto px-5 py-5">
-          <div className="flex-1 space-y-4">
-            {/* Full Name */}
-            <div>
-              <label className="mb-1 block text-[0.76rem] font-semibold text-ink">
-                Full Name <span className="text-danger">*</span>
-              </label>
-              <input
-                ref={nameRef}
-                value={fields.name}
-                onChange={(e) => set("name", e.target.value)}
-                placeholder="e.g. Sarah Johnson"
-                className={cn(
-                  "h-10 w-full rounded-xl border bg-white px-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:outline-none",
-                  errors.name
-                    ? "border-danger/50 focus:border-danger"
-                    : "border-ink/[0.10] focus:border-ink/25",
-                )}
-              />
-              {errors.name && (
-                <p className="mt-1 text-[0.72rem] text-danger">{errors.name}</p>
-              )}
-            </div>
-
-            {/* Phone + Email */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Phone</label>
-                <input
-                  type="tel"
-                  value={fields.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  placeholder="(407) 555-0100"
-                  className="h-10 w-full rounded-xl border border-ink/[0.10] bg-white px-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Email</label>
-                <input
-                  type="email"
-                  value={fields.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  placeholder="sarah@email.com"
-                  className="h-10 w-full rounded-xl border border-ink/[0.10] bg-white px-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Source */}
-            <div>
-              <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Source</label>
-              <div className="relative">
-                <select
-                  value={fields.source}
-                  onChange={(e) => set("source", e.target.value)}
-                  className="h-10 w-full appearance-none rounded-xl border border-ink/[0.10] bg-white px-3.5 pr-9 text-[0.85rem] text-ink focus:border-ink/25 focus:outline-none"
-                >
-                  {LEAD_SOURCES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/50" />
-              </div>
-            </div>
-
-            {/* Budget */}
-            <div>
-              <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Budget Range</label>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.82rem] text-slate/55">$</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={fields.budgetMin}
-                    onChange={(e) => set("budgetMin", e.target.value)}
-                    placeholder="Min"
-                    className="h-10 w-full rounded-xl border border-ink/[0.10] bg-white pl-6 pr-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-                  />
-                </div>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.82rem] text-slate/55">$</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={fields.budgetMax}
-                    onChange={(e) => set("budgetMax", e.target.value)}
-                    placeholder="Max"
-                    className="h-10 w-full rounded-xl border border-ink/[0.10] bg-white pl-6 pr-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Areas of Interest */}
-            <div>
-              <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Areas of Interest</label>
-              <input
-                value={fields.areas}
-                onChange={(e) => set("areas", e.target.value)}
-                placeholder="e.g. Lake Nona, Windermere, Dr. Phillips"
-                className="h-10 w-full rounded-xl border border-ink/[0.10] bg-white px-3.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-              />
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label className="mb-1 block text-[0.76rem] font-semibold text-ink">Notes</label>
-              <textarea
-                value={fields.notes}
-                onChange={(e) => set("notes", e.target.value)}
-                rows={3}
-                placeholder="Any initial context about this lead…"
-                className="min-h-[5rem] w-full resize-y rounded-xl border border-ink/[0.10] bg-white px-3.5 py-2.5 text-[0.85rem] text-ink placeholder:text-slate/40 focus:border-ink/25 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-5 flex items-center gap-3 border-t border-ink/[0.07] pt-4">
-            <button
-              type="submit"
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink text-[0.88rem] font-semibold text-white transition-colors hover:bg-ink/90"
-            >
-              <UserPlus className="h-4 w-4" />
-              Add to CRM
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-ink/[0.10] bg-white px-4 text-[0.86rem] font-semibold text-slate transition-colors hover:bg-paper hover:text-ink"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </aside>
-    </>
   );
 }

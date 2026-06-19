@@ -39,7 +39,7 @@ export function MobileNav() {
         className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white/95 backdrop-blur-sm border-t border-ink/[0.08] pb-[env(safe-area-inset-bottom)]"
         style={{ height: "calc(56px + env(safe-area-inset-bottom))" }}
       >
-        <div className="flex h-14 items-stretch">
+        <div className="flex h-full items-stretch">
           {PRIMARY_NAV.map(({ label, href, Icon }) => {
             const active = isActive(href);
             return (
@@ -92,7 +92,7 @@ export function MobileNav() {
           />
 
           {/* Panel */}
-          <div className="fixed bottom-0 inset-x-0 bg-white rounded-t-2xl px-6 py-6">
+          <div className="fixed bottom-0 inset-x-0 bg-white rounded-t-2xl px-6 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-semibold text-ink/60 tracking-wide uppercase">
                 More

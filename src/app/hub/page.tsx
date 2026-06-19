@@ -397,13 +397,13 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 border-b border-ink/[0.08] mb-6">
+      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-px border-b border-ink/[0.08] mb-6">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={[
-              "px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
+              "shrink-0 whitespace-nowrap px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
               tab === id
                 ? "text-ink border-b-2 border-ink -mb-px"
                 : "text-slate/60 hover:text-ink",
@@ -689,7 +689,7 @@ export default function DashboardPage() {
                       <p className="text-sm leading-snug text-ink">{item.text}</p>
                       <p className="mt-0.5 text-[0.72rem] text-slate/55">{item.sub}</p>
                     </div>
-                    <span className="shrink-0 text-[0.68rem] text-slate/40">{item.ago}</span>
+                    <span className="shrink-0 text-xs text-slate/40">{item.ago}</span>
                   </li>
                 ))}
               </ul>

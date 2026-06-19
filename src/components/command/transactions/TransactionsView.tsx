@@ -25,7 +25,6 @@ import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { cn, usd, daysLabel, initials } from "@/lib/utils";
 import { ProgressBar, Pill } from "@/components/command/ui";
-import { EmptyState } from "@/components/command/ui/EmptyState";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 
@@ -197,7 +196,7 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
     <>
       <div className="overflow-x-auto rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-ink/[0.08] px-4 py-3.5 md:px-5">
+        <div className="flex flex-nowrap overflow-x-auto items-center gap-2 border-b border-ink/[0.08] px-4 py-3.5 pb-3.5 md:px-5">
           {FILTERS.map((f) => {
             const on = filter === f;
             const isRisk = f === "At-risk";
@@ -206,7 +205,7 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
+                  "inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
                     ? FILTER_ACTIVE_TONE[f]
                     : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
@@ -231,8 +230,8 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
           })}
         </div>
 
-        {/* Column header (sm+) */}
-        <div className="hidden border-b border-ink/[0.08] px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate/50 sm:grid sm:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] sm:items-center sm:gap-4">
+        {/* Column header (md+) */}
+        <div className="hidden border-b border-ink/[0.08] px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate/50 md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4">
           <span>Property / Client</span>
           <span>Price</span>
           <span>Agent</span>
@@ -247,21 +246,16 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
             <TransactionRow key={t.id} t={t} onOpen={() => setActive(t)} />
           ))}
           {visible.length === 0 && (
-            transactions.length === 0 ? (
-              <EmptyState
-                icon={FileText}
-                title="No transactions yet"
-                description="When you have active purchase agreements, they'll appear here with full deadline tracking."
-                action={{ label: "Start a transaction", href: "/hub/transactions?new=1" }}
-              />
-            ) : (
-              <EmptyState
-                icon={ClipboardList}
-                title={`No ${filter.toLowerCase()} transactions`}
-                description="There's nothing here right now. Try a different filter to see other transactions."
-                action={{ label: "Show all transactions", onClick: () => setFilter("All") }}
-              />
-            )
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+              <ClipboardList className="h-6 w-6 text-slate/40" />
+              <p className="text-[0.86rem] text-slate">No {filter.toLowerCase()} transactions.</p>
+              <button
+                onClick={() => setFilter("All")}
+                className="text-[0.78rem] font-semibold text-ink hover:underline"
+              >
+                Show all
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -284,13 +278,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
     <button
       onClick={onOpen}
       className={cn(
-        "group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white sm:grid sm:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] sm:items-center sm:gap-4 sm:px-5",
+        "group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5",
         urgencyBorderClass(t.closeDateDaysOut, closed),
       )}
     >
       {/* Property / client */}
-      <div className="flex items-start gap-3 sm:items-center">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] sm:mt-0">
+      <div className="flex items-start gap-3 md:items-center">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] md:mt-0">
           <TypeIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
@@ -320,13 +314,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Price */}
-      <div className="mt-2 sm:mt-0">
+      <div className="mt-2 md:mt-0">
         <span className="font-display text-[0.98rem] text-ink tabular-nums">{usd(t.price)}</span>
-        <span className="ml-2 text-[0.7rem] text-slate/50 sm:hidden">{daysLabel(t.closeDateDaysOut)}</span>
+        <span className="ml-2 text-[0.7rem] text-slate/50 md:hidden">{daysLabel(t.closeDateDaysOut)}</span>
       </div>
 
       {/* Agent */}
-      <div className="mt-2 flex items-center gap-2 sm:mt-0">
+      <div className="mt-2 flex items-center gap-2 md:mt-0">
         {agent ? (
           <>
             <span className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.6rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
@@ -344,13 +338,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Progress */}
-      <div className="mt-2.5 flex items-center gap-2 sm:mt-0">
+      <div className="mt-2.5 flex items-center gap-2 md:mt-0">
         <ProgressBar value={pct} tone={progressTone(t)} className="flex-1" />
         <span className="shrink-0 text-[0.68rem] text-slate/60 tabular-nums">{pct}%</span>
       </div>
 
       {/* Closes */}
-      <div className="mt-2 hidden text-right sm:mt-0 sm:block">
+      <div className="mt-2 hidden text-right md:mt-0 md:block">
         <span
           className={cn(
             "inline-flex items-center justify-end gap-1 text-[0.76rem] tabular-nums",
@@ -373,7 +367,7 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Chevron */}
-      <div className="hidden justify-end text-slate/30 transition-colors group-hover:text-ink sm:flex">
+      <div className="hidden justify-end text-slate/30 transition-colors group-hover:text-ink md:flex">
         <ArrowRight className="h-4 w-4" />
       </div>
     </button>

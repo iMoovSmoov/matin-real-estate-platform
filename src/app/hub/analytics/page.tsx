@@ -241,13 +241,13 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 border-b border-ink/[0.08]">
+      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-px border-b border-ink/[0.08]">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={[
-              "px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
+              "shrink-0 whitespace-nowrap px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
               tab === id
                 ? "text-ink border-b-2 border-ink -mb-px"
                 : "text-slate/60 hover:text-ink",
