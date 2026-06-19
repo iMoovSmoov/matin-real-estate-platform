@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, Award, MapPin, Star, Phone, Mail, Cpu, Sparkles,
-  TrendingUp, Building2, Trophy, Quote,
+  ArrowRight, Award, MapPin, Star, Phone, Mail, Cpu,
+  TrendingUp, Building2, Trophy, Users,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import { company, leadership } from "@/lib/data";
 import { compactUsd, num } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "About Us | Matin Real Estate",
+  title: "About Matin Real Estate | West Linn, OR",
   description:
-    "Founded in 2014 in West Linn by Jordan Matin, Matin Real Estate is the Portland area's most technologically advanced brokerage — $130M+ closed and 305+ homes sold each year.",
+    "Jordan Matin founded Matin Real Estate in 2014 in West Linn. 20+ years of experience, $130M annual volume, 40+ agents, and the largest locally owned Portland real estate website.",
 };
 
 const stats = [
@@ -62,15 +62,16 @@ export default function AboutPage() {
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
-                A brokerage built like a{" "}
-                <span className="italic text-azure-bright">tech company.</span>
+                Portland&apos;s most{" "}
+                <span className="italic text-azure-bright">data-driven</span>{" "}
+                real estate team.
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
-                Founded in {company.founded} in West Linn by {company.founder}, Matin Real Estate has grown
-                into the Portland area&apos;s most technologically advanced brokerage — and one of its
-                fastest-growing companies.
+                Founded in {company.founded} in West Linn by {company.founder}, Matin Real Estate operates
+                the largest locally owned real estate website in the Portland area — with 40+ agents,
+                $130M in annual volume, and 20+ years of local market experience.
               </p>
             </Reveal>
             <Reveal delay={0.24}>
@@ -123,7 +124,7 @@ export default function AboutPage() {
             <div>
               <SectionHeading
                 eyebrow="Our mission"
-                title="Make the biggest move of your life feel effortless"
+                title="Data-driven decisions. Human-led results."
               />
               <div className="mt-7 space-y-5 text-[1.02rem] leading-relaxed text-slate">
                 <p>
@@ -293,14 +294,14 @@ export default function AboutPage() {
         <Container className="relative">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="eyebrow-light">A tech-forward future</span>
+              <span className="eyebrow-light">The platform behind the results</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
-                Where we&apos;re headed next
+                One system. Every deal.
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
-                The <strong className="text-white">Matin Hub</strong> is our edge made tangible — a
-                custom platform that unifies our CRM, listings, transactions, marketing, and AI into one
-                system. It&apos;s how a 40-person team delivers a boutique experience at scale.
+                The <strong className="text-white">Matin Hub</strong> is our proprietary platform — it
+                unifies CRM, listings, transactions, and marketing into one system. It&apos;s how a
+                40-broker team delivers a boutique experience at scale, without dropping a detail.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="/hub" variant="primary" size="lg">
@@ -314,10 +315,10 @@ export default function AboutPage() {
             <Reveal delay={0.1}>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  [TrendingUp, "Live dashboards", "Decisions on real-time data"],
-                  [Sparkles, "AI woven in", "AI inside the workflow"],
-                  [Building2, "Unified platform", "One system, every deal"],
-                  [Quote, "AI coaching", "Scenario training for brokers"],
+                  [TrendingUp, "Live market data", "Real-time comps driving every decision"],
+                  [Users, "Dedicated brokers", "A named agent on every deal, start to close"],
+                  [Building2, "Unified platform", "One system for listings, CRM, and transactions"],
+                  [Cpu, "Matin Hub", "Custom software built for this brokerage"],
                 ].map(([Icon, t, d]) => {
                   const I = Icon as React.ComponentType<{ className?: string }>;
                   return (

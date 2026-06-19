@@ -113,7 +113,7 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
 
   return (
     <>
-      <div className="rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
+      <div className="overflow-x-auto rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-2 border-b border-ink/[0.08] px-4 py-3.5 md:px-5">
           {FILTERS.map((f) => {
@@ -327,7 +327,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
       />
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out sm:max-w-[480px]",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}

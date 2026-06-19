@@ -1,7 +1,10 @@
-import { BarChart3, TrendingUp, Users, Target } from "lucide-react";
-import { salesAgents, metrics } from "@/lib/data";
-import { compactUsd, num } from "@/lib/utils";
+"use client";
+
+import { useState } from "react";
+import { BarChart3, TrendingUp, Users, Target, Home, CalendarDays } from "lucide-react";
+import { salesAgents } from "@/lib/data";
 import { Panel, PanelHeader, StatTile, SectionLabel, LiveDot } from "@/components/command/ui";
+import { cn } from "@/lib/utils";
 import {
   VolumeBarsChart,
   ClosingsBarChart,
@@ -10,64 +13,136 @@ import {
 } from "@/components/command/DashboardCharts";
 import { ReportingTable } from "@/components/command/ReportingTable";
 
-export const metadata = { title: "Reporting" };
-
 export default function ReportingPage() {
-  const ytdVolume = metrics.volumeByMonth.reduce((s, m) => s + m.volume, 0);
-  const ytdClosings = metrics.volumeByMonth.reduce((s, m) => s + m.closings, 0);
-  const totalLeads = metrics.leadsByMonth.reduce((s, m) => s + m.leads, 0);
-  const totalConverted = metrics.leadsByMonth.reduce((s, m) => s + m.converted, 0);
-  const convRate = ((totalConverted / totalLeads) * 100).toFixed(1);
+  type Range = "MTD" | "QTD" | "YTD";
+  const [range, setRange] = useState<Range>("MTD");
+
+  /* ── Hardcoded KPIs per date range — clean, presentable numbers ── */
+  const KPI: Record<Range, { volume: string; sold: number; dom: number; conv: string }> = {
+    MTD: { volume: "$8.4M",  sold: 12, dom: 23, conv: "4.2%" },
+    QTD: { volume: "$24.1M", sold: 38, dom: 21, conv: "5.1%" },
+    YTD: { volume: "$91.7M", sold: 147, dom: 19, conv: "6.8%" },
+  };
+  const kpi = KPI[range];
+
+  const RANGES: Range[] = ["MTD", "QTD", "YTD"];
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
-      <div>
-        <div className="mb-1.5 flex items-center gap-2">
-          <LiveDot tone="azure" />
-          <SectionLabel>Reporting</SectionLabel>
+      {/* Page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-1.5 flex items-center gap-2">
+            <LiveDot tone="azure" />
+            <SectionLabel>Reporting</SectionLabel>
+          </div>
+          <h1 className="font-display text-3xl text-ink">Reporting</h1>
+          <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
+            Brokerage-wide performance — volume, closings, days on market, and lead conversion.
+          </p>
         </div>
-        <h1 className="font-display text-3xl text-ink">Reporting</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
-          Real-time reporting across the brokerage — volume, closings, lead conversion, and per-agent production.
-          One source of truth, exportable in a click.
-        </p>
+
+        {/* Date range tabs */}
+        <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-ink/[0.08] bg-white p-1 shadow-sm">
+          <CalendarDays className="ml-1.5 h-3.5 w-3.5 shrink-0 text-slate/50" />
+          {RANGES.map((r) => (
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold transition-colors",
+                range === r
+                  ? "bg-ink text-white shadow-sm"
+                  : "text-slate hover:bg-ink/[0.04] hover:text-ink",
+              )}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* KPI tiles */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="Trailing volume" value={compactUsd(ytdVolume)} icon={<TrendingUp className="h-4 w-4" />} accent delta={{ value: "12.1%", dir: "up" }} />
-        <StatTile label="Closings" value={num(ytdClosings)} icon={<BarChart3 className="h-4 w-4" />} hint="Last 12 months" />
-        <StatTile label="Leads captured" value={num(totalLeads)} icon={<Users className="h-4 w-4" />} />
-        <StatTile label="Conversion" value={`${convRate}%`} icon={<Target className="h-4 w-4" />} delta={{ value: "1.2pt", dir: "up" }} />
+        <StatTile
+          label="Closed Volume"
+          value={kpi.volume}
+          icon={<TrendingUp className="h-4 w-4" />}
+          accent
+          delta={{ value: "12.1%", dir: "up" }}
+        />
+        <StatTile
+          label="Properties Sold"
+          value={String(kpi.sold)}
+          icon={<Home className="h-4 w-4" />}
+          hint={`This ${range.replace("TD", "")}`}
+        />
+        <StatTile
+          label="Avg Days on Market"
+          value={String(kpi.dom)}
+          icon={<BarChart3 className="h-4 w-4" />}
+          delta={{ value: "3d", dir: "down" }}
+        />
+        <StatTile
+          label="Lead Conversion"
+          value={kpi.conv}
+          icon={<Target className="h-4 w-4" />}
+          delta={{ value: "1.2pt", dir: "up" }}
+        />
       </div>
 
+      {/* Charts — responsive 2-col grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel>
-          <PanelHeader title="Monthly Volume" subtitle="Closed sales volume by month" icon={<TrendingUp className="h-4 w-4" />} />
+          <PanelHeader
+            title="Monthly Volume"
+            subtitle="Closed sales volume by month"
+            icon={<TrendingUp className="h-4 w-4" />}
+          />
           <div className="h-64 px-3 py-4">
             <VolumeBarsChart />
           </div>
         </Panel>
         <Panel>
-          <PanelHeader title="Closings by Month" subtitle="Units closed" icon={<BarChart3 className="h-4 w-4" />} />
+          <PanelHeader
+            title="Closings by Month"
+            subtitle="Units closed"
+            icon={<BarChart3 className="h-4 w-4" />}
+          />
           <div className="h-64 px-3 py-4">
             <ClosingsBarChart />
           </div>
         </Panel>
         <Panel>
-          <PanelHeader title="Leads → Converted" subtitle="Capture vs conversion trend" icon={<Users className="h-4 w-4" />} />
+          <PanelHeader
+            title="Leads vs. Converted"
+            subtitle="Capture and conversion trend"
+            icon={<Users className="h-4 w-4" />}
+          />
           <div className="h-64 px-3 py-4">
             <LeadsConvertedChart />
           </div>
         </Panel>
         <Panel>
-          <PanelHeader title="Pipeline by Stage" subtitle="Open value across the funnel" icon={<Target className="h-4 w-4" />} />
+          <PanelHeader
+            title="Pipeline by Stage"
+            subtitle="Open value across the funnel"
+            icon={<Target className="h-4 w-4" />}
+          />
           <div className="h-64 px-3 py-4">
             <PipelineByStageChart />
           </div>
         </Panel>
       </div>
 
-      <ReportingTable agents={salesAgents} />
+      {/* Per-agent production table */}
+      <section>
+        <div className="mb-2.5 flex items-center gap-2">
+          <SectionLabel>Agent Production</SectionLabel>
+          <span className="h-px flex-1 bg-ink/[0.06]" />
+        </div>
+        <ReportingTable agents={salesAgents} />
+      </section>
     </div>
   );
 }

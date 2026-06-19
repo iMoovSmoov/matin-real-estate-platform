@@ -12,6 +12,7 @@ import {
   Maximize2,
   CalendarDays,
   StickyNote,
+  Wand2,
 } from "lucide-react";
 import { sellerLeads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
@@ -36,11 +37,17 @@ const STAGES: SellerLeadStage[] = [
 
 function conditionTone(condition: PropertyCondition): "success" | "azure" | "warn" | "danger" {
   switch (condition) {
-    case "Excellent": return "success";
-    case "Good":      return "azure";
-    case "Fair":      return "warn";
+    case "Excellent":  return "success";
+    case "Good":       return "azure";
+    case "Fair":       return "warn";
     case "Needs Work": return "danger";
   }
+}
+
+function stageDaysTone(days: number): "success" | "warn" | "danger" {
+  if (days > 7)  return "danger";
+  if (days >= 4) return "warn";
+  return "success";
 }
 
 /** Deterministic two-letter initials from a slug (e.g. "joshua-rose" → "JR"). */
@@ -60,14 +67,19 @@ function slugHue(slug: string): number {
   return h % 360;
 }
 
+/** Format a number as "$1,234,567" with commas (no compact suffix). */
+function formatUsd(n: number): string {
+  return "$" + n.toLocaleString("en-US");
+}
+
 /* ── Sub-components ──────────────────────────────────────────────────────────── */
 
 function AgentAvatar({ slug }: { slug: string }) {
   const hue = slugHue(slug);
   return (
     <span
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold text-white ring-2 ring-white"
-      style={{ backgroundColor: `hsl(${hue},45%,40%)` }}
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink/10 text-[0.7rem] font-bold text-ink"
+      style={{ backgroundColor: `hsl(${hue},38%,88%)`, color: `hsl(${hue},45%,30%)` }}
       title={slug}
     >
       {agentInitials(slug)}
@@ -99,6 +111,28 @@ function FactRow({
   );
 }
 
+/* ── Days-in-stage pill ──────────────────────────────────────────────────────── */
+
+function DaysPill({ days }: { days: number }) {
+  const tone = stageDaysTone(days);
+  const cls =
+    tone === "danger"
+      ? "bg-danger/10 text-danger"
+      : tone === "warn"
+      ? "bg-warn/10 text-amber-700"
+      : "bg-success/10 text-emerald-700";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-semibold",
+        cls,
+      )}
+    >
+      {days}d in stage
+    </span>
+  );
+}
+
 /* ── Kanban card ─────────────────────────────────────────────────────────────── */
 
 function LeadCard({
@@ -108,40 +142,35 @@ function LeadCard({
   lead: SellerLead;
   onClick: () => void;
 }) {
-  const overdue = lead.daysInStage > 7;
-
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
-      className="cursor-pointer rounded-xl border border-ink/[0.08] bg-white p-3 shadow-soft transition-colors hover:border-ink/20"
+      className="cursor-pointer rounded-xl bg-white ring-1 ring-ink/[0.07] shadow-soft p-3 transition-shadow hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
     >
-      {/* Address */}
-      <p className="truncate font-semibold text-[0.85rem] text-ink leading-snug">
-        {lead.address}
+      {/* Seller name */}
+      <p className="truncate font-semibold text-[0.9rem] text-ink leading-snug">
+        {lead.sellerName}
       </p>
-      <p className="mt-0.5 truncate text-[0.75rem] text-slate">{lead.city}</p>
 
-      {/* Value + condition */}
+      {/* Address */}
+      <p className="mt-0.5 truncate text-[0.8rem] text-slate/70">
+        {lead.address}, {lead.city}
+      </p>
+
+      {/* Est value + condition */}
       <div className="mt-2 flex items-center justify-between gap-1.5">
-        <span className="font-display text-[0.92rem] font-semibold text-ink tabular-nums">
-          {compactUsd(lead.estValue)}
+        <span className="font-semibold text-[0.88rem] text-ink tabular-nums">
+          {formatUsd(lead.estValue)}
         </span>
         <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
       </div>
 
       {/* Days in stage + agent avatar */}
       <div className="mt-2.5 flex items-center justify-between">
-        <span
-          className={cn(
-            "text-[0.7rem] font-medium",
-            overdue ? "text-danger" : "text-slate/70",
-          )}
-        >
-          {lead.daysInStage}d in stage
-        </span>
+        <DaysPill days={lead.daysInStage} />
         <AgentAvatar slug={lead.assignedAgent} />
       </div>
     </div>
@@ -247,7 +276,7 @@ function SlideOver({
       {/* Panel */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[480px] flex-col border-l border-ink/[0.08] bg-white shadow-2xl transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-full sm:max-w-[480px] flex-col border-l border-ink/[0.08] bg-white shadow-2xl transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -256,11 +285,11 @@ function SlideOver({
           <>
             {/* Header */}
             <div className="relative shrink-0 border-b border-ink/[0.08] px-5 pb-4 pt-5">
-              {/* Close */}
+              {/* Close — always visible, high z */}
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
+                className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -274,7 +303,7 @@ function SlideOver({
                 {/* Value + condition + stage row */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="font-display text-2xl leading-none text-ink tabular-nums">
-                    {compactUsd(lead.estValue)}
+                    {formatUsd(lead.estValue)}
                   </span>
                   <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
                   <Pill tone="neutral">{lead.stage}</Pill>
@@ -356,37 +385,60 @@ function SlideOver({
                 <button
                   onClick={runEval}
                   disabled={aiLoading}
-                  className="flex-1 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-60"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-60"
                 >
-                  AI Cash Offer Eval
+                  {aiLoading && aiMode === "eval" ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Evaluating…
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4" />
+                      AI Seller Brief
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={runScript}
                   disabled={aiLoading}
-                  className="flex-1 rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04] disabled:opacity-60"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-ink/[0.08] px-4 py-2.5 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04] disabled:opacity-60"
                 >
-                  Call Script
+                  {aiLoading && aiMode === "script" ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+                      Scripting…
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4" />
+                      Call Script
+                    </>
+                  )}
                 </button>
               </div>
 
-              {/* AI output */}
-              {aiLoading && (
-                <div className="flex items-center gap-2 text-[0.82rem] text-slate">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                  {aiMode === "eval"
-                    ? "Evaluating offer range…"
-                    : "Generating call script…"}
-                </div>
-              )}
-
-              {aiOutput && !aiLoading && (
+              {/* AI output — shown while streaming too */}
+              {(aiOutput || (aiLoading && aiMode)) && (
                 <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
                   <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-                    {aiMode === "eval" ? "AI Cash Offer Eval" : "Call Script"}
+                    {aiMode === "eval" ? "AI Seller Brief" : "Call Script"}
                   </p>
-                  <div className="max-h-64 overflow-y-auto">
-                    <AiMarkdown text={aiOutput} />
-                  </div>
+
+                  {aiLoading && !aiOutput && (
+                    <div className="flex items-center gap-2 text-[0.82rem] text-slate">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+                      {aiMode === "eval"
+                        ? "Evaluating offer range…"
+                        : "Generating call script…"}
+                    </div>
+                  )}
+
+                  {aiOutput && (
+                    <div className="max-h-64 overflow-y-auto">
+                      <AiMarkdown text={aiOutput} />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -460,13 +512,13 @@ export function CashOfferPipeline() {
     <>
       {/* Kanban scroll wrapper */}
       <div className="overflow-x-auto">
-        <div className="flex min-w-max gap-4 pb-4">
+        <div className="inline-flex min-w-max gap-4 p-4">
           {STAGES.map((stage) => {
             const stageLeads = leads.filter((l) => l.stage === stage);
             return (
-              <div key={stage} className="min-w-[220px] max-w-[220px]">
+              <div key={stage} className="w-[220px] shrink-0">
                 {/* Column header */}
-                <div className="mb-2 flex items-center gap-1.5">
+                <div className="mb-2.5 flex items-center gap-1.5 px-0.5">
                   <span className="font-semibold text-[0.82rem] text-ink leading-snug">
                     {stage}
                   </span>
@@ -476,19 +528,18 @@ export function CashOfferPipeline() {
                 </div>
 
                 {/* Cards */}
-                <div>
+                <div className="space-y-2">
                   {stageLeads.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-ink/[0.08] px-3 py-6 text-center">
                       <p className="text-[0.72rem] text-slate/50">No leads</p>
                     </div>
                   ) : (
                     stageLeads.map((lead) => (
-                      <div key={lead.id} className="mb-2">
-                        <LeadCard
-                          lead={lead}
-                          onClick={() => setSelectedId(lead.id)}
-                        />
-                      </div>
+                      <LeadCard
+                        key={lead.id}
+                        lead={lead}
+                        onClick={() => setSelectedId(lead.id)}
+                      />
                     ))
                   )}
                 </div>

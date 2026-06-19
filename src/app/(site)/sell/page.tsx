@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import {
   Camera, Globe2, LineChart, Megaphone, Users2, Quote, Star,
-  DollarSign, CalendarCheck, Hammer, ShieldCheck, Sparkles, ClipboardCheck, Handshake,
+  DollarSign, CalendarCheck, Hammer, ShieldCheck, ClipboardCheck, Handshake, TrendingUp,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { company } from "@/lib/data";
 export const metadata: Metadata = {
   title: "Sell Your Home | Matin Real Estate",
   description:
-    "Sell for more with the Portland area's most advanced brokerage — pro photography, the largest local website, and sharp pricing. Or get a guaranteed cash offer from Cash Is King.",
+    "Sell faster and net more with Matin Real Estate — 18 active listings, 40+ brokers, $130M volume. Pro photography, the largest local website, sharp pricing. Or get a guaranteed cash offer.",
 };
 
 const advantages = [
@@ -70,20 +70,21 @@ export default function SellPage() {
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
-                Sell for more, with{" "}
-                <span className="italic text-azure-bright">a lot less stress.</span>
+                Sell faster. Net more.{" "}
+                <span className="italic text-azure-bright">Matin delivers both.</span>
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
                 Cinematic marketing, the largest local audience, and sharp pricing — backed by a $2.4M
-                marketing engine. Start with your home&apos;s value, free and instant.
+                marketing engine and 40+ full-time brokers. Start with your home&apos;s value, free and
+                instant.
               </p>
             </Reveal>
             <Reveal delay={0.24}>
               <div className="mt-8 flex flex-wrap gap-3">
                 <ButtonLink href="#instant-value" variant="primary" size="lg">
-                  <Sparkles className="h-4 w-4" /> Get my home value
+                  <TrendingUp className="h-4 w-4" /> Get my home value
                 </ButtonLink>
                 <ButtonLink href="#cash-offer" variant="outline-light" size="lg">
                   Need a cash offer?
@@ -266,7 +267,7 @@ export default function SellPage() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ButtonLink href="#instant-value" variant="white" size="lg">
-                  <Sparkles className="h-4 w-4" /> Get my home value
+                  <TrendingUp className="h-4 w-4" /> Get my home value
                 </ButtonLink>
                 <ButtonLink href="/contact" variant="outline-light" size="lg">
                   <Handshake className="h-4 w-4" /> Talk to a listing expert

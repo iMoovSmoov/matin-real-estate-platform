@@ -7,7 +7,6 @@ import {
   Award,
   TrendingUp,
   MessageSquareText,
-  Sparkles,
   BarChart2,
 } from "lucide-react";
 import { agents, salesAgents, company } from "@/lib/data";
@@ -151,7 +150,7 @@ export default function CoachingPage() {
               <Drama className="h-3 w-3" /> {scenarios.length} role-play scenarios
             </Pill>
             <Pill tone="success">
-              <Sparkles className="h-3 w-3" /> AI coach
+              <GraduationCap className="h-3 w-3" /> AI coach
             </Pill>
             <Pill tone="neutral">
               <Award className="h-3 w-3" /> Gamified leaderboard
@@ -173,7 +172,7 @@ export default function CoachingPage() {
             icon={<BarChart2 className="h-4 w-4" />}
           />
           <div className="overflow-x-auto">
-            <table className="w-full text-[0.85rem]">
+            <table className="w-full min-w-[600px] text-[0.85rem]">
               <thead>
                 <tr className="border-b border-ink/[0.08] bg-ink/[0.02]">
                   <th className="px-5 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">

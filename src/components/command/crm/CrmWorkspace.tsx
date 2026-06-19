@@ -91,7 +91,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   return (
     <div>
       {/* Smart lists */}
-      <div className="-mx-1 mb-3 flex gap-2 overflow-x-auto px-1 pb-1">
+      <div className="-mx-1 mb-3 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1">
         {SMART_LISTS.map((sl) => {
           const on = sl.id === listId;
           const Icon = sl.icon;
@@ -136,7 +136,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       </div>
 
       {/* Inbox */}
-      <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
+      <div className="overflow-x-auto overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-2.5">
           <p className="flex items-center gap-2 text-[0.78rem] font-semibold text-ink">
             <list.icon className="h-3.5 w-3.5" />
@@ -247,7 +247,7 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
           <p className="text-[0.66rem] text-slate/45">budget</p>
         </div>
 
-        {/* stage + response time */}
+        {/* stage + response time — hidden on mobile */}
         <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
           <span className={cn("rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset", stageTone(lead.stage))}>
             {lead.stage}

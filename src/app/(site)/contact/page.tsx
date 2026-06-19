@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import {
-  MapPin, Phone, Mail, Clock, MessageCircle, ArrowRight, Building2, Sparkles,
+  MapPin, Phone, Mail, Clock, MessageCircle, ArrowRight, Building2,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -128,7 +128,7 @@ export default function ContactPage() {
                   <div className="absolute inset-0 grid-tech opacity-40" />
                   <div className="relative">
                     <div className="flex items-center gap-2 text-azure-bright">
-                      <Sparkles className="h-5 w-5" />
+                      <MessageCircle className="h-5 w-5" />
                       <span className="eyebrow-light">Need an answer right now?</span>
                     </div>
                     <h3 className="mt-3 font-display text-xl text-white">Ask Matin, our AI concierge</h3>

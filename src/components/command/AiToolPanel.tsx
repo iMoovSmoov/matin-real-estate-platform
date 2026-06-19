@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Sparkles,
+  FileText,
   Loader2,
   Copy,
   Check,
   RefreshCw,
   Wand2,
   Printer,
-  ArrowRight,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
@@ -62,6 +61,13 @@ export function AiToolPanel({
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [docDate, setDocDate] = useState("");
+
+  useEffect(() => {
+    if (output && !docDate) {
+      setDocDate(new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }));
+    }
+  }, [output, docDate]);
 
   function set(name: string, v: string) {
     setValues((prev) => ({ ...prev, [name]: v }));
@@ -70,6 +76,7 @@ export function AiToolPanel({
   function applyPreset(p: Preset) {
     setValues({ ...blank, ...p.values });
     setOutput("");
+    setDocDate("");
     setTouched(false);
   }
 
@@ -78,6 +85,7 @@ export function AiToolPanel({
     setBusy(true);
     setTouched(true);
     setOutput("");
+    setDocDate("");
     try {
       await streamAi({ tool, input: values }, (_chunk, full) => setOutput(full));
     } finally {
@@ -130,7 +138,7 @@ export function AiToolPanel({
                   className="group inline-flex items-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:border-ink/20 hover:bg-paper hover:text-ink"
                   title={p.hint}
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-ink" />
+                  <Wand2 className="h-3.5 w-3.5 text-ink" />
                   {p.label}
                 </button>
               ))}
@@ -200,7 +208,7 @@ export function AiToolPanel({
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> {submitLabel}
+                  <Wand2 className="h-4 w-4" /> {submitLabel}
                 </>
               )}
             </button>
@@ -212,7 +220,7 @@ export function AiToolPanel({
       <div className="flex flex-col rounded-2xl border border-ink/[0.08] bg-white">
         <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3.5">
           <div className="flex items-center gap-2">
-            {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-ink" />}
+            {busy ? <LiveDot tone="azure" /> : <FileText className="h-4 w-4 text-ink" />}
             <span className="text-[0.84rem] font-semibold text-ink">{outputTitle}</span>
             {busy && <span className="text-[0.72rem] text-slate/70">streaming live</span>}
           </div>
@@ -245,11 +253,22 @@ export function AiToolPanel({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {!touched && !output ? (
-            <EmptyState submitLabel={submitLabel} />
+            <EmptyState outputTitle={outputTitle} />
           ) : (
-            <div className="prose-none">
-              <AiMarkdown text={output} />
-              {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />}
+            <div>
+              {output && !busy && docDate && (
+                <div className="mb-4 flex items-center justify-between border-b border-ink/[0.08] pb-3">
+                  <div>
+                    <p className="text-[0.78rem] font-semibold uppercase tracking-widest text-ink/40">Matin Real Estate</p>
+                    <p className="mt-0.5 font-display text-[1rem] text-ink">{outputTitle}</p>
+                  </div>
+                  <p className="text-[0.72rem] text-slate/50">{docDate}</p>
+                </div>
+              )}
+              <div className="prose-document text-[0.875rem] leading-relaxed text-ink">
+                <AiMarkdown text={output} />
+                {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />}
+              </div>
             </div>
           )}
         </div>
@@ -258,20 +277,13 @@ export function AiToolPanel({
   );
 }
 
-function EmptyState({ submitLabel }: { submitLabel: string }) {
+function EmptyState({ outputTitle }: { outputTitle: string }) {
   return (
-    <div className="flex h-full min-h-[16rem] flex-col items-center justify-center text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper text-ink ring-1 ring-inset ring-ink/[0.06]">
-        <Sparkles className="h-6 w-6" />
-      </span>
-      <p className="mt-3 text-[0.9rem] font-semibold text-ink">Powered by AI</p>
-      <p className="mt-1 max-w-xs text-[0.8rem] leading-relaxed text-slate/70">
-        Fill the form (or load a quick-fill example) and hit{" "}
-        <span className="inline-flex items-center gap-1 font-semibold text-ink">
-          {submitLabel} <ArrowRight className="h-3 w-3" />
-        </span>{" "}
-        to stream a result live.
-      </p>
+    <div className="flex h-full min-h-[20rem] flex-col items-center justify-center gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper ring-1 ring-inset ring-ink/[0.06]">
+        <Wand2 className="h-6 w-6 text-ink/30" />
+      </div>
+      <p className="text-center text-[0.82rem] text-slate/45">Fill in the details and generate your {outputTitle.toLowerCase()}</p>
     </div>
   );
 }

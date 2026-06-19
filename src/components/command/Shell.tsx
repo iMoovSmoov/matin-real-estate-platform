@@ -6,29 +6,29 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Wallet,
-  Bot,
-  MessageSquareText,
-  PenSquare,
+  DollarSign,
+  FileCheck,
+  FileText,
+  ClipboardList,
+  FilePlus2,
+  Rocket,
   GraduationCap,
-  FileSignature,
+  BarChart2,
+  PlugZap,
+  BrainCircuit,
+  MessageSquareText,
+  PenLine,
   Calculator,
-  Sparkles,
-  Workflow,
-  Plug,
-  BarChart3,
-  Database,
-  ScrollText,
-  Trophy,
+  FileSignature,
+  MessageCircle,
   Search,
   Bell,
   Menu,
   X,
   ArrowLeft,
   ChevronDown,
-  LifeBuoy,
+  Building2,
   Home,
-  Rocket,
   User,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
@@ -39,43 +39,49 @@ type NavItem = { label: string; href: string; icon: React.ComponentType<{ classN
 type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
-  { label: "Overview", items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }] },
-  { label: "Agent", items: [{ label: "My Workspace", href: "/hub/agent", icon: User }] },
   {
-    label: "Clients",
+    label: "COMMAND CENTER",
+    items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }],
+  },
+  {
+    label: "MY WORKSPACE",
+    items: [{ label: "My Workspace", href: "/hub/agent", icon: User }],
+  },
+  {
+    label: "CLIENTS & DEALS",
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
-      { label: "Cash Offers", href: "/hub/cash-offer", icon: Home },
-      { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
-      { label: "Transactions", href: "/hub/transactions", icon: Wallet },
+      { label: "Cash Offers", href: "/hub/cash-offer", icon: DollarSign },
+      { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileCheck },
+      { label: "Transactions", href: "/hub/transactions", icon: FileText },
     ],
   },
   {
-    label: "AI Tools",
+    label: "AI TOOLS",
     items: [
-      { label: "AI Studio", href: "/hub/ai", icon: Bot },
+      { label: "AI Studio", href: "/hub/ai", icon: BrainCircuit },
       { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
-      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenSquare },
+      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenLine },
       { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
       { label: "CMA Generator", href: "/hub/ai/cma", icon: Calculator },
       { label: "Agreements", href: "/hub/ai/agreements", icon: FileSignature },
-      { label: "Ask Matin", href: "/hub/ai/ask", icon: Sparkles },
+      { label: "Ask Matin", href: "/hub/ai/ask", icon: MessageCircle },
     ],
   },
   {
-    label: "Tools",
+    label: "TOOLS",
     items: [
-      { label: "Forms", href: "/hub/forms", icon: Database },
-      { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
+      { label: "Forms", href: "/hub/forms", icon: ClipboardList },
+      { label: "Contract Builder", href: "/hub/contracts", icon: FilePlus2 },
       { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
-      { label: "Coaching", href: "/hub/coaching", icon: Trophy },
+      { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
     ],
   },
   {
-    label: "Insights",
+    label: "ANALYTICS",
     items: [
-      { label: "Reporting", href: "/hub/reporting", icon: BarChart3 },
-      { label: "Integrations", href: "/hub/integrations", icon: Plug },
+      { label: "Reporting", href: "/hub/reporting", icon: BarChart2 },
+      { label: "Integrations", href: "/hub/integrations", icon: PlugZap },
     ],
   },
 ];
@@ -101,22 +107,24 @@ function groupHasActive(pathname: string, g: NavGroup) {
 }
 
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
-  // Collapse long groups by default; expand short ones or the active group.
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(NAV.map((g) => [g.label, g.items.length <= 3 || groupHasActive(pathname, g)])),
   );
 
   return (
     <div className="flex h-full flex-col">
-      {/* Brand */}
-      <div className="flex items-center gap-3 border-b border-ink/[0.08] px-5 py-[1.15rem]">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.08]">
-          <MatinMark className="h-4 text-ink" />
+      {/* Brand header */}
+      <div className="flex items-center gap-3 border-b border-ink/[0.08] bg-white px-5 py-[1.15rem]">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-white ring-1 ring-inset ring-ink/[0.12]">
+          <MatinMark className="h-4 text-white" />
         </span>
         <div className="min-w-0 leading-tight">
-          <span className="block truncate font-display text-[1.05rem] text-ink">Matin Hub</span>
-          <span className="block text-[0.6rem] font-medium uppercase tracking-[0.2em] text-slate/65">
-            Matin Real Estate
+          <div className="flex items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5 shrink-0 text-ink/40" />
+            <span className="block truncate font-display text-[1.05rem] font-semibold text-ink">Matin</span>
+          </div>
+          <span className="block text-[0.68rem] font-medium uppercase tracking-widest text-slate/50">
+            Brokerage Operating System
           </span>
         </div>
       </div>
@@ -131,7 +139,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
               {single ? null : (
                 <button
                   onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-slate/55 transition-colors hover:text-slate"
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-slate/45 transition-colors hover:text-slate"
                 >
                   {group.label}
                   <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isOpen ? "rotate-0" : "-rotate-90")} />
@@ -150,12 +158,16 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                           className={cn(
                             "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors",
                             active
-                              ? "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.08]"
+                              ? "border-l-2 border-ink bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.08]"
                               : "text-slate hover:bg-white hover:text-ink",
                           )}
                         >
-                          {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-ink" />}
-                          <Icon className={cn("h-[1.05rem] w-[1.05rem] shrink-0", active ? "text-ink" : "text-slate group-hover:text-ink")} />
+                          <Icon
+                            className={cn(
+                              "h-[1.05rem] w-[1.05rem] shrink-0",
+                              active ? "text-ink" : "text-slate group-hover:text-ink",
+                            )}
+                          />
                           <span className="truncate">{item.label}</span>
                         </Link>
                       </li>
@@ -168,14 +180,25 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Footer — user + phone */}
       <div className="border-t border-ink/[0.08] p-3">
-        <a
-          href="tel:+15036229624"
-          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:bg-white hover:text-ink"
-        >
-          <LifeBuoy className="h-[1.05rem] w-[1.05rem]" /> Help &amp; support
-        </a>
+        <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-[0.66rem] font-bold text-white">
+            {initials("Alicia Kelly-Smith")}
+          </span>
+          <div className="min-w-0 leading-tight">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+              <span className="truncate text-[0.78rem] font-semibold text-ink">Alicia Kelly-Smith</span>
+            </div>
+            <a
+              href="tel:+15036229624"
+              className="block text-[0.64rem] text-slate/55 transition-colors hover:text-ink"
+            >
+              (503) 622-9624
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -189,14 +212,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink/[0.08] bg-white backdrop-blur-md lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink/[0.08] bg-white lg:flex">
         <SidebarContent pathname={pathname} />
       </aside>
 
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setMobileOpen(false)} aria-hidden />
+          <div
+            className="absolute inset-0 bg-black/80"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden
+          />
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[82vw] border-r border-ink/[0.08] bg-white shadow-2xl">
             <button
               onClick={() => setMobileOpen(false)}
@@ -265,7 +292,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                           <span
                             className={cn(
                               "mt-1 h-2 w-2 shrink-0 rounded-full",
-                              n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-ink",
+                              n.tone === "success"
+                                ? "bg-success"
+                                : n.tone === "warn"
+                                  ? "bg-warn"
+                                  : "bg-ink",
                             )}
                           />
                           <div className="min-w-0">
@@ -292,7 +323,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {initials("Alicia Kelly-Smith")}
               </span>
               <div className="hidden leading-tight md:block">
-                <div className="text-[0.78rem] font-semibold text-ink">Alicia Kelly-Smith</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="text-[0.78rem] font-semibold text-ink">Alicia Kelly-Smith</span>
+                </div>
                 <div className="text-[0.64rem] text-slate/70">Operations</div>
               </div>
             </div>

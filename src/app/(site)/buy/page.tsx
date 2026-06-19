@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import {
   ArrowRight, Search, Handshake, KeyRound, FileSignature, ShieldCheck,
-  TrendingUp, Cpu, Users, Sparkles, BadgeCheck, CalendarClock, Wallet, ClipboardList,
+  TrendingUp, Cpu, Users, Building2, BadgeCheck, CalendarClock, Wallet, ClipboardList, CheckCircle2,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -16,23 +16,22 @@ import { company, featuredListings } from "@/lib/data";
 export const metadata: Metadata = {
   title: "Buy a Home | Matin Real Estate",
   description:
-    "Buy your next home with the Portland area's most advanced brokerage. Live comps, AI-assisted negotiation, and 40+ full-time brokers in your corner.",
+    "Find your next home in Portland's best communities. Off-market access, pre-approval help, expert negotiation, and 40+ full-time brokers in your corner.",
 };
 
 const buyingSteps = [
-  { title: "Get pre-approved", body: "We connect you with trusted local lenders so you shop with a clear budget and a competitive edge before you ever tour a home." },
-  { title: "Tour with confidence", body: "Your broker curates listings from the largest local database in the metro — and flags off-market opportunities others never see." },
-  { title: "Make a winning offer", body: "Live comps and AI-assisted strategy help us price your offer to win without overpaying, even in a multiple-offer market." },
-  { title: "Close & get the keys", body: "We coordinate inspections, appraisal, and closing — keeping every deadline on track so move-in day arrives without surprises." },
+  { title: "Consult", body: "Meet with a Matin broker — in person or by phone — to define your budget, must-haves, and timeline. We connect you with trusted local lenders so you shop pre-approved and ready to move." },
+  { title: "Search", body: "Your broker curates listings from the largest local database in the metro, including off-market and coming-soon properties others never see, then tours with you and narrows to the right fit." },
+  { title: "Close", body: "We craft a winning offer, negotiate hard on your behalf, and coordinate every step — inspections, appraisal, and closing — so your keys arrive on schedule and without surprises." },
 ];
 
 const values = [
-  { icon: TrendingUp, title: "The largest local dataset", body: "We run on the largest locally owned real-estate website in the Portland area — so you see more homes, sooner, with sharper comps behind every decision." },
-  { icon: Cpu, title: "AI-assisted negotiation", body: "Our Matin Hub pairs live market data with AI strategy, so your offer is priced to win without leaving money on the table." },
+  { icon: Building2, title: "Off-market access", body: "Coming-soon and pocket listings across our 40-broker network mean opportunities most buyers never even hear about." },
+  { icon: ShieldCheck, title: "Pre-approval help", body: "We connect you with trusted local lenders so you shop with a clear budget and a competitive edge — before you ever tour a home." },
+  { icon: TrendingUp, title: "Expert negotiation", body: "Live comps and deep market knowledge help us price your offer to win without overpaying, even in a multiple-offer market." },
+  { icon: CheckCircle2, title: "Full transaction support", body: "We coordinate inspections, appraisal, lending, and closing — keeping every deadline on track so move-in day arrives without surprises." },
   { icon: Users, title: "40+ full-time brokers", body: "Never a part-timer. A licensed OR & WA broker who knows your neighborhood by heart is in your corner from first tour to final signature." },
-  { icon: ShieldCheck, title: "Fiduciary, full-service", body: "We represent you — start to close. Inspections, appraisal, lending, and closing are all coordinated and kept on schedule." },
   { icon: BadgeCheck, title: "Award-winning team", body: "Portland Business Journal fastest-growing, $130M+ closed, and 305+ families moved every year. Experience you can feel." },
-  { icon: Sparkles, title: "Off-market access", body: "Coming-soon and pocket listings across our 40-broker network mean opportunities most buyers never even hear about." },
 ];
 
 const resources = [
@@ -66,14 +65,14 @@ export default function BuyPage() {
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
-                The right home, found the{" "}
-                <span className="italic text-azure-bright">smart way.</span>
+                Find your next home in{" "}
+                <span className="italic text-azure-bright">Portland&apos;s best communities.</span>
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
-                More listings, sharper comps, and AI-assisted negotiation — so you win the home you love
-                without overpaying. Start your search below.
+                Off-market access, expert negotiation, and 40+ brokers who live where they sell — so you win
+                the home you love without overpaying.
               </p>
             </Reveal>
             <Reveal delay={0.24}>
@@ -100,7 +99,7 @@ export default function BuyPage() {
         <Container>
           <SectionHeading
             eyebrow="The Matin buying process"
-            title="Four steps from search to keys"
+            title="Three steps from search to keys"
             intro="A clear, broker-guided path — no guesswork, no surprises, no pressure."
             align="center"
           />
@@ -213,11 +212,11 @@ export default function BuyPage() {
                 right homes — many before they hit the open market.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <ButtonLink href="/contact" variant="white" size="lg">
-                  <Handshake className="h-4 w-4" /> Talk to a buyer&apos;s agent
+                <ButtonLink href="/property-search" variant="white" size="lg">
+                  <Search className="h-4 w-4" /> Start your search
                 </ButtonLink>
-                <ButtonLink href="/property-search" variant="outline-light" size="lg">
-                  <Search className="h-4 w-4" /> Search homes
+                <ButtonLink href="/contact" variant="outline-light" size="lg">
+                  <Handshake className="h-4 w-4" /> Talk to a buyer&apos;s agent
                 </ButtonLink>
               </div>
               <p className="mt-6 flex items-center justify-center gap-2 text-[0.85rem] text-white/80">

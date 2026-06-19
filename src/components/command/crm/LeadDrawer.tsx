@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import {
   X,
-  Sparkles,
+  Wand2,
   Loader2,
   Copy,
   Check,
@@ -228,7 +228,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out sm:w-[480px]",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -412,7 +412,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               <div className="rounded-xl border border-ink/[0.08] bg-white">
                 <div className="flex items-center justify-between gap-2 border-b border-ink/[0.08] px-4 py-2.5">
                   <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-ink" />
+                    <Wand2 className="h-4 w-4 text-ink" />
                     <span className="text-[0.82rem] font-semibold text-ink">Draft reply</span>
                   </div>
                   {draft && !busy && (
@@ -434,7 +434,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                       onClick={generate}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink-700"
                     >
-                      <Sparkles className="h-4 w-4" /> Draft a reply with AI
+                      <Wand2 className="h-4 w-4" /> Draft reply with AI
                     </button>
                   ) : (
                     <>
