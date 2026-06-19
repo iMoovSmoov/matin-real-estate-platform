@@ -1,0 +1,1082 @@
+[
+  {
+    "id": "TX-4000",
+    "address": "489 SE Ellsworth Rd, Vancouver",
+    "type": "Sale (Listing)",
+    "client": "Logan Lopez",
+    "agentSlug": "sierra-lockwood",
+    "price": 1910000,
+    "commission": 47750,
+    "stage": "Inspection",
+    "stageIndex": 3,
+    "closeDateDaysOut": 36,
+    "progress": 50,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4001",
+    "address": "7143 Tannler Dr, West Linn",
+    "type": "Purchase (Buyer)",
+    "client": "Lucas Hughes",
+    "agentSlug": "eric-leuschner",
+    "price": 1200000,
+    "commission": 30000,
+    "stage": "Clear to Close",
+    "stageIndex": 6,
+    "closeDateDaysOut": 27,
+    "progress": 88,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": true
+      },
+      {
+        "label": "Final walkthrough",
+        "done": true
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4002",
+    "address": "5030 SW Murray Blvd, Beaverton",
+    "type": "Sale (Listing)",
+    "client": "Olivia Hughes",
+    "agentSlug": "alicia-smith",
+    "price": 1710000,
+    "commission": 42750,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 16,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4003",
+    "address": "8147 Twin Fir Rd, Lake Oswego",
+    "type": "Sale (Listing)",
+    "client": "Leo Chen",
+    "agentSlug": "amy-mead",
+    "price": 1030000,
+    "commission": 25750,
+    "stage": "Clear to Close",
+    "stageIndex": 6,
+    "closeDateDaysOut": 14,
+    "progress": 88,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": true
+      },
+      {
+        "label": "Final walkthrough",
+        "done": true
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4004",
+    "address": "1503 SW Hart Rd, Beaverton",
+    "type": "Sale (Listing)",
+    "client": "Miles Lopez",
+    "agentSlug": "karen-tse",
+    "price": 2185000,
+    "commission": 54625,
+    "stage": "Financing",
+    "stageIndex": 5,
+    "closeDateDaysOut": 5,
+    "progress": 75,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4005",
+    "address": "7926 SE Columbia Way, Vancouver",
+    "type": "Purchase (Buyer)",
+    "client": "Grace Bennett",
+    "agentSlug": "nancy-alhayek",
+    "price": 1510000,
+    "commission": 37750,
+    "stage": "Clear to Close",
+    "stageIndex": 6,
+    "closeDateDaysOut": 34,
+    "progress": 88,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": true
+      },
+      {
+        "label": "Final walkthrough",
+        "done": true
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4006",
+    "address": "8457 NW Lakeshore Ave, Vancouver",
+    "type": "Purchase (Buyer)",
+    "client": "Nadia Patel",
+    "agentSlug": "amanda-conlon",
+    "price": 1580000,
+    "commission": 39500,
+    "stage": "Inspection",
+    "stageIndex": 3,
+    "closeDateDaysOut": 6,
+    "progress": 50,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4007",
+    "address": "5030 SW Murray Blvd, Beaverton",
+    "type": "Purchase (Buyer)",
+    "client": "Diego Russo",
+    "agentSlug": "alicia-smith",
+    "price": 1710000,
+    "commission": 42750,
+    "stage": "Closed",
+    "stageIndex": 7,
+    "closeDateDaysOut": -20,
+    "progress": 100,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": true
+      },
+      {
+        "label": "Final walkthrough",
+        "done": true
+      },
+      {
+        "label": "Closing disbursed",
+        "done": true
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4008",
+    "address": "8457 NW Lakeshore Ave, Vancouver",
+    "type": "Purchase (Buyer)",
+    "client": "Isabella Sullivan",
+    "agentSlug": "amanda-conlon",
+    "price": 1580000,
+    "commission": 39500,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 45,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": "Inspection repairs open"
+  },
+  {
+    "id": "TX-4009",
+    "address": "7353 Summit Ridge Ct, West Linn",
+    "type": "Sale (Listing)",
+    "client": "Ava Okafor",
+    "agentSlug": "miguel-contreras",
+    "price": 1750000,
+    "commission": 43750,
+    "stage": "Financing",
+    "stageIndex": 5,
+    "closeDateDaysOut": 9,
+    "progress": 75,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4010",
+    "address": "3080 SE Eagle Crest Dr, Happy Valley",
+    "type": "Purchase (Buyer)",
+    "client": "Priya Nguyen",
+    "agentSlug": "jose-lettenmaier",
+    "price": 2200000,
+    "commission": 55000,
+    "stage": "Financing",
+    "stageIndex": 5,
+    "closeDateDaysOut": 3,
+    "progress": 75,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4011",
+    "address": "5823 Willamette Falls Dr, West Linn",
+    "type": "Purchase (Buyer)",
+    "client": "Mei Castillo",
+    "agentSlug": "finch-myburgh",
+    "price": 2185000,
+    "commission": 54625,
+    "stage": "Financing",
+    "stageIndex": 5,
+    "closeDateDaysOut": 43,
+    "progress": 75,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": true
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4012",
+    "address": "740 SE Columbia Way, Vancouver",
+    "type": "Sale (Listing)",
+    "client": "Aria Reyes",
+    "agentSlug": "alicia-smith",
+    "price": 2290000,
+    "commission": 57250,
+    "stage": "Appraisal",
+    "stageIndex": 4,
+    "closeDateDaysOut": 38,
+    "progress": 63,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4013",
+    "address": "489 SE Ellsworth Rd, Vancouver",
+    "type": "Purchase (Buyer)",
+    "client": "Liam Nguyen",
+    "agentSlug": "sierra-lockwood",
+    "price": 1910000,
+    "commission": 47750,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 31,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4014",
+    "address": "6754 SW Murdock Rd, Sherwood",
+    "type": "Sale (Listing)",
+    "client": "Grace Ahmed",
+    "agentSlug": "reed-bright",
+    "price": 1360000,
+    "commission": 34000,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 32,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  },
+  {
+    "id": "TX-4015",
+    "address": "4887 SW Oregon St, Sherwood",
+    "type": "Sale (Listing)",
+    "client": "Nadia Mbatha",
+    "agentSlug": "joe-bothe",
+    "price": 2700000,
+    "commission": 67500,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 43,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": "Financing delay"
+  },
+  {
+    "id": "TX-4016",
+    "address": "4887 SW Oregon St, Sherwood",
+    "type": "Sale (Listing)",
+    "client": "Liam Romero",
+    "agentSlug": "joe-bothe",
+    "price": 2700000,
+    "commission": 67500,
+    "stage": "Appraisal",
+    "stageIndex": 4,
+    "closeDateDaysOut": 13,
+    "progress": 63,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": true
+      },
+      {
+        "label": "Earnest money received",
+        "done": true
+      },
+      {
+        "label": "Inspection complete",
+        "done": true
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": true
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": "Inspection repairs open"
+  },
+  {
+    "id": "TX-4017",
+    "address": "4892 Skyline Cir, West Linn",
+    "type": "Purchase (Buyer)",
+    "client": "Carlos Nguyen",
+    "agentSlug": "zach-hosford",
+    "price": 1090000,
+    "commission": 27250,
+    "stage": "Active",
+    "stageIndex": 1,
+    "closeDateDaysOut": 37,
+    "progress": 25,
+    "checklist": [
+      {
+        "label": "Listing agreement signed",
+        "done": true
+      },
+      {
+        "label": "Photos & 3D tour",
+        "done": true
+      },
+      {
+        "label": "MLS live",
+        "done": true
+      },
+      {
+        "label": "Offer accepted",
+        "done": false
+      },
+      {
+        "label": "Earnest money received",
+        "done": false
+      },
+      {
+        "label": "Inspection complete",
+        "done": false
+      },
+      {
+        "label": "Repairs negotiated",
+        "done": false
+      },
+      {
+        "label": "Appraisal ordered",
+        "done": false
+      },
+      {
+        "label": "Loan approved",
+        "done": false
+      },
+      {
+        "label": "Final walkthrough",
+        "done": false
+      },
+      {
+        "label": "Closing disbursed",
+        "done": false
+      }
+    ],
+    "riskFlag": null
+  }
+]

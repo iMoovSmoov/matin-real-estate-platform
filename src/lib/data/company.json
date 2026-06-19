@@ -1,0 +1,42 @@
+{
+  "name": "Matin Real Estate",
+  "founder": "Jordan Matin",
+  "tagline": "Portland & SW Washington's most advanced brokerage.",
+  "phone": "(503) 622-9624",
+  "phoneRaw": "5036229624",
+  "email": "info@matinrealestate.com",
+  "address": {
+    "street": "18825 Willamette Dr",
+    "city": "West Linn",
+    "state": "OR",
+    "zip": "97068"
+  },
+  "hours": "Mon–Sun · 8am–8pm",
+  "founded": 2014,
+  "logo": "/matin/brand/logo-3586_logo_logo-white-20211102123653.png",
+  "officeHero": "/matin/brand/hero-3586_hero_mre-office-west-linn-interior-26-20260604075258.jpeg",
+  "officeMeeting": "/matin/brand/matin-real-estate-office-meeting.jpg",
+  "stats": {
+    "annualVolume": "$130M+",
+    "annualVolumeNum": 130000000,
+    "propertiesSold": "305+",
+    "propertiesSoldNum": 305,
+    "activeListings": "100+",
+    "activeListingsNum": 112,
+    "growth": "35%",
+    "marketing": "$2.4M",
+    "agents": 40,
+    "citiesServed": 40
+  },
+  "social": {
+    "facebook": "https://www.facebook.com/MatinRealEstate/",
+    "instagram": "https://www.instagram.com/matinrealestate/",
+    "linkedin": "https://www.linkedin.com/company/matinrealestate",
+    "youtube": "#"
+  },
+  "awards": [
+    "Portland Business Journal — Fastest Growing Private Companies",
+    "Top 10 Brokers in the Region",
+    "RealTrends America's Best"
+  ]
+}

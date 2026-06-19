@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  MATIN REAL ESTATE — design system
+  Brand: obsidian navy + clean white + electric "Matin blue" (from their real brand).
+  Public site = light/airy with blue accent. Command Center = dark/tech with blue glow.
+*/
+
+@theme {
+  /* Ink (obsidian navy scale) */
+  --color-ink: #0a0e14;
+  --color-ink-900: #0e131b;
+  --color-ink-800: #141a24;
+  --color-ink-700: #1c2532;
+  --color-ink-600: #273241;
+  --color-ink-500: #36465a;
+
+  /* Light neutrals (cool paper) */
+  --color-paper: #f4f6f9;
+  --color-paper-200: #e9edf2;
+  --color-mist: #dde3ea;
+  --color-cloud: #ffffff;
+
+  --color-slate: #5d6b7d;        /* muted text on light */
+  --color-slate-300: #9fb0c2;    /* muted text on dark */
+
+  /* Matin blue */
+  --color-azure: #2e90e0;
+  --color-azure-bright: #54a8ff;
+  --color-azure-300: #8fc7ff;
+  --color-azure-deep: #1668ad;
+  --color-azure-ink: #0c2a45;
+
+  /* Status */
+  --color-success: #2fa36b;
+  --color-danger: #e0564a;
+  --color-warn: #e0a64a;
+  --color-info: #4a8bd0;
+
+  /* Type */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgba(10,14,20,.05), 0 8px 24px rgba(10,14,20,.07);
+  --shadow-lift: 0 2px 4px rgba(10,14,20,.06), 0 18px 50px rgba(10,14,20,.16);
+  --shadow-glow: 0 10px 44px rgba(46,144,224,.34);
+
+  --ease-out-soft: cubic-bezier(.16,1,.3,1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+  * { border-color: color-mix(in oklab, var(--color-ink) 12%, transparent); }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv01";
+  }
+  ::selection { background: var(--color-azure); color: #fff; }
+  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-ink) 24%, transparent);
+    border-radius: 99px; border: 3px solid transparent; background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: color-mix(in oklab, var(--color-ink) 40%, transparent); background-clip: content-box; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer components {
+  .eyebrow {
+    font-family: var(--font-sans); font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-azure-deep);
+  }
+  .eyebrow-light { color: var(--color-azure-bright); }
+  .rule-accent { height: 1px; width: 56px; background: linear-gradient(90deg, var(--color-azure), transparent); }
+
+  .display-1 { font-size: clamp(2.6rem, 6vw, 5.4rem); line-height: 1.0; }
+  .display-2 { font-size: clamp(2rem, 4.4vw, 3.7rem); line-height: 1.05; }
+  .display-3 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); line-height: 1.12; }
+
+  .container-x { width: 100%; max-width: 1240px; margin-inline: auto; padding-inline: 1.25rem; }
+  @media (min-width: 768px) { .container-x { padding-inline: 2rem; } }
+
+  .glass {
+    background: color-mix(in oklab, #fff 6%, transparent);
+    border: 1px solid color-mix(in oklab, #fff 12%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .glass-blue {
+    background: color-mix(in oklab, var(--color-azure) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-azure) 28%, transparent);
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px; background-position: 0 100%; background-repeat: no-repeat;
+    transition: background-size .4s var(--ease-out-soft);
+  }
+  .link-underline:hover { background-size: 100% 1px; }
+
+  .grid-tech {
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--color-azure) 8%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-azure) 8%, transparent) 1px, transparent 1px);
+    background-size: 44px 44px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+  .animate-rise { animation: rise .8s var(--ease-out-soft) both; }
+  .animate-fade { animation: fade 1s ease both; }
+  .ken-burns { animation: ken 20s ease-in-out infinite alternate; }
+  .pulse-dot { animation: pulsedot 2s ease-in-out infinite; }
 }
+
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ken { from { transform: scale(1) translateY(0); } to { transform: scale(1.08) translateY(-1.5%); } }
+@keyframes pulsedot { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,144,224,.5); } 50% { opacity:.7; box-shadow: 0 0 0 7px rgba(46,144,224,0); } }

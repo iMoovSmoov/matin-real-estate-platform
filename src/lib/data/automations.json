@@ -1,0 +1,121 @@
+[
+  {
+    "id": "au1",
+    "name": "Speed-to-Lead Responder",
+    "category": "Lead Gen",
+    "trigger": "New lead from any source",
+    "status": "active",
+    "runsThisMonth": 412,
+    "lastRunMins": 3,
+    "steps": [
+      "Capture lead (Zillow / Web / FB)",
+      "Enrich + de-dupe in CRM",
+      "AI drafts personalized first reply",
+      "Send SMS + email in < 60s",
+      "Assign to best-fit agent",
+      "Create follow-up task"
+    ]
+  },
+  {
+    "id": "au2",
+    "name": "Listing Launch Engine",
+    "category": "Listings",
+    "trigger": "New listing marked 'Coming Soon'",
+    "status": "active",
+    "runsThisMonth": 38,
+    "lastRunMins": 220,
+    "steps": [
+      "Generate MLS description (AI)",
+      "Build social + email creative",
+      "Schedule photographer",
+      "Notify matched buyers",
+      "Post to syndication"
+    ]
+  },
+  {
+    "id": "au3",
+    "name": "Seller CMA Nurture",
+    "category": "Seller",
+    "trigger": "Seller lead, no appointment in 3 days",
+    "status": "active",
+    "runsThisMonth": 156,
+    "lastRunMins": 51,
+    "steps": [
+      "AI builds neighborhood CMA",
+      "Render branded PDF",
+      "Email seller + log",
+      "Notify agent if opened"
+    ]
+  },
+  {
+    "id": "au4",
+    "name": "Under-Contract Concierge",
+    "category": "Transactions",
+    "trigger": "Deal moves to 'Pending'",
+    "status": "active",
+    "runsThisMonth": 71,
+    "lastRunMins": 14,
+    "steps": [
+      "Spin up transaction checklist",
+      "Calendar all deadlines",
+      "Notify lender + title + client",
+      "Daily AI risk scan"
+    ]
+  },
+  {
+    "id": "au5",
+    "name": "Database Reactivation",
+    "category": "Marketing",
+    "trigger": "Past client, 6-month silence",
+    "status": "active",
+    "runsThisMonth": 220,
+    "lastRunMins": 600,
+    "steps": [
+      "Pull equity + market delta",
+      "AI writes 'home value' touch",
+      "Send + book if reply"
+    ]
+  },
+  {
+    "id": "au6",
+    "name": "Review & Referral Loop",
+    "category": "Reputation",
+    "trigger": "Transaction closed",
+    "status": "active",
+    "runsThisMonth": 71,
+    "lastRunMins": 90,
+    "steps": [
+      "Send AI thank-you + survey",
+      "Request Google review",
+      "Trigger referral ask at day 30"
+    ]
+  },
+  {
+    "id": "au7",
+    "name": "Agent Coaching Digest",
+    "category": "Operations",
+    "trigger": "Every Monday 7am",
+    "status": "active",
+    "runsThisMonth": 4,
+    "lastRunMins": 1440,
+    "steps": [
+      "Pull each agent's KPIs",
+      "AI writes personalized coaching note",
+      "Flag deals needing attention"
+    ]
+  },
+  {
+    "id": "au8",
+    "name": "Showing Feedback Collector",
+    "category": "Listings",
+    "trigger": "Showing completed",
+    "status": "paused",
+    "runsThisMonth": 0,
+    "lastRunMins": 4320,
+    "steps": [
+      "Text buyer's agent for feedback",
+      "Summarize sentiment (AI)",
+      "Roll up to seller report"
+    ]
+  }
+]

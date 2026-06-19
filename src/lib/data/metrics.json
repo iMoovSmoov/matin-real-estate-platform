@@ -1,0 +1,246 @@
+{
+  "volumeByMonth": [
+    {
+      "month": "Jul",
+      "volume": 9000000,
+      "closings": 20
+    },
+    {
+      "month": "Aug",
+      "volume": 12000000,
+      "closings": 17
+    },
+    {
+      "month": "Sep",
+      "volume": 10000000,
+      "closings": 16
+    },
+    {
+      "month": "Oct",
+      "volume": 15000000,
+      "closings": 26
+    },
+    {
+      "month": "Nov",
+      "volume": 7000000,
+      "closings": 23
+    },
+    {
+      "month": "Dec",
+      "volume": 11000000,
+      "closings": 14
+    },
+    {
+      "month": "Jan",
+      "volume": 8000000,
+      "closings": 22
+    },
+    {
+      "month": "Feb",
+      "volume": 13000000,
+      "closings": 22
+    },
+    {
+      "month": "Mar",
+      "volume": 9000000,
+      "closings": 17
+    },
+    {
+      "month": "Apr",
+      "volume": 9000000,
+      "closings": 23
+    },
+    {
+      "month": "May",
+      "volume": 15000000,
+      "closings": 16
+    },
+    {
+      "month": "Jun",
+      "volume": 7000000,
+      "closings": 27
+    }
+  ],
+  "leadsByMonth": [
+    {
+      "month": "Jul",
+      "leads": 182,
+      "converted": 32
+    },
+    {
+      "month": "Aug",
+      "leads": 189,
+      "converted": 20
+    },
+    {
+      "month": "Sep",
+      "leads": 230,
+      "converted": 34
+    },
+    {
+      "month": "Oct",
+      "leads": 326,
+      "converted": 18
+    },
+    {
+      "month": "Nov",
+      "leads": 183,
+      "converted": 20
+    },
+    {
+      "month": "Dec",
+      "leads": 189,
+      "converted": 16
+    },
+    {
+      "month": "Jan",
+      "leads": 296,
+      "converted": 33
+    },
+    {
+      "month": "Feb",
+      "leads": 226,
+      "converted": 29
+    },
+    {
+      "month": "Mar",
+      "leads": 336,
+      "converted": 14
+    },
+    {
+      "month": "Apr",
+      "leads": 201,
+      "converted": 38
+    },
+    {
+      "month": "May",
+      "leads": 314,
+      "converted": 27
+    },
+    {
+      "month": "Jun",
+      "leads": 219,
+      "converted": 32
+    }
+  ],
+  "leadsBySource": [
+    {
+      "source": "Zillow",
+      "count": 98
+    },
+    {
+      "source": "Website",
+      "count": 306
+    },
+    {
+      "source": "Open House",
+      "count": 192
+    },
+    {
+      "source": "Referral",
+      "count": 193
+    },
+    {
+      "source": "Facebook Ad",
+      "count": 88
+    },
+    {
+      "source": "Google",
+      "count": 189
+    },
+    {
+      "source": "Realtor.com",
+      "count": 116
+    },
+    {
+      "source": "Past Client",
+      "count": 119
+    },
+    {
+      "source": "Call-In",
+      "count": 240
+    },
+    {
+      "source": "Instagram",
+      "count": 310
+    }
+  ],
+  "pipelineByStage": [
+    {
+      "stage": "Pre-Listing",
+      "value": 8000000,
+      "deals": 15
+    },
+    {
+      "stage": "Active",
+      "value": 3000000,
+      "deals": 5
+    },
+    {
+      "stage": "Pending",
+      "value": 6000000,
+      "deals": 5
+    },
+    {
+      "stage": "Inspection",
+      "value": 4000000,
+      "deals": 3
+    },
+    {
+      "stage": "Appraisal",
+      "value": 6000000,
+      "deals": 8
+    },
+    {
+      "stage": "Financing",
+      "value": 4000000,
+      "deals": 15
+    },
+    {
+      "stage": "Clear to Close",
+      "value": 5000000,
+      "deals": 3
+    },
+    {
+      "stage": "Closed",
+      "value": 5000000,
+      "deals": 16
+    }
+  ],
+  "funnel": [
+    {
+      "stage": "Leads",
+      "count": 2840
+    },
+    {
+      "stage": "Engaged",
+      "count": 1190
+    },
+    {
+      "stage": "Appointments",
+      "count": 410
+    },
+    {
+      "stage": "Active Clients",
+      "count": 188
+    },
+    {
+      "stage": "Under Contract",
+      "count": 96
+    },
+    {
+      "stage": "Closed",
+      "count": 71
+    }
+  ],
+  "kpis": {
+    "pipelineValue": 48200000,
+    "mtdVolume": 14300000,
+    "activeDeals": 63,
+    "newLeadsToday": 41,
+    "avgResponseMins": 4,
+    "conversionRate": 11.4,
+    "avgDaysOnMarket": 17,
+    "listVsSold": 99.2
+  }
+}

@@ -1,0 +1,194 @@
+[
+  {
+    "id": 0,
+    "agent": "Maleigha Martinez",
+    "agentSlug": "maleigha-martinez",
+    "photo": "/matin/agents/maleigha-martinez.jpg",
+    "text": "received an accepted offer in Sherwood",
+    "minsAgo": 9
+  },
+  {
+    "id": 1,
+    "agent": "Kimberly Ilosvay",
+    "agentSlug": "kimberly-ilosvay",
+    "photo": "/matin/agents/kimberly-ilosvay.jpg",
+    "text": "received an accepted offer in Vancouver",
+    "minsAgo": 32
+  },
+  {
+    "id": 2,
+    "agent": "Joe Bothe",
+    "agentSlug": "joe-bothe",
+    "photo": "/matin/agents/joe-bothe.jpg",
+    "text": "booked a showing for Aria Nguyen",
+    "minsAgo": 48
+  },
+  {
+    "id": 3,
+    "agent": "Amy Mead",
+    "agentSlug": "amy-mead",
+    "photo": "/matin/agents/amy-mead.jpg",
+    "text": "booked a showing for Emma Romero",
+    "minsAgo": 67
+  },
+  {
+    "id": 4,
+    "agent": "Ocean Chau",
+    "agentSlug": "ocean-chau",
+    "photo": "/matin/agents/ocean-chau.jpg",
+    "text": "booked a showing for Caleb Russo",
+    "minsAgo": 49
+  },
+  {
+    "id": 5,
+    "agent": "Amy Mead",
+    "agentSlug": "amy-mead",
+    "photo": "/matin/agents/amy-mead.jpg",
+    "text": "listed 7164 SE 1st Ave",
+    "minsAgo": 55
+  },
+  {
+    "id": 6,
+    "agent": "Lexa Brice",
+    "agentSlug": "lexa-brice",
+    "photo": "/matin/agents/lexa-brice.jpg",
+    "text": "closed a $1052K sale in Wilsonville",
+    "minsAgo": 122
+  },
+  {
+    "id": 7,
+    "agent": "Miguel Contreras",
+    "agentSlug": "miguel-contreras",
+    "photo": "/matin/agents/miguel-contreras.jpg",
+    "text": "sent an AI-drafted CMA to a seller",
+    "minsAgo": 61
+  },
+  {
+    "id": 8,
+    "agent": "Jason Veith",
+    "agentSlug": "jason-veith",
+    "photo": "/matin/agents/jason-veith.jpg",
+    "text": "closed a $728K sale in McMinnville",
+    "minsAgo": 169
+  },
+  {
+    "id": 9,
+    "agent": "Nancy Alhayek",
+    "agentSlug": "nancy-alhayek",
+    "photo": "/matin/agents/nancy-alhayek.jpg",
+    "text": "received an accepted offer in Lake Oswego",
+    "minsAgo": 196
+  },
+  {
+    "id": 10,
+    "agent": "Boston Bate",
+    "agentSlug": "boston-bate",
+    "photo": "/matin/agents/boston-bate.jpg",
+    "text": "sent an AI-drafted CMA to a seller",
+    "minsAgo": 311
+  },
+  {
+    "id": 11,
+    "agent": "Jordan Matin",
+    "agentSlug": "jordan-matin",
+    "photo": "/matin/agents/jordan-matin.jpg",
+    "text": "sent an AI-drafted CMA to a seller",
+    "minsAgo": 104
+  },
+  {
+    "id": 12,
+    "agent": "Amy Mead",
+    "agentSlug": "amy-mead",
+    "photo": "/matin/agents/amy-mead.jpg",
+    "text": "moved a deal to Pending",
+    "minsAgo": 136
+  },
+  {
+    "id": 13,
+    "agent": "Leona Mullen",
+    "agentSlug": "leona-mullen",
+    "photo": "/matin/agents/leona-mullen.jpg",
+    "text": "booked a showing for Diego Brooks",
+    "minsAgo": 473
+  },
+  {
+    "id": 14,
+    "agent": "Jason Veith",
+    "agentSlug": "jason-veith",
+    "photo": "/matin/agents/jason-veith.jpg",
+    "text": "received an accepted offer in Happy Valley",
+    "minsAgo": 353
+  },
+  {
+    "id": 15,
+    "agent": "Lexa Brice",
+    "agentSlug": "lexa-brice",
+    "photo": "/matin/agents/lexa-brice.jpg",
+    "text": "listed 806 Officers Row",
+    "minsAgo": 552
+  },
+  {
+    "id": 16,
+    "agent": "Jason Veith",
+    "agentSlug": "jason-veith",
+    "photo": "/matin/agents/jason-veith.jpg",
+    "text": "moved a deal to Financing",
+    "minsAgo": 319
+  },
+  {
+    "id": 17,
+    "agent": "William Carrell",
+    "agentSlug": "william-carrell",
+    "photo": "/matin/agents/william-carrell.jpg",
+    "text": "sent an AI-drafted CMA to a seller",
+    "minsAgo": 360
+  },
+  {
+    "id": 18,
+    "agent": "Vince Kinney",
+    "agentSlug": "vince-kinney",
+    "photo": "/matin/agents/vince-kinney.jpg",
+    "text": "booked a showing for Henry Nguyen",
+    "minsAgo": 571
+  },
+  {
+    "id": 19,
+    "agent": "Zach Hosford",
+    "agentSlug": "zach-hosford",
+    "photo": "/matin/agents/zach-hosford.jpg",
+    "text": "listed 740 SE Columbia Way",
+    "minsAgo": 149
+  },
+  {
+    "id": 20,
+    "agent": "Jason Veith",
+    "agentSlug": "jason-veith",
+    "photo": "/matin/agents/jason-veith.jpg",
+    "text": "moved a deal to Active",
+    "minsAgo": 605
+  },
+  {
+    "id": 21,
+    "agent": "Leona Mullen",
+    "agentSlug": "leona-mullen",
+    "photo": "/matin/agents/leona-mullen.jpg",
+    "text": "received an accepted offer in Beaverton",
+    "minsAgo": 557
+  },
+  {
+    "id": 22,
+    "agent": "Ellen Morehead",
+    "agentSlug": "ellen-morehead",
+    "photo": "/matin/agents/ellen-morehead.jpg",
+    "text": "moved a deal to Inspection",
+    "minsAgo": 843
+  },
+  {
+    "id": 23,
+    "agent": "Michelle McFadden",
+    "agentSlug": "michelle-mcfadden",
+    "photo": "/matin/agents/michelle-mcfadden.jpg",
+    "text": "moved a deal to Clear to Close",
+    "minsAgo": 264
+  }
+]

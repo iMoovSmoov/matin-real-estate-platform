@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Follow Up Boss",
+    "category": "CRM",
+    "status": "connected",
+    "description": "Two-way sync of contacts, deals & calls.",
+    "records": 14820
+  },
+  {
+    "name": "Sierra Interactive",
+    "category": "Website / IDX",
+    "status": "connected",
+    "description": "Lead capture + MLS search feed.",
+    "records": 9631
+  },
+  {
+    "name": "RMLS / NWMLS",
+    "category": "MLS Data",
+    "status": "connected",
+    "description": "Live listing & comp data for OR + WA.",
+    "records": 41200
+  },
+  {
+    "name": "DocuSign",
+    "category": "E-Signature",
+    "status": "connected",
+    "description": "Listing & buyer agreements, fully paperless.",
+    "records": 1860
+  },
+  {
+    "name": "Dotloop",
+    "category": "Transactions",
+    "status": "connected",
+    "description": "Transaction rooms & compliance.",
+    "records": 642
+  },
+  {
+    "name": "Twilio",
+    "category": "SMS / Voice",
+    "status": "connected",
+    "description": "Speed-to-lead texting & call tracking.",
+    "records": 38400
+  },
+  {
+    "name": "SendGrid",
+    "category": "Email",
+    "status": "connected",
+    "description": "Drip campaigns & transactional mail.",
+    "records": 96200
+  },
+  {
+    "name": "Google Workspace",
+    "category": "Productivity",
+    "status": "connected",
+    "description": "Calendar, Drive & Gmail sync.",
+    "records": 5200
+  },
+  {
+    "name": "QuickBooks",
+    "category": "Accounting",
+    "status": "connected",
+    "description": "Commission & expense reconciliation.",
+    "records": 1240
+  },
+  {
+    "name": "Meta Ads",
+    "category": "Marketing",
+    "status": "available",
+    "description": "Auto-import ad leads + spend.",
+    "records": 0
+  },
+  {
+    "name": "Zapier / Make",
+    "category": "Automation",
+    "status": "connected",
+    "description": "Glue for 6,000+ apps & internal flows.",
+    "records": null
+  },
+  {
+    "name": "Anthropic Claude",
+    "category": "AI",
+    "status": "connected",
+    "description": "Powers Ask Matin, coaching & content.",
+    "records": null
+  }
+]
