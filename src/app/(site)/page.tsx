@@ -46,8 +46,7 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[40%_center] sm:object-[45%_center]"
-            style={{ transform: "scaleX(-1)" }}
+            className="object-cover object-center"
           />
         </div>
 
