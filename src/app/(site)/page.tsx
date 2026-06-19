@@ -37,73 +37,106 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section id="main-content" className="relative min-h-[70vh] sm:min-h-[92vh] overflow-hidden">
-        {/* Background image */}
-        <div className="absolute inset-0 ken-burns">
-          <Image
-            src={company.officeHero}
-            alt="Matin Real Estate office in West Linn"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[20%_10%] sm:object-[center_20%]"
-          />
-        </div>
+      <section id="main-content">
 
-        {/* Gradient: dark at BOTTOM — lighter on mobile so the office reads through */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent sm:via-ink/55" />
-        {/* Subtle gold warmth at center-bottom */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
-        {/* Noise texture for film grain premium feel */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-overlay"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }} />
-
-        {/* Content: always anchored to bottom — sits in desk area, never covers logo wall */}
-        <div className="relative z-10 flex min-h-[70vh] sm:min-h-[92vh] items-end">
-          <Container className="pt-20">
-            {/* Wide text block across the bottom — like a caption on an architectural photo */}
-            <div className="w-full pb-24 sm:pb-14 lg:pb-16 max-w-3xl">
-              <Reveal>
-                {/* Short on mobile, full on sm+ */}
-                <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
-                <span className="hero-text-shadow eyebrow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
-              </Reveal>
-              <Reveal delay={0.08}>
-                <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.15rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-5xl lg:text-[3.5rem]">
-                  Find your place in the{" "}
-                  <span className="italic gradient-gold">Pacific Northwest.</span>
-                </h1>
-              </Reveal>
-              {/* Body copy — hidden on mobile to reduce clutter */}
-              <Reveal delay={0.16}>
-                <p className="hidden sm:block mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
-                  The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
-                  annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
-                </p>
-              </Reveal>
-              <Reveal delay={0.24}>
-                <div className="mt-6 sm:mt-8">
-                  <PropertySearchBar dark />
-                </div>
-              </Reveal>
-              <Reveal delay={0.32}>
-                <div className="mt-5 flex items-center gap-2 text-sm text-white/80 sm:mt-7 sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
-                  <span className="flex items-center gap-2">
-                    <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
-                  </span>
-                  <span className="hidden items-center gap-2 sm:flex">
-                    <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
-                  </span>
-                </div>
-              </Reveal>
+        {/* ── MOBILE: stacked — image on top, text panel below ── */}
+        <div className="sm:hidden">
+          {/* Image zone: 4:3 ratio so the full office interior is visible, no extreme portrait crop */}
+          <div className="relative w-full aspect-[4/3] overflow-hidden">
+            <div className="absolute inset-0 ken-burns">
+              <Image
+                src={company.officeHero}
+                alt="Matin Real Estate office in West Linn"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[22%_12%]"
+              />
             </div>
-          </Container>
+            {/* Fade bottom edge into the dark panel below */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0d0d0e]" />
+          </div>
+
+          {/* Text panel: dark ink, flush below the image */}
+          <div className="bg-[#0d0d0e] px-5 pt-5 pb-8">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Portland · Lake Oswego · SW Washington
+            </p>
+            <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-white text-balance">
+              Find your place in the{" "}
+              <span className="italic gradient-gold">Pacific Northwest.</span>
+            </h1>
+            <div className="mt-5">
+              <PropertySearchBar dark />
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-[0.8rem] text-white/50">
+              <BadgeCheck className="h-4 w-4 text-azure-bright" />
+              <span>4.9 · 700+ reviews · Portland&apos;s #1 tech brokerage</span>
+            </div>
+          </div>
         </div>
 
-        {/* scroll-down indicator */}
-        <div className="absolute bottom-[calc(56px+2rem)] sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
-          <span className="text-[0.65rem] uppercase tracking-widest">Scroll</span>
-          <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
+        {/* ── DESKTOP: full-bleed overlay (unchanged) ── */}
+        <div className="relative hidden sm:block min-h-[92vh] overflow-hidden">
+          <div className="absolute inset-0 ken-burns">
+            <Image
+              src={company.officeHero}
+              alt="Matin Real Estate office in West Linn"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-[center_20%]"
+            />
+          </div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-overlay"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }}
+          />
+
+          <div className="relative z-10 flex min-h-[92vh] items-end">
+            <Container className="pt-20">
+              <div className="w-full pb-14 lg:pb-16 max-w-3xl">
+                <Reveal>
+                  <span className="hero-text-shadow eyebrow eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
+                </Reveal>
+                <Reveal delay={0.08}>
+                  <h1 className="hero-text-shadow display-1 mt-5 font-display text-5xl leading-[1.1] text-white text-balance lg:text-[3.5rem]">
+                    Find your place in the{" "}
+                    <span className="italic gradient-gold">Pacific Northwest.</span>
+                  </h1>
+                </Reveal>
+                <Reveal delay={0.16}>
+                  <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
+                    The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
+                    annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
+                  </p>
+                </Reveal>
+                <Reveal delay={0.24}>
+                  <div className="mt-8">
+                    <PropertySearchBar dark />
+                  </div>
+                </Reveal>
+                <Reveal delay={0.32}>
+                  <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/80">
+                    <span className="flex items-center gap-2">
+                      <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
+                    </span>
+                  </div>
+                </Reveal>
+              </div>
+            </Container>
+          </div>
+
+          {/* Scroll indicator — desktop only */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
+            <span className="text-[0.65rem] uppercase tracking-widest">Scroll</span>
+            <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
+          </div>
         </div>
       </section>
 
