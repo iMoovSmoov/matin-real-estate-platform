@@ -55,7 +55,7 @@ export function AskMatin() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close concierge" : "Open Matin concierge"}
         className={cn(
-          "fixed bottom-[calc(56px+1.25rem)] right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full sm:bottom-5 sm:right-7",
+          "fixed bottom-[calc(56px+1.25rem)] right-5 z-50 relative h-14 w-14 rounded-full sm:bottom-5 sm:right-7",
           "bg-ink text-white",
           "shadow-[0_4px_20px_rgba(6,6,6,.45),0_1px_4px_rgba(6,6,6,.25)]",
           "ring-[1.5px] ring-white/20",
@@ -63,11 +63,11 @@ export function AskMatin() {
           open && "scale-95 ring-white/30",
         )}
       >
-        <span className={cn("transition-all duration-300", open ? "opacity-100 scale-100" : "opacity-0 scale-75 absolute")}>
+        <span className={cn("absolute inset-0 flex items-center justify-center transition-all duration-300", open ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none")}>
           <X className="h-5 w-5" />
         </span>
-        <span className={cn("transition-all duration-300", open ? "opacity-0 scale-75 absolute" : "opacity-100 scale-100")}>
-          <MatinMark className="h-6 text-white" />
+        <span className={cn("absolute inset-0 flex items-center justify-center transition-all duration-300", open ? "opacity-0 scale-75 pointer-events-none" : "opacity-100 scale-100")}>
+          <MatinMark className="h-[22px] w-auto text-white" />
         </span>
       </button>
 
@@ -97,7 +97,7 @@ export function AskMatin() {
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3.5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-white/20">
-            <MatinMark className="h-5 text-ink" />
+            <MatinMark className="h-[18px] w-auto text-ink" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-display text-[0.95rem] font-semibold leading-none text-white">
@@ -123,7 +123,7 @@ export function AskMatin() {
             <div key={i} className={cn("flex gap-2.5", m.role === "user" ? "justify-end" : "justify-start items-end")}>
               {m.role === "assistant" && (
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 mb-0.5">
-                  <MatinMark className="h-3 text-white" />
+                  <MatinMark className="h-[10px] w-auto text-white" />
                 </div>
               )}
               <div
