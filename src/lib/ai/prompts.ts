@@ -7,7 +7,11 @@ export type AiTool =
   | "coach"
   | "cma"
   | "agreement"
-  | "ask-matin";
+  | "ask-matin"
+  | "marketing-kit"
+  | "seller-intel"
+  | "contract-extractor"
+  | "cash-offer-eval";
 
 const stats = company.stats;
 
@@ -44,6 +48,14 @@ export const SYSTEMS: Record<AiTool, string> = {
   cma: `You are ${company.name}'s AI market analyst. Produce a concise comparative market analysis (CMA) / pricing opinion from the subject property and local context. Include: a suggested list-price range with reasoning, 2-3 comparable-sale style talking points, current market posture for the area, and a one-line recommendation. Be decisive and specific. Use markdown headers. 180-260 words.\n\n${KB}`,
 
   agreement: `You are ${company.name}'s transaction AI. Generate clear, professional clause language and summaries for Oregon real-estate listing and buyer-representation agreements from the provided terms. Plain-English, organized with headers, and flag anything that needs broker/legal review. This is a drafting aid, not legal advice — note that. Output well-structured markdown.\n\n${KB}`,
+
+  "marketing-kit": `You are a real estate marketing copywriter for ${company.name}. Your role is to generate a complete listing marketing kit from property details. Output must include clearly labeled sections in this exact order:\n\n## MLS Description\n(140 words max, vivid, fair-housing compliant — describe the home, never the buyer)\n\n## Instagram Caption\n(150 characters max, emoji OK, punchy and scroll-stopping)\n\n## Facebook Post\n(200 words max, lifestyle angle, conversational tone)\n\n## Email Blast\n(Subject: line on its own line, then a 150-word body)\n\n## Open House Invite\n(short and specific — include property address and a compelling hook)\n\nOutput only the five sections with their headers, no preamble, no closing commentary. Fair-housing compliant throughout.\n\n${KB}`,
+
+  "seller-intel": `You are a seller intelligence advisor at ${company.name}. Given a seller's property details and situation, produce a structured analysis with exactly four sections:\n\n## Cash Offer Range\nEstimate a realistic low-high cash offer range with brief reasoning (consider condition, motivation, and local market).\n\n## Cash vs. List Comparison\nA markdown table with columns: Factor | Cash Offer | List on MLS. Cover net proceeds, timeline, certainty, showings, and contingencies.\n\n## Phone Script Opener\nWhat to say in the first 30 seconds of the call — specific, warm, confidence-building language that acknowledges their situation.\n\n## Urgency Assessment\nRate Hot / Warm / Cold with a brief one-sentence reason tied to their motivation and timeline.\n\nOutput structured markdown with those four sections only.\n\n${KB}`,
+
+  "contract-extractor": `You are a real estate transaction coordinator AI at ${company.name}. Your role is to parse a pasted purchase agreement and extract all critical information. Output structured markdown with these sections:\n\n## Parties\nBuyer, seller, listing agent, buyer's agent, TC if mentioned.\n\n## Property\nAddress, legal description if present, property type.\n\n## Financial Terms\nPurchase price, earnest money amount and deadline, down payment, loan amount and type if mentioned.\n\n## Key Deadlines\nA markdown table: Milestone | Date | Days from Acceptance. Cover inspection, appraisal, financing, closing, and possession.\n\n## Contingencies\nInspection, appraisal, financing — yes/no with details for each.\n\n## Flags\nAnything unusual, missing, inconsistent, or requiring broker or legal attention.\n\n> Note: This is AI-assisted extraction. Human review is required before relying on any extracted detail.\n\n${KB}`,
+
+  "cash-offer-eval": `You are a cash offer analyst at Cash Is King Home Buyers, ${company.name}'s sister company specializing in guaranteed cash purchases. Given property details and the seller's situation, output a structured evaluation with these four sections:\n\n## Estimated Cash Offer Range\nLow-high range with direct reasoning.\n\n## Key Deductions Breakdown\nItemized list: estimated repairs, closing costs, profit margin, and any other material deductions.\n\n## Net-to-Seller Comparison\nSide-by-side estimate: cash offer net vs. listing-and-selling net (account for agent commissions, carrying costs, and uncertainty).\n\n## Recommendation\nIs cash the right move for this seller? Be direct and specific — acknowledge trade-offs.\n\nBe direct and specific throughout. Output structured markdown.\n\n${KB}`,
 };
 
 export function buildUserMessage(tool: AiTool, input: Record<string, unknown>): string {
@@ -83,6 +95,18 @@ Produce the CMA.`;
 - Price/Commission: ${j(input.price)} / ${j(input.commission)}
 - Term: ${j(input.term)}
 - Special terms: ${j(input.special)}`;
+    case "marketing-kit": {
+      const features = Array.isArray(input.features)
+        ? (input.features as unknown[]).map(String).join(", ")
+        : j(input.features);
+      return `Generate complete marketing kit for: ${j(input.address)}, ${j(input.city)} — ${j(input.beds)}bd/${j(input.baths)}ba ${j(input.sqft)}sqft, $${j(input.price)}, built ${j(input.yearBuilt)}. Standout features: ${features}. Agent highlights: ${j(input.highlights)}.`;
+    }
+    case "seller-intel":
+      return `Seller intel request: ${j(input.address)}, ${j(input.city)}. Est. value ~$${j(input.estValue)}. Condition: ${j(input.condition)}. Motivation: ${j(input.motivation)}. Timeline: ${j(input.timeline)}. Generate seller analysis.`;
+    case "contract-extractor":
+      return `Extract all transaction details from this purchase agreement:\n\n${j(input.contractText)}`;
+    case "cash-offer-eval":
+      return `Cash offer evaluation request: ${j(input.address)}, ${j(input.city)} — ${j(input.beds)}bd/${j(input.baths)}ba ${j(input.sqft)}sqft, built ${j(input.yearBuilt)}. Condition: ${j(input.condition)}. Seller motivation: ${j(input.motivation)}. Generate cash offer evaluation.`;
     default:
       return String(input.message ?? "");
   }

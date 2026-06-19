@@ -16,13 +16,13 @@
     "assignedAgent": "joshua-rose",
     "createdDaysAgo": 109,
     "lastContactDaysAgo": 0,
-    "tags": [
-      "Cash",
-      "First-Time",
-      "Luxury"
-    ],
+    "tags": ["Cash", "First-Time", "Luxury"],
     "aiSummary": "Mason is buying & selling in Tigard around $1445k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send listing update — viewed similar homes, no contact today",
+    "propertyViews": ["4BR/3BA in Tigard $1480K", "5BR in Lake Oswego $1550K"],
+    "responseMinutes": 3,
+    "likelySeller": true
   },
   {
     "id": "LD-2001",
@@ -41,12 +41,13 @@
     "assignedAgent": "janae-chaves",
     "createdDaysAgo": 2,
     "lastContactDaysAgo": 3,
-    "tags": [
-      "Hot",
-      "Contingent"
-    ],
+    "tags": ["Hot", "Contingent"],
     "aiSummary": "Mei is buying & selling in Camas around $1180k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — 3 days since last contact, showing stage",
+    "propertyViews": ["3BR/2BA in Camas $1210K", "4BR in Ridgefield $1195K", "3BR/3BA in Vancouver $1240K"],
+    "responseMinutes": 18,
+    "likelySeller": true
   },
   {
     "id": "LD-2002",
@@ -65,13 +66,13 @@
     "assignedAgent": "boston-bate",
     "createdDaysAgo": 116,
     "lastContactDaysAgo": 3,
-    "tags": [
-      "Contingent",
-      "Pre-approved",
-      "Hot"
-    ],
+    "tags": ["Contingent", "Pre-approved", "Hot"],
     "aiSummary": "Priya is investing in Tualatin around $1395k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — high score investor, 3 days since last contact",
+    "propertyViews": ["Multi-unit in Tualatin $1420K", "4BR/3BA in Wilsonville $1490K", "Investment duplex in Sherwood $1380K"],
+    "responseMinutes": 2,
+    "likelySeller": false
   },
   {
     "id": "LD-2003",
@@ -90,11 +91,13 @@
     "assignedAgent": "amanda-conlon",
     "createdDaysAgo": 51,
     "lastContactDaysAgo": 20,
-    "tags": [
-      "Contingent"
-    ],
+    "tags": ["Contingent"],
     "aiSummary": "Miles is selling in Portland around $1000k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send closed transaction follow-up and referral request",
+    "propertyViews": ["3BR/2BA in Portland $1050K"],
+    "responseMinutes": 22,
+    "likelySeller": true
   },
   {
     "id": "LD-2004",
@@ -113,11 +116,13 @@
     "assignedAgent": "jason-veith",
     "createdDaysAgo": 92,
     "lastContactDaysAgo": 3,
-    "tags": [
-      "Cash"
-    ],
+    "tags": ["Cash"],
     "aiSummary": "Priya is buying in Ridgefield around $805k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 3
+    "unread": 3,
+    "nextBestAction": "Call now — new lead with cash, 3 days unresponded",
+    "propertyViews": ["3BR/2BA in Ridgefield $829K", "4BR in Camas $895K"],
+    "responseMinutes": 14,
+    "likelySeller": false
   },
   {
     "id": "LD-2005",
@@ -136,12 +141,13 @@
     "assignedAgent": "reed-bright",
     "createdDaysAgo": 90,
     "lastContactDaysAgo": 12,
-    "tags": [
-      "Contingent",
-      "VA Loan"
-    ],
+    "tags": ["Contingent", "VA Loan"],
     "aiSummary": "Diego is selling in Tualatin around $1435k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — 12 days since last contact, seller intent",
+    "propertyViews": ["4BR/2BA in Tualatin $1490K", "5BR in Wilsonville $1560K"],
+    "responseMinutes": 4,
+    "likelySeller": true
   },
   {
     "id": "LD-2006",
@@ -160,13 +166,13 @@
     "assignedAgent": "zach-hosford",
     "createdDaysAgo": 86,
     "lastContactDaysAgo": 19,
-    "tags": [
-      "Hot",
-      "VA Loan",
-      "Contingent"
-    ],
+    "tags": ["Hot", "VA Loan", "Contingent"],
     "aiSummary": "Mei is selling in Tigard around $580k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Re-engage now — 19 days since last contact, risk of going cold",
+    "propertyViews": ["3BR/1BA in Tigard $625K"],
+    "responseMinutes": 35,
+    "likelySeller": true
   },
   {
     "id": "LD-2007",
@@ -185,11 +191,13 @@
     "assignedAgent": "chris-zurita-orozco",
     "createdDaysAgo": 78,
     "lastContactDaysAgo": 14,
-    "tags": [
-      "Pre-approved"
-    ],
+    "tags": ["Pre-approved"],
     "aiSummary": "Carlos is buying & selling in Newberg around $1135k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Text listing options — 14 days quiet, pre-approved buyer-seller",
+    "propertyViews": ["4BR/2BA in Newberg $1150K", "3BR/3BA in Dundee $1190K"],
+    "responseMinutes": 28,
+    "likelySeller": false
   },
   {
     "id": "LD-2008",
@@ -208,12 +216,13 @@
     "assignedAgent": "ellen-morehead",
     "createdDaysAgo": 28,
     "lastContactDaysAgo": 3,
-    "tags": [
-      "Luxury",
-      "Hot"
-    ],
+    "tags": ["Luxury", "Hot"],
     "aiSummary": "Isabella is buying & selling in West Linn around $555k. Deal in motion; keep momentum on deadlines.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Follow up on offer status — deal in motion, check for counter",
+    "propertyViews": ["3BR/2BA in West Linn $640K", "4BR in Lake Oswego $700K"],
+    "responseMinutes": 19,
+    "likelySeller": true
   },
   {
     "id": "LD-2009",
@@ -232,11 +241,13 @@
     "assignedAgent": "jason-veith",
     "createdDaysAgo": 106,
     "lastContactDaysAgo": 16,
-    "tags": [
-      "Relocating"
-    ],
+    "tags": ["Relocating"],
     "aiSummary": "Harper is investing in Newberg around $955k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 4
+    "unread": 4,
+    "nextBestAction": "Call now — 16 days since last contact, new investor lead",
+    "propertyViews": ["Investment 4-plex in Newberg $990K", "3BR rental in McMinnville $975K"],
+    "responseMinutes": 31,
+    "likelySeller": false
   },
   {
     "id": "LD-2010",
@@ -255,12 +266,13 @@
     "assignedAgent": "andy-wilcox",
     "createdDaysAgo": 30,
     "lastContactDaysAgo": 15,
-    "tags": [
-      "Cash",
-      "Relocating"
-    ],
+    "tags": ["Cash", "Relocating"],
     "aiSummary": "Isabella is selling in Oregon City around $1170k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Schedule valuation meeting — 15 days since last contact",
+    "propertyViews": ["4BR/2BA in Oregon City $1220K", "3BR/3BA in West Linn $1280K"],
+    "responseMinutes": 42,
+    "likelySeller": true
   },
   {
     "id": "LD-2011",
@@ -279,11 +291,13 @@
     "assignedAgent": "maleigha-martinez",
     "createdDaysAgo": 118,
     "lastContactDaysAgo": 16,
-    "tags": [
-      "Contingent"
-    ],
+    "tags": ["Contingent"],
     "aiSummary": "Miles is selling in Sherwood around $875k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send win-back email — lost lead, 16 days cold",
+    "propertyViews": [],
+    "responseMinutes": 55,
+    "likelySeller": true
   },
   {
     "id": "LD-2012",
@@ -302,13 +316,13 @@
     "assignedAgent": "nick-chamberlin",
     "createdDaysAgo": 45,
     "lastContactDaysAgo": 21,
-    "tags": [
-      "Relocating",
-      "Pre-approved",
-      "Contingent"
-    ],
+    "tags": ["Relocating", "Pre-approved", "Contingent"],
     "aiSummary": "Jamal is investing in Salem around $465k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Re-engage with market report — 21 days since last contact",
+    "propertyViews": ["2BR rental in Salem $490K", "3BR investment in Keizer $510K"],
+    "responseMinutes": 29,
+    "likelySeller": false
   },
   {
     "id": "LD-2013",
@@ -327,13 +341,13 @@
     "assignedAgent": "william-carrell",
     "createdDaysAgo": 61,
     "lastContactDaysAgo": 20,
-    "tags": [
-      "Repeat",
-      "VA Loan",
-      "Contingent"
-    ],
+    "tags": ["Repeat", "VA Loan", "Contingent"],
     "aiSummary": "Isabella is buying & selling in Salem around $1280k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — repeat client, 20 days since last contact",
+    "propertyViews": ["4BR/3BA in Salem $1310K", "5BR in Keizer $1340K"],
+    "responseMinutes": 33,
+    "likelySeller": true
   },
   {
     "id": "LD-2014",
@@ -352,12 +366,13 @@
     "assignedAgent": "jordan-matin",
     "createdDaysAgo": 3,
     "lastContactDaysAgo": 14,
-    "tags": [
-      "Pre-approved",
-      "Luxury"
-    ],
+    "tags": ["Pre-approved", "Luxury"],
     "aiSummary": "Aria is buying & selling in Sherwood around $1420k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Text luxury listing previews — 14 days since last contact",
+    "propertyViews": ["5BR/4BA in Sherwood $1650K", "4BR in Lake Oswego $1580K"],
+    "responseMinutes": 24,
+    "likelySeller": true
   },
   {
     "id": "LD-2015",
@@ -376,13 +391,13 @@
     "assignedAgent": "jason-veith",
     "createdDaysAgo": 40,
     "lastContactDaysAgo": 8,
-    "tags": [
-      "Hot",
-      "Pre-approved",
-      "Repeat"
-    ],
+    "tags": ["Hot", "Pre-approved", "Repeat"],
     "aiSummary": "Omar is selling in Newberg around $815k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send market update — last attempt before archive",
+    "propertyViews": [],
+    "responseMinutes": 58,
+    "likelySeller": true
   },
   {
     "id": "LD-2016",
@@ -401,12 +416,13 @@
     "assignedAgent": "leona-mullen",
     "createdDaysAgo": 49,
     "lastContactDaysAgo": 1,
-    "tags": [
-      "Relocating",
-      "Repeat"
-    ],
+    "tags": ["Relocating", "Repeat"],
     "aiSummary": "Henry is buying & selling in Salem around $1520k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send win-back email — contacted yesterday, lost status",
+    "propertyViews": ["5BR/3BA in Salem $1650K"],
+    "responseMinutes": 47,
+    "likelySeller": false
   },
   {
     "id": "LD-2017",
@@ -425,11 +441,13 @@
     "assignedAgent": "vince-kinney",
     "createdDaysAgo": 52,
     "lastContactDaysAgo": 1,
-    "tags": [
-      "Luxury"
-    ],
+    "tags": ["Luxury"],
     "aiSummary": "Jack is investing in Sherwood around $570k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 4
+    "unread": 4,
+    "nextBestAction": "Call now — new investor, 4 unread messages",
+    "propertyViews": ["3BR/2BA in Sherwood $625K", "Investment condo in Tualatin $590K"],
+    "responseMinutes": 16,
+    "likelySeller": false
   },
   {
     "id": "LD-2018",
@@ -448,13 +466,13 @@
     "assignedAgent": "michelle-mcfadden",
     "createdDaysAgo": 7,
     "lastContactDaysAgo": 2,
-    "tags": [
-      "Hot",
-      "First-Time",
-      "VA Loan"
-    ],
+    "tags": ["Hot", "First-Time", "VA Loan"],
     "aiSummary": "Anika is buying in Lake Oswego around $855k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send VA loan resource and re-engage — 2 days since contact",
+    "propertyViews": ["3BR/2BA in Lake Oswego $875K"],
+    "responseMinutes": 41,
+    "likelySeller": false
   },
   {
     "id": "LD-2019",
@@ -473,12 +491,13 @@
     "assignedAgent": "edmar-martinez",
     "createdDaysAgo": 111,
     "lastContactDaysAgo": 9,
-    "tags": [
-      "Relocating",
-      "Pre-approved"
-    ],
+    "tags": ["Relocating", "Pre-approved"],
     "aiSummary": "Liam is investing in Hillsboro around $1225k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — high-score investor, 9 days since last contact",
+    "propertyViews": ["Multi-family in Hillsboro $1280K", "4BR investment in Beaverton $1245K", "Duplex in Forest Grove $1190K"],
+    "responseMinutes": 5,
+    "likelySeller": false
   },
   {
     "id": "LD-2020",
@@ -497,11 +516,13 @@
     "assignedAgent": "benjamin-fabian",
     "createdDaysAgo": 30,
     "lastContactDaysAgo": 11,
-    "tags": [
-      "Luxury"
-    ],
+    "tags": ["Luxury"],
     "aiSummary": "Charlotte is investing in Milwaukie around $1045k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — high-score luxury investor, 11 days since last contact",
+    "propertyViews": ["4BR/3BA in Milwaukie $1095K", "Investment 4-plex in Happy Valley $1200K"],
+    "responseMinutes": 4,
+    "likelySeller": false
   },
   {
     "id": "LD-2021",
@@ -520,13 +541,13 @@
     "assignedAgent": "jose-lettenmaier",
     "createdDaysAgo": 95,
     "lastContactDaysAgo": 9,
-    "tags": [
-      "Luxury",
-      "Relocating",
-      "Cash"
-    ],
+    "tags": ["Luxury", "Relocating", "Cash"],
     "aiSummary": "Jamal is buying & selling in Ridgefield around $630k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Text market update — buyer-seller with cash, 9 days quiet",
+    "propertyViews": ["3BR/2BA in Ridgefield $695K", "4BR in Camas $775K"],
+    "responseMinutes": 27,
+    "likelySeller": false
   },
   {
     "id": "LD-2022",
@@ -545,12 +566,13 @@
     "assignedAgent": "chase-bright",
     "createdDaysAgo": 89,
     "lastContactDaysAgo": 18,
-    "tags": [
-      "Cash",
-      "Relocating"
-    ],
+    "tags": ["Cash", "Relocating"],
     "aiSummary": "Ethan is investing in Vancouver around $1165k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 1
+    "unread": 1,
+    "nextBestAction": "Call now — 18 days since last contact, cash investor",
+    "propertyViews": ["Investment property in Vancouver $1220K", "Multi-unit in Camas $1310K"],
+    "responseMinutes": 36,
+    "likelySeller": false
   },
   {
     "id": "LD-2023",
@@ -569,13 +591,13 @@
     "assignedAgent": "lexa-brice",
     "createdDaysAgo": 7,
     "lastContactDaysAgo": 6,
-    "tags": [
-      "First-Time",
-      "Pre-approved",
-      "Cash"
-    ],
+    "tags": ["First-Time", "Pre-approved", "Cash"],
     "aiSummary": "Yuki is investing in Lake Oswego around $1375k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — top-score referral, 6 days since last contact",
+    "propertyViews": ["5BR/4BA in Lake Oswego $1480K", "4BR waterfront in West Linn $1590K", "Investment estate in Tualatin $1420K"],
+    "responseMinutes": 1,
+    "likelySeller": false
   },
   {
     "id": "LD-2024",
@@ -594,11 +616,13 @@
     "assignedAgent": "amanda-conlon",
     "createdDaysAgo": 56,
     "lastContactDaysAgo": 15,
-    "tags": [
-      "Pre-approved"
-    ],
+    "tags": ["Pre-approved"],
     "aiSummary": "Anika is selling in Ridgefield around $725k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 3
+    "unread": 3,
+    "nextBestAction": "Call now — 15 days since last contact, 3 unread messages",
+    "propertyViews": ["3BR/2BA in Ridgefield $780K"],
+    "responseMinutes": 43,
+    "likelySeller": true
   },
   {
     "id": "LD-2025",
@@ -617,13 +641,13 @@
     "assignedAgent": "finch-myburgh",
     "createdDaysAgo": 109,
     "lastContactDaysAgo": 19,
-    "tags": [
-      "Relocating",
-      "Contingent",
-      "Repeat"
-    ],
+    "tags": ["Relocating", "Contingent", "Repeat"],
     "aiSummary": "Lucas is investing in Salem around $845k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send referral request — high-score closed deal, 19 days ago",
+    "propertyViews": ["Investment 3BR in Salem $880K", "Duplex in Keizer $915K"],
+    "responseMinutes": 2,
+    "likelySeller": false
   },
   {
     "id": "LD-2026",
@@ -642,13 +666,13 @@
     "assignedAgent": "joshua-rose",
     "createdDaysAgo": 77,
     "lastContactDaysAgo": 8,
-    "tags": [
-      "VA Loan",
-      "Luxury",
-      "Contingent"
-    ],
+    "tags": ["VA Loan", "Luxury", "Contingent"],
     "aiSummary": "Miles is buying in Wilsonville around $950k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send VA loan update and new listings — 8 days since last contact",
+    "propertyViews": ["4BR/3BA in Wilsonville $1050K", "5BR in Tualatin $1090K"],
+    "responseMinutes": 21,
+    "likelySeller": false
   },
   {
     "id": "LD-2027",
@@ -667,11 +691,13 @@
     "assignedAgent": "russell-xay",
     "createdDaysAgo": 119,
     "lastContactDaysAgo": 15,
-    "tags": [
-      "Hot"
-    ],
+    "tags": ["Hot"],
     "aiSummary": "Noah is investing in Tigard around $1565k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 1
+    "unread": 1,
+    "nextBestAction": "Call now — high-value investor lead, 15 days unresponded",
+    "propertyViews": ["5BR estate in Tigard $1720K", "Investment complex in Lake Oswego $1680K"],
+    "responseMinutes": 38,
+    "likelySeller": false
   },
   {
     "id": "LD-2028",
@@ -690,13 +716,13 @@
     "assignedAgent": "nancy-alhayek",
     "createdDaysAgo": 108,
     "lastContactDaysAgo": 20,
-    "tags": [
-      "First-Time",
-      "Cash",
-      "Contingent"
-    ],
+    "tags": ["First-Time", "Cash", "Contingent"],
     "aiSummary": "Daniel is buying & selling in Lake Oswego around $1520k. Deal in motion; keep momentum on deadlines.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — offer stage, 20 days since last contact is too long",
+    "propertyViews": ["5BR/4BA in Lake Oswego $1680K", "4BR in West Linn $1590K"],
+    "responseMinutes": 2,
+    "likelySeller": true
   },
   {
     "id": "LD-2029",
@@ -715,12 +741,13 @@
     "assignedAgent": "kimberly-ilosvay",
     "createdDaysAgo": 112,
     "lastContactDaysAgo": 8,
-    "tags": [
-      "Luxury",
-      "Cash"
-    ],
+    "tags": ["Luxury", "Cash"],
     "aiSummary": "Priya is selling in Oregon City around $690k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Schedule listing presentation — high-score seller, 8 days since last contact",
+    "propertyViews": ["4BR/2BA in Oregon City $755K", "3BR/3BA in Milwaukie $720K"],
+    "responseMinutes": 5,
+    "likelySeller": true
   },
   {
     "id": "LD-2030",
@@ -739,11 +766,13 @@
     "assignedAgent": "chris-zurita-orozco",
     "createdDaysAgo": 68,
     "lastContactDaysAgo": 0,
-    "tags": [
-      "Cash"
-    ],
+    "tags": ["Cash"],
     "aiSummary": "Grace is buying & selling in Milwaukie around $915k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send win-back — contacted today but lost status, past client",
+    "propertyViews": [],
+    "responseMinutes": 51,
+    "likelySeller": false
   },
   {
     "id": "LD-2031",
@@ -762,11 +791,13 @@
     "assignedAgent": "sophia-freiling",
     "createdDaysAgo": 13,
     "lastContactDaysAgo": 19,
-    "tags": [
-      "Contingent"
-    ],
+    "tags": ["Contingent"],
     "aiSummary": "Diego is selling in Camas around $1375k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 2
+    "unread": 2,
+    "nextBestAction": "Call now — 19 days since last contact, seller lead going cold",
+    "propertyViews": ["4BR/3BA in Camas $1420K"],
+    "responseMinutes": 46,
+    "likelySeller": true
   },
   {
     "id": "LD-2032",
@@ -785,12 +816,13 @@
     "assignedAgent": "chase-bright",
     "createdDaysAgo": 65,
     "lastContactDaysAgo": 17,
-    "tags": [
-      "Contingent",
-      "Luxury"
-    ],
+    "tags": ["Contingent", "Luxury"],
     "aiSummary": "Emma is selling in Milwaukie around $795k. Deal in motion; keep momentum on deadlines.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Check inspection contingency status — under contract, 17 days since contact",
+    "propertyViews": ["3BR/2BA in Milwaukie $845K"],
+    "responseMinutes": 32,
+    "likelySeller": true
   },
   {
     "id": "LD-2033",
@@ -809,11 +841,13 @@
     "assignedAgent": "michelle-mcfadden",
     "createdDaysAgo": 38,
     "lastContactDaysAgo": 15,
-    "tags": [
-      "First-Time"
-    ],
+    "tags": ["First-Time"],
     "aiSummary": "Ava is selling in Happy Valley around $835k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send comparative market analysis — 15 days since last contact",
+    "propertyViews": ["3BR/2BA in Happy Valley $875K"],
+    "responseMinutes": 30,
+    "likelySeller": true
   },
   {
     "id": "LD-2034",
@@ -832,13 +866,13 @@
     "assignedAgent": "zach-hosford",
     "createdDaysAgo": 30,
     "lastContactDaysAgo": 20,
-    "tags": [
-      "Hot",
-      "Contingent",
-      "Luxury"
-    ],
+    "tags": ["Hot", "Contingent", "Luxury"],
     "aiSummary": "Logan is selling in Portland around $890k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send referral request and closing gift — recently closed, 20 days out",
+    "propertyViews": ["4BR/3BA in Portland $945K", "3BR/2BA in Lake Oswego $975K"],
+    "responseMinutes": 4,
+    "likelySeller": true
   },
   {
     "id": "LD-2035",
@@ -857,12 +891,13 @@
     "assignedAgent": "nick-chamberlin",
     "createdDaysAgo": 34,
     "lastContactDaysAgo": 4,
-    "tags": [
-      "Cash",
-      "Contingent"
-    ],
+    "tags": ["Cash", "Contingent"],
     "aiSummary": "Nora is buying in West Linn around $1145k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send new West Linn listings — cash buyer, 4 days since contact",
+    "propertyViews": ["4BR/3BA in West Linn $1195K", "5BR in Lake Oswego $1250K", "3BR/2BA in West Linn $1165K"],
+    "responseMinutes": 9,
+    "likelySeller": false
   },
   {
     "id": "LD-2036",
@@ -881,11 +916,13 @@
     "assignedAgent": "amanda-conlon",
     "createdDaysAgo": 53,
     "lastContactDaysAgo": 21,
-    "tags": [
-      "Contingent"
-    ],
+    "tags": ["Contingent"],
     "aiSummary": "Priya is investing in Beaverton around $645k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Archive or send final win-back — 21 days cold, lost stage",
+    "propertyViews": [],
+    "responseMinutes": 60,
+    "likelySeller": false
   },
   {
     "id": "LD-2037",
@@ -904,11 +941,13 @@
     "assignedAgent": "andy-wilcox",
     "createdDaysAgo": 113,
     "lastContactDaysAgo": 17,
-    "tags": [
-      "Hot"
-    ],
+    "tags": ["Hot"],
     "aiSummary": "Amelia is buying in Salem around $1390k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Schedule next showing — 17 days since last contact at showing stage",
+    "propertyViews": ["4BR/3BA in Salem $1430K", "5BR in Keizer $1460K", "4BR in South Salem $1395K"],
+    "responseMinutes": 25,
+    "likelySeller": false
   },
   {
     "id": "LD-2038",
@@ -927,12 +966,13 @@
     "assignedAgent": "ocean-chau",
     "createdDaysAgo": 68,
     "lastContactDaysAgo": 0,
-    "tags": [
-      "VA Loan",
-      "Hot"
-    ],
+    "tags": ["VA Loan", "Hot"],
     "aiSummary": "Ethan is investing in Newberg around $1540k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 2
+    "unread": 2,
+    "nextBestAction": "Respond to 2 unread messages — new lead contacted today",
+    "propertyViews": ["Investment estate in Newberg $1620K", "5BR in Dundee $1590K"],
+    "responseMinutes": 48,
+    "likelySeller": false
   },
   {
     "id": "LD-2039",
@@ -951,12 +991,13 @@
     "assignedAgent": "lexa-brice",
     "createdDaysAgo": 26,
     "lastContactDaysAgo": 13,
-    "tags": [
-      "Cash",
-      "Luxury"
-    ],
+    "tags": ["Cash", "Luxury"],
     "aiSummary": "Caleb is investing in McMinnville around $1120k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 1
+    "unread": 1,
+    "nextBestAction": "Call now — cash investor, 13 days since last contact",
+    "propertyViews": ["Estate in McMinnville $1195K", "4BR winery estate $1280K"],
+    "responseMinutes": 39,
+    "likelySeller": false
   },
   {
     "id": "LD-2040",
@@ -975,11 +1016,13 @@
     "assignedAgent": "jordan-matin",
     "createdDaysAgo": 100,
     "lastContactDaysAgo": 8,
-    "tags": [
-      "Relocating"
-    ],
+    "tags": ["Relocating"],
     "aiSummary": "Ethan is selling in Tualatin around $665k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 3
+    "unread": 3,
+    "nextBestAction": "Call now — seller lead, 3 unread messages, 8 days since contact",
+    "propertyViews": ["3BR/2BA in Tualatin $720K"],
+    "responseMinutes": 17,
+    "likelySeller": true
   },
   {
     "id": "LD-2041",
@@ -998,13 +1041,13 @@
     "assignedAgent": "michelle-mcfadden",
     "createdDaysAgo": 64,
     "lastContactDaysAgo": 20,
-    "tags": [
-      "Luxury",
-      "VA Loan",
-      "Pre-approved"
-    ],
+    "tags": ["Luxury", "VA Loan", "Pre-approved"],
     "aiSummary": "Carlos is buying in Tualatin around $705k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Re-engage — 20 days since last contact, VA-approved buyer",
+    "propertyViews": ["4BR/2BA in Tualatin $765K", "3BR/3BA in Wilsonville $810K"],
+    "responseMinutes": 26,
+    "likelySeller": false
   },
   {
     "id": "LD-2042",
@@ -1023,13 +1066,13 @@
     "assignedAgent": "eric-leuschner",
     "createdDaysAgo": 20,
     "lastContactDaysAgo": 18,
-    "tags": [
-      "Luxury",
-      "Contingent",
-      "Hot"
-    ],
+    "tags": ["Luxury", "Contingent", "Hot"],
     "aiSummary": "Leo is investing in Portland around $800k. Deal in motion; keep momentum on deadlines.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Call now — offer stage, top score, 18 days since last contact is critical",
+    "propertyViews": ["Investment 4-plex in Portland $895K", "Multi-family in NE Portland $940K", "Duplex in SE Portland $825K"],
+    "responseMinutes": 1,
+    "likelySeller": false
   },
   {
     "id": "LD-2043",
@@ -1048,11 +1091,13 @@
     "assignedAgent": "michelle-mcfadden",
     "createdDaysAgo": 20,
     "lastContactDaysAgo": 13,
-    "tags": [
-      "First-Time"
-    ],
+    "tags": ["First-Time"],
     "aiSummary": "Yuki is investing in Milwaukie around $1175k. Deal in motion; keep momentum on deadlines.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Confirm appraisal scheduled — under contract, 13 days since last contact",
+    "propertyViews": ["3BR/2BA in Milwaukie $1220K", "Investment property in Happy Valley $1265K"],
+    "responseMinutes": 13,
+    "likelySeller": false
   },
   {
     "id": "LD-2044",
@@ -1071,12 +1116,13 @@
     "assignedAgent": "maleigha-martinez",
     "createdDaysAgo": 27,
     "lastContactDaysAgo": 14,
-    "tags": [
-      "Luxury",
-      "VA Loan"
-    ],
+    "tags": ["Luxury", "VA Loan"],
     "aiSummary": "Grace is investing in Salem around $635k. Fresh lead — respond within 5 minutes to 9x conversion odds.",
-    "unread": 1
+    "unread": 1,
+    "nextBestAction": "Call now — new investor lead, 14 days since last contact",
+    "propertyViews": ["3BR rental in Salem $660K", "Investment condo in Keizer $645K"],
+    "responseMinutes": 20,
+    "likelySeller": false
   },
   {
     "id": "LD-2045",
@@ -1095,10 +1141,12 @@
     "assignedAgent": "ellen-morehead",
     "createdDaysAgo": 57,
     "lastContactDaysAgo": 3,
-    "tags": [
-      "Contingent"
-    ],
+    "tags": ["Contingent"],
     "aiSummary": "Evelyn is buying in Beaverton around $530k. Warm and engaged; nurture with tailored listings.",
-    "unread": 0
+    "unread": 0,
+    "nextBestAction": "Send win-back with new Beaverton listings — 3 days since last contact",
+    "propertyViews": ["3BR/2BA in Beaverton $565K"],
+    "responseMinutes": 44,
+    "likelySeller": false
   }
 ]

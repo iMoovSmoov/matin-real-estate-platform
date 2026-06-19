@@ -12,6 +12,7 @@ import {
   Zap,
   Activity as ActivityIcon,
   Layers,
+  Home,
 } from "lucide-react";
 import type { Lead } from "@/lib/types";
 import { getAgent } from "@/lib/data";
@@ -44,6 +45,7 @@ const SMART_LISTS: SmartList[] = [
     icon: ActivityIcon,
     match: (l) => ["Active", "Showing", "Offer", "Under Contract"].includes(l.stage),
   },
+  { id: "likely-sellers", label: "Likely Sellers", icon: Home, match: (l) => l.likelySeller === true },
   { id: "all", label: "All", icon: Layers, match: () => true },
 ];
 
@@ -163,6 +165,28 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   );
 }
 
+/* ── Response time dot ─────────────────────────────────────────────────────── */
+function ResponseDot({ minutes }: { minutes: number }) {
+  const color =
+    minutes <= 5
+      ? "bg-success"
+      : minutes <= 15
+      ? "bg-warn"
+      : "bg-danger";
+  const textColor =
+    minutes <= 5
+      ? "text-success"
+      : minutes <= 15
+      ? "text-warn"
+      : "text-danger";
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1">
+      <span className={cn("h-1.5 w-1.5 rounded-full", color)} />
+      <span className={cn("text-[0.68rem] font-medium tabular-nums", textColor)}>{minutes}m</span>
+    </span>
+  );
+}
+
 /* ── A single inbox row ────────────────────────────────────────────────────── */
 function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
   const agent = getAgent(lead.assignedAgent);
@@ -205,6 +229,14 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
             <span className="text-slate/30">·</span>
             <span className="shrink-0">{lead.source}</span>
           </p>
+          {/* nextBestAction */}
+          {lead.nextBestAction && (
+            <p className="text-[0.72rem] text-slate truncate max-w-[160px]">
+              {lead.nextBestAction.length > 35
+                ? lead.nextBestAction.slice(0, 35)
+                : lead.nextBestAction}
+            </p>
+          )}
         </div>
 
         {/* budget */}
@@ -215,10 +247,15 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
           <p className="text-[0.66rem] text-slate/45">budget</p>
         </div>
 
-        {/* stage */}
-        <span className={cn("hidden shrink-0 rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset sm:inline-block", stageTone(lead.stage))}>
-          {lead.stage}
-        </span>
+        {/* stage + response time */}
+        <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+          <span className={cn("rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset", stageTone(lead.stage))}>
+            {lead.stage}
+          </span>
+          {lead.responseMinutes !== undefined && (
+            <ResponseDot minutes={lead.responseMinutes} />
+          )}
+        </div>
 
         {/* score */}
         <span className={cn("inline-flex w-12 shrink-0 items-center justify-center gap-0.5 rounded-md py-0.5 text-[0.72rem] font-bold ring-1 ring-inset tabular-nums", scoreTone(lead.score))}>

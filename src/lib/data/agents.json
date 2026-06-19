@@ -10,10 +10,7 @@
     "phone": "(503) 894-6006",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/alicia-smith.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": true,
     "support": false,
     "yearsExperience": 21,
@@ -22,19 +19,13 @@
     "activeListings": 3,
     "rating": 4.84,
     "reviews": 102,
-    "specialties": [
-      "Relocation",
-      "Acreage & Land",
-      "New Construction"
-    ],
-    "communities": [
-      "newberg-or",
-      "vancouver-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Alicia Smith is an Oregon Principal Broker and Washington Managing Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Alicia helps investors win in one of the country's most competitive markets. Alicia serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Relocation", "Acreage & Land", "New Construction"],
+    "communities": ["newberg-or", "vancouver-wa"],
+    "languages": ["English"],
+    "bio": "Alicia Smith is an Oregon Principal Broker and Washington Managing Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Alicia helps investors win in one of the country's most competitive markets. Alicia serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 32, "texts": 48, "appts": 7, "agreements": 4, "showings": 14, "offers": 3 },
+    "responseTimeMins": 3,
+    "rank": 1
   },
   {
     "id": "amanda-conlon",
@@ -47,9 +38,7 @@
     "phone": "(503) 873-9858",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/amanda-conlon.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 6,
@@ -58,20 +47,13 @@
     "activeListings": 1,
     "rating": 4.71,
     "reviews": 38,
-    "specialties": [
-      "Multi-Family",
-      "Condos & Townhomes",
-      "Luxury Homes"
-    ],
-    "communities": [
-      "ridgefield-wa",
-      "hillsboro-or",
-      "mcminnville-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Amanda Conlon is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Amanda helps sellers win in one of the country's most competitive markets. Amanda serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Multi-Family", "Condos & Townhomes", "Luxury Homes"],
+    "communities": ["ridgefield-wa", "hillsboro-or", "mcminnville-or"],
+    "languages": ["English"],
+    "bio": "Amanda Conlon is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Amanda helps sellers win in one of the country's most competitive markets. Amanda serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 21, "texts": 34, "appts": 4, "agreements": 2, "showings": 8, "offers": 1 },
+    "responseTimeMins": 14,
+    "rank": 8
   },
   {
     "id": "amy-mead",
@@ -84,10 +66,7 @@
     "phone": "(503) 936-9742",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/amy-mead.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 11,
@@ -96,19 +75,13 @@
     "activeListings": 1,
     "rating": 4.94,
     "reviews": 66,
-    "specialties": [
-      "Relocation",
-      "55+ Living"
-    ],
-    "communities": [
-      "lake-oswego-or",
-      "sherwood-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Amy Mead is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Amy helps sellers win in one of the country's most competitive markets. Amy serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Relocation", "55+ Living"],
+    "communities": ["lake-oswego-or", "sherwood-or", "happy-valley-or"],
+    "languages": ["English"],
+    "bio": "Amy Mead is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Amy helps sellers win in one of the country's most competitive markets. Amy serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 14, "texts": 22, "appts": 3, "agreements": 1, "showings": 5, "offers": 0 },
+    "responseTimeMins": 28,
+    "rank": 29
   },
   {
     "id": "andy-wilcox",
@@ -121,10 +94,7 @@
     "phone": "(503) 899-8890",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/andy-wilcox.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 11,
@@ -133,20 +103,13 @@
     "activeListings": 2,
     "rating": 4.8,
     "reviews": 101,
-    "specialties": [
-      "55+ Living",
-      "Acreage & Land"
-    ],
-    "communities": [
-      "wilsonville-or",
-      "sherwood-or",
-      "mcminnville-or",
-      "portland-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Andy Wilcox is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Andy helps sellers win in one of the country's most competitive markets. Andy serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["55+ Living", "Acreage & Land"],
+    "communities": ["wilsonville-or", "sherwood-or", "mcminnville-or", "portland-or"],
+    "languages": ["English"],
+    "bio": "Andy Wilcox is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Andy helps sellers win in one of the country's most competitive markets. Andy serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 18, "texts": 30, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
+    "responseTimeMins": 22,
+    "rank": 17
   },
   {
     "id": "benjamin-fabian",
@@ -159,9 +122,7 @@
     "phone": "(503) 761-2605",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/benjamin-fabian.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 13,
@@ -170,20 +131,13 @@
     "activeListings": 7,
     "rating": 4.88,
     "reviews": 134,
-    "specialties": [
-      "Multi-Family",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "sherwood-or",
-      "lake-oswego-or",
-      "portland-or",
-      "hillsboro-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Ben Fabian is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ben helps investors win in one of the country's most competitive markets. Ben serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Multi-Family", "Equestrian Estates"],
+    "communities": ["sherwood-or", "lake-oswego-or", "portland-or", "hillsboro-or"],
+    "languages": ["English"],
+    "bio": "Ben Fabian is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ben helps investors win in one of the country's most competitive markets. Ben serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 8, "texts": 12, "appts": 1, "agreements": 0, "showings": 2, "offers": 0 },
+    "responseTimeMins": 42,
+    "rank": 37
   },
   {
     "id": "boston-bate",
@@ -196,10 +150,7 @@
     "phone": "(503) 952-3777",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/boston-bate.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 1,
@@ -208,21 +159,13 @@
     "activeListings": 6,
     "rating": 4.73,
     "reviews": 75,
-    "specialties": [
-      "Acreage & Land",
-      "Waterfront & Lakefront",
-      "Relocation"
-    ],
-    "communities": [
-      "mcminnville-or",
-      "west-linn-or",
-      "tigard-or",
-      "camas-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Boston Bate is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Boston helps families win in one of the country's most competitive markets. Boston serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Waterfront & Lakefront", "Relocation"],
+    "communities": ["mcminnville-or", "west-linn-or", "tigard-or", "camas-wa"],
+    "languages": ["English"],
+    "bio": "Boston Bate is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Boston helps families win in one of the country's most competitive markets. Boston serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 26, "texts": 42, "appts": 6, "agreements": 3, "showings": 12, "offers": 2 },
+    "responseTimeMins": 9,
+    "rank": 7
   },
   {
     "id": "charles-corbett",
@@ -235,9 +178,7 @@
     "phone": "(503) 944-9672",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/charles-corbett.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -246,19 +187,13 @@
     "activeListings": 3,
     "rating": 4.89,
     "reviews": 12,
-    "specialties": [
-      "Acreage & Land",
-      "Luxury Homes",
-      "Investment Property"
-    ],
-    "communities": [
-      "newberg-or",
-      "tigard-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Charles Corbett is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Charles helps sellers win in one of the country's most competitive markets. Charles serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Luxury Homes", "Investment Property"],
+    "communities": ["newberg-or", "tigard-or"],
+    "languages": ["English"],
+    "bio": "Charles Corbett is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Charles helps sellers win in one of the country's most competitive markets. Charles serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 16, "texts": 25, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 19,
+    "rank": 20
   },
   {
     "id": "chase-bright",
@@ -271,9 +206,7 @@
     "phone": "(503) 900-8563",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/chase-bright.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 5,
@@ -282,21 +215,13 @@
     "activeListings": 2,
     "rating": 4.9,
     "reviews": 181,
-    "specialties": [
-      "New Construction",
-      "Equestrian Estates",
-      "Relocation"
-    ],
-    "communities": [
-      "hillsboro-or",
-      "milwaukie-or",
-      "camas-wa",
-      "ridgefield-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Chase Bright is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Chase helps buyers win in one of the country's most competitive markets. Chase serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["New Construction", "Equestrian Estates", "Relocation"],
+    "communities": ["hillsboro-or", "milwaukie-or", "camas-wa", "ridgefield-wa"],
+    "languages": ["English"],
+    "bio": "Chase Bright is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Chase helps buyers win in one of the country's most competitive markets. Chase serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 22, "texts": 36, "appts": 5, "agreements": 2, "showings": 10, "offers": 2 },
+    "responseTimeMins": 11,
+    "rank": 13
   },
   {
     "id": "chris-zurita-orozco",
@@ -309,9 +234,7 @@
     "phone": "(503) 623-4915",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/chris-zurita-orozco.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 16,
@@ -320,18 +243,13 @@
     "activeListings": 7,
     "rating": 4.98,
     "reviews": 123,
-    "specialties": [
-      "Waterfront & Lakefront",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "west-linn-or",
-      "vancouver-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Chris Zurita is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Chris helps buyers win in one of the country's most competitive markets. Chris serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Waterfront & Lakefront", "Equestrian Estates"],
+    "communities": ["west-linn-or", "vancouver-wa"],
+    "languages": ["English"],
+    "bio": "Chris Zurita is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Chris helps buyers win in one of the country's most competitive markets. Chris serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 24, "texts": 38, "appts": 5, "agreements": 3, "showings": 11, "offers": 2 },
+    "responseTimeMins": 8,
+    "rank": 10
   },
   {
     "id": "christopher-young",
@@ -344,9 +262,7 @@
     "phone": "(503) 612-8732",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/christopher-young.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 9,
@@ -355,21 +271,13 @@
     "activeListings": 2,
     "rating": 4.98,
     "reviews": 113,
-    "specialties": [
-      "Acreage & Land",
-      "Downsizing",
-      "Multi-Family"
-    ],
-    "communities": [
-      "wilsonville-or",
-      "sherwood-or",
-      "portland-or",
-      "oregon-city-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Christopher Young is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Christopher helps buyers win in one of the country's most competitive markets. Christopher serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Downsizing", "Multi-Family"],
+    "communities": ["wilsonville-or", "sherwood-or", "portland-or", "oregon-city-or"],
+    "languages": ["English"],
+    "bio": "Christopher Young is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Christopher helps buyers win in one of the country's most competitive markets. Christopher serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 10, "texts": 16, "appts": 2, "agreements": 1, "showings": 3, "offers": 0 },
+    "responseTimeMins": 35,
+    "rank": 35
   },
   {
     "id": "edmar-martinez",
@@ -382,9 +290,7 @@
     "phone": "(503) 884-4926",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/edmar-martinez.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 17,
@@ -393,21 +299,13 @@
     "activeListings": 7,
     "rating": 4.93,
     "reviews": 16,
-    "specialties": [
-      "Multi-Family",
-      "55+ Living",
-      "Luxury Homes"
-    ],
-    "communities": [
-      "mcminnville-or",
-      "lake-oswego-or",
-      "camas-wa"
-    ],
-    "languages": [
-      "English",
-      "Spanish"
-    ],
-    "bio": "Edmar Martinez is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Edmar helps sellers win in one of the country's most competitive markets. Edmar serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Multi-Family", "55+ Living", "Luxury Homes"],
+    "communities": ["mcminnville-or", "lake-oswego-or", "camas-wa"],
+    "languages": ["English", "Spanish"],
+    "bio": "Edmar Martinez is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Edmar helps sellers win in one of the country's most competitive markets. Edmar serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 12, "texts": 20, "appts": 2, "agreements": 1, "showings": 4, "offers": 0 },
+    "responseTimeMins": 31,
+    "rank": 31
   },
   {
     "id": "ellen-morehead",
@@ -420,9 +318,7 @@
     "phone": "(503) 934-5817",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/ellen-morehead.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 6,
@@ -431,18 +327,13 @@
     "activeListings": 4,
     "rating": 4.99,
     "reviews": 33,
-    "specialties": [
-      "Luxury Homes",
-      "Multi-Family"
-    ],
-    "communities": [
-      "west-linn-or",
-      "portland-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Ellen Morehead is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ellen helps sellers win in one of the country's most competitive markets. Ellen serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Luxury Homes", "Multi-Family"],
+    "communities": ["west-linn-or", "portland-or"],
+    "languages": ["English"],
+    "bio": "Ellen Morehead is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ellen helps sellers win in one of the country's most competitive markets. Ellen serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 15, "texts": 24, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 18,
+    "rank": 25
   },
   {
     "id": "eric-leuschner",
@@ -455,9 +346,7 @@
     "phone": "(503) 672-9770",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/eric-leuschner.jpg",
-    "licenses": [
-      "WA"
-    ],
+    "licenses": ["WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -466,18 +355,13 @@
     "activeListings": 3,
     "rating": 4.77,
     "reviews": 126,
-    "specialties": [
-      "Luxury Homes",
-      "Multi-Family"
-    ],
-    "communities": [
-      "happy-valley-or",
-      "oregon-city-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Eric Leuschner is a Washington Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Eric helps investors win in one of the country's most competitive markets. Eric serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Luxury Homes", "Multi-Family"],
+    "communities": ["happy-valley-or", "oregon-city-or"],
+    "languages": ["English"],
+    "bio": "Eric Leuschner is a Washington Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Eric helps investors win in one of the country's most competitive markets. Eric serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 23, "texts": 37, "appts": 5, "agreements": 2, "showings": 10, "offers": 2 },
+    "responseTimeMins": 10,
+    "rank": 11
   },
   {
     "id": "erin-martin",
@@ -490,10 +374,7 @@
     "phone": "(503) 917-1189",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/erin-martin.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 1,
@@ -502,21 +383,13 @@
     "activeListings": 3,
     "rating": 4.91,
     "reviews": 140,
-    "specialties": [
-      "Investment Property",
-      "Condos & Townhomes",
-      "Waterfront & Lakefront"
-    ],
-    "communities": [
-      "mcminnville-or",
-      "tigard-or",
-      "portland-or",
-      "sherwood-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Erin Martin is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Erin helps investors win in one of the country's most competitive markets. Erin serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Investment Property", "Condos & Townhomes", "Waterfront & Lakefront"],
+    "communities": ["mcminnville-or", "tigard-or", "portland-or", "sherwood-or"],
+    "languages": ["English"],
+    "bio": "Erin Martin is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Erin helps investors win in one of the country's most competitive markets. Erin serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 9, "texts": 14, "appts": 2, "agreements": 0, "showings": 3, "offers": 0 },
+    "responseTimeMins": 40,
+    "rank": 36
   },
   {
     "id": "finch-myburgh",
@@ -529,9 +402,7 @@
     "phone": "(503) 600-9174",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/finch-myburgh.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 13,
@@ -540,18 +411,13 @@
     "activeListings": 5,
     "rating": 4.73,
     "reviews": 113,
-    "specialties": [
-      "Waterfront & Lakefront",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "milwaukie-or",
-      "sherwood-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Finch Myburgh is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Finch helps investors win in one of the country's most competitive markets. Finch serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Waterfront & Lakefront", "Equestrian Estates"],
+    "communities": ["milwaukie-or", "sherwood-or"],
+    "languages": ["English"],
+    "bio": "Finch Myburgh is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Finch helps investors win in one of the country's most competitive markets. Finch serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 13, "texts": 21, "appts": 2, "agreements": 1, "showings": 4, "offers": 0 },
+    "responseTimeMins": 33,
+    "rank": 30
   },
   {
     "id": "janae-chaves",
@@ -564,10 +430,7 @@
     "phone": "(503) 603-3167",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/janae-chaves.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 3,
@@ -576,21 +439,13 @@
     "activeListings": 1,
     "rating": 4.74,
     "reviews": 165,
-    "specialties": [
-      "Equestrian Estates",
-      "Downsizing",
-      "New Construction"
-    ],
-    "communities": [
-      "oregon-city-or",
-      "west-linn-or",
-      "sherwood-or",
-      "portland-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Janae Chaves is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Janae helps sellers win in one of the country's most competitive markets. Janae serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Equestrian Estates", "Downsizing", "New Construction"],
+    "communities": ["oregon-city-or", "west-linn-or", "sherwood-or", "portland-or"],
+    "languages": ["English"],
+    "bio": "Janae Chaves is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Janae helps sellers win in one of the country's most competitive markets. Janae serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 19, "texts": 31, "appts": 4, "agreements": 2, "showings": 8, "offers": 1 },
+    "responseTimeMins": 16,
+    "rank": 16
   },
   {
     "id": "jason-veith",
@@ -603,10 +458,7 @@
     "phone": "(503) 704-4194",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/jason-veith.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 17,
@@ -615,21 +467,13 @@
     "activeListings": 3,
     "rating": 4.76,
     "reviews": 86,
-    "specialties": [
-      "New Construction",
-      "Luxury Homes",
-      "Relocation"
-    ],
-    "communities": [
-      "vancouver-wa",
-      "hillsboro-or",
-      "lake-oswego-or",
-      "camas-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Jason Veith is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Jason helps investors win in one of the country's most competitive markets. Jason serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["New Construction", "Luxury Homes", "Relocation"],
+    "communities": ["vancouver-wa", "hillsboro-or", "lake-oswego-or", "camas-wa"],
+    "languages": ["English"],
+    "bio": "Jason Veith is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Jason helps investors win in one of the country's most competitive markets. Jason serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 15, "texts": 23, "appts": 3, "agreements": 1, "showings": 5, "offers": 1 },
+    "responseTimeMins": 26,
+    "rank": 26
   },
   {
     "id": "joe-bothe",
@@ -642,9 +486,7 @@
     "phone": "(503) 717-9375",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/joe-bothe.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 16,
@@ -653,20 +495,13 @@
     "activeListings": 5,
     "rating": 4.81,
     "reviews": 9,
-    "specialties": [
-      "Acreage & Land",
-      "Relocation",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "portland-or",
-      "tualatin-or",
-      "vancouver-wa"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Joe Bothe is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Joe helps investors win in one of the country's most competitive markets. Joe serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Relocation", "Condos & Townhomes"],
+    "communities": ["portland-or", "tualatin-or", "vancouver-wa"],
+    "languages": ["English"],
+    "bio": "Joe Bothe is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Joe helps investors win in one of the country's most competitive markets. Joe serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 22, "texts": 35, "appts": 5, "agreements": 2, "showings": 10, "offers": 2 },
+    "responseTimeMins": 12,
+    "rank": 12
   },
   {
     "id": "jordan-matin",
@@ -679,10 +514,7 @@
     "phone": "(503) 761-5616",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/jordan-matin.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": true,
     "support": false,
     "yearsExperience": 22,
@@ -691,19 +523,13 @@
     "activeListings": 7,
     "rating": 4.83,
     "reviews": 182,
-    "specialties": [
-      "Waterfront & Lakefront",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "oregon-city-or",
-      "sherwood-or",
-      "hillsboro-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Jordan Matin is an Oregon Principal Broker & Washington Managing Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Jordan helps families win in one of the country's most competitive markets. Jordan serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Waterfront & Lakefront", "Condos & Townhomes"],
+    "communities": ["oregon-city-or", "sherwood-or", "hillsboro-or"],
+    "languages": ["English"],
+    "bio": "Jordan Matin is an Oregon Principal Broker & Washington Managing Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Jordan helps families win in one of the country's most competitive markets. Jordan serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 35, "texts": 50, "appts": 8, "agreements": 4, "showings": 15, "offers": 3 },
+    "responseTimeMins": 2,
+    "rank": 3
   },
   {
     "id": "jose-lettenmaier",
@@ -716,9 +542,7 @@
     "phone": "(503) 911-3230",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/jose-lettenmaier.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 1,
@@ -727,20 +551,13 @@
     "activeListings": 0,
     "rating": 4.78,
     "reviews": 149,
-    "specialties": [
-      "Waterfront & Lakefront",
-      "Investment Property"
-    ],
-    "communities": [
-      "west-linn-or",
-      "tigard-or",
-      "wilsonville-or"
-    ],
-    "languages": [
-      "English",
-      "Spanish"
-    ],
-    "bio": "Jose Lettenmaier is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Jose helps buyers win in one of the country's most competitive markets. Jose serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Waterfront & Lakefront", "Investment Property"],
+    "communities": ["west-linn-or", "tigard-or", "wilsonville-or"],
+    "languages": ["English", "Spanish"],
+    "bio": "Jose Lettenmaier is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Jose helps buyers win in one of the country's most competitive markets. Jose serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 28, "texts": 44, "appts": 6, "agreements": 3, "showings": 13, "offers": 2 },
+    "responseTimeMins": 6,
+    "rank": 4
   },
   {
     "id": "joshua-rose",
@@ -753,9 +570,7 @@
     "phone": "(503) 859-3502",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/joshua-rose.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 6,
@@ -764,20 +579,13 @@
     "activeListings": 3,
     "rating": 4.84,
     "reviews": 97,
-    "specialties": [
-      "Downsizing",
-      "Luxury Homes",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "portland-or",
-      "happy-valley-or",
-      "wilsonville-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Joshua Rose is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Joshua helps sellers win in one of the country's most competitive markets. Joshua serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Downsizing", "Luxury Homes", "Condos & Townhomes"],
+    "communities": ["portland-or", "happy-valley-or", "wilsonville-or"],
+    "languages": ["English"],
+    "bio": "Joshua Rose is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Joshua helps sellers win in one of the country's most competitive markets. Joshua serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 20, "texts": 33, "appts": 5, "agreements": 2, "showings": 9, "offers": 1 },
+    "responseTimeMins": 13,
+    "rank": 15
   },
   {
     "id": "karen-tse",
@@ -790,9 +598,7 @@
     "phone": "(503) 663-7329",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/karen-tse.jpg",
-    "licenses": [
-      "WA"
-    ],
+    "licenses": ["WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -801,22 +607,13 @@
     "activeListings": 3,
     "rating": 4.83,
     "reviews": 11,
-    "specialties": [
-      "First-Time Buyers",
-      "Downsizing",
-      "Acreage & Land"
-    ],
-    "communities": [
-      "milwaukie-or",
-      "oregon-city-or",
-      "newberg-or",
-      "mcminnville-or"
-    ],
-    "languages": [
-      "English",
-      "Cantonese"
-    ],
-    "bio": "Karen Tse is a Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Karen helps investors win in one of the country's most competitive markets. Karen serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["First-Time Buyers", "Downsizing", "Acreage & Land"],
+    "communities": ["milwaukie-or", "oregon-city-or", "newberg-or", "mcminnville-or"],
+    "languages": ["English", "Cantonese"],
+    "bio": "Karen Tse is a Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Karen helps investors win in one of the country's most competitive markets. Karen serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 27, "texts": 43, "appts": 6, "agreements": 3, "showings": 12, "offers": 2 },
+    "responseTimeMins": 7,
+    "rank": 5
   },
   {
     "id": "kimberly-ilosvay",
@@ -829,9 +626,7 @@
     "phone": "(503) 840-4359",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/kimberly-ilosvay.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 15,
@@ -840,21 +635,13 @@
     "activeListings": 2,
     "rating": 4.86,
     "reviews": 103,
-    "specialties": [
-      "Investment Property",
-      "55+ Living",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "sherwood-or",
-      "milwaukie-or",
-      "hillsboro-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Kimberly Ilosvay is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Kimberly helps sellers win in one of the country's most competitive markets. Kimberly serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Investment Property", "55+ Living", "Condos & Townhomes"],
+    "communities": ["sherwood-or", "milwaukie-or", "hillsboro-or", "happy-valley-or"],
+    "languages": ["English"],
+    "bio": "Kimberly Ilosvay is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Kimberly helps sellers win in one of the country's most competitive markets. Kimberly serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 16, "texts": 27, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 20,
+    "rank": 22
   },
   {
     "id": "leona-mullen",
@@ -867,10 +654,7 @@
     "phone": "(503) 846-2191",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/leona-mullen.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -879,19 +663,13 @@
     "activeListings": 6,
     "rating": 4.74,
     "reviews": 125,
-    "specialties": [
-      "Condos & Townhomes",
-      "Multi-Family",
-      "Waterfront & Lakefront"
-    ],
-    "communities": [
-      "west-linn-or",
-      "sherwood-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Leona Mullen is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Leona helps investors win in one of the country's most competitive markets. Leona serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Condos & Townhomes", "Multi-Family", "Waterfront & Lakefront"],
+    "communities": ["west-linn-or", "sherwood-or"],
+    "languages": ["English"],
+    "bio": "Leona Mullen is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Leona helps investors win in one of the country's most competitive markets. Leona serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 18, "texts": 29, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
+    "responseTimeMins": 24,
+    "rank": 18
   },
   {
     "id": "lexa-brice",
@@ -904,9 +682,7 @@
     "phone": "(503) 791-6331",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/lexa-brice.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 5,
@@ -915,19 +691,13 @@
     "activeListings": 1,
     "rating": 4.94,
     "reviews": 88,
-    "specialties": [
-      "Acreage & Land",
-      "Luxury Homes"
-    ],
-    "communities": [
-      "newberg-or",
-      "tualatin-or",
-      "salem-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Lexa Brice is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Lexa helps investors win in one of the country's most competitive markets. Lexa serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Luxury Homes"],
+    "communities": ["newberg-or", "tualatin-or", "salem-or"],
+    "languages": ["English"],
+    "bio": "Lexa Brice is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Lexa helps investors win in one of the country's most competitive markets. Lexa serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 33, "texts": 49, "appts": 7, "agreements": 4, "showings": 14, "offers": 3 },
+    "responseTimeMins": 4,
+    "rank": 2
   },
   {
     "id": "maleigha-martinez",
@@ -940,9 +710,7 @@
     "phone": "(503) 605-5924",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/maleigha-martinez.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 5,
@@ -951,21 +719,13 @@
     "activeListings": 1,
     "rating": 4.77,
     "reviews": 68,
-    "specialties": [
-      "First-Time Buyers",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "camas-wa",
-      "happy-valley-or",
-      "west-linn-or",
-      "ridgefield-wa"
-    ],
-    "languages": [
-      "English",
-      "Spanish"
-    ],
-    "bio": "Maleigha Martinez is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Maleigha helps families win in one of the country's most competitive markets. Maleigha serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["First-Time Buyers", "Condos & Townhomes"],
+    "communities": ["camas-wa", "happy-valley-or", "west-linn-or", "ridgefield-wa"],
+    "languages": ["English", "Spanish"],
+    "bio": "Maleigha Martinez is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Maleigha helps families win in one of the country's most competitive markets. Maleigha serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 11, "texts": 18, "appts": 2, "agreements": 1, "showings": 4, "offers": 0 },
+    "responseTimeMins": 37,
+    "rank": 32
   },
   {
     "id": "michelle-mcfadden",
@@ -978,9 +738,7 @@
     "phone": "(503) 714-3951",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/michelle-mcfadden.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 11,
@@ -989,19 +747,13 @@
     "activeListings": 7,
     "rating": 4.93,
     "reviews": 162,
-    "specialties": [
-      "Condos & Townhomes",
-      "Investment Property"
-    ],
-    "communities": [
-      "hillsboro-or",
-      "salem-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Michelle McFadden is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Michelle helps sellers win in one of the country's most competitive markets. Michelle serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Condos & Townhomes", "Investment Property"],
+    "communities": ["hillsboro-or", "salem-or", "happy-valley-or"],
+    "languages": ["English"],
+    "bio": "Michelle McFadden is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Michelle helps sellers win in one of the country's most competitive markets. Michelle serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 11, "texts": 17, "appts": 2, "agreements": 1, "showings": 3, "offers": 0 },
+    "responseTimeMins": 39,
+    "rank": 33
   },
   {
     "id": "miguel-contreras",
@@ -1014,10 +766,7 @@
     "phone": "(503) 637-6632",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/miguel-contreras.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -1026,21 +775,13 @@
     "activeListings": 6,
     "rating": 4.82,
     "reviews": 141,
-    "specialties": [
-      "Condos & Townhomes",
-      "Relocation",
-      "55+ Living"
-    ],
-    "communities": [
-      "sherwood-or",
-      "milwaukie-or",
-      "newberg-or"
-    ],
-    "languages": [
-      "English",
-      "Spanish"
-    ],
-    "bio": "Miguel Contreras is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Miguel helps families win in one of the country's most competitive markets. Miguel serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Condos & Townhomes", "Relocation", "55+ Living"],
+    "communities": ["sherwood-or", "milwaukie-or", "newberg-or"],
+    "languages": ["English", "Spanish"],
+    "bio": "Miguel Contreras is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Miguel helps families win in one of the country's most competitive markets. Miguel serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 21, "texts": 35, "appts": 5, "agreements": 2, "showings": 9, "offers": 1 },
+    "responseTimeMins": 15,
+    "rank": 14
   },
   {
     "id": "nancy-alhayek",
@@ -1053,9 +794,7 @@
     "phone": "(503) 660-2026",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/nancy-alhayek.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 5,
@@ -1064,21 +803,13 @@
     "activeListings": 4,
     "rating": 4.8,
     "reviews": 29,
-    "specialties": [
-      "55+ Living",
-      "Downsizing",
-      "Condos & Townhomes"
-    ],
-    "communities": [
-      "vancouver-wa",
-      "newberg-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English",
-      "Arabic"
-    ],
-    "bio": "Nancy Alhayek is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Nancy helps families win in one of the country's most competitive markets. Nancy serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["55+ Living", "Downsizing", "Condos & Townhomes"],
+    "communities": ["vancouver-wa", "newberg-or", "happy-valley-or"],
+    "languages": ["English", "Arabic"],
+    "bio": "Nancy Alhayek is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Nancy helps families win in one of the country's most competitive markets. Nancy serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 14, "texts": 22, "appts": 3, "agreements": 1, "showings": 5, "offers": 1 },
+    "responseTimeMins": 27,
+    "rank": 27
   },
   {
     "id": "nick-chamberlin",
@@ -1091,10 +822,7 @@
     "phone": "(503) 936-2657",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/nick-chamberlin.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 15,
@@ -1103,19 +831,13 @@
     "activeListings": 3,
     "rating": 4.9,
     "reviews": 120,
-    "specialties": [
-      "Condos & Townhomes",
-      "Downsizing"
-    ],
-    "communities": [
-      "hillsboro-or",
-      "west-linn-or",
-      "sherwood-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Nick Chamberlin is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Nick helps sellers win in one of the country's most competitive markets. Nick serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Condos & Townhomes", "Downsizing"],
+    "communities": ["hillsboro-or", "west-linn-or", "sherwood-or"],
+    "languages": ["English"],
+    "bio": "Nick Chamberlin is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Nick helps sellers win in one of the country's most competitive markets. Nick serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 14, "texts": 21, "appts": 3, "agreements": 1, "showings": 5, "offers": 0 },
+    "responseTimeMins": 29,
+    "rank": 28
   },
   {
     "id": "ocean-chau",
@@ -1128,9 +850,7 @@
     "phone": "(503) 897-3775",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/ocean-chau.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -1139,20 +859,13 @@
     "activeListings": 2,
     "rating": 4.97,
     "reviews": 29,
-    "specialties": [
-      "Waterfront & Lakefront",
-      "Relocation"
-    ],
-    "communities": [
-      "beaverton-or",
-      "mcminnville-or",
-      "tualatin-or"
-    ],
-    "languages": [
-      "English",
-      "Cantonese"
-    ],
-    "bio": "Ocean Chau is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ocean helps investors win in one of the country's most competitive markets. Ocean serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Waterfront & Lakefront", "Relocation"],
+    "communities": ["beaverton-or", "mcminnville-or", "tualatin-or"],
+    "languages": ["English", "Cantonese"],
+    "bio": "Ocean Chau is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Ocean helps investors win in one of the country's most competitive markets. Ocean serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 25, "texts": 40, "appts": 5, "agreements": 3, "showings": 11, "offers": 2 },
+    "responseTimeMins": 7,
+    "rank": 9
   },
   {
     "id": "paris-vollstedt",
@@ -1165,10 +878,7 @@
     "phone": "(503) 824-9314",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/paris-vollstedt.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": true,
     "yearsExperience": 1,
@@ -1177,18 +887,9 @@
     "activeListings": 0,
     "rating": 4.94,
     "reviews": 84,
-    "specialties": [
-      "Transaction Management",
-      "Client Care"
-    ],
-    "communities": [
-      "sherwood-or",
-      "tigard-or",
-      "wilsonville-or"
-    ],
-    "languages": [
-      "English"
-    ],
+    "specialties": ["Transaction Management", "Client Care"],
+    "communities": ["sherwood-or", "tigard-or", "wilsonville-or"],
+    "languages": ["English"],
     "bio": "Paris Vollstedt is a Transaction Coordinator- Oregon & Washington Licensed Broker with Matin Real Estate. Paris keeps every transaction on track behind the scenes — coordinating deadlines, documents and communication so clients and agents can move with confidence."
   },
   {
@@ -1202,9 +903,7 @@
     "phone": "(503) 951-8482",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/reed-bright.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 16,
@@ -1213,20 +912,13 @@
     "activeListings": 2,
     "rating": 4.78,
     "reviews": 62,
-    "specialties": [
-      "Multi-Family",
-      "Investment Property",
-      "Relocation"
-    ],
-    "communities": [
-      "happy-valley-or",
-      "vancouver-wa",
-      "sherwood-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Reed Bright is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Reed helps families win in one of the country's most competitive markets. Reed serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Multi-Family", "Investment Property", "Relocation"],
+    "communities": ["happy-valley-or", "vancouver-wa", "sherwood-or"],
+    "languages": ["English"],
+    "bio": "Reed Bright is an Oregon Licensed Broker with Matin Real Estate. Known for data-driven pricing and a calm hand under pressure, Reed helps families win in one of the country's most competitive markets. Reed serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 17, "texts": 26, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 21,
+    "rank": 21
   },
   {
     "id": "russell-xay",
@@ -1239,9 +931,7 @@
     "phone": "(503) 845-5145",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/russell-xay.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 6,
@@ -1250,22 +940,13 @@
     "activeListings": 7,
     "rating": 4.91,
     "reviews": 111,
-    "specialties": [
-      "Luxury Homes",
-      "Relocation",
-      "Downsizing"
-    ],
-    "communities": [
-      "west-linn-or",
-      "oregon-city-or",
-      "beaverton-or",
-      "hillsboro-or"
-    ],
-    "languages": [
-      "English",
-      "Lao"
-    ],
-    "bio": "Russell Xay is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Russell helps families win in one of the country's most competitive markets. Russell serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Luxury Homes", "Relocation", "Downsizing"],
+    "communities": ["west-linn-or", "oregon-city-or", "beaverton-or", "hillsboro-or"],
+    "languages": ["English", "Lao"],
+    "bio": "Russell Xay is an Oregon Licensed Broker with Matin Real Estate. Known for white-glove service and a calm hand under pressure, Russell helps families win in one of the country's most competitive markets. Russell serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 29, "texts": 46, "appts": 7, "agreements": 3, "showings": 13, "offers": 3 },
+    "responseTimeMins": 5,
+    "rank": 6
   },
   {
     "id": "sierra-lockwood",
@@ -1278,9 +959,7 @@
     "phone": "(503) 926-2590",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/sierra-lockwood.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 13,
@@ -1289,20 +968,13 @@
     "activeListings": 9,
     "rating": 4.77,
     "reviews": 136,
-    "specialties": [
-      "First-Time Buyers",
-      "Relocation",
-      "Acreage & Land"
-    ],
-    "communities": [
-      "wilsonville-or",
-      "milwaukie-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Sierra Lockwood is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Sierra helps families win in one of the country's most competitive markets. Sierra serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["First-Time Buyers", "Relocation", "Acreage & Land"],
+    "communities": ["wilsonville-or", "milwaukie-or", "happy-valley-or"],
+    "languages": ["English"],
+    "bio": "Sierra Lockwood is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Sierra helps families win in one of the country's most competitive markets. Sierra serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 17, "texts": 27, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
+    "responseTimeMins": 23,
+    "rank": 19
   },
   {
     "id": "sierra-palmeri",
@@ -1315,9 +987,7 @@
     "phone": "(503) 829-9075",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/sierra-palmeri.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": true,
     "yearsExperience": 2,
@@ -1326,19 +996,9 @@
     "activeListings": 0,
     "rating": 4.94,
     "reviews": 173,
-    "specialties": [
-      "Transaction Management",
-      "Client Care"
-    ],
-    "communities": [
-      "portland-or",
-      "newberg-or",
-      "wilsonville-or",
-      "happy-valley-or"
-    ],
-    "languages": [
-      "English"
-    ],
+    "specialties": ["Transaction Management", "Client Care"],
+    "communities": ["portland-or", "newberg-or", "wilsonville-or", "happy-valley-or"],
+    "languages": ["English"],
     "bio": "Sierra Seggerman is a Listing Coordinator- Oregon Licensed Broker with Matin Real Estate. Sierra keeps every transaction on track behind the scenes — coordinating deadlines, documents and communication so clients and agents can move with confidence."
   },
   {
@@ -1352,9 +1012,7 @@
     "phone": "(503) 974-4041",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/sophia-freiling.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 10,
@@ -1363,20 +1021,13 @@
     "activeListings": 9,
     "rating": 4.97,
     "reviews": 110,
-    "specialties": [
-      "Acreage & Land",
-      "Relocation",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "mcminnville-or",
-      "ridgefield-wa",
-      "salem-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Sophia Freiling is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Sophia helps buyers win in one of the country's most competitive markets. Sophia serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Acreage & Land", "Relocation", "Equestrian Estates"],
+    "communities": ["mcminnville-or", "ridgefield-wa", "salem-or"],
+    "languages": ["English"],
+    "bio": "Sophia Freiling is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Sophia helps buyers win in one of the country's most competitive markets. Sophia serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 10, "texts": 15, "appts": 2, "agreements": 0, "showings": 3, "offers": 0 },
+    "responseTimeMins": 36,
+    "rank": 34
   },
   {
     "id": "vince-kinney",
@@ -1389,10 +1040,7 @@
     "phone": "(503) 727-5593",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/vince-kinney.jpg",
-    "licenses": [
-      "OR",
-      "WA"
-    ],
+    "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
     "yearsExperience": 9,
@@ -1401,19 +1049,13 @@
     "activeListings": 9,
     "rating": 4.74,
     "reviews": 43,
-    "specialties": [
-      "Luxury Homes",
-      "Acreage & Land",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "ridgefield-wa",
-      "milwaukie-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Vince Kinney is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Vince helps families win in one of the country's most competitive markets. Vince serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Luxury Homes", "Acreage & Land", "Equestrian Estates"],
+    "communities": ["ridgefield-wa", "milwaukie-or"],
+    "languages": ["English"],
+    "bio": "Vince Kinney is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, Vince helps families win in one of the country's most competitive markets. Vince serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 16, "texts": 26, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 25,
+    "rank": 23
   },
   {
     "id": "william-carrell",
@@ -1426,9 +1068,7 @@
     "phone": "(503) 618-3043",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/william-carrell.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 8,
@@ -1437,18 +1077,13 @@
     "activeListings": 9,
     "rating": 4.97,
     "reviews": 19,
-    "specialties": [
-      "Luxury Homes",
-      "55+ Living"
-    ],
-    "communities": [
-      "newberg-or",
-      "milwaukie-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "William Carrell is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, William helps buyers win in one of the country's most competitive markets. William serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Luxury Homes", "55+ Living"],
+    "communities": ["newberg-or", "milwaukie-or"],
+    "languages": ["English"],
+    "bio": "William Carrell is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, William helps buyers win in one of the country's most competitive markets. William serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 17, "texts": 28, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
+    "responseTimeMins": 17,
+    "rank": 19
   },
   {
     "id": "zach-hosford",
@@ -1461,9 +1096,7 @@
     "phone": "(503) 735-5410",
     "officePhone": "(503) 622-9624",
     "photo": "/matin/agents/zach-hosford.jpg",
-    "licenses": [
-      "OR"
-    ],
+    "licenses": ["OR"],
     "leadership": false,
     "support": false,
     "yearsExperience": 6,
@@ -1472,20 +1105,12 @@
     "activeListings": 8,
     "rating": 4.83,
     "reviews": 129,
-    "specialties": [
-      "Condos & Townhomes",
-      "Downsizing",
-      "Equestrian Estates"
-    ],
-    "communities": [
-      "tualatin-or",
-      "oregon-city-or",
-      "sherwood-or",
-      "milwaukie-or"
-    ],
-    "languages": [
-      "English"
-    ],
-    "bio": "Zach Hosford is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Zach helps investors win in one of the country's most competitive markets. Zach serves the greater Portland metro and SW Washington and treats every client like the only client."
+    "specialties": ["Condos & Townhomes", "Downsizing", "Equestrian Estates"],
+    "communities": ["tualatin-or", "oregon-city-or", "sherwood-or", "milwaukie-or"],
+    "languages": ["English"],
+    "bio": "Zach Hosford is an Oregon Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Zach helps investors win in one of the country's most competitive markets. Zach serves the greater Portland metro and SW Washington and treats every client like the only client.",
+    "scorecardWeek": { "calls": 15, "texts": 25, "appts": 3, "agreements": 1, "showings": 6, "offers": 1 },
+    "responseTimeMins": 24,
+    "rank": 24
   }
 ]

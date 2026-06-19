@@ -217,3 +217,29 @@ export function ClosingsBarChart() {
     </ResponsiveContainer>
   );
 }
+
+/* ── 7. Source ROI (horizontal grouped bars) ─────────────────────────── */
+export function SourceRoiChart() {
+  const data = metrics.sourceRoi ?? [];
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 4, bottom: 4 }}>
+        <CartesianGrid stroke={GRID} horizontal={false} />
+        <XAxis
+          type="number"
+          {...axisProps}
+          tickFormatter={(v) => compactUsd(Number(v))}
+        />
+        <YAxis type="category" dataKey="source" {...axisProps} width={140} />
+        <Tooltip
+          cursor={{ fill: "#0000000a" }}
+          content={
+            <DarkTooltip fmt={(v) => compactUsd(v)} />
+          }
+        />
+        <Bar dataKey="spend" name="Spend" fill="#e2e2e5" radius={[0, 3, 3, 0]} maxBarSize={14} />
+        <Bar dataKey="revenue" name="Revenue" fill={AZURE} radius={[0, 3, 3, 0]} maxBarSize={14} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}

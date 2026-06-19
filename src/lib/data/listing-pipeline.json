@@ -1,0 +1,362 @@
+[
+  {
+    "id": "LP-001",
+    "address": "14720 SW Osprey Dr",
+    "city": "Beaverton",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 2640,
+    "price": 795000,
+    "yearBuilt": 2003,
+    "features": ["Open floor plan", "Quartz counters", "3-car garage", "Backs to greenspace"],
+    "agentSlug": "lexa-brice",
+    "agentName": "Lexa Brice",
+    "stage": "Active",
+    "daysInStage": 6,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": true }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": true },
+        { "label": "Email blast to buyers list", "done": true },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": true }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": true },
+        { "label": "Showings enabled", "done": true }
+      ]
+    },
+    "brokerApproved": true
+  },
+  {
+    "id": "LP-002",
+    "address": "2980 NW Villard St",
+    "city": "Camas",
+    "beds": 5,
+    "baths": 4,
+    "sqft": 3980,
+    "price": 1295000,
+    "yearBuilt": 2015,
+    "features": ["Chef's kitchen", "Primary suite with spa bath", "Bonus room", "Mountain views", "3-car tandem garage"],
+    "agentSlug": "russell-xay",
+    "agentName": "Russell Xay",
+    "stage": "Under Offer",
+    "daysInStage": 4,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": true }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": true },
+        { "label": "Email blast to buyers list", "done": true },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": true }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": true },
+        { "label": "Showings enabled", "done": true }
+      ]
+    },
+    "brokerApproved": true
+  },
+  {
+    "id": "LP-003",
+    "address": "8145 SE Oak Grove Blvd",
+    "city": "Milwaukie",
+    "beds": 3,
+    "baths": 2,
+    "sqft": 1920,
+    "price": 589000,
+    "yearBuilt": 1989,
+    "features": ["Hardwood floors", "Updated kitchen", "Detached garage", "Large backyard"],
+    "agentSlug": "zach-hosford",
+    "agentName": "Zach Hosford",
+    "stage": "Photos Scheduled",
+    "daysInStage": 2,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": false },
+        { "label": "Virtual tour created", "done": false }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": false },
+        { "label": "MLS input form completed", "done": false },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": false },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": false },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
+    "id": "LP-004",
+    "address": "3352 SW Taylors Ferry Rd",
+    "city": "Portland",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 2870,
+    "price": 1050000,
+    "yearBuilt": 1978,
+    "features": ["Fully remodeled 2021", "Designer finishes", "Wine cellar", "Two-story great room"],
+    "agentSlug": "joshua-rose",
+    "agentName": "Joshua Rose",
+    "stage": "Broker Review",
+    "daysInStage": 1,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
+    "id": "LP-005",
+    "address": "21450 SW 97th Ave",
+    "city": "Tualatin",
+    "beds": 5,
+    "baths": 4,
+    "sqft": 4200,
+    "price": 1450000,
+    "yearBuilt": 2018,
+    "features": ["Smart home automation", "Covered outdoor kitchen", "Theater room", "3-car garage with EV charging", "Heated floors"],
+    "agentSlug": "alicia-smith",
+    "agentName": "Alicia Smith",
+    "stage": "Active",
+    "daysInStage": 11,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": true }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": true },
+        { "label": "Email blast to buyers list", "done": true },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": true }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": true },
+        { "label": "Showings enabled", "done": true }
+      ]
+    },
+    "brokerApproved": true
+  },
+  {
+    "id": "LP-006",
+    "address": "6270 SW Childs Rd",
+    "city": "Lake Oswego",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 3140,
+    "price": 1185000,
+    "yearBuilt": 1997,
+    "features": ["Lakeside community", "Vaulted ceilings", "Gourmet kitchen", "Private deck with hot tub"],
+    "agentSlug": "boston-bate",
+    "agentName": "Boston Bate",
+    "stage": "Intake",
+    "daysInStage": 1,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": false },
+        { "label": "Staging consultation done", "done": false },
+        { "label": "Seller disclosure signed", "done": false }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": false },
+        { "label": "Photos delivered", "done": false },
+        { "label": "Virtual tour created", "done": false }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": false },
+        { "label": "MLS input form completed", "done": false },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": false },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": false },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
+    "id": "LP-007",
+    "address": "4418 NW Brugger Rd",
+    "city": "Ridgefield",
+    "beds": 3,
+    "baths": 2,
+    "sqft": 1980,
+    "price": 645000,
+    "yearBuilt": 2008,
+    "features": ["Single-level layout", "Gas fireplace", "2-car garage", "Quiet cul-de-sac"],
+    "agentSlug": "chase-bright",
+    "agentName": "Chase Bright",
+    "stage": "MLS Draft",
+    "daysInStage": 3,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": false },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": false },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
+    "id": "LP-008",
+    "address": "11024 SE Sunnyside Rd",
+    "city": "Happy Valley",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 2760,
+    "price": 875000,
+    "yearBuilt": 2012,
+    "features": ["Mountain view lot", "Gourmet island kitchen", "Oversized primary suite", "3-car garage", "Tankless water heater"],
+    "agentSlug": "jordan-matin",
+    "agentName": "Jordan Matin",
+    "stage": "Active",
+    "daysInStage": 8,
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": true }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": true },
+        { "label": "Email blast to buyers list", "done": true },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": true }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": true },
+        { "label": "Lockbox placed", "done": true },
+        { "label": "Showings enabled", "done": true }
+      ]
+    },
+    "brokerApproved": true
+  }
+]

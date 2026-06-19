@@ -8,9 +8,13 @@ import metricsJson from "./data/metrics.json";
 import automationsJson from "./data/automations.json";
 import integrationsJson from "./data/integrations.json";
 import companyJson from "./data/company.json";
+import sellerLeadsJson from "./data/seller-leads.json";
+import listingPipelineJson from "./data/listing-pipeline.json";
+import buyerAgreementsJson from "./data/buyer-agreements.json";
 import type {
   Agent, Community, Listing, Lead, Transaction, Activity,
   Metrics, Automation, Integration, Company,
+  SellerLead, ListingPipeline, BuyerAgreement,
 } from "./types";
 
 export const company = companyJson as Company;
@@ -23,6 +27,9 @@ export const activities = activitiesJson as Activity[];
 export const metrics = metricsJson as Metrics;
 export const automations = automationsJson as Automation[];
 export const integrations = integrationsJson as Integration[];
+export const sellerLeads = sellerLeadsJson as SellerLead[];
+export const listingPipeline = listingPipelineJson as ListingPipeline[];
+export const buyerAgreements = buyerAgreementsJson as BuyerAgreement[];
 
 // ---- accessors ----
 export const getAgent = (slug: string) => agents.find((a) => a.slug === slug);

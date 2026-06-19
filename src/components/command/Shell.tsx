@@ -27,6 +27,9 @@ import {
   ArrowLeft,
   ChevronDown,
   LifeBuoy,
+  Home,
+  Rocket,
+  User,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn, initials } from "@/lib/utils";
@@ -37,10 +40,13 @@ type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
   { label: "Overview", items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }] },
+  { label: "Agent", items: [{ label: "My Workspace", href: "/hub/agent", icon: User }] },
   {
     label: "Clients",
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
+      { label: "Cash Offers", href: "/hub/cash-offer", icon: Home },
+      { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
       { label: "Transactions", href: "/hub/transactions", icon: Wallet },
     ],
   },
@@ -61,6 +67,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "Forms", href: "/hub/forms", icon: Database },
       { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
+      { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
       { label: "Coaching", href: "/hub/coaching", icon: Trophy },
     ],
   },
@@ -79,6 +86,8 @@ const NOTIFICATIONS = [
   { title: "Inspection deadline tomorrow", meta: "TX-4003 · due in 1 day", tone: "warn" as const },
   { title: "New 5-star review from the Harrisons", meta: "West Linn · 1h ago", tone: "success" as const },
   { title: "Seller opened your CMA", meta: "Lake Oswego lead · 2h ago", tone: "azure" as const },
+  { title: "Cash offer request — 4521 SW Hillview", meta: "New seller inquiry · 5m ago", tone: "azure" as const },
+  { title: "Buyer agreement needed — Reyes client", meta: "Showing tomorrow, agreement missing", tone: "warn" as const },
 ];
 
 function isActive(pathname: string, href: string) {

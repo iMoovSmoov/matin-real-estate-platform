@@ -49,6 +49,8 @@ export function ScenarioTrainer() {
   const [busy, setBusy] = useState(false);
   const [scored, setScored] = useState(false);
   const [catFilter, setCatFilter] = useState<ScenarioCategory | "All">("All");
+  const [coachGrade, setCoachGrade] = useState<string>("");
+  const [gradeLoading, setGradeLoading] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -78,11 +80,48 @@ export function ScenarioTrainer() {
     }
   }
 
+  /** Find the most recent user message in the visible transcript. */
+  function lastUserMessage(): string {
+    const userMsgs = messages.filter((m) => m.role === "user");
+    return userMsgs[userMsgs.length - 1]?.content ?? "";
+  }
+
+  async function getCoachGrade() {
+    if (gradeLoading || busy || !active) return;
+    const agentResponse = lastUserMessage();
+    if (!agentResponse) return;
+    setCoachGrade("");
+    setGradeLoading(true);
+    try {
+      await streamAi(
+        {
+          tool: "coach",
+          input: {},
+          messages: [
+            {
+              role: "user",
+              content:
+                `Grade this agent response to the scenario '${active.title}': \n\n${agentResponse}\n\n` +
+                `Score it on: Tone (1-10), Clarity (1-10), Did they handle the objection (yes/no). ` +
+                `Give a one-line improvement tip. Format as: Tone: X/10 | Clarity: X/10 | Objection handled: yes/no\n` +
+                `\u{1F4A1} Tip: [one-line tip]`,
+            },
+          ],
+        },
+        (_chunk, full) => setCoachGrade(full),
+      );
+    } finally {
+      setGradeLoading(false);
+    }
+  }
+
   async function start(s: Scenario) {
     if (busy) return;
     setActive(s);
     setScored(false);
     setInput("");
+    setCoachGrade("");
+    setGradeLoading(false);
     const seed: Msg = { role: "user", content: seedPrompt(s) };
     // History sent to the model includes the hidden seed; display hides it.
     await runTurn([seed], []);
@@ -120,6 +159,8 @@ export function ScenarioTrainer() {
     setInput("");
     setBusy(false);
     setScored(false);
+    setCoachGrade("");
+    setGradeLoading(false);
   }
 
   /* ── Library view ─────────────────────────────────────────────────────── */
@@ -270,14 +311,24 @@ export function ScenarioTrainer() {
 
       {/* Composer + score */}
       <div className="border-t border-ink/[0.08] bg-white px-4 py-3.5 md:px-6">
-        {!scored && messages.length >= 2 && (
-          <div className="mb-2.5 flex justify-center">
+        {messages.length >= 2 && (
+          <div className="mb-2.5 flex flex-wrap justify-center gap-2">
+            {!scored && (
+              <button
+                onClick={getScore}
+                disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-paper px-3.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.08] disabled:opacity-40"
+              >
+                <Award className="h-3.5 w-3.5" /> Get my score &amp; feedback
+              </button>
+            )}
             <button
-              onClick={getScore}
-              disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-paper px-3.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.08] disabled:opacity-40"
+              onClick={getCoachGrade}
+              disabled={gradeLoading || busy}
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink/[0.08] bg-white px-3.5 py-1.5 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.04] disabled:opacity-40"
             >
-              <Award className="h-3.5 w-3.5" /> Get my score &amp; feedback
+              <Bot className="h-3.5 w-3.5" />
+              {gradeLoading ? "Grading…" : "Get AI Coaching"}
             </button>
           </div>
         )}
@@ -313,6 +364,14 @@ export function ScenarioTrainer() {
           <Flame className="h-3 w-3 text-ink/80/60" /> Coaching notes appear in [brackets] after each
           reply · stay sharp
         </p>
+        {coachGrade && (
+          <div className="mt-3 rounded-xl border border-ink/[0.08] bg-ink/[0.04] p-3">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink">
+              <Bot className="h-3.5 w-3.5" /> AI Coach Feedback
+            </div>
+            <AiMarkdown text={coachGrade} />
+          </div>
+        )}
       </div>
     </div>
   );

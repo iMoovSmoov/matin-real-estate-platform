@@ -8,8 +8,9 @@ import {
   TrendingUp,
   MessageSquareText,
   Sparkles,
+  BarChart2,
 } from "lucide-react";
-import { salesAgents, company } from "@/lib/data";
+import { agents, salesAgents, company } from "@/lib/data";
 import { cn, initials, num } from "@/lib/utils";
 import {
   Panel,
@@ -73,6 +74,58 @@ function scoreTone(score: number): "success" | "warn" | "azure" {
   return "warn";
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Weekly Scorecard — filter to non-leadership, non-support agents, cap at 8,
+   compute score from scorecardWeek fields (deterministic), sort desc.
+   ────────────────────────────────────────────────────────────────────────── */
+interface ScorecardRow {
+  id: string;
+  name: string;
+  calls: number;
+  texts: number;
+  appts: number;
+  agreements: number;
+  showings: number;
+  offers: number;
+  score: number;
+}
+
+function computeScorecardRows(): ScorecardRow[] {
+  return [...agents]
+    .filter((a) => !a.leadership && !a.support)
+    .slice(0, 8)
+    .map((a): ScorecardRow => {
+      const sw = a.scorecardWeek ?? { calls: 0, texts: 0, appts: 0, agreements: 0, showings: 0, offers: 0 };
+      const raw =
+        sw.calls * 2 +
+        sw.texts * 1 +
+        sw.appts * 8 +
+        sw.agreements * 15 +
+        sw.showings * 3 +
+        sw.offers * 20;
+      return {
+        id: a.id,
+        name: a.name,
+        calls: sw.calls,
+        texts: sw.texts,
+        appts: sw.appts,
+        agreements: sw.agreements,
+        showings: sw.showings,
+        offers: sw.offers,
+        score: Math.min(100, raw),
+      };
+    })
+    .sort((x, y) => y.score - x.score);
+}
+
+const scorecardRows = computeScorecardRows();
+
+function scorecardScoreTone(score: number): string {
+  if (score >= 80) return "text-success";
+  if (score >= 50) return "text-warn";
+  return "text-danger";
+}
+
 export default function CoachingPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
@@ -106,6 +159,108 @@ export default function CoachingPage() {
           </div>
         </div>
       </div>
+
+      {/* Weekly Scorecards */}
+      <section>
+        <div className="mb-2.5 flex items-center gap-2">
+          <SectionLabel>Weekly Agent Scorecards</SectionLabel>
+          <span className="h-px flex-1 bg-ink/[0.06]" />
+        </div>
+        <Panel>
+          <PanelHeader
+            title="Weekly Agent Scorecards"
+            subtitle="Activity this week"
+            icon={<BarChart2 className="h-4 w-4" />}
+          />
+          <div className="overflow-x-auto">
+            <table className="w-full text-[0.85rem]">
+              <thead>
+                <tr className="border-b border-ink/[0.08] bg-ink/[0.02]">
+                  <th className="px-5 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Agent
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Calls
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Texts
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Appts
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Agreements
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Showings
+                  </th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Offers
+                  </th>
+                  <th className="px-5 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
+                    Score
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/[0.06]">
+                {scorecardRows.map((row, i) => {
+                  const isTop = i === 0;
+                  return (
+                    <tr
+                      key={row.id}
+                      className={cn(
+                        "transition-colors hover:bg-ink/[0.02]",
+                        isTop && "bg-ink/[0.015]",
+                      )}
+                    >
+                      <td className={cn("px-5 py-3 text-ink", isTop && "font-semibold")}>
+                        <span className="flex items-center gap-2.5">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.62rem] font-bold text-ink ring-1 ring-inset ring-ink/[0.06]">
+                            {initials(row.name)}
+                          </span>
+                          {row.name}
+                        </span>
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.calls}
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.texts}
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.appts}
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.agreements}
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.showings}
+                      </td>
+                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
+                        {row.offers}
+                      </td>
+                      <td
+                        className={cn(
+                          "px-5 py-3 text-right font-display tabular-nums",
+                          isTop && "font-semibold",
+                          scorecardScoreTone(row.score),
+                        )}
+                      >
+                        {row.score}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="border-t border-ink/[0.08] px-5 py-3">
+            <p className="text-[0.72rem] text-slate/55">
+              Score = calls×2 + texts×1 + appts×8 + agreements×15 + showings×3 + offers×20 · max 100
+            </p>
+          </div>
+        </Panel>
+      </section>
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -21,12 +21,14 @@ import {
   Flame,
   RefreshCw,
   CalendarClock,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 import type { Lead, LeadStage } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { cn, usd, initials, timeAgo } from "@/lib/utils";
-import { Pill } from "@/components/command/ui";
+import { Pill, SectionLabel } from "@/components/command/ui";
 import { LEAD_STAGES, stageTone, scoreTone, scoreLabel } from "@/components/command/crm/leadStyles";
 
 /* ── Communication timeline ──────────────────────────────────────────────────
@@ -247,7 +249,16 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   {initials(lead.name)}
                 </span>
                 <div className="min-w-0">
-                  <h2 className="truncate font-display text-2xl text-ink">{lead.name}</h2>
+                  {/* Lead name + speed-to-lead badge */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="truncate font-display text-2xl text-ink">{lead.name}</h2>
+                    {lead.createdDaysAgo === 0 && (
+                      <Pill tone="danger">
+                        <Clock className="h-3 w-3" />
+                        New lead — respond now
+                      </Pill>
+                    )}
+                  </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {/* Stage selector */}
                     <div className="relative">
@@ -359,13 +370,42 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                 </div>
               )}
 
-              {/* AI summary */}
-              <div className="rounded-xl border border-ink/10 bg-white px-4 py-3">
-                <div className="mb-1.5 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-ink" />
-                  <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-ink/80">AI lead summary</span>
-                </div>
+              {/* ── AI Lead Intel callout ── */}
+              <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.04] p-4">
+                <SectionLabel className="mb-2">AI Intel</SectionLabel>
                 <p className="text-[0.85rem] leading-relaxed text-slate">{lead.aiSummary}</p>
+                {lead.nextBestAction && (
+                  <p className="mt-2 text-[0.82rem] font-medium text-ink">
+                    Next: {lead.nextBestAction}
+                  </p>
+                )}
+              </div>
+
+              {/* ── Likely Seller banner ── */}
+              {lead.likelySeller === true && (
+                <div className="flex items-start gap-2 rounded-xl border border-success/25 bg-success/10 p-3">
+                  <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <p className="text-[0.83rem] leading-snug text-success">
+                    Likely sell-side opportunity — consider pitching a home valuation or cash offer.
+                  </p>
+                </div>
+              )}
+
+              {/* ── Property Interests ── */}
+              <div className="rounded-2xl border border-ink/[0.07] bg-white p-4 shadow-soft">
+                <SectionLabel className="mb-3">Property Interests</SectionLabel>
+                {lead.propertyViews && lead.propertyViews.length > 0 ? (
+                  <ul className="space-y-2">
+                    {lead.propertyViews.map((view, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-slate/55" />
+                        <span className="text-[0.84rem] text-ink">{view}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[0.83rem] text-slate/60">No browsing activity recorded yet.</p>
+                )}
               </div>
 
               {/* ── Draft reply ── */}

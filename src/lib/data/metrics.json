@@ -1,237 +1,61 @@
 {
   "volumeByMonth": [
-    {
-      "month": "Jul",
-      "volume": 9000000,
-      "closings": 20
-    },
-    {
-      "month": "Aug",
-      "volume": 12000000,
-      "closings": 17
-    },
-    {
-      "month": "Sep",
-      "volume": 10000000,
-      "closings": 16
-    },
-    {
-      "month": "Oct",
-      "volume": 15000000,
-      "closings": 26
-    },
-    {
-      "month": "Nov",
-      "volume": 7000000,
-      "closings": 23
-    },
-    {
-      "month": "Dec",
-      "volume": 11000000,
-      "closings": 14
-    },
-    {
-      "month": "Jan",
-      "volume": 8000000,
-      "closings": 22
-    },
-    {
-      "month": "Feb",
-      "volume": 13000000,
-      "closings": 22
-    },
-    {
-      "month": "Mar",
-      "volume": 9000000,
-      "closings": 17
-    },
-    {
-      "month": "Apr",
-      "volume": 9000000,
-      "closings": 23
-    },
-    {
-      "month": "May",
-      "volume": 15000000,
-      "closings": 16
-    },
-    {
-      "month": "Jun",
-      "volume": 7000000,
-      "closings": 27
-    }
+    { "month": "Jul", "volume": 9000000, "closings": 20 },
+    { "month": "Aug", "volume": 12000000, "closings": 17 },
+    { "month": "Sep", "volume": 10000000, "closings": 16 },
+    { "month": "Oct", "volume": 15000000, "closings": 26 },
+    { "month": "Nov", "volume": 7000000, "closings": 23 },
+    { "month": "Dec", "volume": 11000000, "closings": 14 },
+    { "month": "Jan", "volume": 8000000, "closings": 22 },
+    { "month": "Feb", "volume": 13000000, "closings": 22 },
+    { "month": "Mar", "volume": 9000000, "closings": 17 },
+    { "month": "Apr", "volume": 9000000, "closings": 23 },
+    { "month": "May", "volume": 15000000, "closings": 16 },
+    { "month": "Jun", "volume": 7000000, "closings": 27 }
   ],
   "leadsByMonth": [
-    {
-      "month": "Jul",
-      "leads": 182,
-      "converted": 32
-    },
-    {
-      "month": "Aug",
-      "leads": 189,
-      "converted": 20
-    },
-    {
-      "month": "Sep",
-      "leads": 230,
-      "converted": 34
-    },
-    {
-      "month": "Oct",
-      "leads": 326,
-      "converted": 18
-    },
-    {
-      "month": "Nov",
-      "leads": 183,
-      "converted": 20
-    },
-    {
-      "month": "Dec",
-      "leads": 189,
-      "converted": 16
-    },
-    {
-      "month": "Jan",
-      "leads": 296,
-      "converted": 33
-    },
-    {
-      "month": "Feb",
-      "leads": 226,
-      "converted": 29
-    },
-    {
-      "month": "Mar",
-      "leads": 336,
-      "converted": 14
-    },
-    {
-      "month": "Apr",
-      "leads": 201,
-      "converted": 38
-    },
-    {
-      "month": "May",
-      "leads": 314,
-      "converted": 27
-    },
-    {
-      "month": "Jun",
-      "leads": 219,
-      "converted": 32
-    }
+    { "month": "Jul", "leads": 182, "converted": 32 },
+    { "month": "Aug", "leads": 189, "converted": 20 },
+    { "month": "Sep", "leads": 230, "converted": 34 },
+    { "month": "Oct", "leads": 326, "converted": 18 },
+    { "month": "Nov", "leads": 183, "converted": 20 },
+    { "month": "Dec", "leads": 189, "converted": 16 },
+    { "month": "Jan", "leads": 296, "converted": 33 },
+    { "month": "Feb", "leads": 226, "converted": 29 },
+    { "month": "Mar", "leads": 336, "converted": 14 },
+    { "month": "Apr", "leads": 201, "converted": 38 },
+    { "month": "May", "leads": 314, "converted": 27 },
+    { "month": "Jun", "leads": 219, "converted": 32 }
   ],
   "leadsBySource": [
-    {
-      "source": "Zillow",
-      "count": 98
-    },
-    {
-      "source": "Website",
-      "count": 306
-    },
-    {
-      "source": "Open House",
-      "count": 192
-    },
-    {
-      "source": "Referral",
-      "count": 193
-    },
-    {
-      "source": "Facebook Ad",
-      "count": 88
-    },
-    {
-      "source": "Google",
-      "count": 189
-    },
-    {
-      "source": "Realtor.com",
-      "count": 116
-    },
-    {
-      "source": "Past Client",
-      "count": 119
-    },
-    {
-      "source": "Call-In",
-      "count": 240
-    },
-    {
-      "source": "Instagram",
-      "count": 310
-    }
+    { "source": "Zillow", "count": 98 },
+    { "source": "Website", "count": 306 },
+    { "source": "Open House", "count": 192 },
+    { "source": "Referral", "count": 193 },
+    { "source": "Facebook Ad", "count": 88 },
+    { "source": "Google", "count": 189 },
+    { "source": "Realtor.com", "count": 116 },
+    { "source": "Past Client", "count": 119 },
+    { "source": "Call-In", "count": 240 },
+    { "source": "Instagram", "count": 310 }
   ],
   "pipelineByStage": [
-    {
-      "stage": "Pre-Listing",
-      "value": 8000000,
-      "deals": 15
-    },
-    {
-      "stage": "Active",
-      "value": 3000000,
-      "deals": 5
-    },
-    {
-      "stage": "Pending",
-      "value": 6000000,
-      "deals": 5
-    },
-    {
-      "stage": "Inspection",
-      "value": 4000000,
-      "deals": 3
-    },
-    {
-      "stage": "Appraisal",
-      "value": 6000000,
-      "deals": 8
-    },
-    {
-      "stage": "Financing",
-      "value": 4000000,
-      "deals": 15
-    },
-    {
-      "stage": "Clear to Close",
-      "value": 5000000,
-      "deals": 3
-    },
-    {
-      "stage": "Closed",
-      "value": 5000000,
-      "deals": 16
-    }
+    { "stage": "Pre-Listing", "value": 8000000, "deals": 15 },
+    { "stage": "Active", "value": 3000000, "deals": 5 },
+    { "stage": "Pending", "value": 6000000, "deals": 5 },
+    { "stage": "Inspection", "value": 4000000, "deals": 3 },
+    { "stage": "Appraisal", "value": 6000000, "deals": 8 },
+    { "stage": "Financing", "value": 4000000, "deals": 15 },
+    { "stage": "Clear to Close", "value": 5000000, "deals": 3 },
+    { "stage": "Closed", "value": 5000000, "deals": 16 }
   ],
   "funnel": [
-    {
-      "stage": "Leads",
-      "count": 2840
-    },
-    {
-      "stage": "Engaged",
-      "count": 1190
-    },
-    {
-      "stage": "Appointments",
-      "count": 410
-    },
-    {
-      "stage": "Active Clients",
-      "count": 188
-    },
-    {
-      "stage": "Under Contract",
-      "count": 96
-    },
-    {
-      "stage": "Closed",
-      "count": 71
-    }
+    { "stage": "Leads", "count": 2840 },
+    { "stage": "Engaged", "count": 1190 },
+    { "stage": "Appointments", "count": 410 },
+    { "stage": "Active Clients", "count": 188 },
+    { "stage": "Under Contract", "count": 96 },
+    { "stage": "Closed", "count": 71 }
   ],
   "kpis": {
     "pipelineValue": 48200000,
@@ -242,5 +66,24 @@
     "conversionRate": 11.4,
     "avgDaysOnMarket": 17,
     "listVsSold": 99.2
-  }
+  },
+  "speedToLeadMin": 4,
+  "staleLeadsCount": 18,
+  "sourceRoi": [
+    { "source": "Google Ads", "leads": 189, "closed": 14, "revenue": 4900000, "spend": 52000 },
+    { "source": "Facebook Ads", "leads": 88, "closed": 8, "revenue": 2800000, "spend": 28000 },
+    { "source": "Instagram", "leads": 310, "closed": 22, "revenue": 7700000, "spend": 18000 },
+    { "source": "Zillow", "leads": 98, "closed": 9, "revenue": 3150000, "spend": 42000 },
+    { "source": "Organic / Website", "leads": 306, "closed": 28, "revenue": 9800000, "spend": 8000 },
+    { "source": "Referral", "leads": 193, "closed": 31, "revenue": 10850000, "spend": 0 },
+    { "source": "Cash Offer Funnel", "leads": 47, "closed": 12, "revenue": 4200000, "spend": 6000 }
+  ],
+  "agentLeaderboard": [
+    { "slug": "joshua-rose", "name": "Joshua Rose", "responseTimeMins": 2, "leadsThisMonth": 18, "apptRate": 0.44 },
+    { "slug": "alicia-smith", "name": "Alicia Smith", "responseTimeMins": 3, "leadsThisMonth": 14, "apptRate": 0.36 },
+    { "slug": "amanda-conlon", "name": "Amanda Conlon", "responseTimeMins": 8, "leadsThisMonth": 11, "apptRate": 0.27 },
+    { "slug": "james-wright", "name": "James Wright", "responseTimeMins": 12, "leadsThisMonth": 9, "apptRate": 0.22 },
+    { "slug": "sarah-chen", "name": "Sarah Chen", "responseTimeMins": 22, "leadsThisMonth": 7, "apptRate": 0.14 },
+    { "slug": "michael-torres", "name": "Michael Torres", "responseTimeMins": 34, "leadsThisMonth": 5, "apptRate": 0.10 }
+  ]
 }

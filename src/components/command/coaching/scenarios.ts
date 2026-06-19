@@ -136,4 +136,54 @@ export const scenarios: Scenario[] = [
     opening:
       "I really want this house but I'm not going to throw away forty grand over asking. There are five offers — how do we actually win this without getting destroyed?",
   },
+  {
+    id: "zillow-estimate-cma",
+    title: "Zillow Says My Home Is Worth More",
+    category: "Objection Handling",
+    difficulty: "Elite",
+    summary:
+      "Seller insists Zillow's estimate is $80K above your CMA. Walk them through the difference between automated estimates and real market data.",
+    opening:
+      "I just checked Zillow this morning and it says my home is worth eighty thousand dollars more than what you're showing me. Why should I trust your number over theirs?",
+  },
+  {
+    id: "buyer-representation-agreement",
+    title: "Buyer Refuses to Sign Agreement",
+    category: "Buyer Consultation",
+    difficulty: "Pro",
+    summary:
+      "Oregon now requires written buyer representation agreements before showings. A frustrated buyer says they just want to see the house without signing anything.",
+    opening:
+      "I don't understand why I have to sign something just to look at a house. I just want to see it — can't we do that first and handle the paperwork later?",
+  },
+  {
+    id: "lead-wants-to-wait",
+    title: "Lead Wants to Wait 6 Months",
+    category: "Objection Handling",
+    difficulty: "Pro",
+    summary:
+      "Practice keeping the lead warm, educating about market timing, and staying top of mind without being pushy when they cite interest rates as their reason to wait.",
+    opening:
+      "I'm thinking interest rates might come down in the next six months or so. It just makes more sense to wait, doesn't it?",
+  },
+  {
+    id: "cash-offer-vs-top-dollar",
+    title: "Seller Wants Cash AND Top Dollar",
+    category: "Negotiation",
+    difficulty: "Elite",
+    summary:
+      "A seller wants the certainty of a cash offer but also expects full market value. Help them understand the trade-off between speed and certainty versus net proceeds.",
+    opening:
+      "I want a cash offer — no financing contingencies, quick close. But I'm also not leaving money on the table. I expect full market value. Can you make that happen?",
+  },
+  {
+    id: "speed-to-lead-recovery",
+    title: "Speed-to-Lead Recovery",
+    category: "FSBO / Expired",
+    difficulty: "Starter",
+    summary:
+      "You haven't contacted this lead in 10 days. They just visited the website again. Craft a re-engagement message that feels warm, not neglectful.",
+    opening:
+      "Oh hey — I was just browsing some listings again. I wasn't sure if you were still… around, honestly. It's been a while.",
+  },
 ];

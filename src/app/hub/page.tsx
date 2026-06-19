@@ -10,6 +10,7 @@ import {
   CalendarClock,
   Scale,
   ArrowUpRight,
+  ArrowRight,
   Database,
   Bot,
   FileSignature,
@@ -17,18 +18,22 @@ import {
   PenSquare,
   Calculator,
   Users,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import { metrics, agentLeaderboard, activities, company } from "@/lib/data";
 import { usd, compactUsd, num, timeAgo } from "@/lib/utils";
-import { Panel, PanelHeader, StatTile, LiveDot, ProgressBar, SectionLabel } from "@/components/command/ui";
+import { Panel, PanelHeader, StatTile, LiveDot, ProgressBar, SectionLabel, Pill } from "@/components/command/ui";
 import {
   VolumeAreaChart,
   LeadsBySourceChart,
   PipelineByStageChart,
   ConversionFunnelChart,
+  SourceRoiChart,
 } from "@/components/command/DashboardCharts";
 
 const k = metrics.kpis;
+const metricsAgentLeaderboard = metrics.agentLeaderboard ?? [];
 
 const KPIS = [
   { label: "Pipeline Value", value: compactUsd(k.pipelineValue), delta: { value: "8.4%", dir: "up" as const }, icon: <DollarSign className="h-4 w-4" />, accent: true },
@@ -92,6 +97,39 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Needs Attention alert strip */}
+      <Panel className="px-5 py-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="flex items-center gap-1.5 text-[0.78rem] font-semibold uppercase tracking-wider text-slate/70">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Needs Attention
+          </span>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/hub/crm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-warn/25 bg-warn/10 px-3 py-1.5 text-[0.82rem] font-medium text-warn transition-colors hover:bg-warn/15"
+            >
+              <Pill tone="warn">{metrics.staleLeadsCount ?? 18} stale leads</Pill>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/hub/buyer-agreements"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-danger/25 bg-danger/10 px-3 py-1.5 text-[0.82rem] font-medium text-danger transition-colors hover:bg-danger/15"
+            >
+              <Pill tone="danger">7 buyer agreements needed</Pill>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/hub/transactions"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-danger/25 bg-danger/10 px-3 py-1.5 text-[0.82rem] font-medium text-danger transition-colors hover:bg-danger/15"
+            >
+              <Pill tone="danger">3 overdue deadlines</Pill>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </Panel>
+
       {/* Your tools */}
       <div>
         <div className="mb-3 flex items-baseline justify-between">
@@ -153,6 +191,64 @@ export default function DashboardPage() {
           <PanelHeader title="Conversion Funnel" subtitle="Leads → closed, last 12 months" icon={<Target className="h-4 w-4" />} />
           <div className="h-64 px-3 py-4">
             <ConversionFunnelChart />
+          </div>
+        </Panel>
+      </div>
+
+      {/* Speed-to-Lead + Source ROI */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel>
+          <PanelHeader
+            title="Agent Response Time"
+            subtitle="Speed-to-lead by agent, this month"
+            icon={<Clock className="h-4 w-4" />}
+          />
+          <div className="overflow-x-auto">
+            <table className="w-full text-[0.82rem]">
+              <thead>
+                <tr className="border-b border-ink/[0.06]">
+                  <th className="px-5 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">Agent</th>
+                  <th className="px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">Response</th>
+                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">Leads</th>
+                  <th className="px-5 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">Appt Rate</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/[0.04]">
+                {metricsAgentLeaderboard.map((agent, i) => {
+                  const responseColor =
+                    agent.responseTimeMins <= 5
+                      ? "text-success font-semibold"
+                      : agent.responseTimeMins <= 15
+                      ? "text-warn font-semibold"
+                      : "text-danger font-semibold";
+                  const responseLabel =
+                    agent.responseTimeMins < 60
+                      ? `${agent.responseTimeMins}m`
+                      : `${Math.floor(agent.responseTimeMins / 60)}h ${agent.responseTimeMins % 60}m`;
+                  return (
+                    <tr key={agent.slug} className={i % 2 === 0 ? "bg-white" : "bg-[#f4f4f3]/60"}>
+                      <td className="px-5 py-2.5 font-medium text-ink">{agent.name}</td>
+                      <td className={`px-3 py-2.5 tabular-nums ${responseColor}`}>{responseLabel}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-slate">{agent.leadsThisMonth}</td>
+                      <td className="px-5 py-2.5 text-right tabular-nums text-slate">
+                        {Math.round(agent.apptRate * 100)}%
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+
+        <Panel>
+          <PanelHeader
+            title="Marketing ROI by Channel"
+            subtitle="Spend vs. revenue closed, this quarter"
+            icon={<TrendingUp className="h-4 w-4" />}
+          />
+          <div className="h-[260px] px-3 py-4">
+            <SourceRoiChart />
           </div>
         </Panel>
       </div>

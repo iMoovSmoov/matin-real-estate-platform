@@ -17,11 +17,15 @@ import {
   FileClock,
   Home,
   ShoppingBag,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { cn, usd, daysLabel, initials } from "@/lib/utils";
 import { ProgressBar, Pill } from "@/components/command/ui";
+import { streamAi } from "@/lib/ai/client";
+import { AiMarkdown } from "@/components/command/AiMarkdown";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Transactions — a real transaction-coordinator view (Dotloop / SkySlope
@@ -256,6 +260,16 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
           <CalendarClock className="h-3 w-3" />
           {daysLabel(t.closeDateDaysOut)}
         </span>
+        {!isClosed(t) && t.closeDateDaysOut < 0 && (
+          <div className="mt-1 flex justify-end">
+            <Pill tone="danger">{Math.abs(t.closeDateDaysOut)}d overdue</Pill>
+          </div>
+        )}
+        {!isClosed(t) && t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 3 && (
+          <div className="mt-1 flex justify-end">
+            <Pill tone="warn">closing soon</Pill>
+          </div>
+        )}
       </div>
 
       {/* Chevron */}
@@ -277,6 +291,29 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   const nextItem = tx?.checklist.find((c) => !c.done) ?? null;
   const type = tx ? shortType(tx.type) : null;
   const docs = tx ? buildDocuments(tx) : [];
+
+  // Addition 3 state — AI Contract Extractor
+  const [extractOpen, setExtractOpen] = useState(false);
+  const [contractText, setContractText] = useState("");
+  const [extractOutput, setExtractOutput] = useState("");
+  const [extractLoading, setExtractLoading] = useState(false);
+  const [applyToast, setApplyToast] = useState(false);
+
+  async function handleExtract() {
+    if (!contractText.trim()) return;
+    setExtractLoading(true);
+    setExtractOutput("");
+    await streamAi(
+      { tool: "contract-extractor", input: { contractText } },
+      (_, full) => setExtractOutput(full),
+    );
+    setExtractLoading(false);
+  }
+
+  function handleApplyToChecklist() {
+    setApplyToast(true);
+    setTimeout(() => setApplyToast(false), 3000);
+  }
 
   return (
     <>
@@ -425,6 +462,26 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                     );
                   })}
                 </ul>
+
+                {/* Addition 2 — Missing documents alert */}
+                {tx.checklist.some((c) => !c.done) && (
+                  <div className="rounded-xl border border-danger/30 bg-danger/[0.06] p-3 mt-3">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-danger" />
+                      <span className="text-danger font-semibold text-[0.82rem]">Missing items</span>
+                    </div>
+                    <ul className="space-y-1">
+                      {tx.checklist
+                        .filter((c) => !c.done)
+                        .map((c, i) => (
+                          <li key={i} className="flex items-start gap-2 text-[0.78rem] text-danger/80">
+                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-danger/60" />
+                            {c.label}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Documents */}
@@ -444,8 +501,76 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                   ))}
                 </ul>
               </div>
+
+              {/* Addition 3 — AI Contract Extractor */}
+              <div className="rounded-xl border border-ink/[0.08] bg-white">
+                <button
+                  onClick={() => setExtractOpen((v) => !v)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left"
+                >
+                  <span className="inline-flex items-center gap-2 text-[0.95rem] font-semibold text-ink">
+                    <FileText className="h-4 w-4 text-ink" />
+                    AI Contract Extractor
+                  </span>
+                  {extractOpen ? (
+                    <ChevronUp className="h-4 w-4 text-slate/50" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate/50" />
+                  )}
+                </button>
+
+                {extractOpen && (
+                  <div className="border-t border-ink/[0.08] px-4 pb-4 pt-3 space-y-3">
+                    <p className="text-[0.82rem] text-slate">
+                      Paste the full purchase agreement text below to extract parties, financial terms, and all key deadlines.
+                    </p>
+                    <textarea
+                      value={contractText}
+                      onChange={(e) => setContractText(e.target.value)}
+                      placeholder="Paste purchase agreement text here..."
+                      rows={6}
+                      className="w-full rounded-xl border border-ink/[0.08] bg-paper p-3 text-[0.82rem] text-ink resize-none focus:border-ink/40 focus:outline-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleExtract}
+                        disabled={extractLoading || !contractText.trim()}
+                        className="inline-flex items-center gap-2 bg-ink text-white rounded-xl px-4 py-2 text-[0.85rem] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {extractLoading && (
+                          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        )}
+                        {extractLoading ? "Extracting contract details..." : "Extract Deadlines"}
+                      </button>
+                    </div>
+
+                    {extractOutput && !extractLoading && (
+                      <div className="rounded-xl border border-ink/[0.08] bg-paper p-3">
+                        <div className="max-h-72 overflow-y-auto">
+                          <AiMarkdown text={extractOutput} />
+                        </div>
+                        <div className="mt-3 border-t border-ink/[0.08] pt-3">
+                          <button
+                            onClick={handleApplyToChecklist}
+                            className="border border-ink/[0.08] rounded-xl px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04]"
+                          >
+                            Apply to checklist
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </>
+        )}
+
+        {/* Toast notification */}
+        {applyToast && (
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-xl border border-ink/[0.08] bg-ink px-4 py-2.5 text-[0.82rem] text-white shadow-lg">
+            Review the extracted dates and update the checklist manually.
+          </div>
         )}
       </aside>
     </>
