@@ -33,7 +33,7 @@ const cols = [
       ["About Matin", "/about"],
       ["Contact", "/contact"],
       ["Blog & resources", "/blog"],
-      ["Cash offer", "/sell#cash-offer"],
+      ["Cash offer", "/cash-offer"],
       ["Matin Hub", "/hub"],
     ],
   },
@@ -116,6 +116,16 @@ export function SiteFooter() {
         </div>
       </div>
 
+      <div className="border-t border-white/10">
+        <div className="container-x flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 py-4 text-[0.72rem] text-slate-300/70">
+          <span className="font-semibold uppercase tracking-wider text-slate-300/85">The Matin network</span>
+          {["PortlandRealEstate.com", "PortlandLuxuryRealEstate.com", "OregonRealEstate.com", "WashingtonRealEstate.com", "MatinCareers.com"].map((s) => (
+            <a key={s} href={`https://www.${s.toLowerCase()}`} target="_blank" rel="noopener" className="transition hover:text-azure-bright">
+              {s}
+            </a>
+          ))}
+        </div>
+      </div>
       <div className="border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-[0.78rem] text-slate-300 md:flex-row">
           <p>
