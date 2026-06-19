@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -14,16 +13,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { ListingCard } from "@/components/site/ListingCard";
 import { communities, getCommunity, listingsInCommunity } from "@/lib/data";
 import { usd, num, cn } from "@/lib/utils";
-
-// Leaflet is browser-only — lazy load it
-const PropertyMap = dynamic(() => import("@/components/site/PropertyMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-paper-200/50 text-[0.85rem] text-slate">
-      Loading map…
-    </div>
-  ),
-});
+import { CommunityMap } from "@/components/site/CommunityMap";
 
 export function generateStaticParams() {
   return communities.map((c) => ({ slug: c.slug }));
@@ -264,7 +254,7 @@ export default async function CommunityPage({
               Listings map — {community.name}
             </h2>
             <div className="mt-6 h-[420px] overflow-hidden rounded-2xl ring-1 ring-ink/[0.07] shadow-soft">
-              <PropertyMap listings={homes} />
+              <CommunityMap listings={homes} />
             </div>
           </Container>
         </Section>

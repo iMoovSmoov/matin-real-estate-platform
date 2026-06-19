@@ -23,6 +23,7 @@ import { getAgent } from "@/lib/data";
 import { cn, compactUsd, initials, timeAgo } from "@/lib/utils";
 import { LeadDrawer } from "@/components/command/crm/LeadDrawer";
 import { stageTone, scoreTone } from "@/components/command/crm/leadStyles";
+import { EmptyState } from "@/components/command/ui/EmptyState";
 
 type SortKey = "score" | "recency" | "name";
 
@@ -209,19 +210,21 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadCard key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
-              <Inbox className="h-8 w-8 text-slate/30" />
-              <div>
-                <p className="text-[0.86rem] font-semibold text-slate/70">No leads in this list.</p>
-                <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
-              </div>
-              <button
-                onClick={() => setAddLeadOpen(true)}
-                className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90"
-              >
-                <UserPlus className="h-3.5 w-3.5" /> Add a lead
-              </button>
-            </div>
+            allLeads.length === 0 ? (
+              <EmptyState
+                icon={UserPlus}
+                title="Your lead pipeline is empty"
+                description="Import leads from Zillow, Realtor.com, or add them manually. Your first lead is one click away."
+                action={{ label: "Add first lead", onClick: () => setAddLeadOpen(true) }}
+              />
+            ) : (
+              <EmptyState
+                icon={Inbox}
+                title="No leads found"
+                description="Try adjusting your filters, or add your first lead to get started."
+                action={{ label: "Clear filters", onClick: () => { setQuery(""); setListId("all"); } }}
+              />
+            )
           )}
         </div>
 
@@ -231,18 +234,22 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadRow key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            <li className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
-              <Inbox className="h-8 w-8 text-slate/30" />
-              <div>
-                <p className="text-[0.86rem] font-semibold text-slate/70">No leads in this list.</p>
-                <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
-              </div>
-              <button
-                onClick={() => setAddLeadOpen(true)}
-                className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90"
-              >
-                <UserPlus className="h-3.5 w-3.5" /> Add a lead
-              </button>
+            <li>
+              {allLeads.length === 0 ? (
+                <EmptyState
+                  icon={UserPlus}
+                  title="Your lead pipeline is empty"
+                  description="Import leads from Zillow, Realtor.com, or add them manually. Your first lead is one click away."
+                  action={{ label: "Add first lead", onClick: () => setAddLeadOpen(true) }}
+                />
+              ) : (
+                <EmptyState
+                  icon={Inbox}
+                  title="No leads found"
+                  description="Try adjusting your filters, or add your first lead to get started."
+                  action={{ label: "Clear filters", onClick: () => { setQuery(""); setListId("all"); } }}
+                />
+              )}
             </li>
           )}
         </ul>

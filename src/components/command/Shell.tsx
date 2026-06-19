@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { NotificationCenter } from "@/components/command/NotificationCenter";
+import { CommandPalette, CommandPaletteProvider, useCommandPalette } from "@/components/command/CommandPalette";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
@@ -211,9 +212,22 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   );
 }
 
-export function Shell({ children }: { children: React.ReactNode }) {
+function ShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { setOpen: openPalette } = useCommandPalette();
+
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        openPalette(true);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [openPalette]);
 
   return (
     <div className="flex min-h-screen">
@@ -259,18 +273,27 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Search */}
-          <div className="relative hidden max-w-sm flex-1 items-center sm:flex">
+          {/* Search — clicking opens the palette */}
+          <button
+            onClick={() => openPalette(true)}
+            className="relative hidden max-w-sm flex-1 items-center sm:flex h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-[0.85rem] text-slate/40 transition-all hover:border-azure/30 hover:ring-2 hover:ring-azure/10 cursor-text"
+            aria-label="Open command palette"
+          >
             <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate/50" />
-            <input
-              type="text"
-              placeholder="Search leads, listings, agents…"
-              className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-[0.85rem] text-ink placeholder:text-slate/40 transition-all focus:border-azure/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-azure/10"
-            />
+            <span className="truncate">Search leads, listings, agents…</span>
             <kbd className="pointer-events-none absolute right-2.5 rounded border border-ink/[0.08] bg-paper px-1.5 py-0.5 text-[0.6rem] font-medium text-slate/50">
               ⌘K
             </kbd>
-          </div>
+          </button>
+
+          {/* Mobile search icon */}
+          <button
+            onClick={() => openPalette(true)}
+            aria-label="Search"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink sm:hidden"
+          >
+            <Search className="h-5 w-5" />
+          </button>
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
             {/* Notifications */}
@@ -303,6 +326,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
         <main className="flex-1 overflow-x-hidden">{children}</main>
       </div>
+
+      {/* Global command palette */}
+      <CommandPalette />
     </div>
+  );
+}
+
+export function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <CommandPaletteProvider>
+      <ShellInner>{children}</ShellInner>
+    </CommandPaletteProvider>
   );
 }

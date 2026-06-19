@@ -25,6 +25,7 @@ import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { cn, usd, daysLabel, initials } from "@/lib/utils";
 import { ProgressBar, Pill } from "@/components/command/ui";
+import { EmptyState } from "@/components/command/ui/EmptyState";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 
@@ -246,19 +247,21 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
             <TransactionRow key={t.id} t={t} onOpen={() => setActive(t)} />
           ))}
           {visible.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <ClipboardList className="h-8 w-8 text-slate/30" />
-              <div>
-                <p className="text-[0.88rem] font-medium text-ink">No {filter.toLowerCase()} transactions</p>
-                <p className="mt-0.5 text-[0.78rem] text-slate">There&apos;s nothing here right now.</p>
-              </div>
-              <button
-                onClick={() => setFilter("All")}
-                className="rounded-lg bg-ink px-4 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:bg-ink/90"
-              >
-                Show all transactions
-              </button>
-            </div>
+            transactions.length === 0 ? (
+              <EmptyState
+                icon={FileText}
+                title="No transactions yet"
+                description="When you have active purchase agreements, they'll appear here with full deadline tracking."
+                action={{ label: "Start a transaction", href: "/hub/transactions?new=1" }}
+              />
+            ) : (
+              <EmptyState
+                icon={ClipboardList}
+                title={`No ${filter.toLowerCase()} transactions`}
+                description="There's nothing here right now. Try a different filter to see other transactions."
+                action={{ label: "Show all transactions", onClick: () => setFilter("All") }}
+              />
+            )
           )}
         </div>
       </div>

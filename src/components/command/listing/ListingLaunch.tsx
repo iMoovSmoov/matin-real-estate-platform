@@ -16,8 +16,10 @@ import {
   FileText,
   Megaphone,
   Rocket,
+  Home,
 } from "lucide-react";
 import { Panel, PanelHeader, Pill, ProgressBar } from "@/components/command/ui";
+import { EmptyState } from "@/components/command/ui/EmptyState";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
@@ -554,7 +556,25 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
           {/* listing cards */}
           <div className="space-y-2">
             {filtered.length === 0 ? (
-              <p className="py-8 text-center text-[0.8rem] text-slate">No listings match.</p>
+              listings.length === 0 ? (
+                <EmptyState
+                  icon={Home}
+                  title="No active listings"
+                  description="Add your first listing to generate marketing materials, track MLS status, and manage your launch checklist."
+                  action={{ label: "Add listing", href: "/hub/listing-launch?new=1" }}
+                />
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="text-[0.8rem] text-slate">No listings match your search.</p>
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="mt-2 text-[0.78rem] font-medium text-ink underline-offset-2 hover:underline"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )
             ) : (
               filtered.map((listing) => (
                 <ListingCard
@@ -573,9 +593,13 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
         {/* ── Right pane ─────────────────────────────────────────────────────── */}
         <div className="min-w-0 flex-1">
           {!selectedListing ? (
-            <Panel className="flex h-64 flex-col items-center justify-center gap-3">
-              <p className="text-[0.88rem] font-medium text-slate">Select a listing to view details</p>
-              <p className="text-[0.78rem] text-slate/50">Pick a listing from the left to see the checklist, broker status, and marketing kit.</p>
+            <Panel>
+              <EmptyState
+                icon={Home}
+                title="No active listings"
+                description="Add your first listing to generate marketing materials, track MLS status, and manage your launch checklist."
+                action={{ label: "Add listing", href: "/hub/listing-launch?new=1" }}
+              />
             </Panel>
           ) : (
             <div className="space-y-4">

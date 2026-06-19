@@ -559,9 +559,9 @@ export default function CashOfferPipeline() {
                 {/* Cards */}
                 <div className="space-y-2">
                   {stageLeads.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-ink/[0.08] px-3 py-6 text-center">
-                      <p className="text-[0.72rem] text-slate/50">
-                        {isDead ? "No dead deals this month" : "No leads"}
+                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center border-2 border-dashed border-ink/[0.08] rounded-xl">
+                      <p className="text-xs text-slate">
+                        {isDead ? "No dead deals this month" : "No sellers here yet"}
                       </p>
                     </div>
                   ) : (

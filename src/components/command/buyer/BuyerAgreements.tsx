@@ -10,6 +10,7 @@ import {
   Search,
   Filter,
   Users,
+  UserCheck,
   Send,
   MapPin,
   DollarSign,
@@ -17,6 +18,7 @@ import {
 import { buyerAgreements } from "@/lib/data";
 import type { BuyerAgreement, BuyerAgreementStatus, PreapprovalStatus } from "@/lib/types";
 import { Panel, PanelHeader, StatTile } from "@/components/command/ui";
+import { EmptyState } from "@/components/command/ui/EmptyState";
 import { cn, compactUsd, daysLabel, initials } from "@/lib/utils";
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
@@ -536,13 +538,21 @@ export default function BuyerAgreements() {
           {/* Mobile card list (block on mobile, hidden on sm+) */}
           <div className="block sm:hidden divide-y divide-ink/[0.06]">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                <Users className="h-8 w-8 text-slate/30" />
-                <div>
-                  <p className="text-[0.88rem] font-medium text-ink">No buyers found</p>
-                  <p className="mt-0.5 text-[0.78rem] text-slate">Try adjusting your search.</p>
-                </div>
-              </div>
+              buyerAgreements.length === 0 ? (
+                <EmptyState
+                  icon={UserCheck}
+                  title="No buyer clients yet"
+                  description="When you start working with buyers, track their agreement status, showings, and preapproval here."
+                  action={{ label: "Add buyer client", href: "/hub/buyer-agreements?new=1" }}
+                />
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No buyers found"
+                  description="Try adjusting your search to find the buyer you're looking for."
+                  action={{ label: "Clear search", onClick: () => setSearch("") }}
+                />
+              )
             ) : (
               filtered.map((buyer) => (
                 <button
