@@ -107,7 +107,7 @@ export function AiChat({
               className={cn(
                 "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
                 m.role === "user"
-                  ? "rounded-tr-sm bg-azure text-ink"
+                  ? "rounded-tr-sm bg-ink text-white"
                   : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
               )}
             >
@@ -140,7 +140,7 @@ export function AiChat({
       </div>
 
       {/* Composer */}
-      <div className="border-t border-ink/[0.08] bg-ink-900 px-4 py-3.5 md:px-6">
+      <div className="border-t border-ink/[0.08] bg-white px-4 py-3.5 md:px-6">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -164,7 +164,7 @@ export function AiChat({
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-azure text-ink transition-colors hover:bg-ink-700 disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
           </button>

@@ -226,7 +226,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -234,7 +234,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
         {lead && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-ink-800 to-ink-900 px-5 pb-4 pt-5">
+            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 pb-4 pt-5">
               <button
                 onClick={onClose}
                 aria-label="Close"
@@ -264,7 +264,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                       {stageOpen && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setStageOpen(false)} aria-hidden />
-                          <div className="absolute left-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-ink/10 bg-ink-800 py-1 shadow-xl">
+                          <div className="absolute left-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-ink/10 bg-paper py-1 shadow-xl">
                             {LEAD_STAGES.map((s) => (
                               <button
                                 key={s}
@@ -445,7 +445,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                     const Icon = KIND_ICON[e.kind];
                     return (
                       <li key={e.id} className="relative flex gap-3">
-                        <span className="relative z-10 mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-ink-800 text-ink ring-1 ring-inset ring-ink/[0.08]">
+                        <span className="relative z-10 mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-paper text-ink ring-1 ring-inset ring-ink/[0.08]">
                           <Icon className="h-3 w-3" />
                         </span>
                         <div className="min-w-0 flex-1 pt-0.5">
@@ -500,7 +500,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               aria-live="polite"
             >
               {toast && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 bg-ink-800 px-3.5 py-1.5 text-[0.78rem] font-medium text-ink shadow-lg">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/12 bg-paper px-3.5 py-1.5 text-[0.78rem] font-medium text-ink shadow-lg">
                   <Check className="h-3.5 w-3.5 text-success" /> {toast}
                 </span>
               )}

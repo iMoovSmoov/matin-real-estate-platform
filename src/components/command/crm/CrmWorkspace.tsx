@@ -182,7 +182,7 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
         <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-bold text-white">
           {initials(lead.name)}
           {hot && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink-900 ring-1 ring-ink/[0.08]">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
               <Flame className="h-2.5 w-2.5 text-success" />
             </span>
           )}
@@ -264,7 +264,7 @@ function SortSelect({ value, onChange }: { value: SortKey; onChange: (v: SortKey
         aria-label="Sort leads"
       >
         {(Object.keys(labels) as SortKey[]).map((k) => (
-          <option key={k} value={k} className="bg-ink-800">
+          <option key={k} value={k} className="bg-paper">
             Sort: {labels[k]}
           </option>
         ))}

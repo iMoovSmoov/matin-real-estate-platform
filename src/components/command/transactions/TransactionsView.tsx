@@ -290,7 +290,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
       />
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -298,7 +298,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
         {tx && type && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-5">
+            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 py-5">
               <button
                 onClick={onClose}
                 aria-label="Close"

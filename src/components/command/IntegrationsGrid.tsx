@@ -49,7 +49,7 @@ export function IntegrationsGrid({ integrations }: { integrations: Integration[]
               className={cn(
                 "rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold transition-colors",
                 cat === c
-                  ? "bg-azure text-ink"
+                  ? "bg-ink text-white"
                   : "border border-ink/[0.08] bg-white text-slate hover:border-ink/20 hover:text-ink",
               )}
             >

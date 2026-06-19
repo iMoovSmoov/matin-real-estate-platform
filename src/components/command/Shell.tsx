@@ -188,7 +188,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setMobileOpen(false)} aria-hidden />
-          <aside className="absolute inset-y-0 left-0 w-72 max-w-[82vw] border-r border-ink/[0.08] bg-ink-900 shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[82vw] border-r border-ink/[0.08] bg-white shadow-2xl">
             <button
               onClick={() => setMobileOpen(false)}
               aria-label="Close menu"
@@ -243,7 +243,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               {notifOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} aria-hidden />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-ink/[0.08] bg-ink-900 shadow-2xl">
+                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-2xl">
                     <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-3">
                       <span className="text-[0.84rem] font-semibold text-ink">Notifications</span>
                       <span className="rounded-md bg-ink/[0.08] px-1.5 py-0.5 text-[0.62rem] font-semibold text-ink">

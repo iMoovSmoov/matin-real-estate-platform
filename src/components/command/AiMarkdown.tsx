@@ -57,7 +57,7 @@ export function AiMarkdown({ text }: { text: string }) {
       <ul key={key} className="my-2 space-y-1.5">
         {items.map((b, i) => (
           <li key={`${key}-${i}`} className="flex gap-2.5 text-[0.9rem] leading-relaxed text-slate">
-            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-azure" />
+            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
             <span>{renderInline(b, `${key}-${i}`)}</span>
           </li>
         ))}
