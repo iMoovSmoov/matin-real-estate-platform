@@ -77,7 +77,7 @@ const NOTIFICATIONS = [
   { title: "New lead — Olivia Bennett", meta: "Zillow · West Linn · 2m ago", tone: "azure" as const },
   { title: "Offer accepted", meta: "8457 NW Lakeshore Ave · 18m ago", tone: "success" as const },
   { title: "Inspection deadline tomorrow", meta: "TX-4003 · due in 1 day", tone: "warn" as const },
-  { title: "New 5★ review from the Harrisons", meta: "West Linn · 1h ago", tone: "success" as const },
+  { title: "New 5-star review from the Harrisons", meta: "West Linn · 1h ago", tone: "success" as const },
   { title: "Seller opened your CMA", meta: "Lake Oswego lead · 2h ago", tone: "azure" as const },
 ];
 

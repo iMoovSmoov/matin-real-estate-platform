@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import {
   ArrowRight, Phone, Wrench, Eye, Percent, CalendarCheck, ShieldCheck, Home,
-  Check, X, Banknote, Clock,
+  Check, X, Banknote, Clock, ChevronDown,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -37,6 +38,14 @@ const compare = [
   ["Commissions & fees", "$0", "~6% + closing costs"],
   ["Financing risk", "None — it's cash", "Deals fall through"],
   ["Cleaning & staging", "Not your problem", "On you"],
+];
+
+const faqs = [
+  { q: "How do you calculate the offer?", a: "We run real, current comparable sales in your neighborhood and factor in condition and any needed work — then make a fair cash offer, usually 90–95% of market value with zero fees taken out." },
+  { q: "Are there any fees or commissions?", a: "None. No 6% listing commission, no closing-cost surprises, no repair credits. The number we agree on is what you walk away with." },
+  { q: "What condition does my home need to be in?", a: "Any condition. Outdated, damaged, inherited, tenant-occupied, behind on payments — we buy as-is. Leave what you don't want; take what you do." },
+  { q: "How fast can we close?", a: "As little as 7 days, or on whatever date works for you. No bank underwriting means no waiting and no deals falling through at the last minute." },
+  { q: "Is this really an alternative to listing?", a: "Yes — and we'll tell you honestly when a traditional listing would net you more. As the area's largest brokerage, we can do both and recommend what's actually best for you." },
 ];
 
 export default function CashOfferPage() {
@@ -120,6 +129,19 @@ export default function CashOfferPage() {
         </Container>
       </Section>
 
+      {/* PROOF — real cash band */}
+      <section className="relative overflow-hidden py-28">
+        <Image src="/matin/cash/cash-09.jpg" alt="Stacks of cash" fill sizes="100vw" className="object-cover" />
+        <div className="absolute inset-0 bg-ink/82" />
+        <Container className="relative text-center">
+          <p className="display-2 font-display text-white text-balance">Real cash. No banks. Your timeline.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-slate-300">
+            Every Cash Is King purchase is funded cash — no buyer financing to fall through, no appraisal gaps, no
+            30-day waits. Pick the closing date that fits your life and we&apos;ll be there with the check.
+          </p>
+        </Container>
+      </section>
+
       {/* HOW IT WORKS */}
       <Section>
         <Container>
@@ -158,6 +180,24 @@ export default function CashOfferPage() {
                   <X className="h-4 w-4 shrink-0 text-slate-300/40" /> {b}
                 </div>
               </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* FAQ */}
+      <Section>
+        <Container>
+          <SectionHeading eyebrow="Good to know" title="Cash offer questions, answered" align="center" light />
+          <div className="mx-auto mt-10 max-w-3xl space-y-3">
+            {faqs.map((f) => (
+              <details key={f.q} className="group rounded-2xl border border-white/10 bg-ink-900/60 p-5 transition-colors hover:border-emerald-400/30">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-white">
+                  {f.q}
+                  <ChevronDown className="h-4 w-4 shrink-0 text-emerald-400 transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="mt-3 text-[0.92rem] leading-relaxed text-slate-300">{f.a}</p>
+              </details>
             ))}
           </div>
         </Container>

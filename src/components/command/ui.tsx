@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -172,8 +173,9 @@ export function StatTile({
           {value}
         </span>
         {delta && (
-          <span className={cn("mb-0.5 text-[0.74rem] font-semibold tabular-nums", deltaColor)}>
-            {dir === "up" ? "▲" : dir === "down" ? "▼" : "■"} {delta.value}
+          <span className={cn("mb-0.5 inline-flex items-center gap-0.5 text-[0.74rem] font-semibold tabular-nums", deltaColor)}>
+            {dir === "up" ? <ArrowUp className="h-3 w-3" /> : dir === "down" ? <ArrowDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+            {delta.value}
           </span>
         )}
       </div>
@@ -236,7 +238,7 @@ export function LiveDot({
 export function Sparkline({
   data,
   className,
-  stroke = "#c7a567",
+  stroke = "#d8d8da",
   fill = true,
 }: {
   data: number[];

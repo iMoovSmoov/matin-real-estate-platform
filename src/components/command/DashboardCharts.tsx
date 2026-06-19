@@ -27,8 +27,8 @@ type TipProps = {
 
 const GRID = "#1c2532";
 const AXIS = "#5d6b7d";
-const AZURE = "#c7a567";
-const AZURE_DEEP = "#7a5e32";
+const AZURE = "#d8d8da";
+const AZURE_DEEP = "#6e6e72";
 const SUCCESS = "#2fa36b";
 
 /* ── Shared dark tooltip ─────────────────────────────────────────────── */

@@ -5,7 +5,7 @@ type Variant = "primary" | "ink" | "outline" | "ghost" | "white" | "outline-ligh
 type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-azure text-white hover:bg-azure-deep shadow-[0_8px_24px_rgba(46,144,224,.32)]",
+  primary: "bg-ink text-white hover:bg-ink-700 shadow-soft",
   ink: "bg-ink text-white hover:bg-ink-700",
   outline: "border border-ink/20 text-ink hover:border-ink/50 hover:bg-ink/[0.03]",
   "outline-light": "border border-white/30 text-white hover:border-white/70 hover:bg-white/10",
