@@ -37,7 +37,7 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-[92vh]">
+      <section className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-screen">
         <div className="absolute inset-0">
           <Image
             src={company.officeHero}
@@ -56,10 +56,10 @@ export default function HomePage() {
         <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
-              <span className="eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
+              <span className="hero-text-shadow eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
             </Reveal>
             <Reveal delay={0.08}>
-              <h1 className="display-1 mt-5 font-display text-4xl text-white text-balance sm:text-5xl">
+              <h1 className="hero-text-shadow display-1 mt-5 font-display text-4xl text-white text-balance sm:text-6xl lg:text-7xl">
                 Find your place in the{" "}
                 <span className="italic text-azure-bright">Pacific Northwest.</span>
               </h1>
@@ -87,15 +87,22 @@ export default function HomePage() {
             </Reveal>
           </div>
         </Container>
+
+        {/* scroll-down indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
+          <span className="text-[0.65rem] uppercase tracking-widest">Scroll</span>
+          <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
+        </div>
       </section>
 
       {/* ---------- STAT BAND ---------- */}
-      <div className="border-y border-ink/[0.07] bg-cloud">
+      <div className="border-y border-ink/[0.07] bg-paper border-b border-ink/[0.06]">
+        <div className="h-[2px] bg-gradient-to-r from-transparent via-ink/20 to-transparent" />
         <Container>
           <dl className="grid grid-cols-2 divide-ink/[0.07] py-7 sm:grid-cols-3 md:grid-cols-5 md:divide-x md:py-10">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
-                <dt className="font-display text-3xl text-ink md:text-[2.6rem]">{n}</dt>
+                <dt className="font-display text-[2rem] text-ink sm:text-4xl md:text-5xl">{n}</dt>
                 <dd className="mt-1 text-[0.75rem] leading-tight text-slate sm:text-[0.82rem]">{l}</dd>
               </Reveal>
             ))}
@@ -109,6 +116,7 @@ export default function HomePage() {
       {/* ---------- FEATURED LISTINGS ---------- */}
       <Section>
         <Container>
+          <div className="rule-accent mb-6" />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeading
               eyebrow="Featured listings"
@@ -135,7 +143,7 @@ export default function HomePage() {
       </Section>
 
       {/* ---------- COMMUNITIES ---------- */}
-      <Section className="bg-paper-200/60">
+      <Section className="bg-[linear-gradient(180deg,#f6f6f5_0%,#ececeb_100%)]">
         <Container>
           <SectionHeading
             eyebrow="Explore communities"
@@ -185,7 +193,7 @@ export default function HomePage() {
               <div className="mt-6 space-y-5 sm:mt-8 sm:space-y-7">
                 {values.map((v) => (
                   <Reveal key={v.title} className="flex gap-3 sm:gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure sm:h-12 sm:w-12">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink text-white sm:h-12 sm:w-12">
                       <v.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <div>
@@ -203,7 +211,8 @@ export default function HomePage() {
       {/* ---------- TECH / COMMAND CENTER ---------- */}
       <section className="relative overflow-hidden bg-ink py-14 text-white md:py-20 lg:py-24">
         <div className="absolute inset-0 grid-tech opacity-60" />
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
+        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[rgba(210,160,80,0.15)] blur-3xl" />
+        <div className="absolute -right-40 bottom-10 h-80 w-80 rounded-full bg-[rgba(80,140,210,0.08)] blur-3xl" />
         <Container className="relative">
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
@@ -303,7 +312,7 @@ export default function HomePage() {
       {/* ---------- FINAL CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-5 py-12 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ink via-ink-900 to-ink-800 px-5 py-12 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
               <h2 className="font-display text-2xl text-white text-balance sm:text-3xl md:text-4xl">Ready to make your move?</h2>
