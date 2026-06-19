@@ -47,8 +47,8 @@ export default function HomePage() {
             sizes="100vw"
             className="ken-burns object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
         </div>
 
         <Container className="relative z-10 pt-20 sm:pt-28">

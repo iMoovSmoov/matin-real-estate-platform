@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DollarSign,
   X,
@@ -28,6 +28,7 @@ import type { SellerLead, SellerLeadStage, PropertyCondition } from "@/lib/types
 
 /* ── Suppress unused-import lint on icons that are available for future use ── */
 void AlertCircle;
+void Wand2;
 
 /* ── Constants ──────────────────────────────────────────────────────────────── */
 
@@ -108,7 +109,7 @@ function DaysPill({ days }: { days: number }) {
       ? "bg-red-50 text-red-600"
       : days >= 4
       ? "bg-amber-50 text-amber-700"
-      : "bg-emerald-50 text-emerald-700";
+      : "bg-slate-100 text-slate-500";
   return (
     <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-semibold", cls)}>
       {days}d in stage
@@ -132,14 +133,28 @@ function FactRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 
 /* ── Kanban card ─────────────────────────────────────────────────────────────── */
 
-function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) {
+function LeadCard({
+  lead,
+  onClick,
+  onEval,
+  isDead,
+  isRecentlyMoved,
+}: {
+  lead: SellerLead;
+  onClick: () => void;
+  onEval: () => void;
+  isDead: boolean;
+  isRecentlyMoved: boolean;
+}) {
   const isStale = lead.daysInStage > 7;
   return (
     <button
       onClick={onClick}
       className={cn(
         "w-full cursor-pointer rounded-xl bg-white text-left shadow-soft ring-1 p-3 transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
-        isStale ? "ring-red-200" : "ring-ink/[0.07]",
+        isStale && !isDead ? "ring-red-200" : "ring-ink/[0.07]",
+        isDead && "opacity-50",
+        isRecentlyMoved && "ring-2 ring-emerald-400/60 ring-offset-1",
       )}
     >
       {/* Seller name */}
@@ -157,7 +172,7 @@ function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) 
 
       {/* Value + condition */}
       <div className="mt-2 flex items-center justify-between gap-1.5">
-        <span className="font-display text-[0.9rem] font-semibold text-ink tabular-nums">
+        <span className={cn("font-display text-[0.9rem] font-semibold text-ink tabular-nums", isDead && "line-through")}>
           {compactK(lead.estValue)}
         </span>
         <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
@@ -170,7 +185,11 @@ function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) 
       </div>
 
       {/* Quick AI CTA */}
-      <div className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-ink/10 bg-ink/[0.04] py-1.5 text-[0.74rem] font-semibold text-ink/70 transition-colors hover:bg-ink/[0.08]">
+      <div
+        role="button"
+        onClick={(e) => { e.stopPropagation(); onEval(); }}
+        className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-ink/10 bg-ink/[0.04] py-1.5 text-[0.74rem] font-semibold text-ink/70 transition-colors hover:bg-ink/[0.08] cursor-pointer"
+      >
         <Sparkles className="h-3 w-3" />
         AI Eval
       </div>
@@ -187,11 +206,15 @@ function SlideOver({
   onClose,
   onStageChange,
   onConvert,
+  autoEval,
+  onAutoEvalDone,
 }: {
   lead: SellerLead | null;
   onClose: () => void;
   onStageChange: (id: string, stage: SellerLeadStage) => void;
   onConvert: (id: string) => void;
+  autoEval: boolean;
+  onAutoEvalDone: () => void;
 }) {
   const [aiOutput, setAiOutput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -261,6 +284,17 @@ function SlideOver({
       setAiLoading(false);
     }
   }
+
+  // Auto-trigger eval when autoEval prop flips to true
+  useEffect(() => {
+    if (!autoEval || !open) return;
+    const timer = setTimeout(() => {
+      runEval();
+      onAutoEvalDone();
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoEval, open]);
 
   return (
     <>
@@ -470,6 +504,8 @@ function SlideOver({
 export default function CashOfferPipeline() {
   const [leads, setLeads] = useState<SellerLead[]>(sellerLeads as SellerLead[]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [autoEval, setAutoEval] = useState(false);
+  const [recentlyMoved, setRecentlyMoved] = useState<Set<string>>(new Set());
 
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
@@ -482,6 +518,18 @@ export default function CashOfferPipeline() {
 
   function handleStageChange(id: string, stage: SellerLeadStage) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, stage } : l)));
+    setRecentlyMoved((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setTimeout(() => {
+      setRecentlyMoved((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 2000);
   }
 
   function handleConvert(id: string) {
@@ -570,6 +618,12 @@ export default function CashOfferPipeline() {
                         key={lead.id}
                         lead={lead}
                         onClick={() => setSelectedId(lead.id)}
+                        onEval={() => {
+                          setSelectedId(lead.id);
+                          setAutoEval(true);
+                        }}
+                        isDead={isDead}
+                        isRecentlyMoved={recentlyMoved.has(lead.id)}
                       />
                     ))
                   )}
@@ -586,6 +640,8 @@ export default function CashOfferPipeline() {
         onClose={() => setSelectedId(null)}
         onStageChange={handleStageChange}
         onConvert={handleConvert}
+        autoEval={autoEval}
+        onAutoEvalDone={() => setAutoEval(false)}
       />
     </div>
   );

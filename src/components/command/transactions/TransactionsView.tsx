@@ -37,6 +37,55 @@ import { AiMarkdown } from "@/components/command/AiMarkdown";
    deadlines + docs.
    ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * Parse free-form contract text for deadline lines.
+ * Looks for patterns like:
+ *   "Inspection Deadline: June 25"
+ *   "Closing: 07/15/2026"
+ *   "Financing Contingency — August 1, 2026"
+ *   "Earnest Money Due: 06-30-2026"
+ */
+function parseDeadlines(text: string): { label: string; date: string }[] {
+  const results: { label: string; date: string }[] = [];
+
+  const KEYWORD_PATTERNS: { label: string; regex: RegExp }[] = [
+    { label: "Inspection Deadline",        regex: /inspection\s*(?:deadline|date|period|contingency)?/i },
+    { label: "Appraisal Deadline",         regex: /appraisal\s*(?:deadline|date|contingency)?/i },
+    { label: "Financing / Loan Deadline",  regex: /(?:financing|loan)\s*(?:deadline|date|contingency|approval)?/i },
+    { label: "Closing / Close of Escrow",  regex: /(?:closing|close\s*of\s*escrow|coe)\s*(?:date|deadline)?/i },
+    { label: "Possession Date",            regex: /possession\s*(?:date|deadline)?/i },
+    { label: "Earnest Money Due",          regex: /earnest\s*(?:money)?\s*(?:due|deposit|deadline)?/i },
+    { label: "Title Review Deadline",      regex: /title\s*(?:review|deadline|contingency)?/i },
+    { label: "HOA Deadline",               regex: /hoa\s*(?:deadline|documents?|review)?/i },
+  ];
+
+  // Date patterns to scan for after the keyword
+  const DATE_RE = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,?\s*\d{4})?)/i;
+
+  const lines = text.split(/\n/);
+  const seen = new Set<string>();
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    for (const { label, regex } of KEYWORD_PATTERNS) {
+      if (!regex.test(trimmed)) continue;
+      // Try to find a date on this line (after the keyword)
+      const match = DATE_RE.exec(trimmed);
+      if (match) {
+        const key = label;
+        if (!seen.has(key)) {
+          seen.add(key);
+          results.push({ label, date: match[1] });
+        }
+      }
+    }
+  }
+
+  return results;
+}
+
 type StatusFilter = "All" | "Active" | "Pending" | "Closed" | "At-risk";
 
 const FILTERS: StatusFilter[] = ["All", "Active", "Pending", "Closed", "At-risk"];
@@ -173,6 +222,7 @@ function daysOverdue(itemDate: Date): number {
 export function TransactionsView({ transactions }: { transactions: Transaction[] }) {
   const [filter, setFilter] = useState<StatusFilter>("All");
   const [active, setActive] = useState<Transaction | null>(null);
+  const [txNotes, setTxNotes] = useState<Record<string, string>>({});
 
   const counts = useMemo(() => {
     const m = new Map<StatusFilter, number>();
@@ -260,7 +310,12 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
         </div>
       </div>
 
-      <TransactionDetail tx={active} onClose={() => setActive(null)} />
+      <TransactionDetail
+        tx={active}
+        onClose={() => setActive(null)}
+        txNotes={txNotes}
+        setTxNotes={setTxNotes}
+      />
     </>
   );
 }
@@ -376,7 +431,17 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
 
 /* ── Detail slide-over ─────────────────────────────────────────────────── */
 
-function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: () => void }) {
+function TransactionDetail({
+  tx,
+  onClose,
+  txNotes,
+  setTxNotes,
+}: {
+  tx: Transaction | null;
+  onClose: () => void;
+  txNotes: Record<string, string>;
+  setTxNotes: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+}) {
   const open = !!tx;
   const agent = tx ? getAgent(tx.agentSlug) : undefined;
   const doneCount = tx?.checklist.filter((c) => c.done).length ?? 0;
@@ -402,7 +467,8 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   const [contractText, setContractText] = useState("");
   const [extractOutput, setExtractOutput] = useState("");
   const [extractLoading, setExtractLoading] = useState(false);
-  const [applyToast, setApplyToast] = useState(false);
+  const [applyToast, setApplyToast] = useState<{ message: string } | null>(null);
+  const [appliedDeadlines, setAppliedDeadlines] = useState<{ label: string; date: string }[]>([]);
 
   async function handleExtract() {
     if (!contractText.trim()) return;
@@ -416,8 +482,14 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   }
 
   function handleApplyToChecklist() {
-    setApplyToast(true);
-    setTimeout(() => setApplyToast(false), 3500);
+    const deadlines = parseDeadlines(extractOutput);
+    setAppliedDeadlines(deadlines);
+    const message =
+      deadlines.length > 0
+        ? `Applied ${deadlines.length} deadline${deadlines.length === 1 ? "" : "s"} to checklist`
+        : "No deadlines detected — check formatting";
+    setApplyToast({ message });
+    setTimeout(() => setApplyToast(null), 3500);
   }
 
   // Reset extractor state when a different transaction is opened.
@@ -426,7 +498,8 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     setContractText("");
     setExtractOutput("");
     setExtractLoading(false);
-    setApplyToast(false);
+    setApplyToast(null);
+    setAppliedDeadlines([]);
     onClose();
   }
 
@@ -572,6 +645,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                   {tx.checklist.map((c, i) => {
                     const isNext = !c.done && nextItem != null && c.label === nextItem.label;
                     const overdueByDays = !c.done ? daysOverdue(dueDates[i]) : 0;
+                    const isOverdue = overdueByDays > 0;
                     return (
                       <li
                         key={i}
@@ -579,15 +653,17 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                           "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] transition-colors",
                           c.done
                             ? "bg-success/[0.04]"
-                            : isNext
-                              ? "bg-white ring-1 ring-inset ring-azure/20"
-                              : "bg-white/[0.02]",
+                            : isOverdue
+                              ? "bg-red-50 ring-1 ring-inset ring-red-200"
+                              : isNext
+                                ? "bg-white ring-1 ring-inset ring-azure/20"
+                                : "bg-white/[0.02]",
                         )}
                       >
                         {c.done ? (
                           <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
                         ) : (
-                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
+                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isOverdue ? "text-red-400" : isNext ? "text-azure/50" : "text-slate/40")} />
                         )}
                         <span
                           className={cn(
@@ -601,16 +677,39 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                         >
                           {c.label}
                         </span>
-                        {/* Days overdue badge */}
-                        {overdueByDays > 0 && (
-                          <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
-                            {overdueByDays}d overdue
+                        {/* OVERDUE badge + days count */}
+                        {isOverdue && (
+                          <span className="ml-auto flex shrink-0 items-center gap-1">
+                            <span className="rounded bg-red-600 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white">
+                              OVERDUE
+                            </span>
+                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
+                              {overdueByDays}d
+                            </span>
                           </span>
                         )}
                       </li>
                     );
                   })}
                 </ul>
+
+                {/* Extracted from Contract section */}
+                {appliedDeadlines.length > 0 && (
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="mb-2 text-[0.72rem] font-semibold uppercase tracking-wider text-amber-700">
+                      Extracted from Contract
+                    </p>
+                    <ul className="space-y-1.5">
+                      {appliedDeadlines.map((d, i) => (
+                        <li key={i} className="flex items-center gap-2.5">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-500" />
+                          <span className="flex-1 text-[0.82rem] font-semibold text-ink">{d.label}</span>
+                          <span className="text-[0.82rem] font-medium text-amber-700">{d.date}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Documents */}
@@ -721,6 +820,28 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                   </div>
                 )}
               </div>
+
+              {/* ── Quick Notes ── */}
+              <div className="rounded-xl border border-ink/[0.08] bg-white px-4 py-4">
+                <div className="mb-2.5 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
+                    <ClipboardList className="h-4 w-4 text-ink" />
+                    Quick Notes
+                  </span>
+                  <span className="text-[0.68rem] tabular-nums text-slate/50">
+                    {(txNotes[tx.id] ?? "").length}/500
+                  </span>
+                </div>
+                <textarea
+                  value={txNotes[tx.id] ?? ""}
+                  onChange={(e) =>
+                    setTxNotes((prev) => ({ ...prev, [tx.id]: e.target.value.slice(0, 500) }))
+                  }
+                  placeholder="Add a note about this transaction..."
+                  rows={3}
+                  className="w-full resize-y rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3 text-[0.82rem] text-ink focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                />
+              </div>
             </div>
           </>
         )}
@@ -732,7 +853,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
             applyToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
           )}
         >
-          Key deadlines applied to this transaction
+          {applyToast?.message ?? ""}
         </div>
       </aside>
     </>

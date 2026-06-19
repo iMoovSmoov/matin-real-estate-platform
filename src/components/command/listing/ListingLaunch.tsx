@@ -109,11 +109,13 @@ function ListingCard({
   listing,
   overrides,
   isSelected,
+  isActiveMls,
   onClick,
 }: {
   listing: ListingPipeline;
   overrides: Record<string, boolean>;
   isSelected: boolean;
+  isActiveMls: boolean;
   onClick: () => void;
 }) {
   const { done, total } = countChecklist(listing.checklist, overrides);
@@ -135,7 +137,11 @@ function ListingCard({
         {listing.city} &middot; {listing.beds}bd / {listing.baths}ba
       </p>
       <div className="mt-2 flex items-center justify-between gap-2">
-        <Pill tone={stagePillTone(listing.stage)}>{listing.stage}</Pill>
+        {isActiveMls ? (
+          <Pill tone="success">Active</Pill>
+        ) : (
+          <Pill tone={stagePillTone(listing.stage)}>{listing.stage}</Pill>
+        )}
         <span className="text-[0.66rem] text-slate">{listing.daysInStage}d in stage</span>
       </div>
       <div className="mt-2 space-y-1">
@@ -256,6 +262,9 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
   const [kitLoading, setKitLoading] = useState<Record<string, boolean>>({});
   const [kitTab, setKitTab] = useState<Record<string, KitTab>>({});
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+
+  // Active listings (marked on MLS)
+  const [activeListings, setActiveListings] = useState<Set<string>>(new Set());
 
   // Toast
   const [toast, setToast] = useState<string | null>(null);
@@ -386,8 +395,12 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
 
   const handleMarkActive = (listingId: string) => {
     if (!getBrokerApproved(listings.find((l) => l.id === listingId)!)) return;
-    showToast("Status updated — awaiting MLS sync.");
-    void listingId;
+    setActiveListings((prev) => {
+      const n = new Set(prev);
+      n.add(listingId);
+      return n;
+    });
+    showToast("Listing is now live on MLS.");
   };
 
   // Init fields for first listing on mount
@@ -422,6 +435,7 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
                 listing={listing}
                 overrides={checklistOverrides[listing.id] ?? {}}
                 isSelected={listing.id === selectedId}
+                isActiveMls={activeListings.has(listing.id)}
                 onClick={() => handleSelectListing(listing)}
               />
             ))
@@ -513,20 +527,54 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
                       </div>
                     )}
 
-                    {/* MLS action button */}
-                    <button
-                      type="button"
-                      disabled={!getBrokerApproved(selectedListing)}
-                      onClick={() => handleMarkActive(selectedListing.id)}
-                      className={cn(
-                        "w-full rounded-xl border px-4 py-2 text-[0.85rem] font-medium transition-colors",
-                        getBrokerApproved(selectedListing)
-                          ? "border-ink/[0.08] text-ink hover:bg-ink/[0.04]"
-                          : "cursor-not-allowed border-ink/[0.04] text-slate/40",
-                      )}
-                    >
-                      Mark Active on MLS
-                    </button>
+                    {/* MLS action button / success state */}
+                    {activeListings.has(selectedListing.id) ? (
+                      <div className="rounded-xl border border-success/30 bg-success/[0.06] px-4 py-4 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                          <p className="text-[0.9rem] font-semibold text-success">Live on MLS</p>
+                        </div>
+                        <div className="space-y-1 pl-6 text-[0.8rem] text-slate">
+                          <p>
+                            <span className="font-medium text-ink">MLS #:</span>{" "}
+                            RMLS-{selectedListing.id.slice(0, 6).toUpperCase()}
+                          </p>
+                          <p>
+                            <span className="font-medium text-ink">Listed:</span> Just now
+                          </p>
+                          <p>
+                            <span className="font-medium text-ink">Status:</span> Active — Accepting Showings
+                          </p>
+                        </div>
+                        <a
+                          href="#"
+                          className="mt-1 inline-flex items-center gap-1 pl-6 text-[0.8rem] font-medium text-success hover:underline"
+                        >
+                          View on RMLS →
+                        </a>
+                      </div>
+                    ) : (
+                      <>
+                        {!getBrokerApproved(selectedListing) && (
+                          <p className="text-[0.78rem] text-slate/60 italic">
+                            Broker approval required before publishing.
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          disabled={!getBrokerApproved(selectedListing)}
+                          onClick={() => handleMarkActive(selectedListing.id)}
+                          className={cn(
+                            "w-full rounded-xl border px-4 py-2 text-[0.85rem] font-medium transition-colors",
+                            getBrokerApproved(selectedListing)
+                              ? "border-ink/[0.08] text-ink hover:bg-ink/[0.04]"
+                              : "cursor-not-allowed border-ink/[0.04] text-slate/40",
+                          )}
+                        >
+                          Mark Active on MLS
+                        </button>
+                      </>
+                    )}
                   </div>
                 </Panel>
               </div>

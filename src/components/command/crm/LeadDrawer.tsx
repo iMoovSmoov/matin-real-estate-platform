@@ -126,37 +126,47 @@ const KIND_ICON: Record<TimelineKind, typeof MessageSquare> = {
   registered: UserPlus,
 };
 
-/* ── Speed-to-lead badge ─────────────────────────────────────────────────────
-   Shows the lead's age in human-readable form with urgency color coding.
-   Green = responded within 5 min, Red = over 30 min or still pending.   */
+/* ── Response time badge ─────────────────────────────────────────────────────
+   Shows the lead's last response time with urgency color coding.
+   0 = no contact, <60 min = green, <1440 min = amber, >=1440 = red.   */
 function SpeedToLeadBadge({ minutes }: { minutes: number }) {
-  const urgent = minutes < 5;
-  const overdue = minutes >= 30;
-
-  if (minutes < 60) {
+  // No contact yet
+  if (minutes === 0) {
     return (
-      <span
-        className={cn(
-          "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold ring-1 ring-inset",
-          urgent
-            ? "bg-success/10 text-success ring-success/25"
-            : overdue
-            ? "bg-danger/10 text-danger ring-danger/25"
-            : "bg-warn/10 text-warn ring-warn/20",
-        )}
-      >
+      <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-[0.72rem] font-semibold text-danger ring-1 ring-inset ring-danger/25">
         <Clock className="h-3 w-3" />
-        {minutes} {minutes === 1 ? "minute" : "minutes"} old — respond now!
+        No contact yet
       </span>
     );
   }
 
-  const hrs = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+  // Responded within the hour — green
+  if (minutes < 60) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-[0.72rem] font-semibold text-success ring-1 ring-inset ring-success/25">
+        <Clock className="h-3 w-3" />
+        Responded {minutes} min ago
+      </span>
+    );
+  }
+
+  // Within the day — amber
+  if (minutes < 1440) {
+    const hrs = Math.round(minutes / 60);
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-0.5 text-[0.72rem] font-semibold text-warn ring-1 ring-inset ring-warn/20">
+        <Clock className="h-3 w-3" />
+        Responded {hrs}h ago
+      </span>
+    );
+  }
+
+  // Over a day — red
+  const days = Math.floor(minutes / 1440);
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2.5 py-0.5 text-[0.72rem] font-semibold text-danger ring-1 ring-inset ring-danger/25">
       <Clock className="h-3 w-3" />
-      Lead age: {hrs}h {mins}m
+      Last contact: {days} {days === 1 ? "day" : "days"} ago
     </span>
   );
 }
@@ -288,7 +298,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   {/* Lead name + speed-to-lead badge */}
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="truncate font-display text-2xl text-ink">{lead.name}</h2>
-                    {lead.responseMinutes !== undefined && lead.responseMinutes < 1440 && (
+                    {lead.responseMinutes !== undefined && (
                       <SpeedToLeadBadge minutes={lead.responseMinutes} />
                     )}
                   </div>
