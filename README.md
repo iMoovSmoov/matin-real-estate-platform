@@ -1,47 +1,45 @@
-# Matin Real Estate — AI Platform & Command Center
+# Matin Real Estate — Website + Matin Hub
 
 A working build for the **AI Systems & Technology Integrator** role at [Matin Real Estate](https://www.matinrealestate.com/) (West Linn, OR).
 
-It's two things in one app:
+Two things in one app, built on Matin's **real brand, real 40-person agent roster, real communities, and real assets**:
 
-1. **An elevated public website** — a redesigned, faster, more premium version of Matin's marketing site, built with their **real brand, real 40-person agent roster, real communities, and real assets**.
-2. **The "Matin Command Center"** — the internal platform the role is actually about: structured data, real-time dashboards, AI woven into the CRM, automation, AI contract workflows, and agent coaching.
+1. **An elevated public website** — a faster, more premium take on Matin's marketing site (home, search, 32 listing pages, 40 agent profiles, 18 communities, buy, sell, blog, contact) plus an animated **Cash Is King** cash-offer page for their home-buying arm.
+2. **The "Matin Hub"** — the internal platform the role is about: structured data, real-time dashboards, AI woven into the CRM, automation, AI contract workflows, and agent coaching.
 
-### 🔗 Live demo → **https://matin-realestate.vercel.app**
-### 🧠 Command Center → **https://matin-realestate.vercel.app/hub**
+### 🔗 Live site → **https://matin-realestate.vercel.app**
+### 🧠 Matin Hub → **https://matin-realestate.vercel.app/hub**
 
 ---
 
-## Built to the job posting — the 6 pillars
+## What it covers (straight from the posting)
 
-| Pillar (their words) | Where to see it |
+| Capability | Where to see it |
 |---|---|
-| **Structured Data Systems** — replace spreadsheets & Google Forms | [`/hub/forms`](https://matin-realestate.vercel.app/hub/forms) — branded, editable templates for the real **OREF** forms + structured intake flows |
-| **Centralized Dashboard** — real-time reporting | [`/hub`](https://matin-realestate.vercel.app/hub) — live KPIs, charts, leaderboard, activity feed |
-| **AI Integration** — Claude in the CRM | [`/hub/crm`](https://matin-realestate.vercel.app/hub/crm) — one-click **AI-drafted lead replies**, lead scoring, pipeline |
-| **Automation** — eliminate busy work | [`/hub/automations`](https://matin-realestate.vercel.app/hub/automations) — n8n-style flows (speed-to-lead < 60s, listing launch, nurture…) |
-| **Contract Systems** — AI listing & buyer agreements | [`/hub/contracts`](https://matin-realestate.vercel.app/hub/contracts) — a 5-step **AI contract builder** with CRM auto-fill + compliance checks |
-| **AI Coaching** — contract writing & scenario training | [`/hub/coaching`](https://matin-realestate.vercel.app/hub/coaching) — scored role-plays + an AI contract-writing coach |
-
-The **[Playbook](https://matin-realestate.vercel.app/hub/playbook)** page lays out the strategy, the Oregon forms research, and a competitor benchmark (Dotloop, SkySlope, Follow Up Boss, BoldTrail, Lofty…). See also [`docs/real-estate-systems-playbook.md`](docs/real-estate-systems-playbook.md).
+| **Structured data** — replace spreadsheets & Google Forms | [`/hub/forms`](https://matin-realestate.vercel.app/hub/forms) — branded, editable templates for the real **OREF** forms + structured intake flows |
+| **Centralized dashboard** — real-time reporting | [`/hub`](https://matin-realestate.vercel.app/hub) — live KPIs, charts, leaderboard, activity feed, working notifications |
+| **AI in the CRM** | [`/hub/crm`](https://matin-realestate.vercel.app/hub/crm) — scored leads, table ⇄ pipeline, one-click **AI-drafted replies** |
+| **Automation** | [`/hub/automations`](https://matin-realestate.vercel.app/hub/automations) — business-outcome workflows (speed-to-lead < 60s, listing launch, nurture…) |
+| **Contract systems** | [`/hub/contracts`](https://matin-realestate.vercel.app/hub/contracts) — a 5-step **AI contract builder** with CRM auto-fill + Oregon compliance checks |
+| **AI coaching** | [`/hub/coaching`](https://matin-realestate.vercel.app/hub/coaching) — scored scenario role-plays + a contract-writing coach |
 
 ## Highlights
 
-- **A branded, trained AI concierge** ("Ask Matin") docked site-wide — answers buying/selling/neighborhood questions and captures leads. It runs on the same engine as the internal tools.
-- **Real Claude (Opus 4.8) streaming** on every AI feature — lead replies, listing descriptions, CMAs, agreements, coaching, the concierge — through a secure serverless route, with a **graceful canned fallback so the demo never breaks** even with no API key.
-- **Real Matin assets**: 40 real agents with photos + bios, the West Linn office, real communities, and the recreated **M monogram** logo.
-- Public site: home, property search + 32 listing detail pages, agent directory + 40 profiles, 18 community pages, buy, sell (with a **live AI home-value tool**), about, contact, blog.
+- **A branded AI concierge** ("Ask Matin") docked site-wide, trained on Matin's info — answers buying/selling/neighborhood questions and captures leads.
+- **Live, streaming AI** on every tool — lead replies, listing copy, CMAs, agreements, coaching — through a secure serverless route, with a graceful fallback so the demo always works even with no API key.
+- **Real Matin assets**: 40 real agents (photos + bios), the West Linn office, real communities, and a recreated **M-monogram** logo. Built to fit the wider **Matin network** (PortlandRealEstate.com, PortlandLuxuryRealEstate.com, Oregon/WashingtonRealEstate.com).
+- **Premium "monochrome-luxe" design** — warm charcoal, ivory, and a restrained brass accent, grounded in Matin's real brand.
 
-## What's real vs. demo (honesty matters)
+## What's real vs. demo
 
-- **Real:** the entire UI, Matin's brand/agents/assets, **live Claude streaming**, the working forms/contract/coaching workflows, client-side CSV/print export.
-- **Demo data:** leads, transactions, and metrics are realistic *synthetic* records; integrations show simulated connection state. Wiring the live MLS/CRM/transaction systems is the actual day-one job.
+- **Real:** the entire UI, Matin's brand/agents/assets, **live streaming AI**, the working forms/contract/coaching workflows, client-side CSV/print export.
+- **Demo data:** leads, transactions, and metrics are realistic *synthetic* records; integrations show a simulated connection state. Wiring the live MLS/CRM/transaction systems is the actual day-one job.
 
 ## Tech stack
 
 - **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript** (strict)
 - **Tailwind CSS v4** · Framer Motion · Recharts · lucide-react
-- **`@anthropic-ai/sdk`** — Claude streamed from a serverless route (`src/app/api/ai/route.ts`)
+- AI via **`@anthropic-ai/sdk`** (Claude) streamed from `src/app/api/ai/route.ts`
 - Deployed on **Vercel**
 
 ## Run it locally
@@ -51,18 +49,16 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-The AI features work out of the box via the built-in fallback. **For live Claude responses**, set an API key:
+AI works out of the box via the built-in fallback. For live model responses, add an API key:
 
 ```bash
 # .env.local
 ANTHROPIC_API_KEY=sk-ant-...
-# optional overrides:
-# MATIN_AI_MODEL=claude-opus-4-8
-# MATIN_AI_EFFORT=low
+# optional: MATIN_AI_MODEL=claude-opus-4-8   MATIN_AI_EFFORT=low
 ```
 
 On Vercel, add `ANTHROPIC_API_KEY` under **Project → Settings → Environment Variables** and redeploy.
 
 ---
 
-*Portfolio build — not Matin Real Estate's production site.*
+*Portfolio build for the AI Systems & Technology Integrator role — not Matin's production site.*
