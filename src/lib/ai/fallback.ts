@@ -20,15 +20,116 @@ export function fallbackFor(
     case "ask-matin":
     case "concierge": {
       const msg = (lastUserMessage || "").toLowerCase();
+
+      if (/commission|split|co-?broke|compensation|fee/.test(msg))
+        return `**Commission Policy — Matin Real Estate**
+
+Our standard listing commission is negotiated with the seller at the time of listing and varies by price point, property type, and services included. On the buyer side, cooperating broker compensation is offered per the terms set in the active listing agreement and disclosed on RMLS.
+
+**Key points for agents:**
+- In-house transactions follow our disclosed dual-agency protocol — written consent required from both parties before proceeding.
+- Referral fees are handled via OREF referral form and paid at close from the receiving agent's commission.
+- Transaction coordinator fees are separate from agent commission and are disclosed in the listing agreement.
+
+If you have a specific deal structure to review, bring it to Jordan Matin or Alicia Kelly-Smith before presenting to the client. Never quote a split verbally — put it in writing.
+
+Questions? Call the office: ${phone}`;
+
+      if (/west linn|lake oswego|ridgefield|camas|vancouver|portland|willamette|hillsboro|beaverton/.test(msg)) {
+        const area = /west linn/.test(msg) ? "West Linn" : /lake oswego/.test(msg) ? "Lake Oswego" : /ridgefield/.test(msg) ? "Ridgefield" : /camas/.test(msg) ? "Camas" : /vancouver/.test(msg) ? "Vancouver, WA" : "the Portland metro";
+        return `**${area} Market Snapshot**
+
+**Demand:** Strong. ${area} consistently outperforms metro averages on list-to-sale ratio, driven by limited inventory and sustained buyer demand from relocation and equity-flush move-up buyers.
+
+**Pricing:** Well-priced homes in this corridor are receiving 2–4 offers within the first 8 days. Homes priced correctly at launch are clearing 100–102% of list price. Overpriced listings are sitting 40+ days before reductions.
+
+**Buyer profile:** Primarily equity move-up buyers, Portland-to-suburb relocation, and out-of-state transplants (CA, WA tech). Pre-approval is a prerequisite — most sellers will not entertain offers without proof of funds or a strong pre-approval letter.
+
+**Agent action:** If you're showing in ${area} this week, pull the most recent 60-day solds in the $700K–$1.2M corridor before the showing — buyers are asking sharp questions about value per sqft.
+
+Need a printable market summary for a seller consult? I can draft one — just ask.`;
+      }
+
+      if (/draft|email|letter|message|write/.test(msg))
+        return `Happy to draft that. A few quick questions to make it sharp:
+
+1. **Who is the recipient?** (seller, buyer, another agent, a referral partner?)
+2. **What is the goal?** (follow-up, price reduction conversation, offer explanation, check-in?)
+3. **Tone?** (warm and personal, direct and professional, or urgent?)
+
+Drop those details and I'll write a ready-to-send draft — no filler, no corporate speak.`;
+
+      if (/refer|who.*team|which.*agent|best.*agent/.test(msg))
+        return `**Referral Routing — Matin Team**
+
+The right agent depends on the client's area and situation:
+
+- **West Linn / Lake Oswego / Willamette Valley:** Jordan Matin handles high-value listings directly; senior brokers cover buyer representation.
+- **Vancouver / Ridgefield / SW Washington:** Our WA-licensed team. Confirm license reciprocity before making the intro.
+- **Cash offer / investor inquiries:** Route to the Cash Is King Home Buyers desk — separate intake process.
+- **Luxury / $1.5M+:** Flag for Jordan or the luxury team — concierge marketing package required.
+
+For a warm intro email, tell me the client's name, area, and situation and I'll draft it. Or call the office and Alicia will route it: ${phone}.`;
+
       if (/sell|valuation|worth|list my/.test(msg))
-        return `Great — selling with Matin starts with a free, no-pressure home valuation. We pull live comps for your neighborhood, recommend a sharp pricing strategy, and you also have the option of a guaranteed cash offer if you want speed and certainty. Want me to have a listing specialist prepare your valuation? Drop your name and the best number and I'll set it up.`;
+        return `**Selling with Matin — What to Expect**
+
+Selling starts with a free, no-pressure home valuation. Here is what we do:
+
+1. **Live comp pull** — we analyze recent solds and actives in your neighborhood, not just Zestimate data.
+2. **Pricing strategy** — we recommend a sharp list price designed to generate competitive offers within the first 10 days.
+3. **Cash offer option** — through our sister company, Cash Is King Home Buyers, we can deliver a guaranteed cash offer if speed and certainty matter more than maximum price.
+
+**What sellers typically net with Matin:** Homes priced correctly on first launch are closing at 101–102% of list price in under 12 days in most of our service area.
+
+To get your valuation started, drop your address and best contact. I'll have a listing specialist reach out — usually same day. You can also call us directly: ${phone}.`;
+
       if (/buy|home|house|listing|tour|see/.test(msg))
-        return `Happy to help you buy! Matin agents do free buyer consults, on-demand showings, and sharp data-driven offers in this market. Which area are you focused on — West Linn, Lake Oswego, Portland, or somewhere else — and what's your price range and timeline? I can line up matching homes and connect you with the right broker.`;
+        return `**Buying with Matin — How It Works**
+
+We do free buyer consultations — no pressure, no commitment. Here is what we cover:
+
+1. **Search criteria and area** — we narrow down neighborhoods based on your lifestyle, commute, and budget.
+2. **Market reality check** — honest guidance on what your budget gets you in today's market.
+3. **Offer strategy** — sharp, data-driven offers designed to win without overpaying.
+
+Which area are you focused on — West Linn, Lake Oswego, Portland, Vancouver, or somewhere else — and what is your price range and timeline? I can line up matching listings and connect you with the right broker.
+
+Or call us: ${phone}`;
+
       if (/agent|broker|talk|call|contact|reach/.test(msg))
-        return `Absolutely — I can connect you with one of our 40+ brokers. What's the best name and email or phone, and are you looking to buy, sell, or both? You can also reach the office anytime at ${phone}.`;
+        return `I can connect you with the right person on our team right now.
+
+**What I need from you:**
+- Your name and best phone or email
+- Are you looking to buy, sell, or both?
+- What area and price range?
+
+Once I have that, I'll match you with the right broker and get you connected today. You can also call us directly anytime: ${phone}.`;
+
       if (/finance|mortgage|loan|pre-?approv|afford/.test(msg))
-        return `Smart to start with financing. We'll connect you with trusted local lenders for a fast pre-approval, then build a budget that keeps your offers competitive. Want me to send our mortgage calculator and a pre-approval intro? Share your email and I'll get it over.`;
-      return `Thanks for reaching out to ${co}! I can help with buying, selling, neighborhoods, financing, or connecting you with the right broker. What are you working on — and what area are you focused on? You can also call us at ${phone}.`;
+        return `**Financing — Where to Start**
+
+Getting pre-approved before you search is critical in this market. Sellers will not take an offer seriously without it, and it shapes your entire strategy.
+
+**What a strong pre-approval looks like:**
+- Full underwrite (not just a soft pull) from a reputable local lender
+- Clear letter showing purchase price, loan type, and down payment
+- No "subject to" conditions that could raise flags for sellers
+
+**What we recommend:**
+We work with a network of trusted local lenders — conventional, FHA, VA, and jumbo. We can make a warm intro today.
+
+Share your email or call ${phone} and I'll send the pre-approval intro and our mortgage calculator link.`;
+
+      return `Hi — I'm the Matin copilot. Ask me about:
+
+- **Company policy** — commission, referrals, dual agency, contracts
+- **Market intelligence** — any neighborhood or price corridor
+- **Drafts** — emails, follow-ups, price-reduction conversations
+- **Team routing** — who to refer a client to
+
+What do you need? You can also reach the office directly at ${phone}.`;
     }
 
     /* ── Lead Responder ─────────────────────────────────────────────────── */
@@ -44,14 +145,84 @@ Are you free for a quick 10-minute call Thursday at 10am or Friday at 2pm? I'll 
 — The Matin Real Estate Team · ${phone}`;
 
     /* ── Listing Description ────────────────────────────────────────────── */
-    case "listing-description":
-      return `**Light-filled retreat with a chef's kitchen steps from the best of ${s(input.city, "Portland")}**
+    case "listing-description": {
+      const ldCity = s(input.city, "Portland, OR");
+      const ldBeds = s(input.beds, "4");
+      const ldBaths = s(input.baths, "3");
+      const ldSqft = s(input.sqft, "2,400");
+      const ldYr = s(input.yearBuilt, "2003");
+      const ldPrice = s(input.price, "");
+      const ldFeatures = s(input.features, "quartz counters, stainless appliances, hardwood floors, and a private backyard");
+      const ldType = s(input.type, "home");
+      const ldCityShort = ldCity.split(",")[0].trim();
 
-Where the Pacific Northwest lifestyle meets elevated everyday living — this ${s(input.beds, "4")}-bedroom, ${s(input.baths, "3")}-bath residence in ${s(input.city, "the heart of the metro")} delivers ${s(input.sqft, "2,400")} sq ft of thoughtfully designed space built for the way people actually live. The great room anchors the home with soaring ceilings and walls of glass that blur the line between inside and out, while the chef's kitchen — ${s(input.features, "quartz counters, premium appliances, and a walk-in pantry")} — invites the kind of mornings worth waking up for. Built in ${s(input.yearBuilt, "quality construction")}, the primary suite offers a spa-style retreat and generous closet. Minutes to top schools, hiking, and dining. Offered at ${s(input.price, "exceptional value")}.`;
+      return `## MLS Description
+
+**${ldCityShort} living at its best — ${ldBeds}BD/${ldBaths}BA and move-in ready**
+
+This ${ldBeds}-bedroom, ${ldBaths}-bath ${ldType.toLowerCase()} in ${ldCity} offers ${ldSqft} square feet of thoughtfully designed space that works as hard as its owners do. The open main level centers on a kitchen built for real life — ${ldFeatures} — flowing naturally to a dedicated dining area and into a light-drenched living room that opens to the outdoors. Upstairs, the primary suite delivers the kind of space that ends your search: generous proportions, a well-appointed bath, and quiet separation from the rest of the home. Built in ${ldYr} and meticulously maintained, every system is in order. Close to top-rated schools, neighborhood parks, and the dining and shopping that make ${ldCityShort} one of the most sought-after addresses in the metro.${ldPrice ? ` Offered at ${ldPrice}.` : ""}
+
+*This home is offered without regard to race, color, religion, national origin, sex, disability, or familial status.*
+
+---
+
+## Agent Notes
+
+**Selling strategy tips:**
+
+1. **First-weekend momentum is everything.** Price it at the sharp end of the comp range and set an offer-review date for day 7. A visible deadline drives competing offers — homes that "accept offers anytime" sit.
+
+2. **Lead with lifestyle, close with numbers.** The listing description opens buyers emotionally; follow it in showings with hard data — days on market for comparable homes, $/sqft vs. the competition, and net-proceeds modeling. Buyers who understand value buy faster.
+
+3. **Professional photography is non-negotiable.** In this price range, buyers make their showing decision in 8 seconds on a screen. Invest in twilight exteriors, wide-angle interiors, and a floor plan graphic — these alone lift showing volume by 30–40% in our experience.
+
+> *Draft by ${co} AI — all copy must be reviewed for fair housing compliance and factual accuracy before submission to RMLS. · ${phone}*`;
+    }
 
     /* ── Agent Coach ────────────────────────────────────────────────────── */
-    case "coach":
-      return `Good — let's run it. I'll play the on-the-fence seller:\n\n**SELLER:** "We love your marketing, but another agent said they'd list us at $50,000 more. Why should we go with Matin?"\n\nYour move. Don't defend the number — reframe to net proceeds, days-on-market risk, and your track record. Hit me with your response and I'll score your tone, clarity, and close attempt.`;
+    case "coach": {
+      const coachMsg = (lastUserMessage || "").toLowerCase();
+
+      // If the user is responding with their actual pitch/line, score it
+      if (coachMsg.length > 40 && !/role.?play|scenario|let.?s|start|drill|practice|help me/i.test(coachMsg)) {
+        return `## Coach Feedback
+
+**Tone:** 7/10 — Professional and composed. You stayed calm under pressure, which is exactly what a seller needs to see. Avoid hedging words like "I think" or "probably" — they erode confidence.
+
+**Clarity:** 8/10 — Your core message was clear. One suggestion: lead with the outcome (net proceeds and days on market), not with your credentials. Sellers are buying results, not resumes.
+
+**Key Strengths**
+- You redirected from price to net proceeds — that's the right frame.
+- You didn't argue with the competitor's number, which keeps the conversation from becoming defensive.
+
+**What to Tighten**
+Skip the preamble. Your strongest point landed in the third sentence — move it to the first. Sellers decide in the first 10 seconds whether they believe you.
+
+**Stronger Opening**
+> "I understand — $50K sounds significant. But here's the reality: a home priced above market sits, takes price cuts, and closes lower than it would have with a sharp launch. Our sellers average 101% of list price in under 10 days. I'd rather net you more than promise you more."
+
+---
+
+Ready to go again? I'll play a different seller objection, or we can repeat this one and see if you can nail the opener.`;
+      }
+
+      // Default: open the role-play
+      return `Let's drill it. I'll play the on-the-fence seller — make me believe you deserve the listing.
+
+---
+
+**SELLER:** "We love your marketing, but another agent said they'd list us at $50,000 more. Why should we go with Matin instead?"
+
+---
+
+Your move. Don't defend the number — reframe to net proceeds, days-on-market risk, and your track record. Type your response and I'll score:
+
+- **Tone** (did you stay confident without being defensive?)
+- **Clarity** (did the seller understand the point immediately?)
+- **Close attempt** (did you earn the next step?)
+
+Hit me.`;
+    }
 
     /* ── CMA Generator ──────────────────────────────────────────────────── */
     case "cma": {

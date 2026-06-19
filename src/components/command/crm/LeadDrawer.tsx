@@ -307,23 +307,23 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                 </div>
               </div>
 
-              {/* Quick comms actions */}
-              <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2">
+              {/* Quick comms actions — full-width on mobile, 3-col on sm */}
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-1.5">
                 <a
                   href={`tel:${lead.phone.replace(/[^\d+]/g, "")}`}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-ink/12 bg-white py-2.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper min-h-[44px]"
                 >
                   <Phone className="h-3.5 w-3.5" /> Call
                 </a>
                 <button
                   onClick={() => flash(`Texting ${lead.firstName}…`)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-ink/12 bg-white py-2.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper min-h-[44px]"
                 >
                   <MessageSquare className="h-3.5 w-3.5" /> Text
                 </button>
                 <a
                   href={`mailto:${lead.email}`}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-ink/12 bg-white py-2.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper min-h-[44px]"
                 >
                   <Mail className="h-3.5 w-3.5" /> Email
                 </a>
@@ -371,11 +371,11 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               )}
 
               {/* ── AI Lead Intel callout ── */}
-              <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.04] p-4">
-                <SectionLabel className="mb-2">AI Intel</SectionLabel>
+              <div className="rounded-r-xl rounded-l-none border border-l-4 border-azure/30 border-l-azure bg-azure/[0.06] p-4">
+                <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-azure">AI Intel</p>
                 <p className="text-[0.85rem] leading-relaxed text-slate">{lead.aiSummary}</p>
                 {lead.nextBestAction && (
-                  <p className="mt-2 text-[0.82rem] font-medium text-ink">
+                  <p className="mt-2 text-[0.82rem] font-semibold text-ink">
                     Next: {lead.nextBestAction}
                   </p>
                 )}
@@ -395,14 +395,17 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               <div className="rounded-2xl border border-ink/[0.07] bg-white p-4 shadow-soft">
                 <SectionLabel className="mb-3">Property Interests</SectionLabel>
                 {lead.propertyViews && lead.propertyViews.length > 0 ? (
-                  <ul className="space-y-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {lead.propertyViews.map((view, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        <MapPin className="h-3.5 w-3.5 shrink-0 text-slate/55" />
-                        <span className="text-[0.84rem] text-ink">{view}</span>
-                      </li>
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 rounded-lg border border-ink/[0.08] bg-paper px-2.5 py-1 text-[0.78rem] font-medium text-ink"
+                      >
+                        <MapPin className="h-3 w-3 shrink-0 text-slate/55" />
+                        {view}
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
                   <p className="text-[0.83rem] text-slate/60">No browsing activity recorded yet.</p>
                 )}
@@ -444,7 +447,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                         readOnly={busy}
                         rows={6}
                         placeholder="Your reply…"
-                        className="min-h-[7rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-ink/60 px-3.5 py-3 text-[0.85rem] leading-relaxed text-slate-200 placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+                        className="min-h-[7rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-paper px-3.5 py-3 text-[0.85rem] leading-relaxed text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                       />
                       {busy ? (
                         <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate">
@@ -489,7 +492,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                           <Icon className="h-3 w-3" />
                         </span>
                         <div className="min-w-0 flex-1 pt-0.5">
-                          <p className="text-[0.82rem] leading-snug text-slate-200">{e.label}</p>
+                          <p className="text-[0.82rem] leading-snug text-ink/80">{e.label}</p>
                           <p className="mt-0.5 text-[0.7rem] text-slate/55">
                             {e.minsAgo === 0 ? "just now" : timeAgo(e.minsAgo)}
                           </p>

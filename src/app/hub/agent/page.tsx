@@ -7,6 +7,15 @@ export const metadata = { title: "Agent Workspace" };
 
 const AGENT_SLUG = "joshua-rose";
 
+/** Format today's date as "Wednesday, June 18" */
+function todayLabel(): string {
+  return new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export default function AgentPage() {
   const agent = agents.find((a) => a.slug === AGENT_SLUG) ?? agents[1];
   const agentSlug = agent.slug;
@@ -33,15 +42,18 @@ export default function AgentPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
       <div>
+        <p className="mb-1 text-[0.78rem] font-medium uppercase tracking-widest text-slate/50">
+          {todayLabel()}
+        </p>
         <h1 className="font-display text-2xl text-ink sm:text-3xl">
           Good morning, {agent.firstName}.
         </h1>
         <p className="mt-1 text-[0.9rem] text-slate">
-          You have{" "}
+          Here&rsquo;s what needs your attention today &mdash;{" "}
           <span className="font-semibold text-ink">{hotLeads.length}</span> hot{" "}
           {hotLeads.length === 1 ? "lead" : "leads"} and{" "}
           <span className="font-semibold text-ink">{tasksToday.length}</span>{" "}
-          {tasksToday.length === 1 ? "task" : "tasks"} due today.
+          {tasksToday.length === 1 ? "task" : "tasks"} due.
         </p>
       </div>
 

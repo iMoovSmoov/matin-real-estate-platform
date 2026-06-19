@@ -194,7 +194,7 @@ export default function AboutPage() {
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
             {orderedLeadership.map((person, i) => (
               <Reveal key={person.slug} delay={i * 0.1}>
-                <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] sm:flex-row">
+                <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-shadow duration-300 hover:shadow-lift sm:flex-row">
                   <div className="relative aspect-[4/5] w-full shrink-0 bg-paper-200 sm:aspect-auto sm:w-56">
                     <Image
                       src={person.photo}
@@ -245,6 +245,20 @@ export default function AboutPage() {
             Day-to-day operations are led by <strong className="text-ink">Alicia Kelly-Smith</strong>, who keeps
             our 40-broker team — and every transaction — running on time.
           </p>
+
+          {/* Join our team CTA */}
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl border border-ink/[0.08] bg-cloud px-6 py-10 text-center shadow-soft sm:flex-row sm:text-left">
+            <div className="flex-1">
+              <h3 className="font-display text-xl text-ink">Want to join the Matin team?</h3>
+              <p className="mt-2 text-[0.92rem] leading-relaxed text-slate">
+                We&apos;re always looking for driven, full-time brokers who share our standard for
+                client service and data-driven practice. Let&apos;s talk.
+              </p>
+            </div>
+            <ButtonLink href="/contact" variant="ink" className="shrink-0">
+              Apply now <ArrowRight className="h-4 w-4" />
+            </ButtonLink>
+          </div>
         </Container>
       </Section>
 
@@ -294,7 +308,7 @@ export default function AboutPage() {
         <Container className="relative">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="eyebrow-light">The platform behind the results</span>
+              <span className="eyebrow-light border-l-2 border-azure-bright pl-3">The platform behind the results</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 One system. Every deal.
               </h2>

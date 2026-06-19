@@ -8,7 +8,7 @@ export function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link
       href={`/agents/${agent.slug}`}
-      className="group block overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift"
+      className="group block overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-paper-200">
         <Image

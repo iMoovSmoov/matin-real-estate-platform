@@ -147,7 +147,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
                 Our brokers live and work in {community.name}. Get an honest read on the market, schools, and what your
                 budget really buys here.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href="/agents" variant="white" size="lg">Talk to a local broker</ButtonLink>
                 <ButtonLink href="/communities" variant="outline-light" size="lg">Explore more communities</ButtonLink>
               </div>

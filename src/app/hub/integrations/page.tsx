@@ -18,7 +18,7 @@ export default function IntegrationsPage() {
         </p>
         {/* Summary strip */}
         <p className="mt-2 text-[0.78rem] font-medium text-slate/50">
-          9 connected &middot; 4 available
+          7 connected &middot; 5 available &middot; 4 coming soon
         </p>
       </div>
 

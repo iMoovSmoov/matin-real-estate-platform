@@ -22,6 +22,12 @@ function agreementTone(
   return "success";
 }
 
+function agreementBadgeClasses(status: BuyerAgreementStatus): string {
+  if (status === "Not Signed") return "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25";
+  if (status === "Sent") return "bg-warn/10 text-amber-700 ring-1 ring-inset ring-warn/25";
+  return "bg-success/10 text-success ring-1 ring-inset ring-success/25";
+}
+
 function preapprovalTone(
   status: PreapprovalStatus,
 ): "success" | "danger" | "warn" {
@@ -182,15 +188,15 @@ function SlideOver({
             <p className="mt-0.5 text-[0.78rem] text-slate truncate">{buyer.agentName}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Pill tone={agreementTone(buyer.agreementStatus)}>
+            <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold", agreementBadgeClasses(buyer.agreementStatus))}>
               {buyer.agreementStatus}
-            </Pill>
+            </span>
             <button
               onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-ink/[0.08] text-slate hover:bg-ink/[0.04] transition-colors"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
               aria-label="Close"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -484,9 +490,9 @@ export function BuyerAgreements() {
 
                     {/* Agreement Status */}
                     <td className="px-4 py-3">
-                      <Pill tone={agreementTone(buyer.agreementStatus)}>
+                      <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold", agreementBadgeClasses(buyer.agreementStatus))}>
                         {buyer.agreementStatus}
-                      </Pill>
+                      </span>
                     </td>
 
                     {/* Preapproval */}

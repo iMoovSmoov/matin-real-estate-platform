@@ -13,6 +13,9 @@ import {
   Activity as ActivityIcon,
   Layers,
   Home,
+  SlidersHorizontal,
+  UserPlus,
+  ChevronRight,
 } from "lucide-react";
 import type { Lead } from "@/lib/types";
 import { getAgent } from "@/lib/data";
@@ -21,6 +24,18 @@ import { LeadDrawer } from "@/components/command/crm/LeadDrawer";
 import { stageTone, scoreTone } from "@/components/command/crm/leadStyles";
 
 type SortKey = "score" | "recency" | "name";
+
+/* ── Source badge colors ───────────────────────────────────────────────────── */
+const SOURCE_TONE: Record<string, string> = {
+  Zillow:   "bg-[#006AFF]/10 text-[#006AFF] ring-[#006AFF]/20",
+  "Realtor.com": "bg-[#D92228]/10 text-[#D92228] ring-[#D92228]/20",
+  Referral: "bg-success/10 text-success ring-success/20",
+  Organic:  "bg-ink/[0.07] text-ink ring-ink/[0.12]",
+};
+
+function sourceBadge(source: string): string {
+  return SOURCE_TONE[source] ?? "bg-ink/[0.06] text-ink ring-ink/[0.08]";
+}
 
 /* ── Smart lists — Follow Up Boss's signature feature ──────────────────────── */
 type SmartList = {
@@ -54,6 +69,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recency");
   const [active, setActive] = useState<Lead | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -78,7 +94,6 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
         case "name":
           return a.name.localeCompare(b.name);
         case "recency":
-          // Most recently contacted first; unread floats up on ties.
           if (a.lastContactDaysAgo !== b.lastContactDaysAgo) return a.lastContactDaysAgo - b.lastContactDaysAgo;
           return b.unread - a.unread || b.score - a.score;
         default:
@@ -90,52 +105,85 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
 
   return (
     <div>
-      {/* Smart lists */}
-      <div className="-mx-1 mb-3 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1">
-        {SMART_LISTS.map((sl) => {
-          const on = sl.id === listId;
-          const Icon = sl.icon;
-          return (
-            <button
-              key={sl.id}
-              onClick={() => setListId(sl.id)}
-              className={cn(
-                "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
-                on
-                  ? "border-ink/15 bg-ink/[0.06] text-ink"
-                  : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
-              )}
-            >
-              <Icon className={cn("h-3.5 w-3.5", on ? "text-ink" : "text-slate")} />
-              {sl.label}
-              <span
-                className={cn(
-                  "rounded-md px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums",
-                  on ? "bg-ink text-white" : "bg-paper text-slate",
-                )}
-              >
-                {counts[sl.id]}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Search + sort */}
-      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+      {/* ── Top bar: search + add lead button ─────────────────────────────────── */}
+      <div className="mb-3 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/55" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, email, area, tag…"
-            className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-3 text-[0.84rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+            className="h-10 w-full rounded-xl border border-ink/[0.08] bg-white pl-9 pr-3 text-[0.84rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
           />
         </div>
-        <SortSelect value={sort} onChange={setSort} />
+
+        {/* Mobile: single Filters toggle */}
+        <button
+          onClick={() => setFiltersOpen((o) => !o)}
+          className={cn(
+            "flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-[0.82rem] font-semibold transition-colors sm:hidden",
+            filtersOpen
+              ? "border-ink/20 bg-ink/[0.06] text-ink"
+              : "border-ink/[0.08] bg-white text-slate",
+          )}
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          Filters
+        </button>
+
+        {/* Desktop sort */}
+        <div className="hidden sm:block">
+          <SortSelect value={sort} onChange={setSort} />
+        </div>
+
+        {/* Add lead — always visible, high tap target */}
+        <button className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90 shrink-0">
+          <UserPlus className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Add lead</span>
+        </button>
       </div>
 
-      {/* Inbox */}
+      {/* ── Smart lists (desktop always visible; mobile collapsible) ──────────── */}
+      <div className={cn("mb-3", !filtersOpen && "hidden sm:block")}>
+        <div className="-mx-1 flex flex-wrap gap-2 overflow-x-auto px-1 pb-1">
+          {SMART_LISTS.map((sl) => {
+            const on = sl.id === listId;
+            const Icon = sl.icon;
+            return (
+              <button
+                key={sl.id}
+                onClick={() => {
+                  setListId(sl.id);
+                  setFiltersOpen(false);
+                }}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
+                  on
+                    ? "border-ink/15 bg-ink/[0.06] text-ink"
+                    : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
+                )}
+              >
+                <Icon className={cn("h-3.5 w-3.5", on ? "text-ink" : "text-slate")} />
+                {sl.label}
+                <span
+                  className={cn(
+                    "rounded-md px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums",
+                    on ? "bg-ink text-white" : "bg-paper text-slate",
+                  )}
+                >
+                  {counts[sl.id]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {/* Mobile sort (inside expanded filter panel) */}
+        <div className="mt-2 sm:hidden">
+          <SortSelect value={sort} onChange={setSort} />
+        </div>
+      </div>
+
+      {/* ── Inbox ─────────────────────────────────────────────────────────────── */}
       <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-2.5">
           <p className="flex items-center gap-2 text-[0.78rem] font-semibold text-ink">
@@ -147,7 +195,21 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
           </p>
         </div>
 
-        <ul className="divide-y divide-ink/[0.06]">
+        {/* Mobile: card grid */}
+        <div className="divide-y divide-ink/[0.06] sm:hidden">
+          {filtered.map((l) => (
+            <LeadCard key={l.id} lead={l} onOpen={() => setActive(l)} />
+          ))}
+          {filtered.length === 0 && (
+            <div className="px-4 py-14 text-center">
+              <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
+              <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: row list */}
+        <ul className="hidden divide-y divide-ink/[0.06] sm:block">
           {filtered.map((l) => (
             <LeadRow key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
@@ -170,13 +232,13 @@ function ResponseDot({ minutes }: { minutes: number }) {
   const color =
     minutes <= 5
       ? "bg-success"
-      : minutes <= 15
+      : minutes <= 30
       ? "bg-warn"
       : "bg-danger";
   const textColor =
     minutes <= 5
       ? "text-success"
-      : minutes <= 15
+      : minutes <= 30
       ? "text-warn"
       : "text-danger";
   return (
@@ -184,6 +246,75 @@ function ResponseDot({ minutes }: { minutes: number }) {
       <span className={cn("h-1.5 w-1.5 rounded-full", color)} />
       <span className={cn("text-[0.68rem] font-medium tabular-nums", textColor)}>{minutes}m</span>
     </span>
+  );
+}
+
+/* ── Mobile lead card ──────────────────────────────────────────────────────── */
+function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
+  const hot = lead.score >= 80;
+  const overdue = lead.lastContactDaysAgo >= 7 && lead.stage !== "Closed" && lead.stage !== "Lost";
+
+  return (
+    <button
+      onClick={onOpen}
+      className="group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-paper/60"
+    >
+      {/* Unread rail */}
+      <span className={cn("mt-1 h-9 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
+
+      {/* Avatar */}
+      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-bold text-white">
+        {initials(lead.name)}
+        {hot && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
+            <Flame className="h-2.5 w-2.5 text-success" />
+          </span>
+        )}
+      </span>
+
+      {/* Main content */}
+      <div className="min-w-0 flex-1">
+        {/* Name row */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <p className="truncate text-[0.88rem] font-semibold text-ink">{lead.name}</p>
+            {lead.unread > 0 && (
+              <span className="shrink-0 rounded-full bg-ink px-1.5 py-px text-[0.62rem] font-bold text-white tabular-nums">
+                {lead.unread}
+              </span>
+            )}
+          </div>
+          <span className={cn("shrink-0 rounded-md px-1.5 py-px text-[0.72rem] font-semibold ring-1 ring-inset", scoreTone(lead.score))}>
+            {lead.score}
+          </span>
+        </div>
+
+        {/* Source badge + budget */}
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <span className={cn("rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ring-1 ring-inset", sourceBadge(lead.source))}>
+            {lead.source}
+          </span>
+          <span className="text-[0.75rem] font-medium text-ink tabular-nums">
+            {compactUsd(lead.budgetMin)}–{compactUsd(lead.budgetMax)}
+          </span>
+        </div>
+
+        {/* Next action chip */}
+        {lead.nextBestAction && (
+          <div className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-lg bg-azure/[0.07] px-2 py-0.5">
+            <ChevronRight className="h-3 w-3 shrink-0 text-azure" />
+            <span className="truncate text-[0.72rem] font-medium text-azure">
+              {lead.nextBestAction.length > 45 ? lead.nextBestAction.slice(0, 45) + "…" : lead.nextBestAction}
+            </span>
+          </div>
+        )}
+
+        {/* Last touch */}
+        <p className={cn("mt-1 text-[0.72rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/55")}>
+          {lead.lastContactDaysAgo === 0 ? "contacted today" : `${lead.lastContactDaysAgo}d ago`}
+        </p>
+      </div>
+    </button>
   );
 }
 
@@ -222,20 +353,21 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
               </span>
             )}
           </div>
-          <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.74rem] text-slate/65">
-            <span className="truncate">{lead.intent}</span>
-            <span className="text-slate/30">·</span>
-            <span className="truncate">{lead.community}</span>
-            <span className="text-slate/30">·</span>
-            <span className="shrink-0">{lead.source}</span>
-          </p>
-          {/* nextBestAction */}
+          <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+            {/* Color-coded source badge */}
+            <span className={cn("rounded-full px-2 py-px text-[0.66rem] font-semibold ring-1 ring-inset", sourceBadge(lead.source))}>
+              {lead.source}
+            </span>
+            <span className="text-[0.72rem] text-slate/55 truncate">{lead.intent} · {lead.community}</span>
+          </div>
+          {/* Next best action chip */}
           {lead.nextBestAction && (
-            <p className="text-[0.72rem] text-slate truncate max-w-[160px]">
-              {lead.nextBestAction.length > 35
-                ? lead.nextBestAction.slice(0, 35)
-                : lead.nextBestAction}
-            </p>
+            <div className="mt-1 inline-flex max-w-[200px] items-center gap-1 rounded-lg bg-azure/[0.07] px-2 py-0.5">
+              <ChevronRight className="h-3 w-3 shrink-0 text-azure" />
+              <span className="truncate text-[0.70rem] font-medium text-azure">
+                {lead.nextBestAction.length > 38 ? lead.nextBestAction.slice(0, 38) + "…" : lead.nextBestAction}
+              </span>
+            </div>
           )}
         </div>
 

@@ -9,7 +9,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden border border-ink/[0.08] bg-white hover:shadow-lift transition-shadow"
+      className="group block rounded-2xl overflow-hidden border border-ink/[0.08] bg-white hover:shadow-lift transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
     >
       {/* Image */}
       <div className="relative overflow-hidden rounded-t-2xl aspect-[4/3]">

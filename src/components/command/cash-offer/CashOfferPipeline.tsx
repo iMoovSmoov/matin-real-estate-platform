@@ -13,6 +13,7 @@ import {
   CalendarDays,
   StickyNote,
   Wand2,
+  Sparkles,
 } from "lucide-react";
 import { sellerLeads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
@@ -32,6 +33,17 @@ const STAGES: SellerLeadStage[] = [
   "Converted to Listing",
   "Dead",
 ];
+
+/* Column header tones — subtle colored backgrounds per stage */
+const STAGE_HEADER_TONE: Record<SellerLeadStage, string> = {
+  "New Request":          "bg-ink/[0.05] text-ink border-ink/[0.08]",
+  "Needs Valuation":      "bg-azure/[0.07] text-azure border-azure/20",
+  "Offer Pending":        "bg-warn/[0.07] text-amber-700 border-warn/20",
+  "Offer Sent":           "bg-warn/10 text-amber-700 border-warn/25",
+  "Accepted":             "bg-success/[0.07] text-success border-success/20",
+  "Converted to Listing": "bg-success/10 text-success border-success/25",
+  "Dead":                 "bg-ink/[0.04] text-slate/60 border-ink/[0.06]",
+};
 
 /* ── Helpers ─────────────────────────────────────────────────────────────────── */
 
@@ -142,13 +154,18 @@ function LeadCard({
   lead: SellerLead;
   onClick: () => void;
 }) {
+  const isStale = lead.daysInStage > 7;
+
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
-      className="cursor-pointer rounded-xl bg-white ring-1 ring-ink/[0.07] shadow-soft p-3 transition-shadow hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      className={cn(
+        "cursor-pointer rounded-xl bg-white ring-1 shadow-soft p-3 transition-shadow hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+        isStale ? "ring-danger/25" : "ring-ink/[0.07]",
+      )}
     >
       {/* Seller name */}
       <p className="truncate font-semibold text-[0.9rem] text-ink leading-snug">
@@ -156,23 +173,35 @@ function LeadCard({
       </p>
 
       {/* Address */}
-      <p className="mt-0.5 truncate text-[0.8rem] text-slate/70">
+      <p className="mt-0.5 truncate text-[0.78rem] text-slate/65">
         {lead.address}, {lead.city}
       </p>
 
       {/* Est value + condition */}
       <div className="mt-2 flex items-center justify-between gap-1.5">
-        <span className="font-semibold text-[0.88rem] text-ink tabular-nums">
+        <span className="font-semibold text-[0.86rem] text-ink tabular-nums">
           {formatUsd(lead.estValue)}
         </span>
         <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
       </div>
 
       {/* Days in stage + agent avatar */}
-      <div className="mt-2.5 flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <DaysPill days={lead.daysInStage} />
         <AgentAvatar slug={lead.assignedAgent} />
       </div>
+
+      {/* AI Eval button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-azure/25 bg-azure/[0.07] py-1.5 text-[0.74rem] font-semibold text-azure transition-colors hover:bg-azure/[0.12]"
+      >
+        <Sparkles className="h-3 w-3" />
+        AI Eval
+      </button>
     </div>
   );
 }
@@ -515,14 +544,15 @@ export function CashOfferPipeline() {
         <div className="inline-flex min-w-max gap-4 p-4">
           {STAGES.map((stage) => {
             const stageLeads = leads.filter((l) => l.stage === stage);
+            const headerTone = STAGE_HEADER_TONE[stage];
             return (
               <div key={stage} className="w-[220px] shrink-0">
-                {/* Column header */}
-                <div className="mb-2.5 flex items-center gap-1.5 px-0.5">
-                  <span className="font-semibold text-[0.82rem] text-ink leading-snug">
+                {/* Color-coded column header */}
+                <div className={cn("mb-2.5 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5", headerTone)}>
+                  <span className="font-semibold text-[0.78rem] leading-snug flex-1 truncate">
                     {stage}
                   </span>
-                  <span className="rounded-md bg-ink/[0.06] px-2 py-0.5 text-[0.72rem] font-medium text-ink/70">
+                  <span className="rounded-md bg-black/[0.06] px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums">
                     {stageLeads.length}
                   </span>
                 </div>

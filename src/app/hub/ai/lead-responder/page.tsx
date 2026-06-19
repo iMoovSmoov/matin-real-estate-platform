@@ -192,9 +192,9 @@ export default function LeadResponderPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
       {/* ── page header ── */}
-      <div className="mb-6">
+      <div className="mb-5">
         <h1 className="font-display text-2xl text-ink sm:text-3xl">Lead Reply</h1>
-        <p className="mt-1 text-[0.9rem] text-slate">
+        <p className="mt-1 text-[0.92rem] text-slate">
           Craft the perfect first response, personalized to each lead.
         </p>
       </div>
@@ -239,17 +239,17 @@ export default function LeadResponderPage() {
           )}
 
           {/* ── CRM loader ── */}
-          <div className="mt-5">
-            <p className="mb-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+          <div className="mt-5 flex flex-col items-start gap-2 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+            <span className="shrink-0 text-[0.72rem] font-semibold uppercase tracking-wider text-slate/60">
               Load from CRM
-            </p>
-            <div className="relative">
+            </span>
+            <div className="relative flex-1 w-full sm:w-auto">
               <select
                 value={crmValue}
                 onChange={(e) => handleCrmChange(e.target.value)}
-                className={selectCls}
+                className="w-full appearance-none rounded-lg border border-ink/[0.08] bg-white py-2 pl-3 pr-8 text-sm text-ink transition-colors focus:border-ink/40 focus:outline-none"
               >
-                <option value="">— or load a lead from CRM —</option>
+                <option value="">— load a lead from CRM —</option>
                 {leads.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name} · {l.stage} · {l.community}
@@ -259,10 +259,10 @@ export default function LeadResponderPage() {
               <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
             </div>
             {loadedName && (
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[0.75rem] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                 <Check className="h-3 w-3" />
                 Loaded: {loadedName}
-              </div>
+              </span>
             )}
           </div>
 

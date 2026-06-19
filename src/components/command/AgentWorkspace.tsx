@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Flame, TrendingUp } from "lucide-react";
+import { Clock, Flame, TrendingUp, Calendar, Phone, Mail, ArrowRight } from "lucide-react";
 import { leads, transactions, agents, metrics } from "@/lib/data";
 import {
   Panel,
@@ -10,6 +10,28 @@ import {
   ProgressBar,
 } from "@/components/command/ui";
 import { daysLabel, initials } from "@/lib/utils";
+
+/* Deterministic mock appointments derived from agent slug. */
+interface Appt {
+  time: string;
+  client: string;
+  type: "Call" | "Showing" | "Consultation" | "Listing Appointment";
+  note: string;
+  tone: "azure" | "warn" | "success" | "neutral";
+}
+
+function buildAppointments(agentSlug: string): Appt[] {
+  // Stable seed from slug length so it's deterministic but varies per agent.
+  const seed = agentSlug.length % 4;
+  const base: Appt[] = [
+    { time: "9:00 AM", client: "Sarah Mitchell", type: "Call", note: "West Linn — Zillow lead, 2nd follow-up", tone: "azure" },
+    { time: "11:30 AM", client: "Derek & Pam Okafor", type: "Showing", note: "4BR Sellwood bungalow — active buyers", tone: "success" },
+    { time: "1:00 PM", client: "Rina Tanaka", type: "Listing Appointment", note: "Milwaukie — motivated to sell within 60d", tone: "warn" },
+    { time: "3:30 PM", client: "Carlos Vega", type: "Consultation", note: "First-time buyer, pre-approved $450k Gresham", tone: "neutral" },
+  ];
+  // Rotate slightly by seed so different agents show slightly different appts.
+  return [...base.slice(seed % 2), ...base.slice(0, seed % 2)];
+}
 
 interface Task {
   id: string;
@@ -68,6 +90,7 @@ export function AgentWorkspace({ agentSlug }: { agentSlug: string }) {
   }
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const appointments = buildAppointments(agentSlug);
 
   function toggleTask(id: string) {
     setTasks((prev) =>
@@ -116,48 +139,60 @@ export function AgentWorkspace({ agentSlug }: { agentSlug: string }) {
             title="Today's priorities"
             icon={<Clock className="h-4 w-4" />}
           />
-          <div className="divide-y divide-ink/[0.06] px-1 py-1">
+          <div className="divide-y divide-ink/[0.06]">
             {tasks.length === 0 ? (
-              <p className="px-4 py-6 text-center text-[0.85rem] text-slate">
+              <p className="px-5 py-6 text-center text-[0.85rem] text-slate">
                 No urgent tasks — great day to prospect.
               </p>
             ) : (
               tasks.map((task) => (
-                <label
+                <div
                   key={task.id}
-                  className="flex cursor-pointer items-start gap-3 px-4 py-3 hover:bg-ink/[0.02]"
+                  className={[
+                    "flex flex-col gap-2.5 px-5 py-3.5 transition-colors hover:bg-ink/[0.02]",
+                    task.done ? "opacity-50" : "",
+                  ].join(" ")}
                 >
-                  {/* Priority dot */}
-                  <span
-                    className={[
-                      "mt-[3px] h-2 w-2 shrink-0 rounded-full",
-                      task.urgency === "high" ? "bg-danger" : "bg-ink/20",
-                    ].join(" ")}
-                  />
-                  {/* Text */}
-                  <div className="min-w-0 flex-1">
-                    <p
+                  <div className="flex items-start gap-3">
+                    {/* Priority dot */}
+                    <span
                       className={[
-                        "text-[0.85rem] leading-snug",
-                        task.done
-                          ? "text-slate line-through"
-                          : "text-ink",
+                        "mt-[5px] h-2 w-2 shrink-0 rounded-full",
+                        task.urgency === "high" ? "bg-danger" : "bg-ink/20",
                       ].join(" ")}
-                    >
-                      {task.text}
-                    </p>
-                    <p className="mt-0.5 text-[0.72rem] text-slate">
-                      {task.label}
-                    </p>
+                    />
+                    {/* Text */}
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={[
+                          "text-[0.85rem] font-medium leading-snug",
+                          task.done ? "text-slate line-through" : "text-ink",
+                        ].join(" ")}
+                      >
+                        {task.text}
+                      </p>
+                      <p className="mt-0.5 text-[0.72rem] text-slate">
+                        {task.label}
+                      </p>
+                    </div>
+                    {/* Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      onChange={() => toggleTask(task.id)}
+                      aria-label="Mark done"
+                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-ink"
+                    />
                   </div>
-                  {/* Checkbox */}
-                  <input
-                    type="checkbox"
-                    checked={task.done}
-                    onChange={() => toggleTask(task.id)}
-                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-ink"
-                  />
-                </label>
+                  {!task.done && (
+                    <button
+                      onClick={() => toggleTask(task.id)}
+                      className="ml-5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink/80"
+                    >
+                      Do it <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               ))
             )}
           </div>
@@ -175,25 +210,76 @@ export function AgentWorkspace({ agentSlug }: { agentSlug: string }) {
             <span className="mb-0.5 text-[0.85rem] text-slate">min</span>
           </div>
           <p className="mt-1 text-[0.72rem] text-slate">Your avg response</p>
-          <p className="mt-2 text-[0.72rem] text-slate/70">
-            Team avg:{" "}
-            <span className="font-semibold text-ink">{teamAvg}m</span>
-          </p>
-          {ratio <= 1 && (
-            <p className="mt-1 text-[0.72rem] text-success">
-              Faster than team average
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <p className="text-[0.72rem] text-slate/70">
+              Team avg:{" "}
+              <span className="font-semibold text-ink">{teamAvg}m</span>
             </p>
-          )}
-          {ratio > 1 && ratio <= 2 && (
-            <p className="mt-1 text-[0.72rem] text-warn">
-              Slightly slower than team average
-            </p>
-          )}
-          {ratio > 2 && (
-            <p className="mt-1 text-[0.72rem] text-danger">
-              Significantly above team average
-            </p>
-          )}
+            {ratio <= 1 && (
+              <span className="rounded-full bg-success/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-success ring-1 ring-inset ring-success/20">
+                {Math.round(teamAvg - agentMins)}m faster
+              </span>
+            )}
+            {ratio > 1 && ratio <= 2 && (
+              <span className="rounded-full bg-warn/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-warn ring-1 ring-inset ring-warn/20">
+                {Math.round(agentMins - teamAvg)}m slower
+              </span>
+            )}
+            {ratio > 2 && (
+              <span className="rounded-full bg-danger/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-danger ring-1 ring-inset ring-danger/20">
+                {Math.round(agentMins - teamAvg)}m above avg
+              </span>
+            )}
+          </div>
+        </Panel>
+
+        {/* Appointments Today */}
+        <Panel>
+          <PanelHeader
+            title="Appointments today"
+            icon={<Calendar className="h-4 w-4" />}
+            subtitle={`${appointments.length} scheduled`}
+          />
+          <ul className="divide-y divide-ink/[0.06]">
+            {appointments.map((appt, i) => (
+              <li key={i} className="flex items-start gap-3 px-5 py-3.5">
+                {/* Time */}
+                <div className="w-[4.5rem] shrink-0 text-right">
+                  <span className="text-[0.76rem] font-semibold tabular-nums text-slate">
+                    {appt.time}
+                  </span>
+                </div>
+                {/* Divider dot */}
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink/15" />
+                {/* Content */}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.85rem] font-semibold leading-snug text-ink">
+                    {appt.client}
+                  </p>
+                  <p className="mt-0.5 text-[0.72rem] text-slate">{appt.note}</p>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <Pill tone={appt.tone}>{appt.type}</Pill>
+                    {appt.type === "Call" && (
+                      <a
+                        href="tel:"
+                        className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-azure hover:underline"
+                      >
+                        <Phone className="h-3 w-3" /> Dial
+                      </a>
+                    )}
+                    {appt.type !== "Call" && (
+                      <a
+                        href="mailto:"
+                        className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-azure hover:underline"
+                      >
+                        <Mail className="h-3 w-3" /> Prep
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </Panel>
       </div>
 

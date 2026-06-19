@@ -29,7 +29,7 @@ export default function CommunitiesPage() {
           <h1 className="display-2 mt-4 max-w-3xl font-display text-ink text-balance">
             Every neighborhood, known by heart
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate text-pretty">
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate text-pretty sm:text-lg">
             We live where we sell. Get the real story on {communities.length} communities across the Portland metro and
             SW Washington — median prices, schools, walkability and the feel of each place.
           </p>

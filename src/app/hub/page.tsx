@@ -17,7 +17,10 @@ import {
   Clock,
   Home,
   CheckCircle2,
-  AlertTriangle,
+  TriangleAlert,
+  AlertCircle,
+  Calendar,
+  Activity,
 } from "lucide-react";
 import { metrics, agentLeaderboard, company } from "@/lib/data";
 import { usd, compactUsd, num } from "@/lib/utils";
@@ -36,194 +39,269 @@ import {
   SourceRoiChart,
 } from "@/components/command/DashboardCharts";
 
-/* ── Static data ────────────────────────────────────────────────────────── */
+/* ── Static data ─────────────────────────────────────────────────────────── */
 
 const k = metrics.kpis;
 
-/** Alert chips rendered below the header */
+/** Needs-attention alert chips */
 const ALERTS = [
   {
-    label: "3 stale leads",
+    label: "3 leads stale >14 days",
     href: "/hub/crm?filter=stale",
-    tone: "danger" as const,
-    count: 3,
+    icon: TriangleAlert,
+    tone: "amber" as const,
   },
   {
-    label: "2 unsigned buyer agreements",
+    label: "5 buyer agreements missing",
     href: "/hub/buyer-agreements",
-    tone: "danger" as const,
-    count: 2,
+    icon: AlertCircle,
+    tone: "red" as const,
   },
   {
-    label: "1 listing missing photos",
-    href: "/hub/listing-launch",
-    tone: "warn" as const,
-    count: 1,
+    label: "2 inspection deadlines this week",
+    href: "/hub/transactions",
+    icon: Calendar,
+    tone: "blue" as const,
   },
 ];
 
-/** 5-tile KPI strip */
+/** 4 KPI tiles */
 const KPIS = [
   {
-    label: "Active Listings",
-    value: "18",
-    delta: { value: "3", dir: "up" as const },
-    icon: <Home className="h-4 w-4" />,
-  },
-  {
-    label: "Volume MTD",
+    label: "MTD Volume",
     value: "$8.4M",
-    delta: { value: "12.1%", dir: "up" as const },
+    delta: { value: "+12% vs last month", dir: "up" as const },
     icon: <TrendingUp className="h-4 w-4" />,
     accent: true,
   },
   {
-    label: "Leads in Pipeline",
+    label: "Active Leads",
     value: "47",
-    delta: { value: "9", dir: "up" as const },
+    delta: { value: "8 new today", dir: "up" as const },
     icon: <Users className="h-4 w-4" />,
   },
   {
-    label: "Avg Response",
-    value: "4.2 min",
-    delta: { value: "31% faster", dir: "up" as const },
+    label: "Listings Active",
+    value: "12",
+    delta: { value: "3 under offer", dir: "up" as const },
+    icon: <Home className="h-4 w-4" />,
+  },
+  {
+    label: "Avg Days to Close",
+    value: "28",
+    delta: { value: "team avg: 34", dir: "up" as const },
     icon: <Clock className="h-4 w-4" />,
   },
+];
+
+/** Recent activity feed */
+const ACTIVITY = [
   {
-    label: "Closings This Month",
-    value: "6",
-    delta: { value: "1", dir: "up" as const },
-    icon: <CheckCircle2 className="h-4 w-4" />,
+    text: "New lead from Zillow — Sarah M.",
+    sub: "Lake Oswego · buyer inquiry",
+    ago: "2m ago",
+    dot: "bg-azure",
   },
-];
-
-/** Speed-to-lead table — deterministic, no randomness */
-const SPEED_DATA = [
-  { name: "Jordan Matin",  initials: "JM", avgMin: 1.8,  leads: 3,  vsDelta: -2.4 },
-  { name: "Joshua Rose",   initials: "JR", avgMin: 2.1,  leads: 8,  vsDelta: -1.9 },
-  { name: "Sarah Chen",    initials: "SC", avgMin: 4.7,  leads: 12, vsDelta: 0.5  },
-  { name: "Marcus Webb",   initials: "MW", avgMin: 6.3,  leads: 5,  vsDelta: 2.1  },
-  { name: "Keanu Makoa",   initials: "KM", avgMin: 11.2, leads: 9,  vsDelta: 7.0  },
-];
-
-/** Recent activity feed — hardcoded realistic entries */
-const FEED = [
   {
-    initials: "JR",
-    text: "Joshua Rose closed 47 Hillside Dr, Lake Oswego",
-    sub: "$689,000",
+    text: "Offer accepted on 8457 NW Lakeshore",
+    sub: "Listed at $1.15M",
+    ago: "18m ago",
+    dot: "bg-emerald-500",
+  },
+  {
+    text: "CMA opened by Kim Tran",
+    sub: "Lake Oswego lead · viewed 3 pages",
     ago: "2h ago",
+    dot: "bg-azure",
   },
   {
-    initials: "SC",
-    text: "Sarah Chen submitted buyer agreement for Kevin & Maria Torres",
-    sub: "",
-    ago: "4h ago",
+    text: "Inspection scheduled for TX-4003",
+    sub: "Thursday 9 AM · 2 days away",
+    ago: "3h ago",
+    dot: "bg-amber-400",
   },
   {
-    initials: "MW",
-    text: "Marcus Webb scheduled showing at 1204 NW Lovejoy St",
-    sub: "$1.15M",
+    text: "Buyer agreement signed — Reyes family",
+    sub: "Showing confirmed for Saturday",
     ago: "5h ago",
+    dot: "bg-emerald-500",
   },
   {
-    initials: "KM",
-    text: "Keanu Makoa received new lead via Zillow — Portland",
-    sub: "",
-    ago: "6h ago",
+    text: "5-star review from the Harrisons",
+    sub: "West Linn · posted on Google",
+    ago: "7h ago",
+    dot: "bg-emerald-500",
   },
+];
+
+/** Lead pipeline stages */
+const PIPELINE_STAGES = [
+  { label: "New", count: 18, color: "bg-azure" },
+  { label: "Contacted", count: 12, color: "bg-azure/70" },
+  { label: "Showing", count: 7, color: "bg-azure/50" },
+  { label: "Under Contract", count: 4, color: "bg-emerald-500" },
+];
+const PIPELINE_MAX = 18;
+
+/** Agent leaderboard — this month */
+const LEADERBOARD = [
   {
+    name: "Jordan Matin",
     initials: "JM",
-    text: "Jordan Matin updated price on 8312 SW Beaverton-Hillsdale",
-    sub: "$574,900",
-    ago: "8h ago",
+    photo: "/matin/agents/jordan-matin.jpg",
+    closings: 6,
+    volume: "$4.2M",
+    dom: 22,
+    responseTime: "1.8 min",
+    highlight: true,
   },
   {
+    name: "Joshua Rose",
     initials: "JR",
-    text: "Joshua Rose opened transaction file for 2901 NE Glisan St",
-    sub: "$445,000",
-    ago: "10h ago",
+    photo: null,
+    closings: 5,
+    volume: "$3.1M",
+    dom: 27,
+    responseTime: "2.1 min",
+    highlight: false,
+  },
+  {
+    name: "Sarah Chen",
+    initials: "SC",
+    photo: null,
+    closings: 4,
+    volume: "$2.8M",
+    dom: 31,
+    responseTime: "4.7 min",
+    highlight: false,
+  },
+  {
+    name: "Marcus Webb",
+    initials: "MW",
+    photo: null,
+    closings: 3,
+    volume: "$1.9M",
+    dom: 35,
+    responseTime: "6.3 min",
+    highlight: false,
+  },
+  {
+    name: "Keanu Makoa",
+    initials: "KM",
+    photo: null,
+    closings: 2,
+    volume: "$1.1M",
+    dom: 44,
+    responseTime: "11.2 min",
+    highlight: false,
   },
 ];
 
 /** Quick-tool launcher cards */
 const TOOLS = [
-  { label: "Draft a reply",    href: "/hub/ai/lead-responder",  icon: MessageSquareText },
-  { label: "Write a listing",  href: "/hub/ai/listing-writer",  icon: PenSquare         },
-  { label: "Run a CMA",        href: "/hub/ai/cma",             icon: Calculator        },
-  { label: "New agreement",    href: "/hub/ai/agreements",      icon: FileSignature     },
-  { label: "Cash offer eval",  href: "/hub/ai/cash-offer",      icon: DollarSign        },
-  { label: "Generate a form",  href: "/hub/forms",              icon: Database          },
+  { label: "Draft a reply",   href: "/hub/ai/lead-responder", icon: MessageSquareText },
+  { label: "Write a listing", href: "/hub/ai/listing-writer", icon: PenSquare         },
+  { label: "Run a CMA",       href: "/hub/ai/cma",            icon: Calculator        },
+  { label: "New agreement",   href: "/hub/ai/agreements",     icon: FileSignature     },
+  { label: "Cash offer eval", href: "/hub/ai/cash-offer",     icon: DollarSign        },
+  { label: "Generate a form", href: "/hub/forms",             icon: Database          },
 ];
 
 const topVolume = agentLeaderboard[0]?.volume || 1;
 
-/* ── Page ───────────────────────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+
+function alertChipClass(tone: "amber" | "red" | "blue") {
+  if (tone === "amber") return "border-amber-200 bg-amber-50 text-amber-700";
+  if (tone === "red") return "border-red-200 bg-red-50 text-red-700";
+  return "border-blue-200 bg-blue-50 text-blue-700";
+}
+
+/* ── Page ────────────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-4 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
 
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-ink/[0.08] bg-gradient-to-br from-ink/[0.04] via-ink/[0.02] to-ink/[0.03] px-6 py-7">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-ink/[0.08] blur-3xl" />
-
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-          {/* Left — heading + alert chips */}
-          <div className="min-w-0 flex-1">
-            <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.4rem]">
-              Jordan&rsquo;s Dashboard
+      {/* ── Header ────────────────────────────────────────────────────────── */}
+      <div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-2xl text-ink sm:text-[2rem]">
+              Good morning, Jordan.
             </h1>
-            <p className="mt-1 text-[0.92rem] text-slate">
-              {num(k.newLeadsToday)} new leads in the queue &mdash; {num(k.activeDeals)} deals in flight &mdash; {compactUsd(k.pipelineValue)} pipeline.
-            </p>
-
-            {/* Alert chips */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {ALERTS.map((a) => (
-                <Link
-                  key={a.href}
-                  href={a.href}
-                  className={[
-                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.72rem] font-semibold transition-colors",
-                    a.tone === "danger"
-                      ? "border-danger/20 bg-danger/10 text-danger hover:bg-danger/15"
-                      : "border-warn/20 bg-warn/10 text-warn hover:bg-warn/15",
-                  ].join(" ")}
-                >
-                  <AlertTriangle className="h-3 w-3 shrink-0" />
-                  {a.label}
-                  <ArrowRight className="h-3 w-3 shrink-0 opacity-60" />
-                </Link>
-              ))}
-            </div>
+            <p className="mt-0.5 text-[0.85rem] text-slate/60">{today}</p>
           </div>
+          {/* Follow-up chip */}
+          <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[0.78rem] font-semibold text-amber-700 sm:self-auto">
+            <TriangleAlert className="h-3.5 w-3.5" />
+            8 leads need follow-up today
+          </span>
+        </div>
 
-          {/* Right — CTA buttons */}
-          <div className="flex shrink-0 flex-wrap gap-2.5">
-            <Link
-              href="/hub/crm"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink/90"
-            >
-              Work the queue <ArrowUpRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/hub/ai"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-paper"
-            >
-              <Bot className="h-4 w-4 text-ink" /> AI Studio
-            </Link>
-          </div>
+        {/* Needs-attention chips */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {ALERTS.map((a) => {
+            const Icon = a.icon;
+            return (
+              <Link
+                key={a.href}
+                href={a.href}
+                className={[
+                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80",
+                  alertChipClass(a.tone),
+                ].join(" ")}
+              >
+                <Icon className="h-3 w-3 shrink-0" />
+                {a.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
-      {/* ── KPI stat tiles ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {/* ── KPI tiles (2x2 → 4x1) ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {KPIS.map((kpi) => (
-          <StatTile key={kpi.label} {...kpi} />
+          <div
+            key={kpi.label}
+            className="flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]"
+          >
+            {/* Icon + label */}
+            <div className="flex items-center justify-between">
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate/60">
+                {kpi.label}
+              </span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink/[0.05] text-slate/60">
+                {kpi.icon}
+              </span>
+            </div>
+            {/* Value */}
+            <span className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
+              {kpi.value}
+            </span>
+            {/* Trend chip */}
+            <span
+              className={[
+                "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
+                kpi.delta.dir === "up"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-red-50 text-red-700",
+              ].join(" ")}
+            >
+              <TrendingUp className="h-3 w-3" />
+              {kpi.delta.value}
+            </span>
+          </div>
         ))}
       </div>
 
-      {/* ── Quick Tools ─────────────────────────────────────────────────── */}
+      {/* ── Quick Tools ────────────────────────────────────────────────────── */}
       <div>
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-display text-xl text-ink">Quick Tools</h2>
@@ -253,7 +331,78 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Charts: volume area (2 col) + lead sources ──────────────────── */}
+      {/* ── Pipeline section: Activity feed + Lead pipeline ────────────────── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Recent activity */}
+        <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
+              <Activity className="h-4 w-4 text-slate/50" />
+              Recent activity
+            </h2>
+            <Link
+              href="/hub/crm"
+              className="text-[0.75rem] font-semibold text-azure hover:opacity-70"
+            >
+              View all
+            </Link>
+          </div>
+          <ul className="space-y-3">
+            {ACTIVITY.map((item, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span
+                  className={[
+                    "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                    item.dot,
+                  ].join(" ")}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm leading-snug text-ink">{item.text}</p>
+                  <p className="mt-0.5 text-[0.72rem] text-slate/55">{item.sub}</p>
+                </div>
+                <span className="shrink-0 text-[0.68rem] text-slate/40">{item.ago}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Lead pipeline */}
+        <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+          <div className="mb-4">
+            <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+              Lead pipeline
+            </h2>
+            <p className="mt-0.5 text-[0.75rem] text-slate/50">Active leads by stage</p>
+          </div>
+          <div className="space-y-4">
+            {PIPELINE_STAGES.map((stage) => (
+              <div key={stage.label}>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-[0.83rem] font-medium text-ink">{stage.label}</span>
+                  <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[0.72rem] font-semibold text-ink">
+                    {stage.count}
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-ink/[0.06]">
+                  <div
+                    className={["h-full rounded-full transition-all", stage.color].join(" ")}
+                    style={{ width: `${(stage.count / PIPELINE_MAX) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Pipeline total */}
+          <div className="mt-5 flex items-center justify-between border-t border-ink/[0.06] pt-4">
+            <span className="text-[0.75rem] text-slate/55">Total in pipeline</span>
+            <span className="font-display text-lg font-semibold text-ink">
+              {PIPELINE_STAGES.reduce((s, st) => s + st.count, 0)} leads
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Charts: volume area (2 col) + lead sources ─────────────────────── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Panel className="lg:col-span-2">
           <PanelHeader
@@ -282,7 +431,7 @@ export default function DashboardPage() {
         </Panel>
       </div>
 
-      {/* ── Pipeline by stage + conversion funnel ───────────────────────── */}
+      {/* ── Pipeline by stage + conversion funnel ──────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel>
           <PanelHeader
@@ -306,178 +455,131 @@ export default function DashboardPage() {
         </Panel>
       </div>
 
-      {/* ── Speed-to-Lead table ──────────────────────────────────────────── */}
-      <Panel>
-        <PanelHeader
-          title="Response Time — This Week"
-          subtitle="Speed-to-lead by agent"
-          icon={<Clock className="h-4 w-4" />}
-          action={
-            <Link
-              href="/hub/reporting"
-              className="text-[0.74rem] font-semibold text-ink hover:opacity-70"
-            >
-              Full report →
-            </Link>
-          }
-        />
+      {/* ── Team leaderboard ───────────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+        <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div>
+            <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+              Team leaderboard &mdash; this month
+            </h2>
+            <p className="mt-0.5 text-[0.73rem] text-slate/50">Top producers by closed volume</p>
+          </div>
+          <Link
+            href="/hub/reporting"
+            className="text-[0.74rem] font-semibold text-azure hover:opacity-70"
+          >
+            Full report
+          </Link>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-[0.82rem]">
+          <table className="w-full min-w-[560px]">
             <thead>
-              <tr className="border-b border-ink/[0.06]">
-                <th className="px-5 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+              <tr className="border-b border-ink/[0.05]">
+                <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Rank
+                </th>
+                <th className="px-3 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
                   Agent
                 </th>
-                <th className="px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                  Avg Response
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Closings
                 </th>
-                <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                  Leads Handled
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Volume
                 </th>
-                <th className="px-5 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                  vs Team
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Avg DOM
+                </th>
+                <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Response
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-ink/[0.04]">
-              {SPEED_DATA.map((agent, i) => {
-                const responseColor =
-                  agent.avgMin < 5
-                    ? "text-success font-semibold"
-                    : agent.avgMin <= 15
-                    ? "text-warn font-semibold"
-                    : "text-danger font-semibold";
-                const deltaLabel =
-                  agent.vsDelta < 0
-                    ? `${agent.vsDelta.toFixed(1)} min`
-                    : `+${agent.vsDelta.toFixed(1)} min`;
-                const deltaColor =
-                  agent.vsDelta < 0 ? "text-success" : "text-danger";
-                return (
-                  <tr
-                    key={agent.name}
-                    className={i % 2 === 0 ? "bg-white" : "bg-[#f4f4f3]/60"}
-                  >
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.07] text-[0.7rem] font-semibold text-ink">
-                          {agent.initials}
-                        </span>
-                        <span className="font-medium text-ink">{agent.name}</span>
+            <tbody>
+              {LEADERBOARD.map((agent, i) => (
+                <tr
+                  key={agent.name}
+                  className={[
+                    "border-b border-ink/[0.05] text-sm transition-colors last:border-0",
+                    agent.highlight
+                      ? "bg-azure/[0.04]"
+                      : "hover:bg-paper/60",
+                  ].join(" ")}
+                >
+                  <td className="px-5 py-3 text-center">
+                    <span
+                      className={[
+                        "font-display text-base",
+                        agent.highlight ? "font-bold text-azure" : "text-slate/50",
+                      ].join(" ")}
+                    >
+                      {i + 1}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
+                        {agent.photo ? (
+                          <Image
+                            src={agent.photo}
+                            alt={agent.name}
+                            fill
+                            sizes="32px"
+                            className="object-cover object-top"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-[0.68rem] font-semibold text-ink/60">
+                            {agent.initials}
+                          </span>
+                        )}
                       </div>
-                    </td>
-                    <td className={`px-3 py-3 tabular-nums ${responseColor}`}>
-                      {agent.avgMin.toFixed(1)} min
-                    </td>
-                    <td className="px-3 py-3 text-right tabular-nums text-slate">
-                      {agent.leads}
-                    </td>
-                    <td className={`px-5 py-3 text-right tabular-nums text-[0.78rem] font-semibold ${deltaColor}`}>
-                      {deltaLabel}
-                    </td>
-                  </tr>
-                );
-              })}
+                      <span
+                        className={[
+                          "text-[0.85rem]",
+                          agent.highlight ? "font-bold text-ink" : "font-medium text-ink",
+                        ].join(" ")}
+                      >
+                        {agent.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-slate">
+                    {agent.closings}
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums font-semibold text-ink">
+                    {agent.volume}
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-slate">
+                    {agent.dom} days
+                  </td>
+                  <td
+                    className={[
+                      "px-5 py-3 text-right tabular-nums text-[0.82rem] font-semibold",
+                      parseFloat(agent.responseTime) < 5 ? "text-emerald-600" : "text-slate",
+                    ].join(" ")}
+                  >
+                    {agent.responseTime}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </Panel>
-
-      {/* ── Source ROI chart + Activity feed ────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel>
-          <PanelHeader
-            title="Marketing ROI by Channel"
-            subtitle="Spend vs. revenue closed, this quarter"
-            icon={<TrendingUp className="h-4 w-4" />}
-          />
-          <div className="h-[280px] px-3 py-4">
-            <SourceRoiChart />
-          </div>
-        </Panel>
-
-        <Panel>
-          <PanelHeader
-            title="Recent Activity"
-            subtitle="Latest actions across the brokerage"
-            icon={<LiveDot tone="azure" />}
-          />
-          <ul className="divide-y divide-ink/[0.04] py-1">
-            {FEED.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-paper/60"
-              >
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.07] text-[0.7rem] font-semibold text-ink">
-                  {item.initials}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[0.83rem] leading-snug text-slate">
-                    {item.text}
-                    {item.sub && (
-                      <span className="ml-1.5 font-semibold text-ink">{item.sub}</span>
-                    )}
-                  </p>
-                  <p className="mt-0.5 text-[0.68rem] text-slate/50">{item.ago}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Panel>
       </div>
 
-      {/* ── Agent Leaderboard ────────────────────────────────────────────── */}
+      {/* ── Source ROI chart ────────────────────────────────────────────────── */}
       <Panel>
         <PanelHeader
-          title="Agent Leaderboard"
-          subtitle="Top producers by closed volume"
+          title="Marketing ROI by Channel"
+          subtitle="Spend vs. revenue closed, this quarter"
           icon={<TrendingUp className="h-4 w-4" />}
-          action={
-            <Link
-              href="/hub/reporting"
-              className="text-[0.74rem] font-semibold text-ink hover:opacity-70"
-            >
-              Full report →
-            </Link>
-          }
         />
-        <ul className="divide-y divide-ink/[0.06]">
-          {agentLeaderboard.map((a, i) => (
-            <li key={a.slug} className="flex items-center gap-3 px-5 py-3">
-              <span className="w-5 shrink-0 text-center font-display text-base text-slate/70">
-                {i + 1}
-              </span>
-              <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/[0.06]">
-                <Image
-                  src={a.photo}
-                  alt={a.name}
-                  fill
-                  sizes="36px"
-                  className="object-cover"
-                />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-[0.86rem] font-semibold text-ink">
-                    {a.name}
-                  </p>
-                  <p className="shrink-0 font-display text-[0.95rem] text-ink tabular-nums">
-                    {compactUsd(a.volume)}
-                  </p>
-                </div>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <ProgressBar value={(a.volume / topVolume) * 100} className="flex-1" />
-                  <span className="shrink-0 text-[0.7rem] text-slate/70 tabular-nums">
-                    {num(a.homesSold)} sold
-                  </span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="h-[280px] px-3 py-4">
+          <SourceRoiChart />
+        </div>
       </Panel>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <p className="pb-2 text-center text-[0.72rem] text-slate/45">
         {company.name} &middot; {company.stats.annualVolume} annual volume &middot;{" "}
         {company.stats.agents} agents &middot; {usd(metrics.kpis.pipelineValue)} active pipeline

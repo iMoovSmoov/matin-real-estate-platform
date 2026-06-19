@@ -137,7 +137,7 @@ export default function BuyPage() {
       {/* ---------- FEATURED LISTINGS ---------- */}
       <Section>
         <Container>
-          <div className="flex items-end justify-between gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeading
               eyebrow="Just listed"
               title="Homes worth touring this week"
@@ -211,7 +211,7 @@ export default function BuyPage() {
                 Tell us what you&apos;re looking for and we&apos;ll match you with the right broker and the
                 right homes — many before they hit the open market.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href="/property-search" variant="white" size="lg">
                   <Search className="h-4 w-4" /> Start your search
                 </ButtonLink>

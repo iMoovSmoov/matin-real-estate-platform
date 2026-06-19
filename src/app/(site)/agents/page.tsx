@@ -21,7 +21,7 @@ export default function AgentsPage() {
           <h1 className="display-2 mt-4 max-w-3xl font-display text-ink text-balance">
             Brokers who live where they sell
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate text-pretty">
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate text-pretty sm:text-lg">
             Every Matin broker is full-time, licensed, and backed by the most advanced platform in the metro. Find the
             right person for your move across {agents.length} professionals.
           </p>

@@ -8,7 +8,7 @@ export function CommunityCard({ community, large = false }: { community: Communi
   return (
     <Link
       href={`/communities/${community.slug}`}
-      className={`group block overflow-hidden rounded-2xl ${large ? "aspect-[4/5] md:aspect-auto" : ""}`}
+      className={`group block overflow-hidden rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure ${large ? "aspect-[4/5] md:aspect-auto" : ""}`}
     >
       {/* Image with overlay */}
       <div className="relative overflow-hidden rounded-2xl aspect-[3/2] w-full">

@@ -10,6 +10,7 @@ import {
   Wand2,
   Printer,
   X,
+  ClipboardCopy,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
@@ -170,15 +171,13 @@ export function AiToolPanel({
             <Wand2 className="h-5 w-5" />
           </span>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-xl text-ink">{title}</h2>
-              {pillar && (
-                <span className="rounded bg-white px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-slate/70 ring-1 ring-inset ring-ink/[0.06]">
-                  {pillar}
-                </span>
-              )}
-            </div>
-            <p className="mt-1 text-[0.86rem] leading-relaxed text-slate">{description}</p>
+            {pillar && (
+              <span className="mb-1.5 inline-block rounded-full bg-azure/[0.09] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-azure">
+                {pillar}
+              </span>
+            )}
+            <h2 className="font-display text-xl text-ink sm:text-2xl">{title}</h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate max-w-2xl">{description}</p>
           </div>
         </div>
 
@@ -188,12 +187,12 @@ export function AiToolPanel({
             type="button"
             onClick={tryExampleAndRun}
             disabled={busy}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-azure/30 bg-azure/[0.07] px-4 py-2.5 text-[0.84rem] font-semibold text-azure transition-colors hover:bg-azure/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-azure/30 bg-gradient-to-r from-azure/[0.08] to-azure-bright/[0.06] px-4 py-2.5 text-sm font-semibold text-azure transition-colors hover:border-azure/60 hover:bg-azure/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
             ) : (
-              <><Wand2 className="h-4 w-4" /> {tryExample.label ?? "Try with example data"}</>
+              <><Wand2 className="h-4 w-4" /> Try with live data &rarr;</>
             )}
           </button>
         )}
@@ -232,7 +231,7 @@ export function AiToolPanel({
               key={f.name}
               className={cn(
                 "flex flex-col gap-1.5",
-                (f.full || f.type === "textarea") && "sm:col-span-2"
+                (f.full || f.type === "textarea") ? "col-span-1 sm:col-span-2" : "col-span-1"
               )}
             >
               <label
@@ -293,21 +292,24 @@ export function AiToolPanel({
                   value={values[f.name] ?? ""}
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
-                  className="rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none"
+                  className={cn(
+                    "rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none",
+                    f.type === "number" && "sm:max-w-[160px]"
+                  )}
                 />
               )}
             </div>
           ))}
 
-          <div className="sm:col-span-2">
+          <div className="col-span-1 sm:col-span-2">
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.88rem] font-semibold text-white transition-colors hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 font-semibold text-white transition-colors hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> AI is writing...
+                  <Loader2 className="h-4 w-4 animate-spin" /> Generating...
                 </>
               ) : (
                 <>
@@ -331,12 +333,25 @@ export function AiToolPanel({
             )}
           </div>
           {output && !busy && (
-            <button
-              onClick={run}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Regenerate
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={copy}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                ) : (
+                  <ClipboardCopy className="h-3.5 w-3.5" />
+                )}
+                {copied ? "Copied!" : "Copy all"}
+              </button>
+              <button
+                onClick={run}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Regenerate
+              </button>
+            </div>
           )}
         </div>
 
@@ -389,7 +404,7 @@ export function AiToolPanel({
 
               {/* Main content */}
               <div className="px-4 py-4 flex-1 sm:px-8 sm:py-6">
-                <div className="prose-document text-[0.875rem] leading-relaxed text-ink">
+                <div className="prose-document rounded-xl border border-ink/[0.08] bg-white p-5 sm:p-6 text-[0.875rem] leading-relaxed text-ink">
                   <AiMarkdown text={output} />
                   {busy && (
                     <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />

@@ -7,41 +7,18 @@ import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import type { Listing } from "@/lib/types";
 
-function FixLeafletIcon() {
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    });
-  }, []);
-  return null;
-}
-
 function makePriceIcon(price: number): L.DivIcon {
   const label =
     price >= 1_000_000
       ? `$${(price / 1_000_000).toFixed(1)}M`
-      : `$${Math.round(price / 1_000)}k`;
+      : `$${Math.round(price / 1_000)}K`;
 
   return L.divIcon({
     className: "",
-    html: `<div style="
-      background:#0d0d0d;
-      color:#fff;
-      font-family:sans-serif;
-      font-size:11px;
-      font-weight:700;
-      padding:3px 8px;
-      border-radius:999px;
-      white-space:nowrap;
-      box-shadow:0 2px 8px rgba(0,0,0,0.45);
-      border:1.5px solid rgba(255,255,255,0.15);
-      cursor:pointer;
-    ">${label}</div>`,
-    iconAnchor: [0, 0],
+    iconSize: [66, 30] as [number, number],
+    iconAnchor: [33, 15] as [number, number],
+    popupAnchor: [0, -20] as [number, number],
+    html: `<div style="background:#0d0d0d;color:#fff;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.35);letter-spacing:0.02em">${label}</div>`,
   });
 }
 
@@ -58,9 +35,17 @@ interface PropertyMapProps {
 export default function PropertyMap({ listings, className = "", onSelect }: PropertyMapProps) {
   const mappable = listings.filter((l) => l.lat != null && l.lng != null);
 
+  useEffect(() => {
+    delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    });
+  }, []);
+
   return (
     <div className={`relative h-full w-full ${className}`}>
-      <FixLeafletIcon />
       <MapContainer
         center={[45.5231, -122.6765]}
         zoom={11}

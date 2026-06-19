@@ -3,12 +3,12 @@ import { AiChat } from "@/components/command/AiChat";
 export default function CoachPage() {
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-6 md:py-8">
-      <div className="mb-4">
-        <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
+      <div className="mb-5">
+        <span className="inline-block rounded-full bg-azure/[0.09] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-azure mb-1.5">
           Coaching
-        </p>
-        <h1 className="mt-1 font-display text-2xl text-ink sm:text-3xl">Agent Coach</h1>
-        <p className="mt-1.5 max-w-2xl text-[0.9rem] leading-relaxed text-slate">
+        </span>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Agent Coach</h1>
+        <p className="mt-1 max-w-2xl text-[0.92rem] leading-relaxed text-slate">
           A tireless sales trainer. Run realistic role-plays and get crisp, tactical feedback — pick a scenario
           below or describe your own. Coach stays in character until you earn it.
         </p>

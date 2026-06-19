@@ -51,10 +51,10 @@ export default function SellerIntelPage() {
     : {};
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4">
+    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4 sm:space-y-5">
       {/* Page header */}
       <div>
-        <h1 className="font-display text-2xl text-ink md:text-3xl">Seller Intel</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Seller Intel</h1>
         <p className="mt-1 text-[0.92rem] text-slate">
           Build your seller intelligence brief before the first call.
         </p>
@@ -76,33 +76,27 @@ export default function SellerIntelPage() {
       </div>
 
       {/* Load from Cash Offer Pipeline select */}
-      <div className="flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
-        <span className="shrink-0 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/60">
+      <div className="flex flex-col items-start gap-2 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+        <span className="shrink-0 text-[0.72rem] font-semibold uppercase tracking-wider text-slate/60">
           Load from Pipeline
         </span>
-        <div className="flex flex-1 items-center gap-2">
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none"
-          >
-            <option value="">— choose a seller lead to auto-fill —</option>
-            {sellerLeads.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.sellerName} — {s.address}, {s.city}
-              </option>
-            ))}
-          </select>
-          {selectedId && (
-            <button
-              type="button"
-              onClick={() => setSelectedId("")}
-              className="shrink-0 text-[0.75rem] text-slate/50 hover:text-ink transition-colors"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        <select
+          value={selectedId}
+          onChange={(e) => setSelectedId(e.target.value)}
+          className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-sm text-ink transition-colors focus:border-ink/40 focus:outline-none"
+        >
+          <option value="">— choose a seller lead to auto-fill —</option>
+          {sellerLeads.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.sellerName} — {s.address}, {s.city}
+            </option>
+          ))}
+        </select>
+        {selectedId && (
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            Seller loaded
+          </span>
+        )}
       </div>
 
       {/* Tool panel — re-key on selectedId so AiToolPanel resets when seller changes */}

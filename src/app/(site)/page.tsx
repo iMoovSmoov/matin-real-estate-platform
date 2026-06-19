@@ -101,6 +101,9 @@ export default function HomePage() {
         </Container>
       </div>
 
+      {/* thin divider between stat band and listings */}
+      <div className="h-px bg-ink/[0.05]" />
+
       {/* ---------- FEATURED LISTINGS ---------- */}
       <Section>
         <Container>
@@ -202,7 +205,7 @@ export default function HomePage() {
         <Container className="relative">
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
-              <span className="eyebrow-light">The future of the brokerage</span>
+              <span className="eyebrow-light border-l-2 border-azure-bright pl-3">The future of the brokerage</span>
               <h2 className="mt-4 font-display text-3xl text-white text-balance sm:text-4xl">
                 The most technologically advanced brokerage in Oregon
               </h2>

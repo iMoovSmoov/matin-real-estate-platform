@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import {
   BedDouble, Bath, Maximize, Ruler, CalendarDays, Home, Landmark, Car,
   TrendingUp, Clock, Hash, Check, MapPin, Phone, Mail, ArrowRight, ChevronRight,
+  Star, CalendarCheck,
 } from "lucide-react";
 import { Container, Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/badge";
@@ -95,21 +96,34 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             {/* ===== MAIN COLUMN ===== */}
             <div>
               {/* Header */}
-              <div className="flex flex-col gap-4 border-b border-ink/[0.08] pb-8 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-                <div>
-                  <div className="mb-3"><StatusBadge status={listing.status} /></div>
-                  <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-4xl lg:text-5xl">{usd(listing.price)}</h1>
-                  <p className="mt-3 flex items-center gap-1.5 text-base sm:text-lg text-ink/80">
-                    <MapPin className="h-4 w-4 shrink-0 text-azure" /> {listing.address}
-                  </p>
-                  <p className="mt-1 text-slate">{listing.city}, {listing.state} {listing.zip}</p>
+              <div className="border-b border-ink/[0.08] pb-8">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <StatusBadge status={listing.status} />
+                  {listing.daysOnMarket === 0 && (
+                    <span className="rounded-full bg-azure/10 px-2.5 py-0.5 text-[0.72rem] font-semibold uppercase tracking-wide text-azure">
+                      Just listed
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-4 sm:gap-6 rounded-2xl bg-cloud px-4 py-3 sm:px-6 sm:py-4 shadow-soft ring-1 ring-ink/[0.06] self-start">
-                  <Stat icon={BedDouble} value={listing.beds} label="beds" />
-                  <span className="h-8 w-px bg-ink/10" />
-                  <Stat icon={Bath} value={listing.baths} label="baths" />
-                  <span className="h-8 w-px bg-ink/10" />
-                  <Stat icon={Maximize} value={num(listing.sqft)} label="sqft" />
+                <h1 className="font-display text-3xl text-ink sm:text-4xl md:text-5xl lg:text-6xl leading-none tracking-tight">
+                  {usd(listing.price)}
+                </h1>
+                <p className="mt-1 font-display text-base text-slate sm:text-lg">
+                  {listing.pricePerSqft > 0 && (
+                    <span className="mr-3 text-ink/50">${num(listing.pricePerSqft)}/sqft</span>
+                  )}
+                </p>
+                <p className="mt-3 flex items-center gap-1.5 text-base sm:text-lg text-ink/80">
+                  <MapPin className="h-4 w-4 shrink-0 text-azure" /> {listing.address}
+                </p>
+                <p className="mt-0.5 text-slate">{listing.city}, {listing.state} {listing.zip}</p>
+
+                {/* Quick stats row */}
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  <StatPill icon={BedDouble} value={listing.beds} label="beds" />
+                  <StatPill icon={Bath} value={listing.baths} label="baths" />
+                  <StatPill icon={Maximize} value={num(listing.sqft)} label="sqft" />
+                  {listing.garage > 0 && <StatPill icon={Car} value={listing.garage} label="garage" />}
                 </div>
               </div>
 
@@ -194,50 +208,78 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* ===== AGENT SIDEBAR ===== */}
-            <aside className="lg:sticky lg:top-28 lg:self-start">
+            <aside className="mt-8 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
               {agent ? (
                 <div className="overflow-hidden rounded-2xl bg-cloud shadow-lift ring-1 ring-ink/[0.06]">
-                  <div className="relative aspect-[4/3]">
-                    <Image
-                      src={agent.photo}
-                      alt={agent.name}
-                      fill
-                      sizes="360px"
-                      className="object-cover object-top"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-azure">
-                      Listing agent
+                  {/* Agent photo + info strip */}
+                  <div className="flex items-center gap-4 border-b border-ink/[0.07] p-5">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-azure/20">
+                      <Image
+                        src={agent.photo}
+                        alt={agent.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover object-top"
+                      />
                     </div>
-                    <h3 className="mt-2 font-display text-2xl text-ink">{agent.name}</h3>
-                    <p className="text-[0.9rem] text-slate">{agent.title}</p>
-
-                    <div className="mt-5 space-y-2.5 text-[0.9rem]">
-                      <a href={`tel:${agent.phone}`} className="flex items-center gap-3 text-ink/85 hover:text-azure">
-                        <Phone className="h-4 w-4 text-azure" /> {agent.phone}
-                      </a>
-                      <a href={`mailto:${agent.email}`} className="flex items-center gap-3 break-all text-ink/85 hover:text-azure">
-                        <Mail className="h-4 w-4 text-azure" /> {agent.email}
-                      </a>
-                    </div>
-
-                    <div className="mt-6 flex flex-col gap-2.5">
-                      <ButtonLink href={`/agents/${agent.slug}`} variant="primary" className="w-full">
-                        Request a tour <ArrowRight className="h-4 w-4" />
-                      </ButtonLink>
-                      <ButtonLink href={`/agents/${agent.slug}`} variant="outline" className="w-full">
-                        View agent profile
-                      </ButtonLink>
+                    <div className="min-w-0">
+                      <div className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-azure">
+                        Listing agent
+                      </div>
+                      <h3 className="mt-0.5 font-display text-xl text-ink leading-tight">{agent.name}</h3>
+                      <p className="text-[0.82rem] text-slate truncate">{agent.title}</p>
+                      {agent.rating > 0 && (
+                        <div className="mt-1 flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          <span className="text-[0.75rem] font-medium text-ink/70">{agent.rating.toFixed(1)}</span>
+                          {agent.reviews > 0 && (
+                            <span className="text-[0.72rem] text-slate">({agent.reviews})</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Contact links */}
+                  <div className="space-y-2 px-5 py-4 border-b border-ink/[0.07]">
+                    <a href={`tel:${agent.phone}`} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.88rem] text-ink/85 transition hover:bg-azure/5 hover:text-azure">
+                      <Phone className="h-4 w-4 text-azure shrink-0" /> {agent.phone}
+                    </a>
+                    <a href={`mailto:${agent.email}`} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.88rem] text-ink/85 transition hover:bg-azure/5 hover:text-azure break-all">
+                      <Mail className="h-4 w-4 text-azure shrink-0" /> {agent.email}
+                    </a>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="flex flex-col gap-2.5 p-5">
+                    <ButtonLink href={`/agents/${agent.slug}`} variant="primary" className="w-full">
+                      <CalendarCheck className="h-4 w-4" /> Schedule a Showing
+                    </ButtonLink>
+                    <ButtonLink href={`/agents/${agent.slug}`} variant="outline" className="w-full">
+                      View agent profile <ArrowRight className="h-4 w-4" />
+                    </ButtonLink>
+                  </div>
+
+                  {/* Agent stats */}
+                  {(agent.homesSold > 0 || agent.yearsExperience > 0) && (
+                    <div className="grid grid-cols-2 divide-x divide-ink/[0.07] border-t border-ink/[0.07]">
+                      <div className="px-5 py-3 text-center">
+                        <div className="font-display text-xl text-ink">{agent.homesSold}</div>
+                        <div className="text-[0.68rem] uppercase tracking-wide text-slate">Homes sold</div>
+                      </div>
+                      <div className="px-5 py-3 text-center">
+                        <div className="font-display text-xl text-ink">{agent.yearsExperience}yr</div>
+                        <div className="text-[0.68rem] uppercase tracking-wide text-slate">Experience</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-2xl bg-cloud p-6 shadow-soft ring-1 ring-ink/[0.06]">
                   <h3 className="font-display text-xl text-ink">Interested in this home?</h3>
-                  <p className="mt-2 text-[0.9rem] text-slate">Connect with a Matin broker to schedule a tour.</p>
+                  <p className="mt-2 text-[0.9rem] text-slate">Connect with a Matin broker to schedule a private showing.</p>
                   <ButtonLink href="/agents" variant="primary" className="mt-5 w-full">
-                    Meet our brokers
+                    <CalendarCheck className="h-4 w-4" /> Schedule a Showing
                   </ButtonLink>
                 </div>
               )}
@@ -262,16 +304,19 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         </Container>
       </Section>
 
-      {/* ---------- MORE IN COMMUNITY ---------- */}
+      {/* ---------- SIMILAR LISTINGS ---------- */}
       {more.length > 0 && (
         <Section className="bg-paper-200/60 pt-0">
           <Container>
             <div className="flex items-end justify-between gap-6 border-t border-ink/[0.07] pt-10 sm:pt-16">
               <div>
-                <span className="eyebrow">Nearby</span>
+                <span className="eyebrow">Similar homes</span>
                 <h2 className="mt-3 font-display text-2xl sm:text-3xl text-ink">
-                  More in {community ? community.name : listing.city}
+                  You may also like
                 </h2>
+                <p className="mt-1.5 text-[0.9rem] text-slate">
+                  More homes in {community ? community.name : listing.city}
+                </p>
               </div>
               {community && (
                 <ButtonLink href={`/communities/${community.slug}`} variant="outline" className="hidden shrink-0 sm:inline-flex">
@@ -279,11 +324,18 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </ButtonLink>
               )}
             </div>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {more.map((l) => (
                 <ListingCard key={l.id} listing={l} />
               ))}
             </div>
+            {community && (
+              <div className="mt-8 text-center sm:hidden">
+                <ButtonLink href={`/communities/${community.slug}`} variant="outline">
+                  View all in {community.name} <ArrowRight className="h-4 w-4" />
+                </ButtonLink>
+              </div>
+            )}
           </Container>
         </Section>
       )}
@@ -291,12 +343,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   );
 }
 
-function Stat({ icon: Icon, value, label }: { icon: typeof BedDouble; value: string | number; label: string }) {
+function StatPill({ icon: Icon, value, label }: { icon: typeof BedDouble; value: string | number; label: string }) {
   return (
-    <div className="text-center">
-      <Icon className="mx-auto h-5 w-5 text-azure" />
-      <div className="mt-1.5 font-display text-xl text-ink">{value}</div>
-      <div className="text-[0.72rem] uppercase tracking-wide text-slate">{label}</div>
+    <div className="flex items-center gap-2 rounded-full bg-cloud px-4 py-2 shadow-soft ring-1 ring-ink/[0.07]">
+      <Icon className="h-4 w-4 text-azure shrink-0" />
+      <span className="font-display text-base text-ink">{value}</span>
+      <span className="text-[0.78rem] text-slate">{label}</span>
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function SellPage() {
               </p>
             </Reveal>
             <Reveal delay={0.24}>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href="#instant-value" variant="primary" size="lg">
                   <TrendingUp className="h-4 w-4" /> Get my home value
                 </ButtonLink>
@@ -168,7 +168,7 @@ export default function SellPage() {
                   </Reveal>
                 ))}
               </div>
-              <div className="mt-9 flex flex-wrap gap-3">
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href="/contact" variant="primary" size="lg">
                   <DollarSign className="h-4 w-4" /> Get my cash offer
                 </ButtonLink>
@@ -265,7 +265,7 @@ export default function SellPage() {
                 List it on the open market for top dollar, or take a guaranteed cash offer and close on your
                 timeline. We&apos;ll help you choose.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
                 <ButtonLink href="#instant-value" variant="white" size="lg">
                   <TrendingUp className="h-4 w-4" /> Get my home value
                 </ButtonLink>

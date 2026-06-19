@@ -1,7 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Drama, Send, RotateCcw, Bot, Award, Play, Swords, Flame } from "lucide-react";
+import {
+  Drama,
+  Send,
+  RotateCcw,
+  Bot,
+  Award,
+  Play,
+  Swords,
+  Flame,
+  Presentation,
+  ShieldAlert,
+  Users,
+  Handshake,
+  TrendingDown,
+  Home,
+  type LucideIcon,
+} from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
@@ -12,6 +28,16 @@ import {
   type ScenarioCategory,
   type ScenarioDifficulty,
 } from "@/components/command/coaching/scenarios";
+
+/** Map category → lucide icon component */
+const CATEGORY_ICONS: Record<ScenarioCategory, LucideIcon> = {
+  "Listing Presentation": Presentation,
+  "Objection Handling": ShieldAlert,
+  "Buyer Consultation": Users,
+  "Negotiation": Handshake,
+  "Price Reduction": TrendingDown,
+  "FSBO / Expired": Home,
+};
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -208,29 +234,41 @@ export function ScenarioTrainer() {
         </div>
 
         {/* Scenario grid */}
-        <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
-          {filtered.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => start(s)}
-              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 text-left transition-all hover:border-ink/20 hover:bg-azure/[0.06]"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Pill tone="azure">{s.category}</Pill>
+        <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((s) => {
+            const CatIcon = CATEGORY_ICONS[s.category] ?? Drama;
+            return (
+              <button
+                key={s.id}
+                onClick={() => start(s)}
+                className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-ink/[0.08] bg-white p-5 text-left transition-all hover:border-azure/40 hover:shadow-soft"
+              >
+                {/* Icon + difficulty badge */}
+                <div className="flex items-start justify-between gap-2">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink/[0.05] text-ink ring-1 ring-inset ring-ink/[0.06] transition-colors group-hover:bg-ink/[0.08]">
+                    <CatIcon className="h-[18px] w-[18px]" />
+                  </span>
                   <Pill tone={DIFF_TONE[s.difficulty]}>{s.difficulty}</Pill>
                 </div>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] transition-colors group-hover:bg-ink/[0.08]">
-                  <Play className="h-3.5 w-3.5" />
-                </span>
-              </div>
-              <p className="text-[0.92rem] font-semibold text-ink">{s.title}</p>
-              <p className="text-[0.78rem] leading-relaxed text-slate/85">{s.summary}</p>
-              <p className="mt-0.5 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink opacity-80 transition-opacity group-hover:opacity-100">
-                Start role-play <Play className="h-3 w-3" />
-              </p>
-            </button>
-          ))}
+
+                {/* Title + summary */}
+                <div>
+                  <p className="text-[0.92rem] font-semibold leading-snug text-ink">{s.title}</p>
+                  <p className="mt-1 text-[0.78rem] leading-relaxed text-slate/80">{s.summary}</p>
+                </div>
+
+                {/* Category label + CTA */}
+                <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                  <span className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate/50">
+                    {s.category}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.73rem] font-semibold text-ink transition-colors group-hover:border-azure/30 group-hover:bg-azure/[0.06] group-hover:text-azure">
+                    Practice <Play className="h-3 w-3" />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -365,14 +403,75 @@ export function ScenarioTrainer() {
           reply · stay sharp
         </p>
         {coachGrade && (
-          <div className="mt-3 rounded-xl border border-ink/[0.08] bg-ink/[0.04] p-3">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink">
+          <div className="mt-3 rounded-xl border border-azure/20 bg-azure/[0.03] p-3.5">
+            <div className="mb-2.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
               <Bot className="h-3.5 w-3.5" /> AI Coach Feedback
             </div>
-            <AiMarkdown text={coachGrade} />
+            {/* Parse and render score chips if present */}
+            <CoachScoreChips text={coachGrade} />
+            {/* Improvement tip with left accent */}
+            <CoachTip text={coachGrade} />
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Extract "Label: X/10" pairs from coach grade text and render colored chips. */
+function CoachScoreChips({ text }: { text: string }) {
+  // Match patterns like "Tone: 8/10" or "Clarity: 7/10"
+  const chips: { label: string; score: number; max: number }[] = [];
+  const scoreRegex = /(\w[\w\s]*?):\s*(\d+)\/(\d+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = scoreRegex.exec(text)) !== null) {
+    const label = m[1].trim();
+    const score = parseInt(m[2], 10);
+    const max = parseInt(m[3], 10);
+    // Skip "Objection handled" and purely boolean values
+    if (max > 1) chips.push({ label, score, max });
+  }
+  if (chips.length === 0) return <AiMarkdown text={text} />;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {chips.map((c) => {
+        const pct = c.score / c.max;
+        const tone =
+          pct >= 0.8
+            ? "bg-success/10 text-success ring-success/20"
+            : pct >= 0.6
+              ? "bg-warn/10 text-warn ring-warn/20"
+              : "bg-danger/10 text-danger ring-danger/20";
+        return (
+          <span
+            key={c.label}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.78rem] font-semibold ring-1 ring-inset",
+              tone,
+            )}
+          >
+            {c.label}:{" "}
+            <span className="tabular-nums">
+              {c.score}/{c.max}
+            </span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Extract a tip line from the coach grade and render with left border accent. */
+function CoachTip({ text }: { text: string }) {
+  // Match lines starting with "Tip:" or containing tip marker
+  const tipMatch = text.match(/(?:Tip|tip)[:\s]+(.+)/);
+  if (!tipMatch) return null;
+  const tip = tipMatch[1].replace(/[\u{1F4A1}\u{2728}]/gu, "").trim();
+  return (
+    <div className="mt-2.5 border-l-4 border-azure bg-azure/[0.04] px-3 py-2 text-[0.8rem] leading-relaxed text-ink">
+      <span className="font-semibold text-azure">Tip: </span>
+      {tip}
     </div>
   );
 }

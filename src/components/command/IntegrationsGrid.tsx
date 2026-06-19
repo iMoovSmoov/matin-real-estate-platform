@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-type IntegrationStatus = "connected" | "pending" | "disconnected";
+type IntegrationStatus = "connected" | "available" | "coming-soon";
 
 interface Integration {
   id: string;
@@ -47,9 +47,17 @@ const INTEGRATIONS: Integration[] = [
     id: "facebook",
     name: "Facebook Lead Ads",
     category: "Lead Sources",
-    status: "pending",
+    status: "available",
     description: "Social lead generation from Facebook & Instagram.",
     icon: "f",
+  },
+  {
+    id: "homes",
+    name: "Homes.com",
+    category: "Lead Sources",
+    status: "coming-soon",
+    description: "Buyer intent signals from the Homes.com marketplace.",
+    icon: "Ho",
   },
   // CRM & Website
   {
@@ -70,6 +78,14 @@ const INTEGRATIONS: Integration[] = [
     lastSync: "30 min ago",
     icon: "S",
   },
+  {
+    id: "lofty",
+    name: "Lofty CRM",
+    category: "CRM & Website",
+    status: "available",
+    description: "AI-powered CRM with automated follow-up sequences.",
+    icon: "L",
+  },
   // Transaction Management
   {
     id: "dotloop",
@@ -84,7 +100,7 @@ const INTEGRATIONS: Integration[] = [
     id: "skyslope",
     name: "SkySlope",
     category: "Transaction Management",
-    status: "disconnected",
+    status: "available",
     description: "Compliance and brokerage transaction management.",
     icon: "SK",
   },
@@ -92,7 +108,7 @@ const INTEGRATIONS: Integration[] = [
     id: "glide",
     name: "Glide",
     category: "Transaction Management",
-    status: "disconnected",
+    status: "coming-soon",
     description: "Seller disclosures and disclosure management.",
     icon: "GL",
   },
@@ -110,9 +126,17 @@ const INTEGRATIONS: Integration[] = [
     id: "homebot",
     name: "Homebot",
     category: "Marketing",
-    status: "disconnected",
+    status: "available",
     description: "Automated home value reports to your sphere.",
     icon: "H",
+  },
+  {
+    id: "canva",
+    name: "Canva for Real Estate",
+    category: "Marketing",
+    status: "coming-soon",
+    description: "AI-generated listing graphics and social templates.",
+    icon: "Ca",
   },
   // Analytics
   {
@@ -128,9 +152,17 @@ const INTEGRATIONS: Integration[] = [
     id: "sisu",
     name: "Sisu",
     category: "Analytics",
-    status: "disconnected",
+    status: "available",
     description: "Agent performance scorecards and KPI tracking.",
     icon: "SI",
+  },
+  {
+    id: "looker",
+    name: "Looker Studio",
+    category: "Analytics",
+    status: "coming-soon",
+    description: "Custom brokerage dashboards powered by your data.",
+    icon: "LS",
   },
 ];
 
@@ -151,74 +183,82 @@ function StatusPill({ status }: { status: IntegrationStatus }) {
       </span>
     );
   }
-  if (status === "pending") {
+  if (status === "available") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-        Pending
+      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/20">
+        <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+        Available
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-slate-500 ring-1 ring-inset ring-slate-300/60">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-      Disconnected
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-0.5 text-[0.68rem] font-semibold text-slate-400 ring-1 ring-inset ring-slate-200">
+      Coming soon
     </span>
   );
 }
 
 function IntegrationCard({ item }: { item: Integration }) {
   const isConnected = item.status === "connected";
-  const isDisconnected = item.status === "disconnected";
+  const isAvailable = item.status === "available";
+  const isComingSoon = item.status === "coming-soon";
 
   return (
-    <div className="flex flex-col rounded-xl bg-white p-4 ring-1 ring-ink/[0.07] shadow-soft">
-      {/* Top row: icon + name + status */}
+    <div
+      className={cn(
+        "flex flex-col rounded-2xl border bg-white p-5 shadow-soft transition-shadow hover:shadow-lift",
+        isConnected && "border-ink/[0.08]",
+        isAvailable && "border-ink/[0.08]",
+        isComingSoon && "border-ink/[0.05] opacity-70",
+      )}
+    >
+      {/* Top row: icon + status */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white",
-              !isConnected && "opacity-50",
-            )}
-          >
-            {item.icon}
-          </div>
-          <span className="text-[0.88rem] font-semibold text-ink leading-tight">{item.name}</span>
+        <div
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-bold text-white text-[0.85rem] shadow-sm",
+            isConnected ? "bg-ink" : isAvailable ? "bg-ink/70" : "bg-ink/30",
+          )}
+        >
+          {item.icon}
         </div>
-        <div className="shrink-0 pt-0.5">
-          <StatusPill status={item.status} />
-        </div>
+        <StatusPill status={item.status} />
       </div>
 
-      {/* Description */}
-      <p className="mt-3 flex-1 text-[0.82rem] leading-relaxed text-slate/70">
-        {item.description}
-      </p>
+      {/* Name + Description */}
+      <div className="mt-3 flex-1">
+        <h3 className="text-[0.92rem] font-semibold leading-tight text-ink">{item.name}</h3>
+        <p className="mt-1.5 text-[0.82rem] leading-relaxed text-slate/70">
+          {item.description}
+        </p>
+      </div>
 
       {/* Bottom row: lastSync + action */}
-      <div className="mt-3 flex items-center justify-between border-t border-ink/[0.06] pt-3">
+      <div className="mt-4 flex items-center justify-between border-t border-ink/[0.06] pt-3.5">
         {isConnected && item.lastSync ? (
-          <span className="text-[0.74rem] text-slate/50">
+          <span className="text-[0.72rem] text-slate/50">
             Synced {item.lastSync}
           </span>
+        ) : isComingSoon ? (
+          <span className="text-[0.72rem] text-slate/40">Not yet available</span>
         ) : (
-          <span className="text-[0.74rem] text-slate/35">Not syncing</span>
+          <span className="text-[0.72rem] text-slate/40">Not connected</span>
         )}
 
-        {isDisconnected ? (
-          <button className="rounded-md bg-ink px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-ink/80">
+        {isAvailable && (
+          <button className="rounded-lg bg-azure px-3.5 py-1.5 text-[0.78rem] font-semibold text-white transition-colors hover:bg-azure/80">
             Connect
           </button>
-        ) : isConnected ? (
-          <button className="text-[0.74rem] font-semibold text-slate/60 hover:text-ink transition-colors">
+        )}
+        {isConnected && (
+          <button className="text-[0.74rem] font-semibold text-slate/60 transition-colors hover:text-ink">
             Manage
           </button>
-        ) : (
-          /* pending */
-          <button className="text-[0.74rem] font-semibold text-amber-600 hover:text-amber-700 transition-colors">
-            Finish setup
-          </button>
+        )}
+        {isComingSoon && (
+          <span className="rounded-lg bg-slate-50 px-3 py-1.5 text-[0.74rem] font-medium text-slate/40 ring-1 ring-inset ring-ink/[0.05]">
+            Coming soon
+          </span>
         )}
       </div>
     </div>

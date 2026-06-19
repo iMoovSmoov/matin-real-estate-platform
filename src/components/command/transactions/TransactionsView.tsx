@@ -40,6 +40,24 @@ type StatusFilter = "All" | "Active" | "Pending" | "Closed" | "At-risk";
 
 const FILTERS: StatusFilter[] = ["All", "Active", "Pending", "Closed", "At-risk"];
 
+/* ── Status filter color mapping ────────────────────────────────────────────── */
+const FILTER_ACTIVE_TONE: Record<StatusFilter, string> = {
+  All:        "border-ink/20 bg-ink/[0.08] text-ink",
+  Active:     "border-azure/30 bg-azure/10 text-azure",
+  Pending:    "border-warn/30 bg-warn/10 text-amber-700",
+  Closed:     "border-success/30 bg-success/10 text-success",
+  "At-risk":  "border-danger/30 bg-danger/10 text-danger",
+};
+
+/** Stage string → badge classes (for the row stage display) */
+function stageBadgeTone(stage: string): string {
+  if (stage === "Closed") return "bg-success/10 text-success ring-success/25";
+  if (["Appraisal", "Financing", "Clear to Close", "Pending"].includes(stage))
+    return "bg-warn/10 text-amber-700 ring-warn/25";
+  if (stage === "Cancelled") return "bg-danger/10 text-danger ring-danger/25";
+  return "bg-azure/10 text-azure ring-azure/20";
+}
+
 // A deal counts as "Pending" once it's under contract heading to the table.
 const PENDING_STAGES = new Set(["Pending", "Appraisal", "Financing", "Clear to Close"]);
 
@@ -126,20 +144,20 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
-                    ? "border-ink/20 bg-ink/[0.08] text-ink"
+                    ? FILTER_ACTIVE_TONE[f]
                     : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
                 )}
               >
                 {isRisk && (
                   <AlertTriangle
-                    className={cn("h-3 w-3", on ? "text-ink" : "text-danger")}
+                    className={cn("h-3 w-3", on ? "text-danger" : "text-danger/60")}
                   />
                 )}
                 {f}
                 <span
                   className={cn(
                     "rounded px-1 text-[0.66rem] tabular-nums",
-                    on ? "bg-ink/10 text-ink" : "bg-white text-slate/70",
+                    on ? "bg-black/[0.06] text-current" : "bg-white text-slate/70",
                   )}
                 >
                   {counts.get(f) ?? 0}
@@ -213,9 +231,12 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
               </Pill>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[0.74rem] text-slate/70">
-            {t.client} · {type.label} · <span className="text-slate/55">{t.stage}</span>
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+            <span className="truncate text-[0.74rem] text-slate/70">{t.client} · {type.label}</span>
+            <span className={cn("inline-flex items-center rounded-full px-2 py-px text-[0.66rem] font-semibold ring-1 ring-inset", stageBadgeTone(t.stage))}>
+              {t.stage}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -339,13 +360,17 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate hover:bg-ink/[0.04] hover:text-ink"
+                className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
               >
                 <X className="h-4 w-4" />
               </button>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">
-                {type.label} · {tx.stage} · {tx.id}
-              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">{type.label}</span>
+                <span className={cn("inline-flex items-center rounded-full px-2 py-px text-[0.66rem] font-semibold ring-1 ring-inset", stageBadgeTone(tx.stage))}>
+                  {tx.stage}
+                </span>
+                <span className="text-[0.7rem] text-slate/50">{tx.id}</span>
+              </div>
               <h2 className="mt-1 pr-8 font-display text-2xl text-ink">{tx.address}</h2>
 
               {/* Risk banner */}
@@ -434,23 +459,24 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                       <li
                         key={i}
                         className={cn(
-                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem]",
+                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] transition-colors",
                           c.done
-                            ? "bg-white/[0.02]"
+                            ? "bg-success/[0.04]"
                             : isNext
-                              ? "bg-white ring-1 ring-inset ring-ink/10"
+                              ? "bg-white ring-1 ring-inset ring-azure/20"
                               : "bg-white/[0.02]",
                         )}
                       >
                         {c.done ? (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
                         ) : (
-                          <Circle className="h-4 w-4 shrink-0 text-slate/40" />
+                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
                         )}
                         <span
                           className={cn(
+                            "transition-colors",
                             c.done
-                              ? "text-success line-through decoration-success/30"
+                              ? "text-success/70 line-through decoration-success/30"
                               : isNext
                                 ? "font-medium text-ink"
                                 : "text-slate",
