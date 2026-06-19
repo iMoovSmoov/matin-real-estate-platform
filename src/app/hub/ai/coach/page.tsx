@@ -7,7 +7,7 @@ export default function CoachPage() {
         <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
           Coaching
         </p>
-        <h1 className="mt-1 font-display text-3xl text-ink">Agent Coach</h1>
+        <h1 className="mt-1 font-display text-2xl text-ink sm:text-3xl">Agent Coach</h1>
         <p className="mt-1.5 max-w-2xl text-[0.9rem] leading-relaxed text-slate">
           A tireless sales trainer. Run realistic role-plays and get crisp, tactical feedback — pick a scenario
           below or describe your own. Coach stays in character until you earn it.

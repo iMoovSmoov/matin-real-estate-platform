@@ -139,7 +139,7 @@ export default function CoachingPage() {
             </span>
             <LiveDot tone="success" />
           </div>
-          <h1 className="font-display text-3xl text-ink md:text-[2.4rem]">Coaching Academy</h1>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.4rem]">Coaching Academy</h1>
           <p className="mt-1.5 max-w-2xl text-[0.92rem] leading-relaxed text-slate">
             AI scenario training &amp; contract-writing coaching for every broker. Drill live
             role-plays against a tireless AI client, sharpen your agreement language, and climb the

@@ -136,7 +136,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       </div>
 
       {/* Inbox */}
-      <div className="overflow-x-auto overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
+      <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-2.5">
           <p className="flex items-center gap-2 text-[0.78rem] font-semibold text-ink">
             <list.icon className="h-3.5 w-3.5" />

@@ -23,7 +23,7 @@ export function BlogGrid({ posts, categories }: { posts: Post[]; categories: str
   return (
     <div>
       {/* category chips */}
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex gap-2.5 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:pb-0">
         {chips.map((c) => {
           const on = active === c;
           return (
@@ -46,7 +46,7 @@ export function BlogGrid({ posts, categories }: { posts: Post[]; categories: str
       </div>
 
       {/* grid */}
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p, i) => (
           <Reveal key={p.title} delay={(i % 3) * 0.07}>
             <a

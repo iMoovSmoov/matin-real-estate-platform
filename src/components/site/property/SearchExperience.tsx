@@ -1,17 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, X, MapPinned, ChevronDown } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Search, SlidersHorizontal, X, MapPinned, ChevronDown, Map, List } from "lucide-react";
 import { ListingCard } from "@/components/site/ListingCard";
 import { Button } from "@/components/ui/button";
 import { cn, compactUsd } from "@/lib/utils";
 import type { Listing, ListingStatus } from "@/lib/types";
+
+const PropertyMap = dynamic(() => import("@/components/site/PropertyMap"), { ssr: false });
 
 const TYPES = ["Single Family", "Condo", "Townhouse", "Acreage Estate"] as const;
 const STATUSES: ListingStatus[] = ["Active", "New", "Pending", "Coming Soon", "Sold"];
 const BEDS = [1, 2, 3, 4, 5] as const;
 
 type Sort = "newest" | "price-asc" | "price-desc";
+type View = "list" | "map";
 
 const SORTS: { value: Sort; label: string }[] = [
   { value: "newest", label: "Newest" },
@@ -36,6 +40,7 @@ export function SearchExperience({
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sort, setSort] = useState<Sort>("newest");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [view, setView] = useState<View>("list");
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -75,147 +80,220 @@ export function SearchExperience({
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[300px_1fr]">
-      {/* ---------- FILTER SIDEBAR ---------- */}
-      <aside className="lg:sticky lg:top-28 lg:self-start">
-        {/* Search box */}
-        <div className="flex items-center gap-2 rounded-2xl bg-cloud px-4 shadow-soft ring-1 ring-ink/[0.08] focus-within:ring-azure/40">
-          <Search className="h-5 w-5 shrink-0 text-azure" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="City, neighborhood, or ZIP"
-            className="w-full bg-transparent py-3 text-[0.95rem] text-ink placeholder:text-slate focus:outline-none"
-          />
-          {query && (
-            <button onClick={() => setQuery("")} aria-label="Clear search" className="text-slate hover:text-ink">
-              <X className="h-4 w-4" />
-            </button>
-          )}
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
+      {/* ═══ LEFT PANEL: filters + list ═══ */}
+      <div
+        className={cn(
+          "flex flex-col",
+          // On mobile: hide entirely when map view is active
+          view === "map" ? "hidden lg:flex lg:flex-col" : "flex flex-col",
+          // Desktop: fixed-width sidebar with scroll
+          "lg:w-[44%] lg:border-r lg:border-ink/[0.08] lg:overflow-y-auto lg:h-[calc(100vh-4rem)] lg:sticky lg:top-16",
+        )}
+      >
+        {/* Mobile view toggle bar */}
+        <div className="flex gap-1 p-3 border-b border-ink/[0.08] bg-white lg:hidden">
+          <button
+            type="button"
+            onClick={() => setView("list")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all",
+              view === "list"
+                ? "bg-ink text-white"
+                : "bg-transparent text-slate",
+            )}
+          >
+            <List className="h-4 w-4" /> List
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("map")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all",
+              view === "map"
+                ? "bg-ink text-white"
+                : "bg-transparent text-slate",
+            )}
+          >
+            <Map className="h-4 w-4" /> Map
+          </button>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setFiltersOpen((v) => !v)}
-          className="mt-3 flex w-full items-center justify-between rounded-xl bg-cloud px-4 py-3 text-sm font-medium text-ink shadow-soft ring-1 ring-ink/[0.08] lg:hidden"
-        >
-          <span className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-azure" /> Filters
-            {activeFilterCount > 0 && (
-              <span className="rounded-full bg-azure px-2 py-0.5 text-[0.7rem] text-white">{activeFilterCount}</span>
-            )}
-          </span>
-          <ChevronDown className={cn("h-4 w-4 transition-transform", filtersOpen && "rotate-180")} />
-        </button>
-
-        <div className={cn("mt-4 space-y-7", !filtersOpen && "hidden lg:block")}>
-          {/* Type */}
-          <FilterGroup label="Property type">
-            <div className="flex flex-wrap gap-2">
-              <Chip active={type === ""} onClick={() => setType("")}>Any</Chip>
-              {TYPES.map((t) => (
-                <Chip key={t} active={type === t} onClick={() => setType(type === t ? "" : t)}>
-                  {t === "Acreage Estate" ? "Acreage" : t}
-                </Chip>
-              ))}
-            </div>
-          </FilterGroup>
-
-          {/* Status */}
-          <FilterGroup label="Status">
-            <div className="flex flex-wrap gap-2">
-              <Chip active={status === ""} onClick={() => setStatus("")}>Any</Chip>
-              {STATUSES.map((s) => (
-                <Chip key={s} active={status === s} onClick={() => setStatus(status === s ? "" : s)}>
-                  {s}
-                </Chip>
-              ))}
-            </div>
-          </FilterGroup>
-
-          {/* Beds */}
-          <FilterGroup label="Bedrooms (min)">
-            <div className="flex flex-wrap gap-2">
-              <Chip active={minBeds === 0} onClick={() => setMinBeds(0)}>Any</Chip>
-              {BEDS.map((b) => (
-                <Chip key={b} active={minBeds === b} onClick={() => setMinBeds(b)}>
-                  {b}+
-                </Chip>
-              ))}
-            </div>
-          </FilterGroup>
-
-          {/* Price range */}
-          <FilterGroup label="Price range">
-            <div className="flex items-center gap-2">
-              <PriceInput value={minPrice} onChange={setMinPrice} placeholder="No min" />
-              <span className="text-slate">—</span>
-              <PriceInput value={maxPrice} onChange={setMaxPrice} placeholder="No max" />
-            </div>
-            {(minPrice || maxPrice) && (
-              <p className="mt-2 text-[0.78rem] text-slate">
-                {minPrice ? compactUsd(Number(minPrice)) : "$0"} to {maxPrice ? compactUsd(Number(maxPrice)) : "any"}
-              </p>
-            )}
-          </FilterGroup>
-
-          {(activeFilterCount > 0 || query) && (
-            <Button variant="outline" size="sm" onClick={reset} className="w-full">
-              <X className="h-4 w-4" /> Reset all filters
-            </Button>
-          )}
-        </div>
-      </aside>
-
-      {/* ---------- RESULTS ---------- */}
-      <div>
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink/[0.08] pb-5">
-          <p className="text-[0.95rem] text-slate">
-            <span className="font-display text-2xl text-ink">{results.length}</span>{" "}
-            {results.length === 1 ? "home" : "homes"}
+        {/* Search + filter sidebar (inner) */}
+        <div className="p-4 pb-0">
+          {/* Search box */}
+          <div className="flex items-center gap-2 rounded-2xl bg-cloud px-4 shadow-soft ring-1 ring-ink/[0.08] focus-within:ring-azure/40">
+            <Search className="h-5 w-5 shrink-0 text-azure" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="City, neighborhood, or ZIP"
+              className="w-full bg-transparent py-3 text-[0.95rem] text-ink placeholder:text-slate focus:outline-none"
+            />
             {query && (
-              <>
-                {" "}for <span className="font-medium text-ink">&ldquo;{query}&rdquo;</span>
-              </>
+              <button onClick={() => setQuery("")} aria-label="Clear search" className="text-slate hover:text-ink">
+                <X className="h-4 w-4" />
+              </button>
             )}
-          </p>
-          <label className="flex items-center gap-2 text-sm text-slate">
-            Sort
-            <div className="relative">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as Sort)}
-                className="appearance-none rounded-full bg-cloud py-2 pl-4 pr-9 text-[0.85rem] font-medium text-ink shadow-soft ring-1 ring-ink/[0.08] focus:outline-none focus-visible:ring-azure/40"
-              >
-                {SORTS.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
+          </div>
+
+          {/* Mobile filter accordion toggle */}
+          <button
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="mt-3 flex w-full items-center justify-between rounded-xl bg-cloud px-4 py-3 text-sm font-medium text-ink shadow-soft ring-1 ring-ink/[0.08] lg:hidden"
+          >
+            <span className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-azure" /> Filters
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-azure px-2 py-0.5 text-[0.7rem] text-white">{activeFilterCount}</span>
+              )}
+            </span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", filtersOpen && "rotate-180")} />
+          </button>
+
+          <div className={cn("mt-4 space-y-7 pb-4", !filtersOpen && "hidden lg:block")}>
+            {/* Type */}
+            <FilterGroup label="Property type">
+              <div className="flex flex-wrap gap-2">
+                <Chip active={type === ""} onClick={() => setType("")}>Any</Chip>
+                {TYPES.map((t) => (
+                  <Chip key={t} active={type === t} onClick={() => setType(type === t ? "" : t)}>
+                    {t === "Acreage Estate" ? "Acreage" : t}
+                  </Chip>
                 ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate" />
-            </div>
-          </label>
+              </div>
+            </FilterGroup>
+
+            {/* Status */}
+            <FilterGroup label="Status">
+              <div className="flex flex-wrap gap-2">
+                <Chip active={status === ""} onClick={() => setStatus("")}>Any</Chip>
+                {STATUSES.map((s) => (
+                  <Chip key={s} active={status === s} onClick={() => setStatus(status === s ? "" : s)}>
+                    {s}
+                  </Chip>
+                ))}
+              </div>
+            </FilterGroup>
+
+            {/* Beds */}
+            <FilterGroup label="Bedrooms (min)">
+              <div className="flex flex-wrap gap-2">
+                <Chip active={minBeds === 0} onClick={() => setMinBeds(0)}>Any</Chip>
+                {BEDS.map((b) => (
+                  <Chip key={b} active={minBeds === b} onClick={() => setMinBeds(b)}>
+                    {b}+
+                  </Chip>
+                ))}
+              </div>
+            </FilterGroup>
+
+            {/* Price range */}
+            <FilterGroup label="Price range">
+              <div className="flex items-center gap-2">
+                <PriceInput value={minPrice} onChange={setMinPrice} placeholder="No min" />
+                <span className="text-slate">—</span>
+                <PriceInput value={maxPrice} onChange={setMaxPrice} placeholder="No max" />
+              </div>
+              {(minPrice || maxPrice) && (
+                <p className="mt-2 text-[0.78rem] text-slate">
+                  {minPrice ? compactUsd(Number(minPrice)) : "$0"} to {maxPrice ? compactUsd(Number(maxPrice)) : "any"}
+                </p>
+              )}
+            </FilterGroup>
+
+            {(activeFilterCount > 0 || query) && (
+              <Button variant="outline" size="sm" onClick={reset} className="w-full">
+                <X className="h-4 w-4" /> Reset all filters
+              </Button>
+            )}
+          </div>
         </div>
 
-        {results.length > 0 ? (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {results.map((l) => (
-              <ListingCard key={l.id} listing={l} />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-8 flex flex-col items-center justify-center rounded-2xl bg-cloud px-6 py-20 text-center shadow-soft ring-1 ring-ink/[0.06]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-azure/10 text-azure">
-              <MapPinned className="h-8 w-8" />
-            </div>
-            <h3 className="mt-5 font-display text-2xl text-ink">No homes match your search</h3>
-            <p className="mt-2 max-w-md text-[0.95rem] text-slate">
-              Try widening your price range, clearing a filter, or searching a nearby community.
+        {/* Results list */}
+        <div className="flex-1 px-4 pb-6">
+          {/* Results heading + sort */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] py-4">
+            <p className="text-[0.95rem] text-slate">
+              <span className="font-display text-2xl text-ink">{results.length}</span>{" "}
+              {results.length === 1 ? "home" : "homes"}
+              {query && (
+                <>
+                  {" "}for <span className="font-medium text-ink">&ldquo;{query}&rdquo;</span>
+                </>
+              )}
             </p>
-            <Button variant="primary" size="md" onClick={reset} className="mt-6">
-              Reset filters
-            </Button>
+            <label className="flex items-center gap-2 text-sm text-slate">
+              Sort
+              <div className="relative">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as Sort)}
+                  className="appearance-none rounded-full bg-cloud py-2 pl-4 pr-9 text-[0.85rem] font-medium text-ink shadow-soft ring-1 ring-ink/[0.08] focus:outline-none focus-visible:ring-azure/40"
+                >
+                  {SORTS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate" />
+              </div>
+            </label>
+          </div>
+
+          {results.length > 0 ? (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {results.map((l) => (
+                <ListingCard key={l.id} listing={l} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 flex flex-col items-center justify-center rounded-2xl bg-cloud px-6 py-20 text-center shadow-soft ring-1 ring-ink/[0.06]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-azure/10 text-azure">
+                <MapPinned className="h-8 w-8" />
+              </div>
+              <h3 className="mt-5 font-display text-2xl text-ink">No homes match your search</h3>
+              <p className="mt-2 max-w-md text-[0.95rem] text-slate">
+                Try widening your price range, clearing a filter, or searching a nearby community.
+              </p>
+              <Button variant="primary" size="md" onClick={reset} className="mt-6">
+                Reset filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ RIGHT PANEL: map ═══ */}
+      <div
+        className={cn(
+          // Mobile: full-screen when map view active, hidden when list view active
+          view === "list"
+            ? "hidden lg:block lg:flex-1 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]"
+            : "flex flex-1 h-[calc(100vh-14rem)] lg:flex-1 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]",
+        )}
+      >
+        {/* Mobile "back to list" toggle shown above map on mobile */}
+        {view === "map" && (
+          <div className="flex gap-1 p-3 border-b border-ink/[0.08] bg-white lg:hidden">
+            <button
+              type="button"
+              onClick={() => setView("list")}
+              className="flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold bg-transparent text-slate"
+            >
+              <List className="h-4 w-4" /> List
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("map")}
+              className="flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold bg-ink text-white"
+            >
+              <Map className="h-4 w-4" /> Map
+            </button>
           </div>
         )}
+        <div className="h-full w-full">
+          <PropertyMap listings={results} className="h-full w-full" />
+        </div>
       </div>
     </div>
   );

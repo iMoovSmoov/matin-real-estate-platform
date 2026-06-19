@@ -33,7 +33,7 @@ export default function AgentPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
       <div>
-        <h1 className="font-display text-3xl text-ink">
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">
           Good morning, {agent.firstName}.
         </h1>
         <p className="mt-1 text-[0.9rem] text-slate">

@@ -114,7 +114,7 @@ export default async function CommunityPage({ params }: { params: Promise<{ slug
           </div>
 
           {homes.length > 0 ? (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {homes.map((l) => (
                 <ListingCard key={l.id} listing={l} />
               ))}

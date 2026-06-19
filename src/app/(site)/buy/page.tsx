@@ -118,7 +118,7 @@ export default function BuyPage() {
             intro="A brokerage built like a tech company — so your search is faster, your offers are smarter, and your close is smoother."
             align="center"
           />
-          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {values.map((v, i) => (
               <Reveal key={v.title} delay={(i % 3) * 0.08}>
                 <div className="group flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift">
@@ -147,7 +147,7 @@ export default function BuyPage() {
               View all listings <ArrowRight className="h-4 w-4" />
             </ButtonLink>
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredListings.slice(0, 3).map((l, i) => (
               <Reveal key={l.id} delay={i * 0.08}>
                 <ListingCard listing={l} />
@@ -171,7 +171,7 @@ export default function BuyPage() {
             intro="The questions every buyer asks — answered by the team that closes 305+ homes a year."
             align="center"
           />
-          <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2">
             {resources.map((r, i) => (
               <Reveal key={r.title} delay={(i % 2) * 0.08}>
                 <a

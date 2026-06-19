@@ -83,7 +83,7 @@ export default function AiStudioPage() {
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Header */}
       <div className="pb-2">
-        <h1 className="font-display text-3xl text-ink md:text-[2.3rem]">AI Toolkit</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.3rem]">AI Toolkit</h1>
         <p className="mt-2 text-[0.95rem] leading-relaxed text-slate">
           Nine purpose-built tools — each connected to your CRM, listings, and pipeline. Pick a tool, load your data, and generate in one click.
         </p>

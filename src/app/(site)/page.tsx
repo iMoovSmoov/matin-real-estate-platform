@@ -37,7 +37,7 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="relative flex min-h-[92vh] items-center overflow-hidden">
+      <section className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-[92vh]">
         <div className="absolute inset-0">
           <Image
             src={company.officeHero}
@@ -51,19 +51,19 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
         </div>
 
-        <Container className="relative z-10 pt-28">
+        <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
             </Reveal>
             <Reveal delay={0.08}>
-              <h1 className="display-1 mt-5 font-display text-white text-balance">
+              <h1 className="display-1 mt-5 font-display text-4xl text-white text-balance sm:text-5xl">
                 Find your place in the{" "}
                 <span className="italic text-azure-bright">Pacific Northwest.</span>
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
                 The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
                 annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
               </p>
@@ -74,7 +74,7 @@ export default function HomePage() {
               </div>
             </Reveal>
             <Reveal delay={0.32}>
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/80">
                 <span className="flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
                 </span>
@@ -87,14 +87,14 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* ---------- STАТ BAND ---------- */}
+      {/* ---------- STAT BAND ---------- */}
       <div className="border-y border-ink/[0.07] bg-cloud">
         <Container>
-          <dl className="grid grid-cols-2 divide-ink/[0.07] py-10 md:grid-cols-5 md:divide-x">
+          <dl className="grid grid-cols-2 divide-ink/[0.07] py-7 sm:grid-cols-3 md:grid-cols-5 md:divide-x md:py-10">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
-                <dt className="font-display text-4xl text-ink md:text-[2.6rem]">{n}</dt>
-                <dd className="mt-1 text-[0.82rem] leading-tight text-slate">{l}</dd>
+                <dt className="font-display text-3xl text-ink md:text-[2.6rem]">{n}</dt>
+                <dd className="mt-1 text-[0.75rem] leading-tight text-slate sm:text-[0.82rem]">{l}</dd>
               </Reveal>
             ))}
           </dl>
@@ -104,7 +104,7 @@ export default function HomePage() {
       {/* ---------- FEATURED LISTINGS ---------- */}
       <Section>
         <Container>
-          <div className="flex items-end justify-between gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeading
               eyebrow="Featured listings"
               title="Homes worth coming home to"
@@ -114,12 +114,17 @@ export default function HomePage() {
               View all listings <ArrowRight className="h-4 w-4" />
             </ButtonLink>
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:mt-12 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {featuredListings.slice(0, 6).map((l, i) => (
               <Reveal key={l.id} delay={(i % 3) * 0.08}>
                 <ListingCard listing={l} />
               </Reveal>
             ))}
+          </div>
+          <div className="mt-6 sm:hidden">
+            <ButtonLink href="/property-search" variant="outline" className="w-full justify-center">
+              View all listings <ArrowRight className="h-4 w-4" />
+            </ButtonLink>
           </div>
         </Container>
       </Section>
@@ -133,7 +138,7 @@ export default function HomePage() {
             intro="From West Linn bluffs to Lake Oswego lakefront and the Vancouver waterfront — we live where we sell."
             align="center"
           />
-          <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
             {popularCommunities.map((c, i) => (
               <Reveal key={c.slug} delay={(i % 6) * 0.05}>
                 <CommunityCard community={c} />
@@ -151,9 +156,9 @@ export default function HomePage() {
       {/* ---------- WHY MATIN ---------- */}
       <Section>
         <Container>
-          <div className="grid items-center gap-14 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
             <Reveal>
-              <div className="relative aspect-[5/4] overflow-hidden rounded-3xl shadow-lift">
+              <div className="relative aspect-[5/4] overflow-hidden rounded-2xl shadow-lift sm:rounded-3xl">
                 <Image
                   src={company.officeMeeting}
                   alt="Matin Real Estate team"
@@ -161,7 +166,7 @@ export default function HomePage() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
                 />
-                <div className="absolute bottom-5 left-5 rounded-2xl bg-cloud/95 px-5 py-4 shadow-lift backdrop-blur">
+                <div className="absolute bottom-4 left-4 rounded-2xl bg-cloud/95 px-5 py-4 shadow-lift backdrop-blur sm:bottom-5 sm:left-5">
                   <div className="font-display text-3xl text-ink">{company.founded}</div>
                   <div className="text-[0.8rem] text-slate">Founded in West Linn, OR</div>
                 </div>
@@ -172,15 +177,15 @@ export default function HomePage() {
                 eyebrow="Why Matin"
                 title="A brokerage built like a tech company"
               />
-              <div className="mt-8 space-y-7">
+              <div className="mt-6 space-y-5 sm:mt-8 sm:space-y-7">
                 {values.map((v) => (
-                  <Reveal key={v.title} className="flex gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure">
-                      <v.icon className="h-6 w-6" />
+                  <Reveal key={v.title} className="flex gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure sm:h-12 sm:w-12">
+                      <v.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <div>
-                      <h3 className="font-display text-xl text-ink">{v.title}</h3>
-                      <p className="mt-1 text-[0.95rem] leading-relaxed text-slate">{v.body}</p>
+                      <h3 className="font-display text-lg text-ink sm:text-xl">{v.title}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-slate sm:text-[0.95rem]">{v.body}</p>
                     </div>
                   </Reveal>
                 ))}
@@ -191,17 +196,17 @@ export default function HomePage() {
       </Section>
 
       {/* ---------- TECH / COMMAND CENTER ---------- */}
-      <section className="relative overflow-hidden bg-ink py-24 text-white">
+      <section className="relative overflow-hidden bg-ink py-14 text-white md:py-20 lg:py-24">
         <div className="absolute inset-0 grid-tech opacity-60" />
         <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
         <Container className="relative">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div>
               <span className="eyebrow-light">The future of the brokerage</span>
-              <h2 className="display-2 mt-4 font-display text-white text-balance">
+              <h2 className="mt-4 font-display text-3xl text-white text-balance sm:text-4xl">
                 The most technologically advanced brokerage in Oregon
               </h2>
-              <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">
                 Behind every Matin client is the <strong className="text-white">Matin Hub</strong> — a custom
                 platform that unifies our CRM, listings, transactions, marketing and AI into one seamless system. Real-time
                 dashboards, AI coaching, and automated workflows so our brokers spend their time on you.
@@ -216,17 +221,17 @@ export default function HomePage() {
               </div>
             </div>
             <Reveal delay={0.1}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {[
                   ["Structured data", "Spreadsheets → live databases", Database],
                   ["AI integration", "AI woven into the CRM", BrainCircuit],
                   ["Automation", "Speed-to-lead in under 60s", Zap],
                   ["AI coaching", "Scenario training for brokers", GraduationCap],
                 ].map(([t, d, Icon]) => (
-                  <div key={t as string} className="glass rounded-2xl p-5">
-                    <Icon className="h-5 w-5 text-azure-bright" />
-                    <div className="mt-3 font-display text-lg text-white">{t as string}</div>
-                    <div className="mt-1 text-[0.84rem] text-slate-300">{d as string}</div>
+                  <div key={t as string} className="glass rounded-2xl p-4 sm:p-5">
+                    <Icon className="h-4 w-4 text-azure-bright sm:h-5 sm:w-5" />
+                    <div className="mt-3 font-display text-base text-white sm:text-lg">{t as string}</div>
+                    <div className="mt-1 text-xs text-slate-300 sm:text-[0.84rem]">{d as string}</div>
                   </div>
                 ))}
               </div>
@@ -244,10 +249,10 @@ export default function HomePage() {
               title="40+ brokers who live where they sell"
               align="center"
             />
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-2 sm:mt-10 sm:gap-3">
               {salesAgents.slice(0, 12).map((a) => (
                 <Link key={a.slug} href={`/agents/${a.slug}`} className="group relative">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full ring-2 ring-cloud transition group-hover:ring-azure md:h-20 md:w-20">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-full ring-2 ring-cloud transition group-hover:ring-azure sm:h-16 sm:w-16 md:h-20 md:w-20">
                     <Image src={a.photo} alt={a.name} fill sizes="80px" className="object-cover object-top" />
                   </div>
                 </Link>
@@ -266,11 +271,11 @@ export default function HomePage() {
       <Section className="bg-paper-200/60">
         <Container>
           <SectionHeading eyebrow="Client stories" title="People who trusted us with the biggest move of their lives" align="center" />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
-                <figure className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">
-                  <Quote className="h-8 w-8 text-azure/30" />
+                <figure className="flex h-full flex-col rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06] sm:p-7">
+                  <Quote className="h-6 w-6 text-azure/30 sm:h-8 sm:w-8" />
                   <blockquote className="mt-3 flex-1 text-[0.98rem] leading-relaxed text-ink/85">
                     &ldquo;{t.quote}&rdquo;
                   </blockquote>
@@ -293,15 +298,15 @@ export default function HomePage() {
       {/* ---------- FINAL CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-8 py-16 text-center text-white shadow-glow md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-5 py-12 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
-              <h2 className="display-2 font-display text-white text-balance">Ready to make your move?</h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-white/90">
+              <h2 className="font-display text-2xl text-white text-balance sm:text-3xl md:text-4xl">Ready to make your move?</h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm text-white/90 sm:text-base">
                 Whether you&apos;re buying, selling, or just exploring — let&apos;s talk. Or ask our AI concierge anything,
                 right now.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-6 flex flex-col justify-center gap-3 sm:mt-8 sm:flex-row">
                 <ButtonLink href="/contact" variant="white" size="lg">Talk to a broker</ButtonLink>
                 <ButtonLink href="/sell" variant="outline-light" size="lg">Get your home value</ButtonLink>
               </div>

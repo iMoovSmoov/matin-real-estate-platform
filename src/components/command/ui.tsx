@@ -159,7 +159,7 @@ export function StatTile({
         <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-ink/[0.08] blur-2xl" />
       )}
       <div className="relative flex items-start justify-between gap-2">
-        <p className="text-[0.72rem] font-medium uppercase tracking-wider text-slate">
+        <p className="text-[0.64rem] font-medium uppercase tracking-wider text-slate sm:text-[0.72rem]">
           {label}
         </p>
         {icon && (
@@ -169,11 +169,11 @@ export function StatTile({
         )}
       </div>
       <div className="relative mt-2 flex items-end gap-2">
-        <span className="font-display text-2xl leading-none text-ink tabular-nums">
+        <span className="font-display text-xl leading-none text-ink tabular-nums sm:text-2xl lg:text-3xl">
           {value}
         </span>
         {delta && (
-          <span className={cn("mb-0.5 inline-flex items-center gap-0.5 text-[0.74rem] font-semibold tabular-nums", deltaColor)}>
+          <span className={cn("mb-0.5 inline-flex items-center gap-0.5 text-[0.68rem] font-semibold tabular-nums sm:text-[0.74rem]", deltaColor)}>
             {dir === "up" ? <ArrowUp className="h-3 w-3" /> : dir === "down" ? <ArrowDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
             {delta.value}
           </span>

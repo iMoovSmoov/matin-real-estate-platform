@@ -23,7 +23,7 @@ export default function ListingLaunchPage() {
           <LiveDot tone="azure" />
           <SectionLabel>Listing management</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-ink">Listing Launch Wizard</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Listing Launch Wizard</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
           Orchestrate every listing from intake to MLS-live — checklists, marketing kit generation,
           and broker approval in one place.

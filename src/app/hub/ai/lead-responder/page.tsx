@@ -193,7 +193,7 @@ export default function LeadResponderPage() {
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
       {/* ── page header ── */}
       <div className="mb-6">
-        <h1 className="font-display text-2xl text-ink">Lead Reply</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Lead Reply</h1>
         <p className="mt-1 text-[0.9rem] text-slate">
           Craft the perfect first response, personalized to each lead.
         </p>

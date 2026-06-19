@@ -236,11 +236,11 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
         {lead && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 pb-4 pt-5">
+            <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-4 pb-4 pt-4 sm:px-5 sm:pt-5">
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
+                className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink sm:right-4 sm:top-4"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -308,7 +308,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               </div>
 
               {/* Quick comms actions */}
-              <div className="mt-4 grid grid-cols-3 gap-2">
+              <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2">
                 <a
                   href={`tel:${lead.phone.replace(/[^\d+]/g, "")}`}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-ink/12 bg-white py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
@@ -331,7 +331,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
             </div>
 
             {/* Body */}
-            <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+            <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
               {/* Contact + facts */}
               <div className="grid grid-cols-2 gap-2">
                 <Fact icon={<Mail className="h-3.5 w-3.5" />} label="Email" value={lead.email} />

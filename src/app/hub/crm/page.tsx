@@ -21,7 +21,7 @@ export default function CrmPage() {
           <LiveDot tone="azure" />
           <SectionLabel>CRM &amp; Leads</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-ink">CRM &amp; Leads</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">CRM &amp; Leads</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
           Your lead inbox. Work the smart lists top to bottom, open a lead to see every call, text, and
           email in one timeline, then reply in seconds with AI.

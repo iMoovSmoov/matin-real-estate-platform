@@ -241,9 +241,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-ink/[0.08] bg-paper/85 px-4 backdrop-blur-md md:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-ink/[0.08] bg-paper/85 px-4 backdrop-blur-md sm:h-16 md:px-6">
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
@@ -275,14 +275,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Bell className="h-[1.15rem] w-[1.15rem]" />
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.58rem] font-bold text-ink ring-2 ring-ink">
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.58rem] font-bold text-white ring-2 ring-paper">
                   {NOTIFICATIONS.length}
                 </span>
               </button>
               {notifOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} aria-hidden />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-2xl">
+                  <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-2xl sm:w-80">
                     <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-3">
                       <span className="text-[0.84rem] font-semibold text-ink">Notifications</span>
                       <span className="rounded-md bg-ink/[0.08] px-1.5 py-0.5 text-[0.62rem] font-semibold text-ink">
@@ -321,7 +321,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            <div className="flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-3">
+            <div className="flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 md:pr-3">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-[0.66rem] font-bold text-white">
                 {initials("Alicia Kelly-Smith")}
               </span>
@@ -337,17 +337,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Back-to-site strip */}
-        <div className="flex items-center border-b border-ink/[0.06] bg-white px-4 py-1.5 md:px-6">
+        <div className="flex items-center overflow-x-hidden border-b border-ink/[0.06] bg-white px-4 py-1.5 md:px-6">
           <Link
             href="/"
-            className="group inline-flex items-center gap-1.5 text-[0.72rem] font-medium text-slate/70 transition-colors hover:text-ink"
+            className="group inline-flex shrink-0 items-center gap-1.5 text-[0.72rem] font-medium text-slate/70 transition-colors hover:text-ink"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
             Back to website
           </Link>
         </div>
 
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );

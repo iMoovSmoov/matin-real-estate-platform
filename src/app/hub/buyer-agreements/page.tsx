@@ -27,7 +27,7 @@ export default function BuyerAgreementsPage() {
           <LiveDot tone="azure" />
           <SectionLabel>Buyer Agreement Workspace</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-ink">Buyer Agreements</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Buyer Agreements</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
           Track every buyer&apos;s representation agreement from intake through signature. Generate
           packets, send via DocuSign, and keep every agent compliant.

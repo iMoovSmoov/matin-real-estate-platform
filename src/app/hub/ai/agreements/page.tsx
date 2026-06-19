@@ -72,31 +72,33 @@ export default function AgreementsPage() {
       </div>
 
       {/* Load from CRM select */}
-      <div className="flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-4 py-3">
+      <div className="flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
         <span className="shrink-0 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/60">
           Load from CRM
         </span>
-        <select
-          value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
-          className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none"
-        >
-          <option value="">— choose a buyer to auto-fill —</option>
-          {buyerAgreements.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name} — {b.areas.join(", ")} · ${Math.round(b.budgetMin / 1000)}k–${Math.round(b.budgetMax / 1000)}k
-            </option>
-          ))}
-        </select>
-        {selectedId && (
-          <button
-            type="button"
-            onClick={() => setSelectedId("")}
-            className="shrink-0 text-[0.75rem] text-slate/50 hover:text-ink transition-colors"
+        <div className="flex flex-1 items-center gap-2">
+          <select
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none"
           >
-            Clear
-          </button>
-        )}
+            <option value="">— choose a buyer to auto-fill —</option>
+            {buyerAgreements.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} — {b.areas.join(", ")} · ${Math.round(b.budgetMin / 1000)}k–${Math.round(b.budgetMax / 1000)}k
+              </option>
+            ))}
+          </select>
+          {selectedId && (
+            <button
+              type="button"
+              onClick={() => setSelectedId("")}
+              className="shrink-0 text-[0.75rem] text-slate/50 hover:text-ink transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tool panel */}

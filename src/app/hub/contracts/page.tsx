@@ -67,7 +67,7 @@ export default function ContractsPage() {
             <FileSignature className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="font-display text-3xl text-ink md:text-[2.2rem]">Contract Builder</h1>
+            <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.2rem]">Contract Builder</h1>
             <p className="mt-1.5 max-w-xl text-[0.92rem] leading-relaxed text-slate">
               Pick a contract, auto-fill it, and send it for signature in minutes.
             </p>

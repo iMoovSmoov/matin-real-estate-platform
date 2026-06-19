@@ -29,7 +29,7 @@ export default function CashOfferPage() {
           <LiveDot tone="azure" />
           <SectionLabel>Cash Is King Home Buyers — active seller pipeline</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-ink">Cash Offer Pipeline</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Cash Offer Pipeline</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
           Track every seller request from initial inquiry through cash offer acceptance and
           listing conversion.

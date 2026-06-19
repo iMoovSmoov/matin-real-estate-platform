@@ -161,7 +161,7 @@ const topVolume = agentLeaderboard[0]?.volume || 1;
 /* ── Page ───────────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-4 md:px-6 md:py-8">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-2xl border border-ink/[0.08] bg-gradient-to-br from-ink/[0.04] via-ink/[0.02] to-ink/[0.03] px-6 py-7">
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         <div className="relative flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
           {/* Left — heading + alert chips */}
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-3xl text-ink md:text-[2.4rem]">
+            <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.4rem]">
               Jordan&rsquo;s Dashboard
             </h1>
             <p className="mt-1 text-[0.92rem] text-slate">
@@ -199,7 +199,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Right — CTA buttons */}
-          <div className="flex shrink-0 gap-2.5">
+          <div className="flex shrink-0 flex-wrap gap-2.5">
             <Link
               href="/hub/crm"
               className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-ink/90"

@@ -119,7 +119,7 @@ export default function SellPage() {
             intro="The difference between listed and sold is exposure, presentation, and price. We engineer all three."
             align="center"
           />
-          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {advantages.map((a, i) => (
               <Reveal key={a.title} delay={(i % 3) * 0.08}>
                 <div className="group flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift">
@@ -227,7 +227,7 @@ export default function SellPage() {
             title="Sold — and thrilled they chose Matin"
             align="center"
           />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
                 <figure className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">

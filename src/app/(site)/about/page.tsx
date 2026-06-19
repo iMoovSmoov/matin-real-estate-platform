@@ -167,7 +167,7 @@ export default function AboutPage() {
             title="A decade of building differently"
             align="center"
           />
-          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {milestones.map((m, i) => (
               <Reveal key={m.year} delay={(i % 4) * 0.08}>
                 <div className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">
@@ -313,7 +313,7 @@ export default function AboutPage() {
               </div>
             </div>
             <Reveal delay={0.1}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[
                   [TrendingUp, "Live market data", "Real-time comps driving every decision"],
                   [Users, "Dedicated brokers", "A named agent on every deal, start to close"],

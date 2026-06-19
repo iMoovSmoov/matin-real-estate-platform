@@ -170,7 +170,7 @@ export default async function AgentPage({ params }: { params: Promise<{ slug: st
                   {agent.firstName}&apos;s active listings
                 </h2>
                 {myListings.length > 0 ? (
-                  <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                     {myListings.map((l) => (
                       <ListingCard key={l.id} listing={l} />
                     ))}

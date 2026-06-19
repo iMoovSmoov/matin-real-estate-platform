@@ -36,7 +36,7 @@ export default function ReportingPage() {
             <LiveDot tone="azure" />
             <SectionLabel>Reporting</SectionLabel>
           </div>
-          <h1 className="font-display text-3xl text-ink">Reporting</h1>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl">Reporting</h1>
           <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
             Brokerage-wide performance — volume, closings, days on market, and lead conversion.
           </p>

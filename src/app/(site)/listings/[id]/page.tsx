@@ -89,22 +89,22 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         <Gallery photos={listing.photos} alt={`${listing.address}, ${listing.city}`} />
       </Container>
 
-      <Section className="pt-12 md:pt-14">
+      <Section className="pt-8 md:pt-12 lg:pt-14">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_360px]">
             {/* ===== MAIN COLUMN ===== */}
             <div>
               {/* Header */}
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink/[0.08] pb-8">
+              <div className="flex flex-col gap-4 border-b border-ink/[0.08] pb-8 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                 <div>
                   <div className="mb-3"><StatusBadge status={listing.status} /></div>
-                  <h1 className="font-display text-4xl text-ink md:text-5xl">{usd(listing.price)}</h1>
-                  <p className="mt-3 flex items-center gap-1.5 text-lg text-ink/80">
-                    <MapPin className="h-4.5 w-4.5 text-azure" /> {listing.address}
+                  <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-4xl lg:text-5xl">{usd(listing.price)}</h1>
+                  <p className="mt-3 flex items-center gap-1.5 text-base sm:text-lg text-ink/80">
+                    <MapPin className="h-4 w-4 shrink-0 text-azure" /> {listing.address}
                   </p>
                   <p className="mt-1 text-slate">{listing.city}, {listing.state} {listing.zip}</p>
                 </div>
-                <div className="flex items-center gap-6 rounded-2xl bg-cloud px-6 py-4 shadow-soft ring-1 ring-ink/[0.06]">
+                <div className="flex items-center gap-4 sm:gap-6 rounded-2xl bg-cloud px-4 py-3 sm:px-6 sm:py-4 shadow-soft ring-1 ring-ink/[0.06] self-start">
                   <Stat icon={BedDouble} value={listing.beds} label="beds" />
                   <span className="h-8 w-px bg-ink/10" />
                   <Stat icon={Bath} value={listing.baths} label="baths" />
@@ -114,33 +114,33 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               </div>
 
               {/* Key facts grid */}
-              <div className="mt-10">
-                <h2 className="font-display text-2xl text-ink">Property details</h2>
-                <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-ink/[0.06] ring-1 ring-ink/[0.06] sm:grid-cols-3">
+              <div className="mt-8 sm:mt-10">
+                <h2 className="font-display text-xl sm:text-2xl text-ink">Property details</h2>
+                <dl className="mt-5 sm:mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-ink/[0.06] ring-1 ring-ink/[0.06] sm:grid-cols-3">
                   {facts.map((f) => (
-                    <div key={f.label} className="bg-cloud p-5">
+                    <div key={f.label} className="bg-cloud p-4 sm:p-5">
                       <dt className="flex items-center gap-2 text-[0.78rem] uppercase tracking-wide text-slate">
-                        <f.icon className="h-4 w-4 text-azure" /> {f.label}
+                        <f.icon className="h-4 w-4 shrink-0 text-azure" /> {f.label}
                       </dt>
-                      <dd className="mt-2 font-display text-xl text-ink">{f.value}</dd>
+                      <dd className="mt-2 font-display text-lg sm:text-xl text-ink">{f.value}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
 
               {/* Description */}
-              <div className="mt-12">
-                <h2 className="font-display text-2xl text-ink">About this home</h2>
-                <p className="mt-5 text-[1.02rem] leading-relaxed text-ink/85 text-pretty">{listing.description}</p>
+              <div className="mt-8 sm:mt-12">
+                <h2 className="font-display text-xl sm:text-2xl text-ink">About this home</h2>
+                <p className="mt-4 sm:mt-5 text-[0.97rem] sm:text-[1.02rem] leading-relaxed text-ink/85 text-pretty">{listing.description}</p>
               </div>
 
               {/* Features */}
               {listing.features.length > 0 && (
-                <div className="mt-12">
-                  <h2 className="font-display text-2xl text-ink">Features &amp; highlights</h2>
-                  <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-8 sm:mt-12">
+                  <h2 className="font-display text-xl sm:text-2xl text-ink">Features &amp; highlights</h2>
+                  <ul className="mt-5 sm:mt-6 grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2">
                     {listing.features.map((feat) => (
-                      <li key={feat} className="flex items-center gap-3 text-[0.95rem] text-ink/85">
+                      <li key={feat} className="flex items-center gap-3 text-[0.94rem] sm:text-[0.95rem] text-ink/85 py-1">
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-azure/10 text-azure">
                           <Check className="h-3.5 w-3.5" />
                         </span>
@@ -152,40 +152,40 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               )}
 
               {/* Payment estimate */}
-              <div className="mt-12 rounded-2xl bg-gradient-to-br from-ink to-ink-700 p-8 text-white shadow-lift">
+              <div className="mt-8 sm:mt-12 rounded-2xl bg-gradient-to-br from-ink to-ink-700 p-6 sm:p-8 text-white shadow-lift">
                 <span className="eyebrow-light">Payment estimate</span>
-                <div className="mt-4 flex flex-wrap items-end gap-3">
-                  <span className="font-display text-5xl text-white">{usd(monthly)}</span>
-                  <span className="pb-1.5 text-white/70">/ month</span>
+                <div className="mt-4 flex flex-wrap items-end gap-2 sm:gap-3">
+                  <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-white">{usd(monthly)}</span>
+                  <span className="pb-1 sm:pb-1.5 text-white/70">/ month</span>
                 </div>
-                <p className="mt-4 max-w-md text-[0.9rem] leading-relaxed text-slate-300">
+                <p className="mt-4 max-w-md text-[0.88rem] sm:text-[0.9rem] leading-relaxed text-slate-300">
                   Estimated principal &amp; interest with 20% down ({usd(Math.round(listing.price * 0.2))}) on a 30-year
                   fixed at ~6.8%. Taxes, insurance and HOA not included. For illustration only.
                 </p>
-                <div className="mt-6 flex flex-wrap gap-6 border-t border-white/10 pt-5 text-sm">
+                <div className="mt-5 sm:mt-6 flex flex-wrap gap-4 sm:gap-6 border-t border-white/10 pt-4 sm:pt-5 text-sm">
                   <div>
                     <div className="text-white/60">Down payment</div>
-                    <div className="mt-0.5 font-display text-lg text-white">{usd(Math.round(listing.price * 0.2))}</div>
+                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">{usd(Math.round(listing.price * 0.2))}</div>
                   </div>
                   <div>
                     <div className="text-white/60">Loan amount</div>
-                    <div className="mt-0.5 font-display text-lg text-white">{usd(Math.round(listing.price * 0.8))}</div>
+                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">{usd(Math.round(listing.price * 0.8))}</div>
                   </div>
                   <div>
                     <div className="text-white/60">Rate / term</div>
-                    <div className="mt-0.5 font-display text-lg text-white">6.8% · 30yr</div>
+                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">6.8% · 30yr</div>
                   </div>
                 </div>
               </div>
 
               {/* Map */}
-              <div className="mt-12">
-                <h2 className="font-display text-2xl text-ink">Location</h2>
-                <div className="mt-6 overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]">
+              <div className="mt-8 sm:mt-12">
+                <h2 className="font-display text-xl sm:text-2xl text-ink">Location</h2>
+                <div className="mt-5 sm:mt-6 overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]">
                   <iframe
                     title={`Map of ${listing.address}`}
                     src={`https://www.google.com/maps?q=${listing.lat},${listing.lng}&z=14&output=embed`}
-                    className="h-[400px] w-full border-0"
+                    className="h-48 sm:h-64 md:h-[400px] w-full border-0"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
@@ -266,10 +266,10 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       {more.length > 0 && (
         <Section className="bg-paper-200/60 pt-0">
           <Container>
-            <div className="flex items-end justify-between gap-6 border-t border-ink/[0.07] pt-16">
+            <div className="flex items-end justify-between gap-6 border-t border-ink/[0.07] pt-10 sm:pt-16">
               <div>
                 <span className="eyebrow">Nearby</span>
-                <h2 className="display-3 mt-3 font-display text-ink">
+                <h2 className="mt-3 font-display text-2xl sm:text-3xl text-ink">
                   More in {community ? community.name : listing.city}
                 </h2>
               </div>

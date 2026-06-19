@@ -12,7 +12,7 @@ export default function IntegrationsPage() {
           <LiveDot tone="success" />
           <SectionLabel>Matin Hub · Integrations</SectionLabel>
         </div>
-        <h1 className="font-display text-3xl text-ink">Integrations</h1>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Integrations</h1>
         <p className="mt-1 text-[0.9rem] text-slate/70">
           Connect your brokerage stack — leads, transactions, marketing, and analytics.
         </p>

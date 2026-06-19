@@ -12,7 +12,7 @@ export function Gallery({ photos, alt = "Listing photo" }: { photos: string[]; a
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_120px]">
       {/* Main image */}
-      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-paper-200 shadow-lift ring-1 ring-ink/[0.06]">
+      <div className="relative aspect-[4/3] sm:aspect-[16/10] overflow-hidden rounded-2xl bg-paper-200 shadow-lift ring-1 ring-ink/[0.06]">
         <Image
           key={current}
           src={current}
@@ -27,9 +27,9 @@ export function Gallery({ photos, alt = "Listing photo" }: { photos: string[]; a
         </div>
       </div>
 
-      {/* Thumbnail strip — vertical on desktop, horizontal scroll on mobile */}
+      {/* Thumbnail strip — hidden on mobile, horizontal scroll on sm, vertical on desktop */}
       {safe.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+        <div className="hidden sm:flex gap-3 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
           {safe.map((src, i) => (
             <button
               key={`${src}-${i}`}

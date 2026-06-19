@@ -343,7 +343,7 @@ export function AiToolPanel({
         {/* Document area */}
         <div
           className="flex-1 overflow-y-auto"
-          style={{ minHeight: outputMinHeight ?? 600 }}
+          style={{ minHeight: outputMinHeight ?? 400 }}
         >
           {!touched && !output ? (
             <EmptyState outputTitle={outputTitle} minHeight={outputMinHeight} />
@@ -351,7 +351,7 @@ export function AiToolPanel({
             <div className="flex flex-col h-full">
               {/* CMA report banner — rendered when reportBannerLabel is provided */}
               {output && !busy && reportBannerLabel && (
-                <div className="mx-8 mt-6 mb-1 rounded-xl border border-ink/[0.08] bg-paper px-5 py-4">
+                <div className="mx-4 mt-4 mb-1 rounded-xl border border-ink/[0.08] bg-paper px-4 py-3 sm:mx-8 sm:mt-6 sm:px-5 sm:py-4">
                   <p className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-slate/50">
                     {reportBannerLabel}
                   </p>
@@ -371,11 +371,11 @@ export function AiToolPanel({
 
               {/* Document header — shown once output + date are ready */}
               {output && docDate && (
-                <div className="bg-[#f8f7f6] ring-1 ring-ink/[0.06] px-8 py-4 flex items-center justify-between gap-4">
-                  <p className="font-display text-[0.72rem] uppercase tracking-[0.18em] text-ink/40 shrink-0">
+                <div className="bg-[#f8f7f6] ring-1 ring-ink/[0.06] px-4 py-3 flex flex-wrap items-center justify-between gap-2 sm:px-8 sm:py-4 sm:flex-nowrap">
+                  <p className="font-display text-[0.68rem] uppercase tracking-[0.18em] text-ink/40 shrink-0 sm:text-[0.72rem]">
                     Matin Real Estate
                   </p>
-                  <p className="font-display text-[1.05rem] font-semibold text-ink text-center flex-1 truncate">
+                  <p className="font-display text-[0.95rem] font-semibold text-ink text-center flex-1 truncate sm:text-[1.05rem]">
                     {outputTitle}
                   </p>
                   <p className="text-[0.72rem] text-slate/50 shrink-0 tabular-nums">{docDate}</p>
@@ -388,7 +388,7 @@ export function AiToolPanel({
               )}
 
               {/* Main content */}
-              <div className="px-8 py-6 flex-1">
+              <div className="px-4 py-4 flex-1 sm:px-8 sm:py-6">
                 <div className="prose-document text-[0.875rem] leading-relaxed text-ink">
                   <AiMarkdown text={output} />
                   {busy && (
@@ -399,7 +399,7 @@ export function AiToolPanel({
 
               {/* Action buttons row — shown after output is complete */}
               {output && !busy && (
-                <div className="border-t border-ink/[0.06] bg-[#fafaf9] px-8 py-3.5 flex items-center gap-2">
+                <div className="border-t border-ink/[0.06] bg-[#fafaf9] px-4 py-3 flex flex-wrap items-center gap-2 sm:px-8 sm:py-3.5">
                   <button
                     onClick={copy}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:border-ink/20 hover:bg-paper hover:text-ink"
@@ -443,7 +443,7 @@ function EmptyState({
   return (
     <div
       className="flex h-full flex-col items-center justify-center gap-3 px-8 py-12"
-      style={{ minHeight: minHeight ? `${Math.round(minHeight * 0.6)}px` : "600px" }}
+      style={{ minHeight: minHeight ? `${Math.round(minHeight * 0.6)}px` : "400px" }}
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper ring-1 ring-inset ring-ink/[0.06]">
         <Wand2 className="h-6 w-6 text-ink/30" />
