@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ArrowRight, Award, ShieldCheck, TrendingUp, Cpu, Quote, Star, Database, Zap, GraduationCap, BrainCircuit,
+  ArrowRight, Award, ShieldCheck, TrendingUp, Cpu, Quote, Star, Database, Zap, GraduationCap, BrainCircuit, BadgeCheck,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default function HomePage() {
             <Reveal delay={0.32}>
               <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">
                 <span className="flex items-center gap-2">
-                  <Star className="h-4 w-4 fill-azure-bright text-azure-bright" /> 4.9 · 700+ reviews
+                  <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
                 </span>
                 <span className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
