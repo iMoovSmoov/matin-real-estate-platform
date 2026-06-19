@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 const B = "/matin/brand";
 
 const featured: Post = {
+  slug: "selling-home-oregon-2026-playbook",
   title: "Selling Your Home in Oregon: The 2026 Playbook",
   category: "Selling",
   excerpt:
@@ -26,6 +27,7 @@ const featured: Post = {
 
 const posts: Post[] = [
   {
+    slug: "closing-costs-oregon",
     title: "Closing Costs in Oregon: What You'll Actually Pay",
     category: "Buying",
     excerpt: "A clear, line-by-line breakdown of buyer and seller closing costs in Oregon — and which ones are negotiable.",
@@ -33,6 +35,7 @@ const posts: Post[] = [
     image: `${B}/14838-closing-costs-oregon-preview.jpg`,
   },
   {
+    slug: "home-inspections-demystified",
     title: "Home Inspections, Demystified",
     category: "Buying",
     excerpt: "What inspectors look for, which red flags actually matter, and how to use findings to negotiate.",
@@ -40,6 +43,7 @@ const posts: Post[] = [
     image: `${B}/6737-home-inspections-preview.jpg`,
   },
   {
+    slug: "house-hunting-checklist",
     title: "The Ultimate House-Hunting Checklist",
     category: "Buying",
     excerpt: "Stay organized and decisive on every tour with the checklist our buyer's agents swear by.",
@@ -47,6 +51,7 @@ const posts: Post[] = [
     image: `${B}/17391-house-hunting-checklist-preview.jpg`,
   },
   {
+    slug: "types-of-mortgages",
     title: "Types of Mortgages: Which Loan Fits You?",
     category: "Financing",
     excerpt: "Conventional, FHA, VA, jumbo — a plain-English guide to the loan that matches your situation.",
@@ -54,6 +59,7 @@ const posts: Post[] = [
     image: `${B}/6748-types-of-mortgages-preview.jpg`,
   },
   {
+    slug: "short-sales-explained",
     title: "Short Sales Explained for Oregon Homeowners",
     category: "Selling",
     excerpt: "How short sales work, when they make sense, and what to expect from lenders and timelines.",
@@ -61,6 +67,7 @@ const posts: Post[] = [
     image: `${B}/17945-short-sales-preview.jpg`,
   },
   {
+    slug: "home-appraisals-how-value-gets-set",
     title: "Home Appraisals: How Value Gets Set",
     category: "Selling",
     excerpt: "What appraisers measure, why deals hinge on it, and how to prepare for a clean appraisal.",
@@ -68,6 +75,7 @@ const posts: Post[] = [
     image: `${B}/18072-home-appraisals-preview.jpg`,
   },
   {
+    slug: "final-walkthrough-checklist",
     title: "The Final Walkthrough: Your Last-Minute Checklist",
     category: "Buying",
     excerpt: "The 12 things to verify before you sign — so move-in day brings zero surprises.",
@@ -75,6 +83,7 @@ const posts: Post[] = [
     image: `${B}/15964-final-walkthrough-preview.jpg`,
   },
   {
+    slug: "how-to-sell-house-fast",
     title: "How to Sell Your House Fast (Without Leaving Money Behind)",
     category: "Selling",
     excerpt: "Speed and price aren't a trade-off when you do it right. Here's how to sell quickly and well.",
@@ -118,7 +127,7 @@ export default function BlogPage() {
         <Container>
           <Reveal>
             <a
-              href="#"
+              href={`/blog/${featured.slug}`}
               className="group grid overflow-hidden rounded-3xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:shadow-lift lg:grid-cols-2"
             >
               <div className="relative aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[24rem]">

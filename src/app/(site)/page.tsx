@@ -37,62 +37,65 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section id="main-content" className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-screen">
-        <div className="absolute inset-0">
+      <section id="main-content" className="relative min-h-[85vh] sm:min-h-[92vh] overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 ken-burns">
           <Image
             src={company.officeHero}
             alt="Matin Real Estate office in West Linn"
             fill
             priority
             sizes="100vw"
-            className="ken-burns object-cover"
+            className="object-cover object-[60%_center] sm:object-[55%_center]"
           />
-          {/* top/bottom vignette only — leaves horizontal centre open */}
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-transparent to-ink/50" />
-          {/* dark on the RIGHT where text lives — left side reveals office + Matin logo on wall */}
-          <div className="absolute inset-0 bg-gradient-to-l from-ink/92 via-ink/65 to-ink/10 sm:to-transparent" />
-          {/* gold warmth concentrated on the right */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_85%_55%,rgba(210,160,80,0.09),transparent)]" />
         </div>
 
-        <Container className="relative z-10 pt-20 sm:pt-28">
-          {/* push content to the right half — office + brand mark stay visible on left */}
-          <div className="ml-auto max-w-[22rem] sm:max-w-[28rem] lg:max-w-xl">
-            <Reveal>
-              {/* Short on mobile, full on sm+ */}
-              <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
-              <span className="hero-text-shadow eyebrow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.15rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-5xl lg:text-[3.5rem]">
-                Find your place in the{" "}
-                <span className="italic text-azure-bright">Pacific Northwest.</span>
-              </h1>
-            </Reveal>
-            {/* Body copy — hidden on mobile to keep image visible */}
-            <Reveal delay={0.16}>
-              <p className="hidden sm:block mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
-                The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
-                annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
-              </p>
-            </Reveal>
-            <Reveal delay={0.24}>
-              <div className="mt-6 sm:mt-8">
-                <PropertySearchBar dark />
-              </div>
-            </Reveal>
-            <Reveal delay={0.32}>
-              <div className="mt-5 flex items-center gap-2 text-sm text-white/80 sm:mt-7 sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
-                <span className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
-                </span>
-                <span className="hidden items-center gap-2 sm:flex">
-                  <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
-                </span>
-              </div>
-            </Reveal>
-          </div>
-        </Container>
+        {/* Gradient: dark at BOTTOM on mobile; dark on LEFT on desktop so text reads over the left side */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent sm:bg-gradient-to-r sm:from-ink/85 sm:via-ink/50 sm:to-transparent" />
+        {/* Subtle gold warmth on the left (desktop) */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_20%_55%,rgba(210,160,80,0.07),transparent)]" />
+
+        {/* Content: anchored to bottom on mobile, centered vertically + pushed LEFT on desktop */}
+        <div className="relative z-10 flex min-h-[85vh] sm:min-h-[92vh] items-end sm:items-center">
+          <Container className="pt-20 sm:pt-0">
+            {/* Full-width at bottom on mobile; pushed LEFT on desktop so right side of image shows */}
+            <div className="w-full pb-10 sm:pb-0 sm:mr-auto sm:max-w-[32rem] lg:max-w-[38rem]">
+              <Reveal>
+                {/* Short on mobile, full on sm+ */}
+                <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
+                <span className="hero-text-shadow eyebrow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.15rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-5xl lg:text-[3.5rem]">
+                  Find your place in the{" "}
+                  <span className="italic text-azure-bright">Pacific Northwest.</span>
+                </h1>
+              </Reveal>
+              {/* Body copy — hidden on mobile to reduce clutter */}
+              <Reveal delay={0.16}>
+                <p className="hidden sm:block mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
+                  The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
+                  annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
+                </p>
+              </Reveal>
+              <Reveal delay={0.24}>
+                <div className="mt-6 sm:mt-8">
+                  <PropertySearchBar dark />
+                </div>
+              </Reveal>
+              <Reveal delay={0.32}>
+                <div className="mt-5 flex items-center gap-2 text-sm text-white/80 sm:mt-7 sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
+                  <span className="flex items-center gap-2">
+                    <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
+                  </span>
+                  <span className="hidden items-center gap-2 sm:flex">
+                    <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
+                  </span>
+                </div>
+              </Reveal>
+            </div>
+          </Container>
+        </div>
 
         {/* scroll-down indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">

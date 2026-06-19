@@ -41,25 +41,26 @@ import {
 
 const k = metrics.kpis;
 
-/** Needs-attention alert chips */
+/** Needs-attention alert chips — numbers driven by data where available */
+const staleCount = metrics.staleLeadsCount ?? 0;
 const ALERTS = [
   {
-    label: "3 leads stale >14 days",
+    label: `${staleCount} stale leads`,
     href: "/hub/crm?filter=stale",
     icon: TriangleAlert,
-    tone: "amber" as const,
+    tone: "red" as const,
   },
   {
-    label: "5 buyer agreements missing",
+    label: "8 missing buyer agreements",
     href: "/hub/buyer-agreements",
     icon: AlertCircle,
     tone: "red" as const,
   },
   {
-    label: "2 inspection deadlines this week",
+    label: "3 contract deadlines this week",
     href: "/hub/transactions",
     icon: Calendar,
-    tone: "blue" as const,
+    tone: "amber" as const,
   },
 ];
 
@@ -84,21 +85,21 @@ const KPIS = [
   },
   {
     label: "Speed to Lead",
-    value: "4 min",
+    value: `${metrics.speedToLeadMin ?? k.avgResponseMins ?? 4} min`,
     delta: null,
     icon: <Zap className="h-4 w-4" />,
     accent: false,
     href: null,
-    chip: { label: "Goal: <5 min", tone: "green" as const },
+    chip: { label: "Benchmark: <5 min", tone: "green" as const },
   },
   {
     label: "Stale Leads",
-    value: "8",
+    value: String(metrics.staleLeadsCount ?? 0),
     delta: null,
     icon: <Timer className="h-4 w-4" />,
     accent: false,
-    href: "/hub/crm",
-    chip: { label: "> 14 days no contact", tone: "amber" as const },
+    href: "/hub/crm?filter=stale",
+    chip: { label: "Need follow-up", tone: "amber" as const },
   },
 ];
 
@@ -413,6 +414,156 @@ export default function DashboardPage() {
                 <div key={kpi.label}>{inner}</div>
               );
             })}
+          </div>
+
+          {/* Speed-to-Lead panel + Stale Leads alert — 2-col */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* Speed-to-Lead */}
+            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
+                    <Zap className="h-4 w-4 text-slate/40" />
+                    Speed to Lead
+                  </h2>
+                  <p className="mt-0.5 text-[0.73rem] text-slate/50">
+                    Industry benchmark: &lt;5 minutes
+                  </p>
+                </div>
+                <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
+                  Full report
+                </Link>
+              </div>
+              {/* Big number */}
+              <div className="mb-4 flex items-end gap-3">
+                <span className={[
+                  "font-display text-5xl font-bold tabular-nums",
+                  (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) < 5
+                    ? "text-emerald-600"
+                    : (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) <= 10
+                    ? "text-amber-600"
+                    : "text-red-600",
+                ].join(" ")}>
+                  {metrics.speedToLeadMin ?? k.avgResponseMins ?? 4} min
+                </span>
+                <span className="mb-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.72rem] font-semibold text-emerald-700">
+                  Team avg
+                </span>
+              </div>
+              {/* Mini leaderboard — top 3 by response time */}
+              <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-wider text-slate/40">
+                Top responders
+              </p>
+              <div className="space-y-2.5">
+                {RESPONSE_RANKING.slice(0, 3).map((agent, i) => (
+                  <div key={agent.slug} className="flex items-center gap-3">
+                    <span className={[
+                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold",
+                      i === 0 ? "bg-amber-100 text-amber-700" : "bg-ink/[0.05] text-slate/60",
+                    ].join(" ")}>
+                      {i + 1}
+                    </span>
+                    <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
+                      {agent.photo ? (
+                        <Image
+                          src={agent.photo}
+                          alt={agent.name}
+                          fill
+                          sizes="28px"
+                          className="object-cover object-top"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-[0.62rem] font-semibold text-ink/60">
+                          {agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </span>
+                      )}
+                    </div>
+                    <span className="flex-1 text-[0.83rem] font-medium text-ink">{agent.name}</span>
+                    <span className={[
+                      "text-[0.78rem] font-semibold tabular-nums",
+                      (agent.responseTimeMins ?? 99) < 5 ? "text-emerald-600" : (agent.responseTimeMins ?? 99) <= 15 ? "text-amber-600" : "text-red-600",
+                    ].join(" ")}>
+                      {agent.responseTimeMins ?? "—"} min
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stale Leads alert panel */}
+            <div className="rounded-2xl border border-red-200 bg-red-50/40 p-5 shadow-[0_1px_4px_rgb(0,0,0,0.04)]">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
+                  <Timer className="h-4 w-4 text-red-500" />
+                  Stale Leads
+                </h2>
+              </div>
+              {/* Big badge */}
+              <div className="mb-4 flex items-center gap-3">
+                <span className="font-display text-5xl font-bold tabular-nums text-red-600">
+                  {metrics.staleLeadsCount ?? 0}
+                </span>
+                <span className="rounded-full border border-red-200 bg-red-100 px-2.5 py-0.5 text-[0.75rem] font-semibold text-red-700">
+                  need attention
+                </span>
+              </div>
+              <p className="mb-4 text-[0.82rem] text-slate/60">
+                Leads with no contact for more than 7 days. Each day without contact reduces close probability.
+              </p>
+              <Link
+                href="/hub/crm?filter=stale"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-red-700 transition-colors hover:bg-red-50"
+              >
+                <AlertCircle className="h-3.5 w-3.5" />
+                View stale leads
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Source ROI panel */}
+          <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+              <div>
+                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                  Source ROI
+                </h2>
+                <p className="mt-0.5 text-[0.73rem] text-slate/50">
+                  Leads, closings, and revenue by marketing channel
+                </p>
+              </div>
+              <Link href="/hub/analytics?tab=marketing" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
+                Full breakdown
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px]">
+                <thead>
+                  <tr className="border-b border-ink/[0.05]">
+                    <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Source</th>
+                    <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Leads</th>
+                    <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Closed</th>
+                    <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {SOURCE_ROI.map((row) => (
+                    <tr key={row.source} className="border-b border-ink/[0.05] text-sm last:border-0 hover:bg-paper/50">
+                      <td className="px-5 py-3 font-medium text-ink">{row.source}</td>
+                      <td className="px-3 py-3 text-center">
+                        <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[0.72rem] font-medium text-ink">
+                          {row.leads}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-center tabular-nums text-slate">{row.closed}</td>
+                      <td className="px-5 py-3 text-right tabular-nums font-semibold text-ink">
+                        {compactUsd(row.revenue)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Quick Tools */}

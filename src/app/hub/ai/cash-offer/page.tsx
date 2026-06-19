@@ -112,7 +112,7 @@ export default function CashOfferPage() {
       {/* Tool panel */}
       <AiToolPanel
         key={selectedId || "__blank__"}
-        tool="cash-offer"
+        tool="cash-offer-eval"
         tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         title="Cash Offer Evaluator"
         pillar="Acquisitions"

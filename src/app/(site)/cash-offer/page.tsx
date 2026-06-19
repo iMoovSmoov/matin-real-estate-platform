@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import {
   ArrowRight, Phone, Wrench, Eye, Percent, CalendarCheck, ShieldCheck, Home,
-  Check, X, Banknote, Clock, ChevronDown,
+  Check, X, Banknote, Clock,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { CashRain } from "@/components/site/cash/CashRain";
 import { CashOfferEstimator } from "@/components/site/cash/CashOfferEstimator";
+import { CashFaqAccordion } from "@/components/site/cash/CashFaqAccordion";
 
 export const metadata: Metadata = {
   title: "Cash Is King — Sell your home for cash, as-is",
@@ -26,9 +27,27 @@ const perks = [
 ];
 
 const steps = [
-  { n: "01", title: "Tell us about your home", body: "Two minutes online or one quick call — address, condition, timeline." },
-  { n: "02", title: "Get a cash offer in 24 hours", body: "We run real local comps and send a fair, no-obligation cash offer fast." },
-  { n: "03", title: "Close in as little as 7 days", body: "Pick your date, sign, and get paid. No banks, no waiting, no games." },
+  { n: "01", title: "Tell us about your home", body: "Share your address and basic details — takes two minutes online or one quick call." },
+  { n: "02", title: "Get your offer", body: "We review real local comps and present a fair cash price within 24 hours. No obligation." },
+  { n: "03", title: "Choose your closing date", body: "Pick any date in the next 7–60 days. Sign, collect your cash. Done." },
+];
+
+const testimonials = [
+  {
+    name: "Sandra M.",
+    city: "Portland, OR",
+    quote: "I thought selling would take months. Cash Is King had an offer in my inbox the next morning and we closed in nine days. Absolutely painless.",
+  },
+  {
+    name: "Robert & Diane T.",
+    city: "Beaverton, OR",
+    quote: "We inherited a property that needed serious work. Matin bought it as-is — no repairs, no staging, no drama. The whole thing felt almost too easy.",
+  },
+  {
+    name: "Kevin L.",
+    city: "Gresham, OR",
+    quote: "The offer was fair and they were completely transparent about how they got there. No pressure, no games. I'd do it again without hesitation.",
+  },
 ];
 
 const compare = [
@@ -41,17 +60,17 @@ const compare = [
 ];
 
 const faqs = [
-  { q: "How do you calculate the offer?", a: "We run real, current comparable sales in your neighborhood and factor in condition and any needed work — then make a fair cash offer, usually 90–95% of market value with zero fees taken out." },
-  { q: "Are there any fees or commissions?", a: "None. No 6% listing commission, no closing-cost surprises, no repair credits. The number we agree on is what you walk away with." },
-  { q: "What condition does my home need to be in?", a: "Any condition. Outdated, damaged, inherited, tenant-occupied, behind on payments — we buy as-is. Leave what you don't want; take what you do." },
-  { q: "How fast can we close?", a: "As little as 7 days, or on whatever date works for you. No bank underwriting means no waiting and no deals falling through at the last minute." },
-  { q: "Is this really an alternative to listing?", a: "Yes — and we'll tell you honestly when a traditional listing would net you more. As the area's largest brokerage, we can do both and recommend what's actually best for you." },
+  { q: "How is the offer calculated?", a: "We run real, current comparable sales in your neighborhood and factor in condition and any needed work — then make a fair cash offer, usually 90–95% of market value with zero fees taken out." },
+  { q: "Do I need to make repairs?", a: "None at all. We buy in any condition — outdated kitchens, damaged roofs, inherited clutter, tenant-occupied. Leave what you don't want; take what you do." },
+  { q: "How fast can you close?", a: "As little as 7 days, or on whatever date works for you. No bank underwriting means no waiting and no deals falling through at the last minute." },
+  { q: "Are there fees or commissions?", a: "None. No 6% listing commission, no closing-cost surprises, no repair credits. The number we agree on is what you walk away with." },
+  { q: "What if I have a mortgage?", a: "No problem. We handle payoff coordination with your lender at closing — it's completely standard and won't slow anything down." },
 ];
 
 export default function CashOfferPage() {
   return (
     <div className="bg-ink text-white">
-      {/* HERO */}
+      {/* HERO — above the fold landing treatment */}
       <section className="relative flex min-h-[88vh] items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink-900 to-ink" />
         <CashRain />
@@ -62,32 +81,46 @@ export default function CashOfferPage() {
               <Banknote className="h-4 w-4" /> Cash Is King Home Buyers · by Matin Real Estate
             </span>
           </Reveal>
+
+          {/* Primary headline */}
           <Reveal delay={0.08}>
             <h1 className="display-1 mx-auto mt-6 max-w-4xl font-display text-white text-balance">
-              Sell your home for <span className="italic text-emerald-400">cash.</span> As-is. On your timeline.
+              Get a cash offer in 24 hours —{" "}
+              <span className="italic text-emerald-400">no repairs, no showings, no stress.</span>
             </h1>
           </Reveal>
+
+          {/* 3 trust signals inline */}
           <Reveal delay={0.16}>
-            <p className="mx-auto mt-6 hidden max-w-2xl text-base leading-relaxed text-slate-300 text-pretty sm:block sm:text-lg">
-              No repairs. No showings. No fees. Get a real, no-obligation cash offer and close in as little as
-              seven days — backed by the largest locally owned brokerage in the Portland area.
-            </p>
+            <div className="mx-auto mt-7 flex flex-wrap items-center justify-center gap-x-7 gap-y-2 text-sm font-medium text-white/90">
+              <span className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-400" /> Close in as little as 7 days</span>
+              <span className="hidden sm:block text-white/20">·</span>
+              <span className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-400" /> As-is condition</span>
+              <span className="hidden sm:block text-white/20">·</span>
+              <span className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-400" /> No agent commissions</span>
+            </div>
           </Reveal>
-          <Reveal delay={0.24}>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <ButtonLink href="#estimate" size="lg" className="bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_12px_36px_rgba(16,122,80,.45)]">
-                Get my cash offer <ArrowRight className="h-4 w-4" />
+
+          {/* Primary CTA */}
+          <Reveal delay={0.22}>
+            <div className="mx-auto mt-9 w-full max-w-xs sm:max-w-none sm:w-auto">
+              <ButtonLink
+                href="#estimate"
+                size="lg"
+                className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_12px_36px_rgba(16,122,80,.45)]"
+              >
+                Get my offer <ArrowRight className="h-4 w-4" />
               </ButtonLink>
+            </div>
+            <p className="mt-3 text-[0.8rem] text-slate-300/70">No obligation. Free estimate.</p>
+          </Reveal>
+
+          {/* Secondary phone link */}
+          <Reveal delay={0.3}>
+            <div className="mt-6">
               <ButtonLink href="tel:+15036229624" size="lg" variant="outline-light">
                 <Phone className="h-4 w-4" /> (503) 622-9624
               </ButtonLink>
-            </div>
-          </Reveal>
-          <Reveal delay={0.32}>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-slate-300/80">
-              {["Sold as-is", "$0 in fees", "Close in 7 days", "Any condition"].map((t) => (
-                <span key={t} className="flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-400" /> {t}</span>
-              ))}
             </div>
           </Reveal>
         </Container>
@@ -129,6 +162,56 @@ export default function CashOfferPage() {
         </Container>
       </Section>
 
+      {/* HOW IT WORKS — numbered steps with connecting line */}
+      <Section className="bg-paper-200/[0.04]">
+        <Container>
+          <SectionHeading eyebrow="How it works" title="Three steps to sold" align="center" light />
+          <div className="relative mt-14">
+            {/* connecting line — desktop only */}
+            <div
+              aria-hidden="true"
+              className="absolute left-1/6 right-1/6 top-[2.75rem] hidden h-px bg-emerald-400/20 md:block"
+            />
+            <div className="grid gap-8 md:grid-cols-3">
+              {steps.map((s, i) => (
+                <Reveal key={s.n} delay={i * 0.1}>
+                  <div className="relative flex flex-col items-center text-center px-4">
+                    {/* large serif number */}
+                    <div className="relative z-10 flex h-[5.5rem] w-[5.5rem] items-center justify-center rounded-full border border-emerald-400/20 bg-ink">
+                      <span className="font-display text-4xl font-light text-emerald-400">{s.n}</span>
+                    </div>
+                    <h3 className="mt-5 font-display text-xl text-white">{s.title}</h3>
+                    <p className="mt-2 max-w-xs text-[0.92rem] leading-relaxed text-slate-300">{s.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* SOCIAL PROOF — testimonial band */}
+      <Section className="bg-ink-900/60">
+        <Container>
+          <SectionHeading eyebrow="Seller stories" title="Real people, real results" align="center" light />
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {testimonials.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08}>
+                <figure className="flex h-full flex-col rounded-2xl border border-white/10 bg-ink-800/50 p-6">
+                  <blockquote className="flex-1">
+                    <p className="text-[0.93rem] leading-relaxed text-slate-300 italic">&ldquo;{t.quote}&rdquo;</p>
+                  </blockquote>
+                  <figcaption className="mt-5 border-t border-white/10 pt-4">
+                    <p className="font-semibold text-white text-sm">{t.name}</p>
+                    <p className="text-[0.8rem] text-slate-300/70">{t.city}</p>
+                  </figcaption>
+                </figure>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
       {/* PROOF — real cash band */}
       <section className="relative overflow-hidden py-28">
         <Image src="/matin/cash/cash-09.jpg" alt="Stacks of cash" fill sizes="100vw" className="object-cover" placeholder="blur" blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=" />
@@ -141,24 +224,6 @@ export default function CashOfferPage() {
           </p>
         </Container>
       </section>
-
-      {/* HOW IT WORKS */}
-      <Section>
-        <Container>
-          <SectionHeading eyebrow="How it works" title="Three steps to sold" align="center" light />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {steps.map((s, i) => (
-              <Reveal key={s.n} delay={i * 0.1}>
-                <div className="relative rounded-2xl border border-white/10 bg-ink-900/60 p-7">
-                  <span className="font-display text-5xl text-emerald-400/30">{s.n}</span>
-                  <h3 className="mt-3 font-display text-xl text-white">{s.title}</h3>
-                  <p className="mt-1.5 text-[0.92rem] leading-relaxed text-slate-300">{s.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </Container>
-      </Section>
 
       {/* COMPARISON */}
       <Section className="bg-ink-900/60">
@@ -187,21 +252,11 @@ export default function CashOfferPage() {
         </Container>
       </Section>
 
-      {/* FAQ */}
+      {/* FAQ — client accordion */}
       <Section>
         <Container>
           <SectionHeading eyebrow="Good to know" title="Cash offer questions, answered" align="center" light />
-          <div className="mx-auto mt-10 max-w-3xl space-y-3">
-            {faqs.map((f) => (
-              <details key={f.q} className="group rounded-2xl border border-white/10 bg-ink-900/60 p-5 transition-colors hover:border-emerald-400/30">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-white">
-                  {f.q}
-                  <ChevronDown className="h-4 w-4 shrink-0 text-emerald-400 transition-transform group-open:rotate-180" />
-                </summary>
-                <p className="mt-3 text-[0.92rem] leading-relaxed text-slate-300">{f.a}</p>
-              </details>
-            ))}
-          </div>
+          <CashFaqAccordion faqs={faqs} />
         </Container>
       </Section>
 
@@ -219,7 +274,7 @@ export default function CashOfferPage() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <ButtonLink href="#estimate" size="lg" className="bg-emerald-600 text-white hover:bg-emerald-500">
-                  Get my cash offer <ArrowRight className="h-4 w-4" />
+                  Get my offer <ArrowRight className="h-4 w-4" />
                 </ButtonLink>
                 <ButtonLink href="/contact" size="lg" variant="outline-light">Talk to our team</ButtonLink>
               </div>

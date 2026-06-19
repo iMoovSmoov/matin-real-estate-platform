@@ -18,7 +18,6 @@ import {
   BrainCircuit,
   FileSignature,
   Search,
-  Bell,
   Menu,
   X,
   ArrowLeft,
@@ -26,6 +25,7 @@ import {
   Building2,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
+import { NotificationCenter } from "@/components/command/NotificationCenter";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
@@ -73,43 +73,6 @@ const NAV: NavGroup[] = [
   },
 ];
 
-const NOTIFICATIONS = [
-  {
-    title: "New lead — Sarah M. from Zillow",
-    meta: "Lake Oswego · Buyer inquiry · 2m ago",
-    tone: "azure" as const,
-  },
-  {
-    title: "Offer accepted — 8457 NW Lakeshore",
-    meta: "Listed at $1.15M · congrats · 18m ago",
-    tone: "success" as const,
-  },
-  {
-    title: "Inspection deadline this week",
-    meta: "TX-4003 · due in 2 days · action needed",
-    tone: "warn" as const,
-  },
-  {
-    title: "5-star review from the Harrisons",
-    meta: "West Linn · just posted on Google · 1h ago",
-    tone: "success" as const,
-  },
-  {
-    title: "Kim Tran opened your CMA",
-    meta: "Lake Oswego lead · viewed 3 pages · 2h ago",
-    tone: "azure" as const,
-  },
-  {
-    title: "Showing scheduled — 1204 NW Lovejoy",
-    meta: "Tomorrow 10 AM · Buyer: Chen family · 3h ago",
-    tone: "azure" as const,
-  },
-  {
-    title: "Buyer agreement missing — Reyes family",
-    meta: "Showing tomorrow, agreement not signed",
-    tone: "warn" as const,
-  },
-];
 
 function isActive(pathname: string, href: string) {
   if (href === "/hub") return pathname === "/hub";
@@ -251,7 +214,6 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
@@ -312,67 +274,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
             {/* Notifications */}
-            <div className="relative">
-              <button
-                onClick={() => setNotifOpen((o) => !o)}
-                aria-label="Notifications"
-                className={cn(
-                  "relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-ink/[0.04] hover:text-ink",
-                  notifOpen ? "bg-ink/[0.06] text-ink" : "text-slate",
-                )}
-              >
-                <Bell className="h-[1.1rem] w-[1.1rem]" />
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.56rem] font-bold text-white ring-2 ring-paper">
-                  {NOTIFICATIONS.length}
-                </span>
-              </button>
-
-              {notifOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} aria-hidden />
-                  <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-[22rem]">
-                    <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3">
-                      <span className="text-[0.84rem] font-semibold text-ink">Notifications</span>
-                      <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[0.62rem] font-bold text-danger">
-                        {NOTIFICATIONS.length} new
-                      </span>
-                    </div>
-                    <ul className="max-h-[22rem] divide-y divide-ink/[0.05] overflow-y-auto">
-                      {NOTIFICATIONS.map((n, i) => (
-                        <li
-                          key={i}
-                          className="flex gap-3 px-4 py-3 transition-colors hover:bg-paper/60 cursor-pointer"
-                        >
-                          <span
-                            className={cn(
-                              "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                              n.tone === "success"
-                                ? "bg-success"
-                                : n.tone === "warn"
-                                  ? "bg-warn"
-                                  : "bg-azure",
-                            )}
-                          />
-                          <div className="min-w-0">
-                            <p className="text-[0.82rem] font-medium leading-snug text-ink">
-                              {n.title}
-                            </p>
-                            <p className="mt-0.5 text-[0.72rem] text-slate/60">{n.meta}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href="/hub/crm"
-                      onClick={() => setNotifOpen(false)}
-                      className="block border-t border-ink/[0.07] px-4 py-2.5 text-center text-[0.76rem] font-semibold text-azure transition-colors hover:bg-paper/60"
-                    >
-                      View all in CRM
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+            <NotificationCenter />
 
             {/* User pill */}
             <div className="flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 shadow-sm md:pr-3">

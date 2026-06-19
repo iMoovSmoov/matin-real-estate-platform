@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Images, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,8 +11,20 @@ export function Gallery({ photos, alt = "Listing photo" }: { photos: string[]; a
   const safe = photos.length ? photos : ["/matin/exteriors/exteriors-01.jpg"];
   const current = safe[Math.min(active, safe.length - 1)];
 
-  function prev() { setActive((i) => (i - 1 + safe.length) % safe.length); }
-  function next() { setActive((i) => (i + 1) % safe.length); }
+  const prev = useCallback(() => { setActive((i) => (i - 1 + safe.length) % safe.length); }, [safe.length]);
+  const next = useCallback(() => { setActive((i) => (i + 1) % safe.length); }, [safe.length]);
+
+  // Close lightbox on Escape, navigate with arrow keys
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen, prev, next]);
 
   return (
     <>

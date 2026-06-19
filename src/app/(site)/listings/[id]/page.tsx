@@ -14,6 +14,7 @@ import { ListingCard } from "@/components/site/ListingCard";
 import { Gallery } from "@/components/site/property/Gallery";
 import { getListing, getAgent, getCommunity, listings, listingsInCommunity } from "@/lib/data";
 import { usd, num } from "@/lib/utils";
+import { MortgageCalc } from "@/components/site/property/MortgageCalc";
 
 export function generateStaticParams() {
   return listings.map((l) => ({ id: l.id }));
@@ -33,15 +34,6 @@ export async function generateMetadata({
   };
 }
 
-function monthlyPayment(price: number) {
-  const down = price * 0.2;
-  const principal = price - down;
-  const r = 0.068 / 12;
-  const n = 30 * 12;
-  const m = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  return Math.round(m);
-}
-
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const listing = getListing(id);
@@ -50,7 +42,6 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   const agent = getAgent(listing.agentSlug);
   const community = getCommunity(listing.communitySlug);
   const more = listingsInCommunity(listing.communitySlug).filter((l) => l.id !== listing.id).slice(0, 3);
-  const monthly = monthlyPayment(listing.price);
 
   const facts: { icon: typeof BedDouble; label: string; value: string }[] = [
     { icon: BedDouble, label: "Bedrooms", value: `${listing.beds}` },
@@ -167,31 +158,9 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               )}
 
-              {/* Payment estimate */}
-              <div className="mt-8 sm:mt-12 rounded-2xl bg-gradient-to-br from-ink to-ink-700 p-6 sm:p-8 text-white shadow-lift">
-                <span className="eyebrow-light">Payment estimate</span>
-                <div className="mt-4 flex flex-wrap items-end gap-2 sm:gap-3">
-                  <span className="font-display text-3xl sm:text-4xl lg:text-5xl text-white">{usd(monthly)}</span>
-                  <span className="pb-1 sm:pb-1.5 text-white/70">/ month</span>
-                </div>
-                <p className="mt-4 max-w-md text-[0.88rem] sm:text-[0.9rem] leading-relaxed text-slate-300">
-                  Estimated principal &amp; interest with 20% down ({usd(Math.round(listing.price * 0.2))}) on a 30-year
-                  fixed at ~6.8%. Taxes, insurance and HOA not included. For illustration only.
-                </p>
-                <div className="mt-5 sm:mt-6 flex flex-wrap gap-4 sm:gap-6 border-t border-white/10 pt-4 sm:pt-5 text-sm">
-                  <div>
-                    <div className="text-white/60">Down payment</div>
-                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">{usd(Math.round(listing.price * 0.2))}</div>
-                  </div>
-                  <div>
-                    <div className="text-white/60">Loan amount</div>
-                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">{usd(Math.round(listing.price * 0.8))}</div>
-                  </div>
-                  <div>
-                    <div className="text-white/60">Rate / term</div>
-                    <div className="mt-0.5 font-display text-base sm:text-lg text-white">6.8% · 30yr</div>
-                  </div>
-                </div>
+              {/* Mortgage calculator — shown inline on mobile (sidebar is below on mobile) */}
+              <div className="mt-8 sm:mt-12 lg:hidden">
+                <MortgageCalc listingPrice={listing.price} />
               </div>
 
               {/* Map */}
@@ -210,7 +179,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* ===== AGENT SIDEBAR ===== */}
-            <aside className="mt-8 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
+            <aside className="agent-sidebar mt-8 lg:mt-0 lg:sticky lg:top-28 lg:self-start space-y-4">
+              {/* Mortgage calculator — sidebar (desktop only; mobile version is inline above) */}
+              <div className="hidden lg:block">
+                <MortgageCalc listingPrice={listing.price} />
+              </div>
+
               {agent ? (
                 <div className="overflow-hidden rounded-2xl bg-cloud shadow-lift ring-1 ring-ink/[0.06]">
                   {/* Agent photo + info strip */}
@@ -254,7 +228,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
                   {/* CTAs */}
                   <div className="flex flex-col gap-2.5 p-5">
-                    <ButtonLink href={`/agents/${agent.slug}`} variant="primary" className="w-full">
+                    <ButtonLink href={`/contact?listing=${listing.id}`} variant="primary" className="w-full">
                       <CalendarCheck className="h-4 w-4" /> Schedule a Showing
                     </ButtonLink>
                     <ButtonLink href={`/agents/${agent.slug}`} variant="outline" className="w-full">
@@ -289,7 +263,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               {community && (
                 <Link
                   href={`/communities/${community.slug}`}
-                  className="group mt-4 block overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]"
+                  className="group block overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]"
                 >
                   <div className="relative aspect-[16/9]">
                     <Image src={community.thumb} alt={community.name} fill sizes="360px" className="object-cover transition-transform duration-700 group-hover:scale-105" />

@@ -8,6 +8,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 
 export type Post = {
+  slug: string;
   title: string;
   category: string;
   excerpt: string;
@@ -50,7 +51,7 @@ export function BlogGrid({ posts, categories }: { posts: Post[]; categories: str
         {filtered.map((p, i) => (
           <Reveal key={p.title} delay={(i % 3) * 0.07}>
             <a
-              href="#"
+              href={`/blog/${p.slug}`}
               className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift"
             >
               <div className="relative aspect-[16/10] overflow-hidden">

@@ -678,7 +678,9 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
                             </p>
                           </div>
                           <a
-                            href="#"
+                            href={`https://www.rmls.com/search/?q=${encodeURIComponent(selectedListing.address + ", " + selectedListing.city)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="mt-1 inline-flex items-center gap-1 pl-6 text-[0.8rem] font-medium text-success hover:underline"
                           >
                             View on RMLS →

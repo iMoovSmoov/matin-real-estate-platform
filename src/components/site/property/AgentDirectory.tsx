@@ -110,7 +110,7 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
 
       {/* ---------- GRID ---------- */}
       {results.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {results.map((a) => (
             <AgentCard key={a.slug} agent={a} />
           ))}

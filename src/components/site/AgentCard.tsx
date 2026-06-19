@@ -54,8 +54,9 @@ export function AgentCard({ agent }: { agent: Agent }) {
           </span>
           <span className="text-slate">{agent.licenses.join(" · ")}</span>
         </div>
-        <div className="mt-2 flex items-center gap-1 text-[0.75rem] font-medium text-ink transition-transform duration-200 group-hover:translate-x-1">
-          View profile <span aria-hidden>→</span>
+        <div className="mt-3 flex items-center gap-1.5 text-[0.78rem] font-semibold tracking-wide text-ink/60 transition-all duration-300 group-hover:text-ink group-hover:translate-x-0.5">
+          <span className="link-underline">View profile</span>
+          <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
         </div>
       </div>
     </Link>

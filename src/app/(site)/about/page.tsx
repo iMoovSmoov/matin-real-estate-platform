@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight, Award, MapPin, Star, Phone, Mail, Cpu,
-  TrendingUp, Building2, Trophy, Users,
+  TrendingUp, Building2, Trophy, Users, BarChart2, Eye, Zap,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -31,6 +31,42 @@ const milestones = [
   { year: "2018", title: "Built the largest local website", body: "We grow into the largest locally owned real-estate website in the Portland area — more homes, sooner, for every client." },
   { year: "2021", title: "Recognized for growth", body: "Named to the Portland Business Journal's Fastest Growing Private Companies as the team scales past 40 brokers." },
   { year: "Today", title: "The Matin Hub era", body: "A custom platform unifies CRM, listings, transactions, marketing, and AI — so brokers spend their time on people, not paperwork." },
+];
+
+const values = [
+  {
+    Icon: BarChart2,
+    title: "Data-driven advice",
+    body: "Every recommendation is grounded in live market data — comps, DOM trends, absorption rates — so you negotiate from strength, not optimism.",
+  },
+  {
+    Icon: MapPin,
+    title: "Local expertise",
+    body: "Our brokers live in the communities they serve: West Linn, Lake Oswego, Beaverton, Tigard, and across SW Washington. The knowledge runs deep.",
+  },
+  {
+    Icon: Eye,
+    title: "Full transparency",
+    body: "You see the same numbers we do. Pricing rationale, offer strategy, days-on-market comparisons — shared openly, in plain language.",
+  },
+  {
+    Icon: Zap,
+    title: "Technology-first",
+    body: "The Matin Hub gives our clients real-time listing alerts, market snapshots, and a single dashboard for every step of the transaction.",
+  },
+];
+
+const neighborhoods = [
+  "West Linn", "Lake Oswego", "Tualatin", "Wilsonville",
+  "Tigard", "Beaverton", "SW Portland", "Vancouver", "Camas", "Battle Ground",
+];
+
+const recognitionChips = [
+  "Top 1% Portland Brokers",
+  "4.9-Star Rated",
+  "$130M+ Annual Sales",
+  "PBJ Fastest-Growing Private Co.",
+  "RealTrends America's Best",
 ];
 
 // Put the founder first.
@@ -133,9 +169,21 @@ export default function AboutPage() {
                   a brokerage with the discipline, data, and tooling of a modern tech company — and put all
                   of it to work for the client.
                 </p>
+                <blockquote
+                  className="my-7 border-l-4 pl-5"
+                  style={{ borderColor: "rgba(210,160,80,0.75)" }}
+                >
+                  <p className="font-display text-xl leading-snug text-ink sm:text-2xl text-balance">
+                    &ldquo;We built the largest locally owned real-estate website in the Portland area because
+                    we believed better information leads to better outcomes — for buyers and sellers
+                    alike.&rdquo;
+                  </p>
+                  <cite className="mt-3 block text-[0.82rem] not-italic text-slate">
+                    — {company.founder}, Founder &amp; Principal Broker
+                  </cite>
+                </blockquote>
                 <p>
-                  A decade later, that thesis has compounded. We operate the largest locally owned
-                  real-estate website in the Portland area, employ 40+ full-time brokers across Oregon and
+                  A decade later, that thesis has compounded. We employ 40+ full-time brokers across Oregon and
                   Washington, and close <strong className="text-ink">{company.stats.annualVolume}</strong> in
                   volume every year — all while reinvesting{" "}
                   <strong className="text-ink">{company.stats.marketing}</strong> into reaching the right
@@ -159,8 +207,35 @@ export default function AboutPage() {
         </Container>
       </Section>
 
-      {/* ---------- TIMELINE ---------- */}
+      {/* ---------- VALUES ---------- */}
       <Section className="bg-paper-200/60">
+        <Container>
+          <SectionHeading
+            eyebrow="What we stand for"
+            title="Four principles. Every deal."
+            align="center"
+          />
+          <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map((v, i) => (
+              <Reveal key={v.title} delay={i * 0.07}>
+                <div className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-xl"
+                    style={{ background: "rgba(210,160,80,0.12)" }}
+                  >
+                    <v.Icon className="h-6 w-6" style={{ color: "rgba(210,160,80,1)" }} />
+                  </div>
+                  <h3 className="mt-5 font-display text-lg text-ink">{v.title}</h3>
+                  <p className="mt-2 flex-1 text-[0.88rem] leading-relaxed text-slate">{v.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* ---------- TIMELINE ---------- */}
+      <Section>
         <Container>
           <SectionHeading
             eyebrow="The journey"
@@ -181,6 +256,71 @@ export default function AboutPage() {
           </div>
         </Container>
       </Section>
+
+      {/* ---------- COMMUNITY ---------- */}
+      <Section className="overflow-hidden">
+        <Container>
+          <div className="grid items-center gap-14 lg:grid-cols-2">
+            <div>
+              <SectionHeading
+                eyebrow="Rooted in Portland"
+                title="We know these streets"
+              />
+              <p className="mt-5 max-w-prose text-base leading-relaxed text-slate sm:text-[1.02rem]">
+                Our brokers grew up here, raise their kids here, and have sold homes up and
+                down the I-205 corridor for over a decade. That means school-district answers
+                without a Google search, contractor referrals earned through real transactions,
+                and neighborhood-level pricing instinct that no algorithm replicates.
+              </p>
+              <p className="mt-4 max-w-prose text-base leading-relaxed text-slate sm:text-[1.02rem]">
+                From the bluffs of West Linn to the waterfront in Vancouver, we cover the
+                entire Portland–SW Washington metro with local expertise at every address.
+              </p>
+            </div>
+            <div>
+              <p className="mb-5 text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-slate">
+                Communities we serve
+              </p>
+              <div className="flex flex-wrap gap-x-1 gap-y-0.5">
+                {neighborhoods.map((n, i) => (
+                  <span
+                    key={n}
+                    className="font-display text-[1.6rem] leading-tight text-ink sm:text-[2rem]"
+                  >
+                    {n}
+                    {i < neighborhoods.length - 1 && (
+                      <span
+                        className="mx-2 font-sans text-[1rem] font-normal"
+                        style={{ color: "rgba(210,160,80,0.8)" }}
+                        aria-hidden
+                      >
+                        ·
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      {/* ---------- RECOGNITION CHIPS ---------- */}
+      <div className="border-y border-ink/[0.07] bg-cloud py-7">
+        <Container>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {recognitionChips.map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border px-5 py-2 text-[0.8rem] font-semibold tracking-wide text-ink"
+                style={{ borderColor: "rgba(210,160,80,0.55)" }}
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+        </Container>
+      </div>
 
       {/* ---------- LEADERSHIP ---------- */}
       <Section>
