@@ -42,7 +42,7 @@ const cols = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-ink text-white">
+    <footer className="bg-ink text-white pb-16 sm:pb-0">
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo className="h-10 text-white" />
@@ -71,7 +71,7 @@ export function SiteFooter() {
         {cols.map((c) => (
           <div key={c.title}>
             <h4 className="font-display text-lg">{c.title}</h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-slate-300">
+            <ul className="mt-4 space-y-3 text-sm text-slate-300">
               {c.links.map(([label, href]) => (
                 <li key={href}>
                   <Link href={href} className="transition hover:text-azure-bright">

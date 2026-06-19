@@ -83,7 +83,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <Section className="pt-8 md:pt-12 lg:pt-14">
+      <Section className="pt-8 pb-24 md:pt-12 md:pb-16 lg:pt-14">
         <Container>
           <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_360px]">
             {/* ===== MAIN COLUMN ===== */}
@@ -282,7 +282,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
       {/* ---------- SIMILAR LISTINGS ---------- */}
       {more.length > 0 && (
-        <Section className="bg-paper-200/60 pt-0">
+        <Section className="bg-paper-200/60 pt-0 pb-24 sm:pb-16">
           <Container>
             <div className="flex items-end justify-between gap-6 border-t border-ink/[0.07] pt-10 sm:pt-16">
               <div>

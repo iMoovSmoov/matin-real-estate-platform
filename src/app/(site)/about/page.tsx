@@ -91,7 +91,7 @@ export default function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
         </div>
-        <Container className="relative z-10 pb-16 pt-24 sm:pb-20 sm:pt-32">
+        <Container className="relative z-10 pb-20 pt-24 sm:pb-20 sm:pt-32">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow eyebrow-light">Our story</span>
@@ -285,7 +285,7 @@ export default function AboutPage() {
                 {neighborhoods.map((n, i) => (
                   <span
                     key={n}
-                    className="font-display text-[1.6rem] leading-tight text-ink sm:text-[2rem]"
+                    className="font-display text-[1.2rem] leading-tight text-ink sm:text-[1.6rem] lg:text-[2rem]"
                   >
                     {n}
                     {i < neighborhoods.length - 1 && (
@@ -442,7 +442,7 @@ export default function AboutPage() {
       </Section>
 
       {/* ---------- TECH-FORWARD FUTURE ---------- */}
-      <section className="relative overflow-hidden bg-ink py-16 text-white sm:py-24">
+      <section className="relative overflow-hidden bg-ink py-16 pb-24 text-white sm:py-24">
         <div className="absolute inset-0 grid-tech opacity-60" />
         <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[rgba(210,160,80,0.15)] blur-3xl" />
         <Container className="relative">

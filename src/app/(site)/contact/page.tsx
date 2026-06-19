@@ -101,7 +101,7 @@ export default function ContactPage() {
                   <Reveal key={f.label}>
                     <div className="flex h-full flex-col rounded-2xl bg-cloud p-6 shadow-soft ring-1 ring-ink/[0.06]">
                       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-azure/10 text-azure">
-                        <f.icon className="h-5.5 w-5.5" />
+                        <f.icon className="h-5 w-5" />
                       </div>
                       <div className="mt-4 text-[0.78rem] font-semibold uppercase tracking-wide text-slate">
                         {f.label}
@@ -149,7 +149,7 @@ export default function ContactPage() {
       </Section>
 
       {/* ---------- MAP ---------- */}
-      <Section className="bg-paper-200/60 pt-0">
+      <Section className="bg-paper-200/60 pt-0 pb-24 sm:pb-16">
         <Container>
           <SectionHeading
             eyebrow="Find us"
@@ -171,7 +171,7 @@ export default function ContactPage() {
               <div className="flex flex-col gap-4 bg-cloud p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-azure/10 text-azure">
-                    <Building2 className="h-5.5 w-5.5" />
+                    <Building2 className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="font-medium text-ink">{company.name}</div>

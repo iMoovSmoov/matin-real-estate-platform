@@ -103,7 +103,7 @@ export function CommunitiesGrid({ communities }: Props) {
       </div>
 
       {/* ---- Grid ---- */}
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:py-14 sm:pb-14 lg:px-8">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center py-24 text-center">
             <p className="font-display text-2xl text-ink">No communities found</p>

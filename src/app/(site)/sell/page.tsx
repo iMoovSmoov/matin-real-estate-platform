@@ -65,7 +65,7 @@ export default function SellPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-20 sm:pt-28">
+        <Container className="relative z-10 pt-20 pb-16 sm:pt-28 sm:pb-20">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow eyebrow-light">Sell with Matin</span>
@@ -77,7 +77,7 @@ export default function SellPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 hidden max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:block sm:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
                 Cinematic marketing, the largest local audience, and sharp pricing — backed by a $2.4M
                 marketing engine and 40+ full-time brokers. Start with your home&apos;s value, free and
                 instant.
@@ -138,7 +138,7 @@ export default function SellPage() {
       </Section>
 
       {/* ---------- CASH IS KING ---------- */}
-      <section id="cash-offer" className="relative overflow-hidden bg-ink py-24 text-white md:py-28">
+      <section id="cash-offer" className="relative overflow-hidden bg-ink py-16 text-white sm:py-20 md:py-28">
         <div className="absolute inset-0 grid-tech opacity-50" />
         <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
         <Container className="relative">

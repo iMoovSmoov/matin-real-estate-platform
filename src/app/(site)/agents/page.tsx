@@ -28,7 +28,7 @@ export default function AgentsPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/40 to-ink/10" />
         </div>
-        <Container className="relative z-10 pb-14 pt-32 sm:pb-20">
+        <Container className="relative z-10 pb-16 pt-32 sm:pb-20">
           <span className="eyebrow eyebrow-light">Meet the team</span>
           <h1 className="display-2 mt-4 max-w-3xl font-display text-white text-balance">
             Brokers who live where they sell
@@ -45,7 +45,7 @@ export default function AgentsPage() {
         </Container>
       </section>
 
-      <Section className="py-12 md:py-16">
+      <Section className="py-12 pb-24 md:py-16 md:pb-24">
         <Container>
           <AgentDirectory agents={agents} />
         </Container>

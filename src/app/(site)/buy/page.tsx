@@ -123,7 +123,7 @@ export default function BuyPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
         </div>
-        <Container className="relative z-10 pt-20 sm:pt-28">
+        <Container className="relative z-10 pt-20 pb-16 sm:pt-28 sm:pb-20">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow eyebrow-light">Buy with Matin</span>
@@ -135,7 +135,7 @@ export default function BuyPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
-              <p className="mt-6 hidden max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:block sm:text-lg">
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
                 Off-market access, expert negotiation, and 40+ brokers who live where they sell — so you win
                 the home you love without overpaying.
               </p>
