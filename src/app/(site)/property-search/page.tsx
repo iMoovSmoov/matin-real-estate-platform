@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Container, Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/section";
 import { SearchExperience } from "@/components/site/property/SearchExperience";
 import { listings } from "@/lib/data";
 
@@ -32,11 +32,8 @@ export default async function PropertySearchPage({
         </Container>
       </div>
 
-      <Section className="py-12 md:py-16">
-        <Container>
-          <SearchExperience listings={listings} initialQuery={q} initialType={type} />
-        </Container>
-      </Section>
+      {/* Full-bleed search — no container wrapper so the 2-col layout reaches the viewport edges */}
+      <SearchExperience listings={listings} initialQuery={q} initialType={type} />
     </>
   );
 }

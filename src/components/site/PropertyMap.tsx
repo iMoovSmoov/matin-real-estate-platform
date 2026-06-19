@@ -49,7 +49,7 @@ export default function PropertyMap({ listings, className = "", onSelect }: Prop
       <MapContainer
         center={[45.5231, -122.6765]}
         zoom={11}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
@@ -65,18 +65,29 @@ export default function PropertyMap({ listings, className = "", onSelect }: Prop
               click: () => onSelect?.(l.id),
             }}
           >
-            <Popup>
-              <div className="min-w-[180px] space-y-1 text-sm">
-                <div className="font-semibold text-gray-900">{l.address}</div>
-                <div className="font-bold text-gray-800">{formatPrice(l.price)}</div>
-                <div className="text-gray-500">
-                  {l.beds} bd · {l.baths} ba
+            <Popup minWidth={200}>
+              <div style={{ fontFamily: "inherit", padding: "2px 0" }}>
+                <div style={{ fontWeight: 700, fontSize: "15px", color: "#0d0d0d", lineHeight: 1.3 }}>{formatPrice(l.price)}</div>
+                <div style={{ marginTop: "3px", fontSize: "12px", color: "#0d0d0d", opacity: 0.8, lineHeight: 1.4 }}>{l.address}</div>
+                <div style={{ marginTop: "2px", fontSize: "12px", color: "#64748b" }}>
+                  {l.beds} bd &middot; {l.baths} ba &middot; {l.sqft.toLocaleString()} sf
                 </div>
                 <Link
                   href={`/listings/${l.id}`}
-                  className="mt-1.5 inline-block rounded-full bg-gray-900 px-3 py-1 text-[0.75rem] font-semibold text-white hover:bg-gray-700"
+                  style={{
+                    display: "inline-block",
+                    marginTop: "8px",
+                    borderRadius: "999px",
+                    background: "#0d0d0d",
+                    color: "#fff",
+                    padding: "4px 14px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    letterSpacing: "0.01em",
+                  }}
                 >
-                  View listing
+                  View listing →
                 </Link>
               </div>
             </Popup>

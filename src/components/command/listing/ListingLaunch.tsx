@@ -1,7 +1,22 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, Wand2, CheckCircle2, Circle, ToggleLeft, ToggleRight, Copy, Check } from "lucide-react";
+import {
+  Search,
+  Wand2,
+  CheckCircle2,
+  Circle,
+  ToggleLeft,
+  ToggleRight,
+  Copy,
+  Check,
+  ChevronDown,
+  ClipboardList,
+  Camera,
+  FileText,
+  Megaphone,
+  Rocket,
+} from "lucide-react";
 import { Panel, PanelHeader, Pill, ProgressBar } from "@/components/command/ui";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { streamAi } from "@/lib/ai/client";
@@ -22,6 +37,34 @@ const CHECKLIST_TABS: { key: ChecklistSection; label: string }[] = [
 ];
 
 const KIT_TABS: KitTab[] = ["MLS", "Instagram", "Facebook", "Email", "Open House"];
+
+/* ── stage progress pipeline ────────────────────────────────────────────────── */
+
+interface StageStep {
+  key: ListingPipelineStage | "Marketing";
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const STAGE_STEPS: StageStep[] = [
+  { key: "Intake", label: "Intake", icon: ClipboardList },
+  { key: "Photos Scheduled", label: "Photos", icon: Camera },
+  { key: "MLS Draft", label: "MLS", icon: FileText },
+  { key: "Marketing", label: "Marketing", icon: Megaphone },
+  { key: "Active", label: "Launch", icon: Rocket },
+];
+
+function stageIndex(stage: ListingPipelineStage): number {
+  switch (stage) {
+    case "Intake": return 0;
+    case "Photos Scheduled": return 1;
+    case "MLS Draft": return 2;
+    case "Broker Review": return 2; // same as MLS
+    case "Active": return 4;
+    case "Under Offer": return 4;
+    default: return 0;
+  }
+}
 
 /* ── helpers ────────────────────────────────────────────────────────────────── */
 
@@ -103,6 +146,68 @@ function parseKitSections(raw: string): Record<KitTab, string> {
   return result;
 }
 
+/* ── Stage Progress Bar ──────────────────────────────────────────────────────── */
+
+function StageProgressBar({ stage }: { stage: ListingPipelineStage }) {
+  const current = stageIndex(stage);
+
+  return (
+    <div className="flex items-center gap-0 overflow-x-auto py-1">
+      {STAGE_STEPS.map((step, i) => {
+        const StepIcon = step.icon;
+        const isComplete = i < current;
+        const isActive = i === current;
+        const isLast = i === STAGE_STEPS.length - 1;
+
+        return (
+          <div key={step.key} className="flex min-w-0 items-center">
+            {/* step circle + label */}
+            <div className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[0.65rem] transition-colors",
+                  isComplete
+                    ? "border-success/40 bg-success/[0.12] text-success"
+                    : isActive
+                    ? "border-ink/20 bg-ink text-white ring-2 ring-ink/10"
+                    : "border-ink/[0.08] bg-white text-slate/40",
+                )}
+              >
+                {isComplete ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <StepIcon className="h-3 w-3" />
+                )}
+              </span>
+              <span
+                className={cn(
+                  "whitespace-nowrap text-[0.6rem] font-semibold uppercase tracking-wider",
+                  isComplete
+                    ? "text-success"
+                    : isActive
+                    ? "text-ink"
+                    : "text-slate/40",
+                )}
+              >
+                {step.label}
+              </span>
+            </div>
+            {/* connector */}
+            {!isLast && (
+              <div
+                className={cn(
+                  "mx-1 mt-[-12px] h-px w-8 shrink-0 sm:w-10 lg:w-14",
+                  i < current ? "bg-success/40" : "bg-ink/[0.08]",
+                )}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── sub-components ─────────────────────────────────────────────────────────── */
 
 function ListingCard({
@@ -128,11 +233,11 @@ function ListingCard({
       className={cn(
         "w-full rounded-xl border p-3 text-left transition-colors",
         isSelected
-          ? "border-ink/30 bg-ink/[0.04] border-l-4 border-l-ink pl-2.5"
+          ? "border-l-4 border-ink/30 border-l-ink bg-ink/[0.04] pl-2.5"
           : "border-ink/[0.07] bg-white hover:border-ink/15 hover:bg-ink/[0.02]",
       )}
     >
-      <p className="text-[0.85rem] font-semibold text-ink leading-tight">{listing.address}</p>
+      <p className="text-[0.85rem] font-semibold leading-tight text-ink">{listing.address}</p>
       <p className="mt-0.5 text-[0.72rem] text-slate">
         {listing.city} &middot; {listing.beds}bd / {listing.baths}ba
       </p>
@@ -247,8 +352,7 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(listings[0]?.id ?? null);
 
-  // Per-listing checklist overrides: "listingId::section::label" -> boolean
-  // Using a flat map keyed by "listingId" with nested overrides
+  // Per-listing checklist overrides: "section::label" -> boolean keyed by listingId
   const [checklistOverrides, setChecklistOverrides] = useState<
     Record<string, Record<string, boolean>>
   >({});
@@ -409,433 +513,463 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
   }
 
   return (
-    <div className="relative flex gap-4" style={{ minHeight: "calc(100vh - 280px)" }}>
-      {/* ── Left pane ──────────────────────────────────────────────────────── */}
-      <div className="w-[280px] shrink-0 space-y-3">
-        {/* search */}
+    <div className="relative" style={{ minHeight: "calc(100vh - 280px)" }}>
+      {/* ── Mobile: listing select dropdown (hidden on md+) ─────────────────── */}
+      <div className="mb-4 md:hidden">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
-          <input
-            type="text"
-            placeholder="Search address or city..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-ink/[0.08] bg-white py-2 pl-8 pr-3 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-          />
-        </div>
-
-        {/* listing cards */}
-        <div className="space-y-2">
-          {filtered.length === 0 ? (
-            <p className="py-8 text-center text-[0.8rem] text-slate">No listings match.</p>
-          ) : (
-            filtered.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                overrides={checklistOverrides[listing.id] ?? {}}
-                isSelected={listing.id === selectedId}
-                isActiveMls={activeListings.has(listing.id)}
-                onClick={() => handleSelectListing(listing)}
-              />
-            ))
-          )}
+          <select
+            value={selectedId ?? ""}
+            onChange={(e) => {
+              const listing = listings.find((l) => l.id === e.target.value);
+              if (listing) handleSelectListing(listing);
+            }}
+            className="w-full appearance-none rounded-xl border border-ink/[0.08] bg-white py-2.5 pl-4 pr-10 text-[0.88rem] font-medium text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+          >
+            {listings.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.address} — {l.stage}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/50" />
         </div>
       </div>
 
-      {/* ── Right pane ─────────────────────────────────────────────────────── */}
-      <div className="min-w-0 flex-1">
-        {!selectedListing ? (
-          <Panel className="flex h-64 flex-col items-center justify-center gap-3">
-            <p className="text-[0.88rem] font-medium text-slate">Select a listing to view details</p>
-            <p className="text-[0.78rem] text-slate/50">Pick a listing from the left to see the checklist, broker status, and marketing kit.</p>
-          </Panel>
-        ) : (
-          <div className="space-y-4">
-            {/* listing header */}
-            <Panel>
-              <PanelHeader
-                title={selectedListing.address}
-                subtitle={`${selectedListing.city} · ${selectedListing.beds}bd / ${selectedListing.baths}ba · ${selectedListing.sqft.toLocaleString()} sqft · Built ${selectedListing.yearBuilt}`}
-                action={
-                  <div className="flex items-center gap-2">
-                    <Pill tone={stagePillTone(selectedListing.stage)}>
-                      {selectedListing.stage}
-                    </Pill>
-                    <span className="text-[0.72rem] text-slate">
-                      {selectedListing.daysInStage}d in stage
-                    </span>
-                  </div>
-                }
-              />
-            </Panel>
+      {/* ── Desktop two-pane layout ──────────────────────────────────────────── */}
+      <div className="flex gap-4">
+        {/* Left pane — hidden on mobile, shown on md+ */}
+        <div className="hidden w-[280px] shrink-0 space-y-3 md:block">
+          {/* search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
+            <input
+              type="text"
+              placeholder="Search address or city..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-ink/[0.08] bg-white py-2 pl-8 pr-3 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+            />
+          </div>
 
-            {/* main content grid */}
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              {/* checklist section */}
-              <Panel className="overflow-hidden">
-                <div className="border-b border-ink/[0.08] px-5 py-4">
-                  <h3 className="text-[0.95rem] font-semibold text-ink">Launch Checklist</h3>
-                </div>
-                <div className="px-5 py-4">
-                  <ChecklistTab
-                    listing={selectedListing}
-                    overrides={checklistOverrides[selectedListing.id] ?? {}}
-                    onToggle={(section, label) =>
-                      handleToggle(selectedListing.id, section, label)
-                    }
-                  />
+          {/* listing cards */}
+          <div className="space-y-2">
+            {filtered.length === 0 ? (
+              <p className="py-8 text-center text-[0.8rem] text-slate">No listings match.</p>
+            ) : (
+              filtered.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  overrides={checklistOverrides[listing.id] ?? {}}
+                  isSelected={listing.id === selectedId}
+                  isActiveMls={activeListings.has(listing.id)}
+                  onClick={() => handleSelectListing(listing)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Right pane ─────────────────────────────────────────────────────── */}
+        <div className="min-w-0 flex-1">
+          {!selectedListing ? (
+            <Panel className="flex h-64 flex-col items-center justify-center gap-3">
+              <p className="text-[0.88rem] font-medium text-slate">Select a listing to view details</p>
+              <p className="text-[0.78rem] text-slate/50">Pick a listing from the left to see the checklist, broker status, and marketing kit.</p>
+            </Panel>
+          ) : (
+            <div className="space-y-4">
+              {/* listing header + stage progress */}
+              <Panel>
+                <PanelHeader
+                  title={selectedListing.address}
+                  subtitle={`${selectedListing.city} · ${selectedListing.beds}bd / ${selectedListing.baths}ba · ${selectedListing.sqft.toLocaleString()} sqft · Built ${selectedListing.yearBuilt}`}
+                  action={
+                    <div className="flex items-center gap-2">
+                      <Pill tone={stagePillTone(selectedListing.stage)}>
+                        {selectedListing.stage}
+                      </Pill>
+                      <span className="text-[0.72rem] text-slate">
+                        {selectedListing.daysInStage}d in stage
+                      </span>
+                    </div>
+                  }
+                />
+                {/* Stage step progress bar */}
+                <div className="border-t border-ink/[0.05] px-5 py-4">
+                  <StageProgressBar stage={selectedListing.stage} />
                 </div>
               </Panel>
 
-              {/* broker approval + MLS action */}
-              <div className="flex flex-col gap-4">
+              {/* main content grid */}
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {/* checklist section */}
                 <Panel className="overflow-hidden">
                   <div className="border-b border-ink/[0.08] px-5 py-4">
-                    <h3 className="text-[0.95rem] font-semibold text-ink">Broker Approval</h3>
+                    <h3 className="text-[0.95rem] font-semibold text-ink">Launch Checklist</h3>
                   </div>
-                  <div className="px-5 py-4 space-y-4">
-                    {/* toggle */}
-                    <div className="flex items-center justify-between gap-4">
-                      <p className="text-[0.85rem] text-ink">Broker reviewed &amp; approved</p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleBrokerApproved(
-                            selectedListing.id,
-                            getBrokerApproved(selectedListing),
-                          )
-                        }
-                        className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-ink/[0.04]"
-                        aria-label="Toggle broker approval"
-                      >
-                        {getBrokerApproved(selectedListing) ? (
-                          <ToggleRight className="h-7 w-7 text-success" />
-                        ) : (
-                          <ToggleLeft className="h-7 w-7 text-slate/40" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* approved banner */}
-                    {getBrokerApproved(selectedListing) && (
-                      <div className="flex items-center gap-2 rounded-xl bg-success/[0.08] px-4 py-3 ring-1 ring-inset ring-success/20">
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-                        <p className="text-[0.82rem] font-medium text-success">
-                          Broker has reviewed and approved this listing.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* MLS action button / success state */}
-                    {activeListings.has(selectedListing.id) ? (
-                      <div className="rounded-xl border border-success/30 bg-success/[0.06] px-4 py-4 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-                          <p className="text-[0.9rem] font-semibold text-success">Live on MLS</p>
-                        </div>
-                        <div className="space-y-1 pl-6 text-[0.8rem] text-slate">
-                          <p>
-                            <span className="font-medium text-ink">MLS #:</span>{" "}
-                            RMLS-{selectedListing.id.slice(0, 6).toUpperCase()}
-                          </p>
-                          <p>
-                            <span className="font-medium text-ink">Listed:</span> Just now
-                          </p>
-                          <p>
-                            <span className="font-medium text-ink">Status:</span> Active — Accepting Showings
-                          </p>
-                        </div>
-                        <a
-                          href="#"
-                          className="mt-1 inline-flex items-center gap-1 pl-6 text-[0.8rem] font-medium text-success hover:underline"
-                        >
-                          View on RMLS →
-                        </a>
-                      </div>
-                    ) : (
-                      <>
-                        {!getBrokerApproved(selectedListing) && (
-                          <p className="text-[0.78rem] text-slate/60 italic">
-                            Broker approval required before publishing.
-                          </p>
-                        )}
-                        <button
-                          type="button"
-                          disabled={!getBrokerApproved(selectedListing)}
-                          onClick={() => handleMarkActive(selectedListing.id)}
-                          className={cn(
-                            "w-full rounded-xl border px-4 py-2 text-[0.85rem] font-medium transition-colors",
-                            getBrokerApproved(selectedListing)
-                              ? "border-ink/[0.08] text-ink hover:bg-ink/[0.04]"
-                              : "cursor-not-allowed border-ink/[0.04] text-slate/40",
-                          )}
-                        >
-                          Mark Active on MLS
-                        </button>
-                      </>
-                    )}
+                  <div className="px-5 py-4">
+                    <ChecklistTab
+                      listing={selectedListing}
+                      overrides={checklistOverrides[selectedListing.id] ?? {}}
+                      onToggle={(section, label) =>
+                        handleToggle(selectedListing.id, section, label)
+                      }
+                    />
                   </div>
                 </Panel>
-              </div>
-            </div>
 
-            {/* marketing kit section */}
-            <Panel className="overflow-hidden">
-              <div className="border-b border-ink/[0.08] px-5 py-4">
-                <div className="flex items-center gap-2">
-                  <Wand2 className="h-4 w-4 text-ink" />
-                  <h3 className="text-[0.95rem] font-semibold text-ink">Generate Marketing Kit</h3>
-                </div>
-              </div>
+                {/* broker approval + MLS action */}
+                <div className="flex flex-col gap-4">
+                  <Panel className="overflow-hidden">
+                    <div className="border-b border-ink/[0.08] px-5 py-4">
+                      <h3 className="text-[0.95rem] font-semibold text-ink">Broker Approval</h3>
+                    </div>
+                    <div className="space-y-4 px-5 py-4">
+                      {/* toggle */}
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-[0.85rem] text-ink">Broker reviewed &amp; approved</p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleBrokerApproved(
+                              selectedListing.id,
+                              getBrokerApproved(selectedListing),
+                            )
+                          }
+                          className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-ink/[0.04]"
+                          aria-label="Toggle broker approval"
+                        >
+                          {getBrokerApproved(selectedListing) ? (
+                            <ToggleRight className="h-7 w-7 text-success" />
+                          ) : (
+                            <ToggleLeft className="h-7 w-7 text-slate/40" />
+                          )}
+                        </button>
+                      </div>
 
-              <div className="px-5 py-5">
-                {/* form */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {/* address */}
-                  <div className="col-span-2 space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      value={getKitField(selectedListing.id, "address")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "address", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
+                      {/* approved banner */}
+                      {getBrokerApproved(selectedListing) && (
+                        <div className="flex items-center gap-2 rounded-xl bg-success/[0.08] px-4 py-3 ring-1 ring-inset ring-success/20">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                          <p className="text-[0.82rem] font-medium text-success">
+                            Broker has reviewed and approved this listing.
+                          </p>
+                        </div>
+                      )}
 
-                  {/* city */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={getKitField(selectedListing.id, "city")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "city", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* price */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      List Price ($)
-                    </label>
-                    <input
-                      type="number"
-                      value={getKitField(selectedListing.id, "price")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "price", e.target.value)
-                      }
-                      placeholder="e.g. 795000"
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* beds */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Beds
-                    </label>
-                    <input
-                      type="number"
-                      value={getKitField(selectedListing.id, "beds")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "beds", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* baths */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Baths
-                    </label>
-                    <input
-                      type="number"
-                      value={getKitField(selectedListing.id, "baths")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "baths", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* sqft */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Sqft
-                    </label>
-                    <input
-                      type="number"
-                      value={getKitField(selectedListing.id, "sqft")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "sqft", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* year built */}
-                  <div className="space-y-1">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Year Built
-                    </label>
-                    <input
-                      type="number"
-                      value={getKitField(selectedListing.id, "yearBuilt")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "yearBuilt", e.target.value)
-                      }
-                      className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* features */}
-                  <div className="col-span-2 space-y-1 lg:col-span-2">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Features
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={getKitField(selectedListing.id, "features")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "features", e.target.value)
-                      }
-                      className="w-full resize-none rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-
-                  {/* highlights */}
-                  <div className="col-span-2 space-y-1 lg:col-span-2">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
-                      Highlights
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="What makes this listing special?"
-                      value={getKitField(selectedListing.id, "highlights")}
-                      onChange={(e) =>
-                        setKitField(selectedListing.id, "highlights", e.target.value)
-                      }
-                      className="w-full resize-none rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-5">
-                  <button
-                    type="button"
-                    disabled={kitLoading[selectedListing.id]}
-                    onClick={() => handleGenerateKit(selectedListing)}
-                    className={cn(
-                      "flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-[0.9rem] font-semibold text-white shadow-sm transition-opacity",
-                      kitLoading[selectedListing.id]
-                        ? "cursor-not-allowed opacity-50"
-                        : "hover:opacity-90 active:scale-[0.99]",
-                    )}
-                  >
-                    <Wand2 className="h-4 w-4" />
-                    {kitLoading[selectedListing.id] ? "Generating marketing kit…" : "Generate Marketing Kit"}
-                  </button>
-                </div>
-
-                {/* loading pulse */}
-                {kitLoading[selectedListing.id] && !kitOutput[selectedListing.id] && (
-                  <div className="mt-4">
-                    <p className="animate-pulse text-[0.85rem] text-slate">
-                      Generating your marketing kit...
-                    </p>
-                  </div>
-                )}
-
-                {/* output */}
-                {kitOutput[selectedListing.id] && (
-                  <div className="mt-5 space-y-3">
-                    {/* kit tab bar */}
-                    <div className="flex flex-wrap gap-1 border-b border-ink/[0.08] pb-0">
-                      {KIT_TABS.map((tab) => {
-                        const currentKitTab =
-                          kitTab[selectedListing.id] ?? "MLS";
-                        return (
+                      {/* MLS action button / success state */}
+                      {activeListings.has(selectedListing.id) ? (
+                        <div className="space-y-2 rounded-xl border border-success/30 bg-success/[0.06] px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                            <p className="text-[0.9rem] font-semibold text-success">Live on MLS</p>
+                          </div>
+                          <div className="space-y-1 pl-6 text-[0.8rem] text-slate">
+                            <p>
+                              <span className="font-medium text-ink">MLS #:</span>{" "}
+                              RMLS-{selectedListing.id.slice(0, 6).toUpperCase()}
+                            </p>
+                            <p>
+                              <span className="font-medium text-ink">Listed:</span> Just now
+                            </p>
+                            <p>
+                              <span className="font-medium text-ink">Status:</span> Active — Accepting Showings
+                            </p>
+                          </div>
+                          <a
+                            href="#"
+                            className="mt-1 inline-flex items-center gap-1 pl-6 text-[0.8rem] font-medium text-success hover:underline"
+                          >
+                            View on RMLS →
+                          </a>
+                        </div>
+                      ) : (
+                        <>
+                          {!getBrokerApproved(selectedListing) && (
+                            <p className="text-[0.78rem] italic text-slate/60">
+                              Broker approval required before publishing.
+                            </p>
+                          )}
                           <button
-                            key={tab}
                             type="button"
-                            onClick={() =>
-                              setKitTab((prev) => ({
-                                ...prev,
-                                [selectedListing.id]: tab,
-                              }))
-                            }
+                            disabled={!getBrokerApproved(selectedListing)}
+                            onClick={() => handleMarkActive(selectedListing.id)}
                             className={cn(
-                              "relative px-3 py-2 text-[0.8rem] font-medium transition-colors",
-                              currentKitTab === tab
-                                ? "text-ink after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-ink"
-                                : "text-slate hover:text-ink",
+                              "w-full rounded-xl border px-4 py-2 text-[0.85rem] font-medium transition-colors",
+                              getBrokerApproved(selectedListing)
+                                ? "border-ink/[0.08] text-ink hover:bg-ink/[0.04]"
+                                : "cursor-not-allowed border-ink/[0.04] text-slate/40",
                             )}
                           >
-                            {tab}
+                            Mark Active on MLS
                           </button>
-                        );
-                      })}
+                        </>
+                      )}
+                    </div>
+                  </Panel>
+                </div>
+              </div>
+
+              {/* marketing kit section */}
+              <Panel className="overflow-hidden">
+                <div className="border-b border-ink/[0.08] px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="h-4 w-4 text-ink" />
+                    <h3 className="text-[0.95rem] font-semibold text-ink">Generate Marketing Kit</h3>
+                  </div>
+                  <p className="mt-0.5 pl-6 text-[0.78rem] text-slate">
+                    AI-generates MLS copy, social posts, email, and open house script in one click.
+                  </p>
+                </div>
+
+                <div className="px-5 py-5">
+                  {/* form */}
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {/* address */}
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Address
+                      </label>
+                      <input
+                        type="text"
+                        value={getKitField(selectedListing.id, "address")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "address", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
                     </div>
 
-                    {/* section content */}
-                    {(() => {
-                      const currentKitTab = kitTab[selectedListing.id] ?? "MLS";
-                      const sections = parseKitSections(kitOutput[selectedListing.id]);
-                      const sectionText = sections[currentKitTab];
-                      const copyKey = `${selectedListing.id}::${currentKitTab}`;
-                      return (
-                        <div className="space-y-3">
-                          {sectionText ? (
-                            <div className="rounded-xl bg-paper/60 px-4 py-4 ring-1 ring-inset ring-ink/[0.05]">
-                              <AiMarkdown text={sectionText} />
-                            </div>
-                          ) : (
-                            <div className="rounded-xl bg-paper/60 px-4 py-4 ring-1 ring-inset ring-ink/[0.05]">
-                              <p className="text-[0.85rem] text-slate/60 italic">
-                                No content for this section yet.
-                              </p>
-                            </div>
-                          )}
-                          {sectionText && (
+                    {/* city */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        value={getKitField(selectedListing.id, "city")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "city", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* price */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        List Price ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={getKitField(selectedListing.id, "price")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "price", e.target.value)
+                        }
+                        placeholder="e.g. 795000"
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* beds */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Beds
+                      </label>
+                      <input
+                        type="number"
+                        value={getKitField(selectedListing.id, "beds")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "beds", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* baths */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Baths
+                      </label>
+                      <input
+                        type="number"
+                        value={getKitField(selectedListing.id, "baths")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "baths", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* sqft */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Sqft
+                      </label>
+                      <input
+                        type="number"
+                        value={getKitField(selectedListing.id, "sqft")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "sqft", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* year built */}
+                    <div className="space-y-1">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Year Built
+                      </label>
+                      <input
+                        type="number"
+                        value={getKitField(selectedListing.id, "yearBuilt")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "yearBuilt", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* features */}
+                    <div className="col-span-2 space-y-1 lg:col-span-2">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Features
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={getKitField(selectedListing.id, "features")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "features", e.target.value)
+                        }
+                        className="w-full resize-none rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+
+                    {/* highlights */}
+                    <div className="col-span-2 space-y-1 lg:col-span-2">
+                      <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+                        Highlights
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="What makes this listing special?"
+                        value={getKitField(selectedListing.id, "highlights")}
+                        onChange={(e) =>
+                          setKitField(selectedListing.id, "highlights", e.target.value)
+                        }
+                        className="w-full resize-none rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-2 focus:ring-ink/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      disabled={kitLoading[selectedListing.id]}
+                      onClick={() => handleGenerateKit(selectedListing)}
+                      className={cn(
+                        "flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-[0.9rem] font-semibold text-white shadow-sm transition-opacity",
+                        kitLoading[selectedListing.id]
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:opacity-90 active:scale-[0.99]",
+                      )}
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      {kitLoading[selectedListing.id] ? "Generating marketing kit…" : "Generate Marketing Kit"}
+                    </button>
+                  </div>
+
+                  {/* loading pulse */}
+                  {kitLoading[selectedListing.id] && !kitOutput[selectedListing.id] && (
+                    <div className="mt-4">
+                      <p className="animate-pulse text-[0.85rem] text-slate">
+                        Generating your marketing kit...
+                      </p>
+                    </div>
+                  )}
+
+                  {/* output tabs */}
+                  {kitOutput[selectedListing.id] && (
+                    <div className="mt-5 space-y-3">
+                      {/* kit tab bar */}
+                      <div className="flex flex-wrap gap-1 border-b border-ink/[0.08] pb-0">
+                        {KIT_TABS.map((tab) => {
+                          const currentKitTab = kitTab[selectedListing.id] ?? "MLS";
+                          return (
                             <button
+                              key={tab}
                               type="button"
                               onClick={() =>
-                                handleCopy(selectedListing.id, sectionText, copyKey)
+                                setKitTab((prev) => ({
+                                  ...prev,
+                                  [selectedListing.id]: tab,
+                                }))
                               }
-                              className="flex items-center gap-1.5 rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
-                            >
-                              {copiedSection === copyKey ? (
-                                <>
-                                  <Check className="h-3.5 w-3.5 text-success" />
-                                  Copied!
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="h-3.5 w-3.5" />
-                                  Copy
-                                </>
+                              className={cn(
+                                "relative px-3 py-2 text-[0.8rem] font-medium transition-colors",
+                                currentKitTab === tab
+                                  ? "text-ink after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-ink"
+                                  : "text-slate hover:text-ink",
                               )}
+                            >
+                              {tab}
                             </button>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            </Panel>
-          </div>
-        )}
+                          );
+                        })}
+                      </div>
+
+                      {/* section content + copy button */}
+                      {(() => {
+                        const currentKitTab = kitTab[selectedListing.id] ?? "MLS";
+                        const sections = parseKitSections(kitOutput[selectedListing.id]);
+                        const sectionText = sections[currentKitTab];
+                        const copyKey = `${selectedListing.id}::${currentKitTab}`;
+                        return (
+                          <div className="space-y-3">
+                            {sectionText ? (
+                              <div className="rounded-xl bg-paper/60 px-4 py-4 ring-1 ring-inset ring-ink/[0.05]">
+                                <AiMarkdown text={sectionText} />
+                              </div>
+                            ) : (
+                              <div className="rounded-xl bg-paper/60 px-4 py-4 ring-1 ring-inset ring-ink/[0.05]">
+                                <p className="text-[0.85rem] italic text-slate/60">
+                                  No content for this section yet.
+                                </p>
+                              </div>
+                            )}
+                            {sectionText && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopy(selectedListing.id, sectionText, copyKey)
+                                }
+                                className="flex items-center gap-1.5 rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                              >
+                                {copiedSection === copyKey ? (
+                                  <>
+                                    <Check className="h-3.5 w-3.5 text-success" />
+                                    Copied!
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-3.5 w-3.5" />
+                                    Copy {currentKitTab} copy
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Toast ──────────────────────────────────────────────────────────── */}

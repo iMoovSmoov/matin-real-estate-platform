@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Phone,
   MessageSquare,
-  Calendar,
   Clock,
   Flame,
   CheckCircle2,
@@ -13,191 +12,23 @@ import {
   ArrowRight,
   Target,
   TrendingUp,
-  AlertCircle,
+  Calendar,
+  Users,
 } from "lucide-react";
 import { Panel, PanelHeader, Pill } from "@/components/command/ui";
 import { cn } from "@/lib/utils";
+import { salesAgents, leads, transactions } from "@/lib/data";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
-type Priority = "high" | "mid" | "low";
-
 interface Task {
   id: string;
-  priority: Priority;
-  bold: string;
-  detail: string;
+  leadName: string;
+  description: string;
+  timeDue: string;
   href: string;
   done: boolean;
 }
-
-interface HotLead {
-  id: string;
-  name: string;
-  source: string;
-  budget: string;
-  lastContact: string;
-  nextAction: string;
-  phone: string;
-}
-
-interface Deal {
-  id: string;
-  address: string;
-  stage: "Active" | "Under Contract" | "Closing Soon";
-  nextDeadline: string;
-  daysToClose: number;
-  client: string;
-}
-
-interface Appointment {
-  time: string;
-  type: "Call" | "Showing" | "Consultation" | "Listing Appointment";
-  client: string;
-  phone: string;
-  note: string;
-}
-
-/* ─── Static demo data ───────────────────────────────────────────────────── */
-
-const INITIAL_TASKS: Task[] = [
-  {
-    id: "t1",
-    priority: "high",
-    bold: "Call Sarah M.",
-    detail: "Zillow lead · No response to 2 texts (3 days ago)",
-    href: "/hub/crm",
-    done: false,
-  },
-  {
-    id: "t2",
-    priority: "high",
-    bold: "Send buyer agreement to Torres family",
-    detail: "Meeting was yesterday — unsigned agreement blocks the showing",
-    href: "/hub/buyer-agreements",
-    done: false,
-  },
-  {
-    id: "t3",
-    priority: "mid",
-    bold: "Schedule showing for Kim Tran",
-    detail: "Interested in West Linn 4BR · Available this weekend",
-    href: "/hub/crm",
-    done: false,
-  },
-  {
-    id: "t4",
-    priority: "mid",
-    bold: "Follow up: Harrison listing",
-    detail: "Offer expires today — confirm buyer intent before 5 PM",
-    href: "/hub/transactions",
-    done: false,
-  },
-  {
-    id: "t5",
-    priority: "low",
-    bold: "Review CMA draft for Chen family",
-    detail: "Meeting at 2 PM — CMA was auto-generated, verify comps",
-    href: "/hub/ai/cma",
-    done: false,
-  },
-  {
-    id: "t6",
-    priority: "low",
-    bold: "Log notes from last night's showing",
-    detail: "1204 NW Lovejoy — clients left with questions about HOA",
-    href: "/hub/crm",
-    done: false,
-  },
-];
-
-const HOT_LEADS: HotLead[] = [
-  {
-    id: "l1",
-    name: "Sarah Mitchell",
-    source: "Zillow",
-    budget: "$650k–$800k",
-    lastContact: "3 days ago",
-    nextAction: "Call now — missed 2 texts",
-    phone: "+15035550001",
-  },
-  {
-    id: "l2",
-    name: "Derek & Pam Okafor",
-    source: "Referral",
-    budget: "$900k–$1.1M",
-    lastContact: "1 day ago",
-    nextAction: "Confirm weekend showing",
-    phone: "+15035550002",
-  },
-  {
-    id: "l3",
-    name: "Rina Tanaka",
-    source: "Website",
-    budget: "$550k–$700k",
-    lastContact: "2 days ago",
-    nextAction: "Text listing recommendations",
-    phone: "+15035550003",
-  },
-];
-
-const DEALS: Deal[] = [
-  {
-    id: "d1",
-    address: "8457 NW Lakeshore Dr",
-    stage: "Closing Soon",
-    nextDeadline: "Closing Thu Jun 20",
-    daysToClose: 2,
-    client: "Harrison family",
-  },
-  {
-    id: "d2",
-    address: "1204 NW Lovejoy St",
-    stage: "Under Contract",
-    nextDeadline: "Inspection Jun 22",
-    daysToClose: 9,
-    client: "Chen family",
-  },
-  {
-    id: "d3",
-    address: "714 SE Morrison Ave",
-    stage: "Active",
-    nextDeadline: "Offer review Jun 25",
-    daysToClose: 18,
-    client: "Torres family",
-  },
-];
-
-const APPOINTMENTS: Appointment[] = [
-  {
-    time: "9:00 AM",
-    type: "Call",
-    client: "Sarah Mitchell",
-    phone: "+15035550001",
-    note: "West Linn — Zillow lead, 2nd follow-up",
-  },
-  {
-    time: "11:30 AM",
-    type: "Showing",
-    client: "Derek & Pam Okafor",
-    phone: "+15035550002",
-    note: "4BR Sellwood bungalow — active buyers",
-  },
-  {
-    time: "2:00 PM",
-    type: "Consultation",
-    client: "Chen family",
-    phone: "+15035550003",
-    note: "CMA review before listing conversation",
-  },
-  {
-    time: "4:30 PM",
-    type: "Listing Appointment",
-    client: "Rina Tanaka",
-    phone: "+15035550004",
-    note: "Milwaukie — motivated to sell within 60 days",
-  },
-];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 
@@ -209,355 +40,578 @@ function todayLabel(): string {
   });
 }
 
-const PRIORITY_DOT: Record<Priority, string> = {
-  high: "bg-red-500",
-  mid: "bg-amber-400",
-  low: "bg-emerald-400",
+function greetingWord(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function formatBudget(min: number, max: number): string {
+  const fmt = (n: number) =>
+    n >= 1_000_000
+      ? `$${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 2)}M`
+      : `$${Math.round(n / 1000)}k`;
+  return `${fmt(min)}–${fmt(max)}`;
+}
+
+function daysAgoLabel(d: number): string {
+  if (d === 0) return "today";
+  if (d === 1) return "yesterday";
+  return `${d} days ago`;
+}
+
+const STAGE_PILL: Record<string, "azure" | "warn" | "success" | "danger" | "neutral"> = {
+  Inspection: "warn",
+  "Clear to Close": "success",
+  "Under Contract": "azure",
+  Active: "neutral",
+  Pending: "warn",
+  Closing: "danger",
 };
 
-const STAGE_PILL: Record<Deal["stage"], "azure" | "warn" | "success"> = {
-  Active: "azure",
-  "Under Contract": "warn",
-  "Closing Soon": "success",
-};
+function stagePillTone(stage: string): "azure" | "warn" | "success" | "danger" | "neutral" {
+  return STAGE_PILL[stage] ?? "neutral";
+}
 
-const APPT_PILL: Record<Appointment["type"], "azure" | "warn" | "success" | "neutral"> = {
-  Call: "azure",
-  Showing: "success",
-  Consultation: "neutral",
-  "Listing Appointment": "warn",
-};
+function responseColor(mins: number): { ring: string; bg: string; text: string; label: string } {
+  if (mins <= 5)
+    return {
+      ring: "ring-emerald-300",
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      label: "green",
+    };
+  if (mins <= 15)
+    return {
+      ring: "ring-amber-300",
+      bg: "bg-amber-50",
+      text: "text-amber-700",
+      label: "amber",
+    };
+  return { ring: "ring-red-300", bg: "bg-red-50", text: "text-red-700", label: "red" };
+}
 
 /* ─── Sub-components ─────────────────────────────────────────────────────── */
 
-function TaskCard({
+function TaskRow({
   task,
+  index,
   onToggle,
 }: {
   task: Task;
+  index: number;
   onToggle: (id: string) => void;
 }) {
+  const isEven = index % 2 === 0;
   return (
     <div
-      className={[
-        "flex items-start gap-3 rounded-xl border p-4 transition-all",
-        task.done
-          ? "border-ink/[0.06] bg-ink/[0.02] opacity-50"
-          : "border-ink/[0.08] bg-white hover:border-azure/30",
-      ].join(" ")}
+      className={cn(
+        "flex items-center gap-3 px-4 py-3.5 transition-colors",
+        task.done ? "opacity-50" : isEven ? "bg-white" : "bg-[#f4f4f3]",
+        !task.done && "hover:bg-ink/[0.03]",
+      )}
     >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(task.id)}
         aria-label={task.done ? "Mark incomplete" : "Mark complete"}
-        className="mt-0.5 shrink-0 text-slate transition-colors hover:text-ink"
+        className="shrink-0 text-slate/50 transition-colors hover:text-ink"
       >
         {task.done ? (
-          <CheckCircle2 className="h-5 w-5 text-success" />
+          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
         ) : (
           <Circle className="h-5 w-5" />
         )}
       </button>
 
-      {/* Priority dot */}
-      <span
-        className={[
-          "mt-[5px] h-2.5 w-2.5 shrink-0 rounded-full",
-          PRIORITY_DOT[task.priority],
-        ].join(" ")}
-      />
-
-      {/* Content */}
-      <div className="min-w-0 flex-1">
+      {/* Lead name */}
+      <div className="w-[9rem] shrink-0">
         <p
-          className={[
-            "text-[0.88rem] font-semibold leading-snug",
+          className={cn(
+            "truncate text-[0.82rem] font-semibold leading-tight",
             task.done ? "text-slate line-through" : "text-ink",
-          ].join(" ")}
+          )}
         >
-          {task.bold}
+          {task.leadName}
         </p>
-        <p className="mt-0.5 text-[0.76rem] text-slate">{task.detail}</p>
       </div>
 
-      {/* Action link */}
-      {!task.done && (
+      {/* Description */}
+      <div className="min-w-0 flex-1">
+        <p
+          className={cn(
+            "truncate text-[0.82rem] leading-tight",
+            task.done ? "text-slate/50 line-through" : "text-slate",
+          )}
+        >
+          {task.description}
+        </p>
+      </div>
+
+      {/* Time due */}
+      <span className="hidden shrink-0 text-[0.73rem] text-slate/60 sm:block">
+        {task.timeDue}
+      </span>
+
+      {/* Done / Do it */}
+      {!task.done ? (
         <Link
           href={task.href}
-          className="ml-1 shrink-0 inline-flex items-center gap-0.5 text-[0.76rem] font-semibold text-azure transition-colors hover:text-azure/70 hover:underline"
+          className="ml-1 inline-flex shrink-0 items-center gap-0.5 rounded-md border border-ink/[0.1] px-2.5 py-1 text-[0.72rem] font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
         >
           Do it
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3 w-3" />
         </Link>
+      ) : (
+        <span className="ml-1 shrink-0 text-[0.72rem] font-medium text-emerald-600">Done</span>
       )}
     </div>
   );
 }
 
-function LeadCard({ lead }: { lead: HotLead }) {
+function HotLeadCard({
+  lead,
+}: {
+  lead: {
+    id: string;
+    name: string;
+    phone: string;
+    source: string;
+    lastContactDaysAgo: number;
+    nextBestAction?: string;
+    budgetMin: number;
+    budgetMax: number;
+  };
+}) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border-l-4 border-l-red-400 bg-white p-4 shadow-sm ring-1 ring-inset ring-ink/[0.06]">
+    <div className="flex flex-col gap-3 rounded-xl border border-ink/[0.08] bg-white p-4 shadow-sm ring-2 ring-inset ring-red-100">
       <div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[0.9rem] font-semibold text-ink">{lead.name}</span>
+          <span className="text-[0.88rem] font-semibold text-ink">{lead.name}</span>
           <Pill tone="neutral">{lead.source}</Pill>
         </div>
-        <p className="mt-1 text-[0.76rem] text-slate">
-          Budget: <span className="font-medium text-ink">{lead.budget}</span>
+        <p className="mt-1 text-[0.73rem] text-slate">
+          Budget:{" "}
+          <span className="font-medium text-ink">
+            {formatBudget(lead.budgetMin, lead.budgetMax)}
+          </span>
         </p>
-        <p className="mt-0.5 text-[0.76rem] text-slate">
-          Last contact: <span className="font-medium text-ink">{lead.lastContact}</span>
+        <p className="mt-0.5 text-[0.73rem] text-slate">
+          Last contact:{" "}
+          <span className="font-medium text-ink">{daysAgoLabel(lead.lastContactDaysAgo)}</span>
         </p>
       </div>
-      <p className="rounded-lg bg-ink/[0.04] px-2.5 py-1.5 text-[0.76rem] font-medium text-ink ring-1 ring-inset ring-ink/[0.06]">
-        <Target className="mr-1 inline h-3.5 w-3.5 text-azure" />
-        {lead.nextAction}
+
+      {/* AI suggested action */}
+      <p className="rounded-lg bg-[#f4f4f3] px-2.5 py-1.5 text-[0.73rem] font-medium text-ink ring-1 ring-inset ring-ink/[0.06]">
+        <Target className="mr-1 inline h-3.5 w-3.5 text-blue-500" />
+        {lead.nextBestAction ?? "Follow up — contact this lead today"}
       </p>
+
+      {/* CTA buttons */}
       <div className="flex gap-2">
         <a
           href={`tel:${lead.phone}`}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:bg-ink/80"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[0.75rem] font-semibold text-white transition-colors hover:bg-ink/80"
         >
           <Phone className="h-3.5 w-3.5" />
           Call now
         </a>
-        <a
-          href={`sms:${lead.phone}`}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-2 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
+        <Link
+          href="/hub/crm"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-2 text-[0.75rem] font-semibold text-ink transition-colors hover:bg-[#f4f4f3]"
         >
-          <MessageSquare className="h-3.5 w-3.5" />
-          Text
-        </a>
+          <Users className="h-3.5 w-3.5" />
+          Open lead
+        </Link>
       </div>
     </div>
   );
 }
 
-function DaysToCloseChip({ days }: { days: number }) {
-  const cls =
-    days <= 3
-      ? "bg-red-50 text-red-700 ring-red-200"
-      : days <= 10
-      ? "bg-amber-50 text-amber-700 ring-amber-200"
-      : "bg-slate-50 text-slate-600 ring-slate-200";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset",
-        cls,
-      )}
-    >
-      {days}d to close
-    </span>
-  );
-}
+function PipelineCard({
+  tx,
+}: {
+  tx: {
+    id: string;
+    address: string;
+    stage: string;
+    closeDateDaysOut: number;
+    client: string;
+  };
+}) {
+  const urgent = tx.closeDateDaysOut <= 5;
+  const soon = tx.closeDateDaysOut <= 14;
+  const chipCls = urgent
+    ? "bg-red-50 text-red-700 ring-red-200"
+    : soon
+    ? "bg-amber-50 text-amber-700 ring-amber-200"
+    : "bg-slate-50 text-slate-600 ring-slate-200";
 
-function DealCard({ deal }: { deal: Deal }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-[0.85rem] font-semibold text-ink">{deal.address}</p>
-          <p className="mt-0.5 text-[0.73rem] text-slate">{deal.client}</p>
-        </div>
-        <Pill tone={STAGE_PILL[deal.stage]}>{deal.stage}</Pill>
-      </div>
-      <div className="flex items-center justify-between gap-2 rounded-lg bg-paper px-3 py-2">
-        <p className="text-[0.73rem] text-slate">
-          <Calendar className="mr-1 inline h-3.5 w-3.5 text-slate/60" />
-          {deal.nextDeadline}
-        </p>
-        <DaysToCloseChip days={deal.daysToClose} />
-      </div>
-    </div>
-  );
-}
-
-function ApptRow({ appt }: { appt: Appointment }) {
-  return (
-    <li className="flex items-start gap-3 px-5 py-3.5">
-      {/* Time — bold and fixed-width */}
-      <div className="w-[4.5rem] shrink-0 text-right">
-        <span className="text-[0.8rem] font-bold tabular-nums text-ink">{appt.time}</span>
-      </div>
-      {/* Dot */}
-      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-ink/20" />
-      {/* Content */}
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 shadow-sm">
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[0.85rem] font-semibold leading-snug text-ink">{appt.client}</p>
-          <Pill tone={APPT_PILL[appt.type]}>{appt.type}</Pill>
-        </div>
-        <p className="mt-0.5 text-[0.73rem] text-slate">{appt.note}</p>
-        {(appt.type === "Call" || appt.type === "Showing") && (
-          <a
-            href={`tel:${appt.phone}`}
-            className="mt-1 inline-flex items-center gap-1 text-[0.72rem] font-medium text-azure transition-colors hover:underline"
-          >
-            <Phone className="h-3 w-3" />
-            Dial
-          </a>
-        )}
+        <p className="truncate text-[0.83rem] font-semibold text-ink">{tx.address}</p>
+        <p className="mt-0.5 text-[0.71rem] text-slate">{tx.client}</p>
       </div>
-    </li>
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <Pill tone={stagePillTone(tx.stage)}>{tx.stage}</Pill>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-[0.67rem] font-semibold ring-1 ring-inset",
+            chipCls,
+          )}
+        >
+          <Calendar className="mr-1 h-2.5 w-2.5" />
+          {tx.closeDateDaysOut}d to close
+        </span>
+      </div>
+    </div>
   );
 }
 
 /* ─── Main component ─────────────────────────────────────────────────────── */
 
 export default function AgentWorkspace() {
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  // Pick the first sales agent as "this" agent
+  const agent = salesAgents[0];
+
+  // Hot leads: assigned to this agent, score ≥80 OR lastContactDaysAgo >5
+  const hotLeads = useMemo(
+    () =>
+      leads
+        .filter(
+          (l) =>
+            l.assignedAgent === agent.slug &&
+            (l.score >= 80 || l.lastContactDaysAgo > 5),
+        )
+        .slice(0, 4),
+    [agent.slug],
+  );
+
+  // Pipeline: transactions assigned to this agent
+  const pipeline = useMemo(
+    () =>
+      transactions
+        .filter((t) => t.agentSlug === agent.slug)
+        .sort((a, b) => a.closeDateDaysOut - b.closeDateDaysOut)
+        .slice(0, 4),
+    [agent.slug],
+  );
+
+  // Generate tasks from hot leads + pipeline urgency
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const generated: Task[] = [];
+
+    hotLeads.forEach((l, i) => {
+      const daysFmt =
+        l.lastContactDaysAgo > 0
+          ? `no contact in ${l.lastContactDaysAgo} day${l.lastContactDaysAgo !== 1 ? "s" : ""}`
+          : "contacted today";
+      generated.push({
+        id: `lead-${l.id}`,
+        leadName: l.name,
+        description: `${l.nextBestAction ?? `Follow up — ${daysFmt}`}`,
+        timeDue: i === 0 ? "ASAP" : i === 1 ? "By noon" : "Today",
+        href: "/hub/crm",
+        done: false,
+      });
+    });
+
+    pipeline.forEach((tx) => {
+      if (tx.closeDateDaysOut <= 7) {
+        generated.push({
+          id: `tx-${tx.id}`,
+          leadName: tx.client,
+          description: `${tx.stage} — closes in ${tx.closeDateDaysOut}d · ${tx.address}`,
+          timeDue: `${tx.closeDateDaysOut}d left`,
+          href: "/hub/transactions",
+          done: false,
+        });
+      }
+    });
+
+    // Pad with a couple of standing tasks if we have room
+    if (generated.length < 3) {
+      generated.push({
+        id: "task-ba",
+        leadName: "New inquiry",
+        description: "Review and send buyer agreement to interested buyers",
+        timeDue: "EOD",
+        href: "/hub/buyer-agreements",
+        done: false,
+      });
+    }
+
+    return generated;
+  });
 
   function toggleTask(id: string) {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   }
 
-  const pendingCount = tasks.filter((t) => !t.done).length;
-  const hotCount = HOT_LEADS.length;
+  const pendingTasks = tasks.filter((t) => !t.done);
+  const hotCount = hotLeads.length;
+  const responseTimeMins = agent.responseTimeMins ?? 12;
+  const teamAvgMins = 18; // pulled from metrics or hardcoded baseline
+  const rtStyle = responseColor(responseTimeMins);
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
 
-      {/* ── 1. Greeting header ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* ── 1. Greeting header ───────────────────────────────────────────── */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="mb-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate/50">
+          <p className="mb-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/50">
             {todayLabel()}
           </p>
           <h1 className="font-display text-2xl text-ink sm:text-3xl">
-            Good morning, Jordan.
+            {greetingWord()}, {agent.firstName}.
           </h1>
-          <p className="mt-1.5 text-[0.9rem] text-slate">
-            You have{" "}
-            <span className="font-semibold text-danger">{hotCount} hot lead{hotCount !== 1 ? "s" : ""}</span>
-            {" "}and{" "}
-            <span className="font-semibold text-ink">{pendingCount} task{pendingCount !== 1 ? "s" : ""}</span>
-            {" "}due today.
+          <p className="mt-1.5 text-[0.88rem] text-slate">
+            {hotCount > 0 ? (
+              <>
+                You have{" "}
+                <span className="font-semibold text-red-600">
+                  {hotCount} hot lead{hotCount !== 1 ? "s" : ""}
+                </span>{" "}
+                and{" "}
+              </>
+            ) : (
+              <>You have </>
+            )}
+            <span className="font-semibold text-ink">
+              {pendingTasks.length} task{pendingTasks.length !== 1 ? "s" : ""}
+            </span>{" "}
+            due today.
           </p>
         </div>
 
-        {/* Response time badges */}
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <p className="text-[0.64rem] font-semibold uppercase tracking-wider text-slate/50">
+        {/* Response time badge — top-right on desktop */}
+        <div className="flex shrink-0 flex-col items-start gap-1.5 sm:items-end">
+          <p className="text-[0.62rem] font-semibold uppercase tracking-wider text-slate/50">
             Response time
           </p>
-          <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[0.76rem] font-semibold text-success ring-1 ring-inset ring-success/20">
+          <span
+            className={cn(
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.75rem] font-semibold ring-1 ring-inset",
+              rtStyle.bg,
+              rtStyle.text,
+              rtStyle.ring,
+            )}
+          >
             <Clock className="h-3.5 w-3.5" />
-            You: 4 min avg
+            You: {responseTimeMins} min avg
           </span>
-          <span className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.76rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
-            Team: 18 min avg
+          <span className="flex items-center gap-1.5 rounded-full bg-[#f4f4f3] px-3 py-1.5 text-[0.75rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
+            Team avg: {teamAvgMins} min
           </span>
         </div>
       </div>
 
-      {/* ── 2. Today's priority list ───────────────────────────────────────── */}
-      <section>
-        <div className="mb-3 flex items-center gap-2">
-          <h2 className="font-display text-[1.05rem] font-semibold text-ink">Today&rsquo;s priorities</h2>
-          <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-ink px-1.5 text-[0.64rem] font-bold text-white">
-            {pendingCount}
-          </span>
-        </div>
-        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onToggle={toggleTask} />
-          ))}
-        </div>
-      </section>
+      {/* ── Desktop 2-column layout ──────────────────────────────────────── */}
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
 
-      {/* ── 3. Hot leads panel ────────────────────────────────────────────── */}
-      <section>
-        <Panel>
-          <PanelHeader
-            title="Hot leads"
-            icon={<Flame className="h-4 w-4" />}
-            subtitle={`${HOT_LEADS.length} leads need a response today`}
-            action={
-              <Link
-                href="/hub/crm"
-                className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
-              >
-                View all
-              </Link>
-            }
-          />
-          {HOT_LEADS.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-              <Target className="h-8 w-8 text-slate/30" />
-              <p className="text-[0.88rem] text-slate">No hot leads right now — great work.</p>
-              <Link
-                href="/hub/crm"
-                className="rounded-lg bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/80"
-              >
-                View all leads
-              </Link>
-            </div>
-          ) : (
-          <div className="flex gap-4 overflow-x-auto p-5 sm:grid sm:grid-cols-3 sm:overflow-visible">
-            {HOT_LEADS.map((lead) => (
-              <div key={lead.id} className="min-w-[80vw] sm:min-w-0">
-                <LeadCard lead={lead} />
+        {/* ── LEFT: Tasks + Hot Leads (2/3 width on desktop) ──────────── */}
+        <div className="flex flex-col gap-5 lg:flex-[2]">
+
+          {/* ── 2. Priority task list ─────────────────────────────────── */}
+          <Panel>
+            <PanelHeader
+              title="Today's priorities"
+              icon={<CheckCircle2 className="h-4 w-4" />}
+              subtitle={`${pendingTasks.length} action${pendingTasks.length !== 1 ? "s" : ""} remaining`}
+            />
+
+            {/* Column header row */}
+            <div className="flex items-center gap-3 border-b border-ink/[0.06] bg-[#f4f4f3] px-4 py-2">
+              <div className="w-5 shrink-0" />
+              <div className="w-[9rem] shrink-0">
+                <p className="text-[0.64rem] font-semibold uppercase tracking-wider text-slate/60">
+                  Lead / Client
+                </p>
               </div>
-            ))}
-          </div>
-          )}
-        </Panel>
-      </section>
-
-      {/* ── 4 + 5. My pipeline + Appointments (two-column on lg) ─────────── */}
-      <div className="grid gap-5 lg:grid-cols-2">
-
-        {/* My pipeline */}
-        <Panel>
-          <PanelHeader
-            title="My active transactions"
-            icon={<TrendingUp className="h-4 w-4" />}
-            subtitle={`${DEALS.length} deals in flight`}
-            action={
-              <Link
-                href="/hub/transactions"
-                className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
-              >
-                See all
-              </Link>
-            }
-          />
-          <div className="grid gap-3 p-5 sm:grid-cols-1">
-            {DEALS.map((deal) => (
-              <DealCard key={deal.id} deal={deal} />
-            ))}
-          </div>
-        </Panel>
-
-        {/* Appointments today */}
-        <Panel>
-          <PanelHeader
-            title="Appointments today"
-            icon={<Calendar className="h-4 w-4" />}
-            subtitle={`${APPOINTMENTS.length} scheduled`}
-          />
-          {APPOINTMENTS.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
-              <AlertCircle className="h-8 w-8 text-slate/40" />
-              <p className="text-[0.88rem] text-slate">No appointments scheduled today.</p>
-              <Link
-                href="/hub/crm"
-                className="rounded-lg bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/80"
-              >
-                Call a lead
-              </Link>
+              <div className="min-w-0 flex-1">
+                <p className="text-[0.64rem] font-semibold uppercase tracking-wider text-slate/60">
+                  Task
+                </p>
+              </div>
+              <p className="hidden shrink-0 text-[0.64rem] font-semibold uppercase tracking-wider text-slate/60 sm:block">
+                Due
+              </p>
+              <div className="ml-1 w-[3.75rem] shrink-0" />
             </div>
-          ) : (
-            <ul className="divide-y divide-ink/[0.06]">
-              {APPOINTMENTS.map((appt, i) => (
-                <ApptRow key={i} appt={appt} />
-              ))}
-            </ul>
-          )}
-        </Panel>
-      </div>
 
+            {tasks.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
+                <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                <p className="text-[0.88rem] text-slate">All caught up — no tasks today.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-ink/[0.05] overflow-hidden rounded-b-2xl">
+                {tasks.map((task, i) => (
+                  <TaskRow key={task.id} task={task} index={i} onToggle={toggleTask} />
+                ))}
+              </div>
+            )}
+          </Panel>
+
+          {/* ── 3. Hot leads panel ───────────────────────────────────── */}
+          <Panel>
+            <PanelHeader
+              title="Hot leads"
+              icon={<Flame className="h-4 w-4" />}
+              subtitle={
+                hotLeads.length > 0
+                  ? `${hotLeads.length} lead${hotLeads.length !== 1 ? "s" : ""} need a response today`
+                  : "No urgent leads right now"
+              }
+              action={
+                <Link
+                  href="/hub/crm"
+                  className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-[#f4f4f3]"
+                >
+                  View all
+                </Link>
+              }
+            />
+
+            {hotLeads.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+                <Target className="h-8 w-8 text-slate/30" />
+                <p className="text-[0.88rem] text-slate">No hot leads right now — great work.</p>
+              </div>
+            ) : (
+              /* Mobile: horizontal scroll; desktop: grid */
+              <div className="flex gap-4 overflow-x-auto p-5 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-2">
+                {hotLeads.map((lead) => (
+                  <div key={lead.id} className="min-w-[80vw] sm:min-w-0">
+                    <HotLeadCard lead={lead} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
+        </div>
+
+        {/* ── RIGHT: Pipeline + Response time (1/3 width on desktop) ── */}
+        <div className="flex flex-col gap-5 lg:flex-[1]">
+
+          {/* ── 4. Pipeline mini cards ───────────────────────────────── */}
+          <Panel>
+            <PanelHeader
+              title="My pipeline"
+              icon={<TrendingUp className="h-4 w-4" />}
+              subtitle={
+                pipeline.length > 0
+                  ? `${pipeline.length} active deal${pipeline.length !== 1 ? "s" : ""}`
+                  : "No active transactions"
+              }
+              action={
+                <Link
+                  href="/hub/transactions"
+                  className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-[#f4f4f3]"
+                >
+                  See all
+                </Link>
+              }
+            />
+
+            {pipeline.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 px-5 py-8 text-center">
+                <TrendingUp className="h-7 w-7 text-slate/30" />
+                <p className="text-[0.85rem] text-slate">No transactions in flight.</p>
+              </div>
+            ) : (
+              /* Mobile: horizontal scroll; desktop: stacked vertical */
+              <div className="flex gap-3 overflow-x-auto p-4 sm:flex-col sm:overflow-visible">
+                {pipeline.map((tx) => (
+                  <div key={tx.id} className="min-w-[80vw] sm:min-w-0">
+                    <PipelineCard tx={tx} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
+
+          {/* ── 5. Response time card (standalone on right column) ─── */}
+          <Panel>
+            <PanelHeader
+              title="Response time"
+              icon={<Clock className="h-4 w-4" />}
+              subtitle="Your avg vs. team"
+            />
+            <div className="flex flex-col gap-3 p-4">
+              {/* Your badge */}
+              <div
+                className={cn(
+                  "flex items-center justify-between rounded-xl px-4 py-3 ring-1 ring-inset",
+                  rtStyle.bg,
+                  rtStyle.ring,
+                )}
+              >
+                <div>
+                  <p className={cn("text-[0.7rem] font-semibold uppercase tracking-wider", rtStyle.text)}>
+                    You
+                  </p>
+                  <p className={cn("mt-0.5 text-2xl font-bold tabular-nums", rtStyle.text)}>
+                    {responseTimeMins}m
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className={cn("text-[0.72rem] font-medium", rtStyle.text)}>
+                    {responseTimeMins <= 5
+                      ? "Excellent"
+                      : responseTimeMins <= 15
+                      ? "Good"
+                      : "Needs work"}
+                  </p>
+                  <p className={cn("text-[0.7rem]", rtStyle.text)}>
+                    {responseTimeMins <= 5
+                      ? "Top of team"
+                      : responseTimeMins <= 15
+                      ? "Near average"
+                      : "Above avg"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Team comparison */}
+              <div className="flex items-center justify-between rounded-xl bg-[#f4f4f3] px-4 py-3 ring-1 ring-inset ring-ink/[0.07]">
+                <div>
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-slate/60">
+                    Team avg
+                  </p>
+                  <p className="mt-0.5 text-2xl font-bold tabular-nums text-ink">
+                    {teamAvgMins}m
+                  </p>
+                </div>
+                <div className="text-right">
+                  {responseTimeMins < teamAvgMins ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[0.72rem] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                      {teamAvgMins - responseTimeMins}m faster
+                    </span>
+                  ) : responseTimeMins > teamAvgMins ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[0.72rem] font-semibold text-red-700 ring-1 ring-inset ring-red-200">
+                      {responseTimeMins - teamAvgMins}m slower
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[0.72rem] font-semibold text-slate ring-1 ring-inset ring-slate-200">
+                      On par
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-center text-[0.68rem] text-slate/50">
+                <MessageSquare className="mr-0.5 inline h-3 w-3" />
+                Based on last 30 days of lead responses
+              </p>
+            </div>
+          </Panel>
+        </div>
+      </div>
     </div>
   );
 }

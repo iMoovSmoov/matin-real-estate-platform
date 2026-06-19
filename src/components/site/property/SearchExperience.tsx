@@ -13,14 +13,16 @@ const PropertyMap = dynamic(() => import("@/components/site/PropertyMap"), { ssr
 const TYPES = ["Single Family", "Condo", "Townhouse", "Acreage Estate"] as const;
 const STATUSES: ListingStatus[] = ["Active", "New", "Pending", "Coming Soon", "Sold"];
 const BEDS = [1, 2, 3, 4, 5] as const;
+const BATHS = [1, 2, 3] as const;
 
-type Sort = "newest" | "price-asc" | "price-desc";
+type Sort = "newest" | "price-asc" | "price-desc" | "beds-desc";
 type View = "list" | "map";
 
 const SORTS: { value: Sort; label: string }[] = [
   { value: "newest", label: "Newest" },
   { value: "price-asc", label: "Price — Low to High" },
   { value: "price-desc", label: "Price — High to Low" },
+  { value: "beds-desc", label: "Most Beds" },
 ];
 
 export function SearchExperience({
@@ -36,6 +38,7 @@ export function SearchExperience({
   const [type, setType] = useState(initialType);
   const [status, setStatus] = useState<string>("");
   const [minBeds, setMinBeds] = useState<number>(0);
+  const [minBaths, setMinBaths] = useState<number>(0);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [sort, setSort] = useState<Sort>("newest");
@@ -55,6 +58,7 @@ export function SearchExperience({
       if (type && l.type !== type) return false;
       if (status && l.status !== status) return false;
       if (minBeds && l.beds < minBeds) return false;
+      if (minBaths && l.baths < minBaths) return false;
       if (l.price < min || l.price > max) return false;
       return true;
     });
@@ -62,73 +66,81 @@ export function SearchExperience({
     const sorted = [...filtered];
     if (sort === "price-asc") sorted.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") sorted.sort((a, b) => b.price - a.price);
+    else if (sort === "beds-desc") sorted.sort((a, b) => b.beds - a.beds);
     else sorted.sort((a, b) => a.daysOnMarket - b.daysOnMarket);
     return sorted;
-  }, [listings, query, type, status, minBeds, minPrice, maxPrice, sort]);
+  }, [listings, query, type, status, minBeds, minBaths, minPrice, maxPrice, sort]);
 
   const activeFilterCount =
-    (type ? 1 : 0) + (status ? 1 : 0) + (minBeds ? 1 : 0) + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0);
+    (type ? 1 : 0) +
+    (status ? 1 : 0) +
+    (minBeds ? 1 : 0) +
+    (minBaths ? 1 : 0) +
+    (minPrice ? 1 : 0) +
+    (maxPrice ? 1 : 0);
 
   function reset() {
     setQuery("");
     setType("");
     setStatus("");
     setMinBeds(0);
+    setMinBaths(0);
     setMinPrice("");
     setMaxPrice("");
     setSort("newest");
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
-      {/* ═══ LEFT PANEL: filters + list ═══ */}
+    <div className="flex flex-col lg:flex-row" style={{ minHeight: "calc(100vh - 4rem)" }}>
+
+      {/* ══════════════════════════════════════════════
+          MOBILE VIEW TOGGLE — sticky bar at the top
+      ══════════════════════════════════════════════ */}
+      <div className="sticky top-16 z-20 flex gap-1 border-b border-ink/[0.08] bg-white px-4 py-2.5 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setView("list")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-all",
+            view === "list" ? "bg-ink text-white" : "text-slate hover:text-ink",
+          )}
+        >
+          <List className="h-4 w-4" /> List
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("map")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-semibold transition-all",
+            view === "map" ? "bg-ink text-white" : "text-slate hover:text-ink",
+          )}
+        >
+          <Map className="h-4 w-4" /> Map
+        </button>
+      </div>
+
+      {/* ══════════════════════════════════════════════
+          LEFT PANEL — filters + results list
+          Hidden on mobile when map view is active
+      ══════════════════════════════════════════════ */}
       <div
         className={cn(
-          "flex flex-col",
-          // On mobile: hide entirely when map view is active
-          view === "map" ? "hidden lg:flex lg:flex-col" : "flex flex-col",
-          // Desktop: fixed-width sidebar with scroll
-          "lg:w-[44%] lg:border-r lg:border-ink/[0.08] lg:overflow-y-auto lg:h-[calc(100vh-4rem)] lg:sticky lg:top-16",
+          "flex flex-col bg-white",
+          view === "map" ? "hidden lg:flex" : "flex",
+          "lg:w-[44%] lg:border-r lg:border-ink/[0.08] lg:overflow-y-auto lg:sticky lg:top-16",
         )}
+        style={{ height: "calc(100vh - 4rem)" }}
       >
-        {/* Mobile view toggle bar */}
-        <div className="flex gap-1 p-3 border-b border-ink/[0.08] bg-white lg:hidden">
-          <button
-            type="button"
-            onClick={() => setView("list")}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all",
-              view === "list"
-                ? "bg-ink text-white"
-                : "bg-transparent text-slate",
-            )}
-          >
-            <List className="h-4 w-4" /> List
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("map")}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all",
-              view === "map"
-                ? "bg-ink text-white"
-                : "bg-transparent text-slate",
-            )}
-          >
-            <Map className="h-4 w-4" /> Map
-          </button>
-        </div>
-
-        {/* Search + filter sidebar (inner) */}
-        <div className="p-4 pb-0">
+        {/* ── Filter sidebar (paper bg) ── */}
+        <div className="bg-paper/60 border-b border-ink/[0.07] px-4 pt-4 pb-0">
           {/* Search box */}
-          <div className="flex items-center gap-2 rounded-2xl bg-cloud px-4 shadow-soft ring-1 ring-ink/[0.08] focus-within:ring-azure/40">
+          <div className="flex items-center gap-2 rounded-2xl bg-white px-4 shadow-soft ring-1 ring-ink/[0.1] focus-within:ring-azure/40">
             <Search className="h-5 w-5 shrink-0 text-azure" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="City, neighborhood, or ZIP"
-              className="w-full bg-transparent py-3 text-[0.95rem] text-ink placeholder:text-slate focus:outline-none"
+              className="w-full bg-transparent py-3 text-[0.95rem] text-ink placeholder:text-slate/70 focus:outline-none"
             />
             {query && (
               <button onClick={() => setQuery("")} aria-label="Clear search" className="text-slate hover:text-ink">
@@ -137,22 +149,26 @@ export function SearchExperience({
             )}
           </div>
 
-          {/* Mobile filter accordion toggle */}
+          {/* Mobile: collapsible filter accordion toggle */}
           <button
             onClick={() => setFiltersOpen((v) => !v)}
-            className="mt-3 flex w-full items-center justify-between rounded-xl bg-cloud px-4 py-3 text-sm font-medium text-ink shadow-soft ring-1 ring-ink/[0.08] lg:hidden"
+            className="mt-3 flex w-full items-center justify-between rounded-xl bg-white px-4 py-3 text-sm font-medium text-ink shadow-soft ring-1 ring-ink/[0.1] lg:hidden"
           >
             <span className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-azure" /> Filters
+              <SlidersHorizontal className="h-4 w-4 text-azure" />
+              Filters
               {activeFilterCount > 0 && (
-                <span className="rounded-full bg-azure px-2 py-0.5 text-[0.7rem] text-white">{activeFilterCount}</span>
+                <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-azure px-1.5 text-[0.68rem] font-bold text-white">
+                  {activeFilterCount}
+                </span>
               )}
             </span>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", filtersOpen && "rotate-180")} />
+            <ChevronDown className={cn("h-4 w-4 text-slate transition-transform duration-200", filtersOpen && "rotate-180")} />
           </button>
 
-          <div className={cn("mt-4 space-y-7 pb-4", !filtersOpen && "hidden lg:block")}>
-            {/* Type */}
+          {/* Filter fields — always visible on desktop, collapsible on mobile */}
+          <div className={cn("mt-4 space-y-6 pb-5", !filtersOpen && "hidden lg:block")}>
+            {/* Property type */}
             <FilterGroup label="Property type">
               <div className="flex flex-wrap gap-2">
                 <Chip active={type === ""} onClick={() => setType("")}>Any</Chip>
@@ -177,11 +193,23 @@ export function SearchExperience({
             </FilterGroup>
 
             {/* Beds */}
-            <FilterGroup label="Bedrooms (min)">
+            <FilterGroup label="Min bedrooms">
               <div className="flex flex-wrap gap-2">
                 <Chip active={minBeds === 0} onClick={() => setMinBeds(0)}>Any</Chip>
                 {BEDS.map((b) => (
-                  <Chip key={b} active={minBeds === b} onClick={() => setMinBeds(b)}>
+                  <Chip key={b} active={minBeds === b} onClick={() => setMinBeds(minBeds === b ? 0 : b)}>
+                    {b}+
+                  </Chip>
+                ))}
+              </div>
+            </FilterGroup>
+
+            {/* Baths */}
+            <FilterGroup label="Min bathrooms">
+              <div className="flex flex-wrap gap-2">
+                <Chip active={minBaths === 0} onClick={() => setMinBaths(0)}>Any</Chip>
+                {BATHS.map((b) => (
+                  <Chip key={b} active={minBaths === b} onClick={() => setMinBaths(minBaths === b ? 0 : b)}>
                     {b}+
                   </Chip>
                 ))}
@@ -197,26 +225,27 @@ export function SearchExperience({
               </div>
               {(minPrice || maxPrice) && (
                 <p className="mt-2 text-[0.78rem] text-slate">
-                  {minPrice ? compactUsd(Number(minPrice)) : "$0"} to {maxPrice ? compactUsd(Number(maxPrice)) : "any"}
+                  {minPrice ? compactUsd(Number(minPrice)) : "$0"} — {maxPrice ? compactUsd(Number(maxPrice)) : "any"}
                 </p>
               )}
             </FilterGroup>
 
             {(activeFilterCount > 0 || query) && (
               <Button variant="outline" size="sm" onClick={reset} className="w-full">
-                <X className="h-4 w-4" /> Reset all filters
+                <X className="h-4 w-4 mr-1" /> Reset all filters
               </Button>
             )}
           </div>
         </div>
 
-        {/* Results list */}
-        <div className="flex-1 px-4 pb-6">
-          {/* Results heading + sort */}
+        {/* ── Results list ── */}
+        <div className="flex-1 overflow-y-auto px-4 pb-8">
+          {/* Results count + sort */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] py-4">
-            <p className="text-[0.95rem] text-slate">
-              <span className="font-display text-2xl text-ink">{results.length}</span>{" "}
-              {results.length === 1 ? "home" : "homes"}
+            <p className="text-sm text-slate">
+              Showing{" "}
+              <span className="font-display text-2xl font-bold text-ink">{results.length}</span>{" "}
+              <span className="font-medium text-ink/80">{results.length === 1 ? "home" : "homes"}</span>
               {query && (
                 <>
                   {" "}for <span className="font-medium text-ink">&ldquo;{query}&rdquo;</span>
@@ -224,7 +253,7 @@ export function SearchExperience({
               )}
             </p>
             <label className="flex items-center gap-2 text-sm text-slate">
-              Sort
+              Sort by
               <div className="relative">
                 <select
                   value={sort}
@@ -247,6 +276,7 @@ export function SearchExperience({
               ))}
             </div>
           ) : (
+            /* ── Empty state ── */
             <div className="mt-8 flex flex-col items-center justify-center rounded-2xl bg-cloud px-6 py-20 text-center shadow-soft ring-1 ring-ink/[0.06]">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-azure/10 text-azure">
                 <MapPinned className="h-8 w-8" />
@@ -256,53 +286,36 @@ export function SearchExperience({
                 Try widening your price range, clearing a filter, or searching a nearby community.
               </p>
               <Button variant="primary" size="md" onClick={reset} className="mt-6">
-                Reset filters
+                Clear filters
               </Button>
             </div>
           )}
         </div>
       </div>
 
-      {/* ═══ RIGHT PANEL: map ═══ */}
+      {/* ══════════════════════════════════════════════
+          RIGHT PANEL — map
+          Full screen on mobile when map tab is active
+      ══════════════════════════════════════════════ */}
       <div
         className={cn(
-          // Mobile: full-screen when map view active, hidden when list view active
-          view === "list"
-            ? "hidden lg:block lg:flex-1 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]"
-            : "flex flex-1 h-[calc(100vh-14rem)] lg:flex-1 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]",
+          view === "list" ? "hidden lg:block" : "block",
+          "lg:flex-1 lg:sticky lg:top-16",
         )}
+        style={{ height: "calc(100vh - 4rem)" }}
       >
-        {/* Mobile "back to list" toggle shown above map on mobile */}
-        {view === "map" && (
-          <div className="flex gap-1 p-3 border-b border-ink/[0.08] bg-white lg:hidden">
-            <button
-              type="button"
-              onClick={() => setView("list")}
-              className="flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold bg-transparent text-slate"
-            >
-              <List className="h-4 w-4" /> List
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("map")}
-              className="flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold bg-ink text-white"
-            >
-              <Map className="h-4 w-4" /> Map
-            </button>
-          </div>
-        )}
-        <div className="h-full w-full">
-          <PropertyMap listings={results} className="h-full w-full" />
-        </div>
+        <PropertyMap listings={results} className="h-full w-full" />
       </div>
     </div>
   );
 }
 
+/* ────────────────────────────────────── helpers ── */
+
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate">{label}</h3>
+      <h3 className="mb-2.5 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-slate/70">{label}</h3>
       {children}
     </div>
   );
@@ -322,10 +335,10 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium transition-all duration-200",
+        "rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium transition-all duration-150",
         active
-          ? "bg-azure text-white shadow-[0_6px_16px_rgba(46,144,224,.28)]"
-          : "bg-cloud text-ink/75 ring-1 ring-ink/[0.1] hover:ring-azure/40 hover:text-ink",
+          ? "bg-azure text-white shadow-[0_4px_14px_rgba(46,144,224,.30)]"
+          : "bg-white text-ink/70 ring-1 ring-ink/[0.12] hover:ring-azure/40 hover:text-ink",
       )}
     >
       {children}
@@ -343,14 +356,14 @@ function PriceInput({
   placeholder: string;
 }) {
   return (
-    <div className="flex flex-1 items-center rounded-xl bg-cloud px-3 shadow-soft ring-1 ring-ink/[0.08] focus-within:ring-azure/40">
+    <div className="flex flex-1 items-center rounded-xl bg-white px-3 shadow-soft ring-1 ring-ink/[0.1] focus-within:ring-azure/40">
       <span className="text-[0.85rem] text-slate">$</span>
       <input
         inputMode="numeric"
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ""))}
         placeholder={placeholder}
-        className="w-full bg-transparent py-2.5 pl-1 text-[0.85rem] text-ink placeholder:text-slate focus:outline-none"
+        className="w-full bg-transparent py-2.5 pl-1 text-[0.85rem] text-ink placeholder:text-slate/60 focus:outline-none"
       />
     </div>
   );

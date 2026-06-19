@@ -329,7 +329,7 @@ export function ScenarioTrainer() {
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
                 m.role === "user"
-                  ? "bg-ink text-ink"
+                  ? "bg-ink text-white"
                   : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
               )}
             >
