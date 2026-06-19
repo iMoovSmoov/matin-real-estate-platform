@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import {
   X,
   Wand2,
-  Wand2,
   Save,
   Send,
   Printer,

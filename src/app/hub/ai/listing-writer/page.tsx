@@ -1,9 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { listings, getCommunity } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 
-const presets: Preset[] = listings.slice(0, 5).map((l) => {
+// Build presets from the full listings array
+const ALL_PRESETS: (Preset & { id: string })[] = listings.map((l) => {
   const community = getCommunity(l.communitySlug)?.name ?? l.city;
   return {
+    id: l.id,
     label: `${l.address.split(" ").slice(0, 2).join(" ")} · ${l.city}`,
     hint: `${l.beds}bd/${l.baths}ba · ${l.sqft.toLocaleString()} sqft`,
     values: {
@@ -21,17 +26,57 @@ const presets: Preset[] = listings.slice(0, 5).map((l) => {
 });
 
 export default function ListingWriterPage() {
+  const [selectedId, setSelectedId] = useState<string>("");
+
+  const activePreset = ALL_PRESETS.find((p) => p.id === selectedId);
+  const initial = activePreset?.values ?? {};
+
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4">
+      {/* Page header */}
+      <div>
+        <h1 className="font-display text-2xl text-ink md:text-3xl">Listing Writer</h1>
+        <p className="mt-1 text-[0.92rem] text-slate">Write MLS-ready listing descriptions that sell.</p>
+      </div>
+
+      {/* Load from Listings select */}
+      <div className="flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-4 py-3">
+        <span className="shrink-0 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/60">
+          Load from Listings
+        </span>
+        <select
+          value={selectedId}
+          onChange={(e) => setSelectedId(e.target.value)}
+          className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none"
+        >
+          <option value="">— choose a listing to auto-fill —</option>
+          {ALL_PRESETS.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label} — {p.hint}
+            </option>
+          ))}
+        </select>
+        {selectedId && (
+          <button
+            type="button"
+            onClick={() => setSelectedId("")}
+            className="shrink-0 text-[0.75rem] text-slate/50 hover:text-ink transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Tool panel — re-key on selectedId so AiToolPanel resets when listing changes */}
       <AiToolPanel
+        key={selectedId || "__blank__"}
         tool="listing-description"
         title="Listing Writer"
         pillar="Marketing"
-        description="Turn raw property facts into a vivid, MLS-ready listing description — lifestyle hook first, standout features woven in, fair-housing compliant. Load a real Matin listing to start."
+        description="Turn raw property facts into a vivid, MLS-ready listing description — lifestyle hook first, standout features woven in, fair-housing compliant."
         submitLabel="Write description"
         outputTitle="MLS description"
-        presets={presets}
-        presetLabel="Load a listing"
+        initial={initial}
         fields={[
           { name: "address", label: "Address", placeholder: "8457 NW Lakeshore Ave", full: true },
           { name: "city", label: "City", placeholder: "Vancouver, WA" },
@@ -41,7 +86,13 @@ export default function ListingWriterPage() {
           { name: "sqft", label: "Square feet", type: "number", placeholder: "2624" },
           { name: "yearBuilt", label: "Year built", type: "number", placeholder: "1974" },
           { name: "price", label: "List price", placeholder: "$1,580,000" },
-          { name: "features", label: "Standout features", type: "textarea", placeholder: "ADU / guest suite, mountain views, hardwoods…", full: true },
+          {
+            name: "features",
+            label: "Standout features",
+            type: "textarea",
+            placeholder: "ADU / guest suite, mountain views, hardwoods…",
+            full: true,
+          },
         ]}
       />
     </div>

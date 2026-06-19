@@ -1,28 +1,30 @@
+"use client";
+
 import { Fragment } from "react";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Dark-themed inline markdown renderer for the streamed AI output
-   (CMA, agreements, listing copy). Dependency-free. Understands:
-     # / ## / ###   headings
-     **bold**  *italic*  `code`
-     - / *          bullet list
-     1.             numbered list
-     > quote        blockquote
-     | table |      table with header / separator / data rows
-     ---            divider
-     blank line     paragraph break
+   Professional markdown renderer for streamed AI output.
+   Renders as a real business document with proper sizing and hierarchy.
+   Supports: # ## ### headings, **bold**, *italic*, `code`,
+             - /* bullets, 1. ordered lists, > blockquotes,
+             | tables |, --- dividers, blank line paragraph breaks.
    ────────────────────────────────────────────────────────────────────────── */
 
+/* ── inline renderer ───────────────────────────────────────────────────── */
+
 function renderInline(text: string, keyBase: string): React.ReactNode[] {
-  // Split on **bold**, *italic*, `code` — in that priority order
+  // Split on **bold**, *italic*, `code` — bold checked first to avoid
+  // a single * inside ** being consumed as italic.
   const tokens = text
-    .split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g)
+    .split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g)
     .filter(Boolean);
 
   return tokens.map((tok, i) => {
+    const k = `${keyBase}-${i}`;
+
     if (tok.startsWith("**") && tok.endsWith("**") && tok.length > 4) {
       return (
-        <strong key={`${keyBase}-b-${i}`} className="font-semibold text-ink">
+        <strong key={k} className="font-semibold text-ink">
           {tok.slice(2, -2)}
         </strong>
       );
@@ -30,8 +32,8 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
     if (tok.startsWith("`") && tok.endsWith("`") && tok.length > 2) {
       return (
         <code
-          key={`${keyBase}-c-${i}`}
-          className="rounded bg-ink/[0.05] px-1.5 py-0.5 font-mono text-[0.82em] text-ink"
+          key={k}
+          className="rounded bg-ink/[0.06] px-1.5 py-0.5 font-mono text-[0.82em] text-ink ring-1 ring-inset ring-ink/[0.08]"
         >
           {tok.slice(1, -1)}
         </code>
@@ -39,19 +41,20 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
     }
     if (tok.startsWith("*") && tok.endsWith("*") && tok.length > 2) {
       return (
-        <em key={`${keyBase}-i-${i}`} className="italic">
+        <em key={k} className="italic text-ink/80">
           {tok.slice(1, -1)}
         </em>
       );
     }
-    return <Fragment key={`${keyBase}-t-${i}`}>{tok}</Fragment>;
+    return <Fragment key={k}>{tok}</Fragment>;
   });
 }
 
 /* ── table helpers ─────────────────────────────────────────────────────── */
 
 function isTableRow(line: string): boolean {
-  return line.trimStart().startsWith("|") && line.trimEnd().endsWith("|");
+  const t = line.trim();
+  return t.startsWith("|") && t.endsWith("|");
 }
 
 function isSeparatorRow(line: string): boolean {
@@ -66,225 +69,291 @@ function parseTableCells(line: string): string[] {
     .map((c) => c.trim());
 }
 
-interface TableBlock {
-  type: "table";
-  header: string[];
-  rows: string[][];
-}
+/* ── block types ───────────────────────────────────────────────────────── */
+
+type Block =
+  | { type: "h1" | "h2" | "h3"; text: string }
+  | { type: "p"; text: string }
+  | { type: "hr" }
+  | { type: "blockquote"; lines: string[] }
+  | { type: "ul"; items: string[] }
+  | { type: "ol"; items: Array<{ num: number; text: string }> }
+  | { type: "table"; header: string[]; rows: string[][] };
 
 /* ── main component ────────────────────────────────────────────────────── */
 
 export function AiMarkdown({ text }: { text: string }) {
   const lines = text.split("\n");
-  const blocks: React.ReactNode[] = [];
-  let bullets: string[] = [];
-  let ordered: string[] = [];
-  let tableLines: string[] = [];
+  const blocks: Block[] = [];
 
-  /* flush helpers */
+  // Accumulators for multi-line blocks
+  let bulletAcc: string[] = [];
+  let orderedAcc: Array<{ num: number; text: string }> = [];
+  let quoteAcc: string[] = [];
+  let tableAcc: string[] = [];
 
-  const flushBullets = (key: string) => {
-    if (bullets.length === 0) return;
-    const items = [...bullets];
-    bullets = [];
-    blocks.push(
-      <ul key={key} className="list-none my-2 space-y-1">
-        {items.map((b, i) => (
-          <li key={`${key}-${i}`} className="flex gap-2 text-[0.9rem] leading-relaxed text-ink/90">
-            <span aria-hidden className="mt-[0.45em] shrink-0 text-ink/40">•</span>
-            <span>{renderInline(b, `${key}-${i}`)}</span>
-          </li>
-        ))}
-      </ul>,
-    );
+  const flushBullets = () => {
+    if (bulletAcc.length === 0) return;
+    blocks.push({ type: "ul", items: [...bulletAcc] });
+    bulletAcc = [];
   };
 
-  const flushOrdered = (key: string) => {
-    if (ordered.length === 0) return;
-    const items = [...ordered];
-    ordered = [];
-    blocks.push(
-      <ol key={key} className="list-decimal list-inside my-2 space-y-1 ml-1">
-        {items.map((b, i) => (
-          <li key={`${key}-${i}`} className="text-[0.9rem] leading-relaxed text-ink/90">
-            {renderInline(b, `${key}-${i}`)}
-          </li>
-        ))}
-      </ol>,
-    );
+  const flushOrdered = () => {
+    if (orderedAcc.length === 0) return;
+    blocks.push({ type: "ol", items: [...orderedAcc] });
+    orderedAcc = [];
   };
 
-  const flushTable = (key: string) => {
-    if (tableLines.length === 0) return;
-    const allLines = [...tableLines];
-    tableLines = [];
+  const flushQuote = () => {
+    if (quoteAcc.length === 0) return;
+    blocks.push({ type: "blockquote", lines: [...quoteAcc] });
+    quoteAcc = [];
+  };
 
-    // Identify header (first row), separator (second row if separator), rest = data
-    let headerCells: string[] = [];
-    let dataRows: string[][] = [];
-
+  const flushTable = () => {
+    if (tableAcc.length === 0) return;
+    const allLines = [...tableAcc];
+    tableAcc = [];
     if (allLines.length === 0) return;
 
-    headerCells = parseTableCells(allLines[0]);
-
-    const startIdx = allLines.length > 1 && isSeparatorRow(allLines[1]) ? 2 : 1;
+    const header = parseTableCells(allLines[0]);
+    const startIdx =
+      allLines.length > 1 && isSeparatorRow(allLines[1]) ? 2 : 1;
+    const rows: string[][] = [];
     for (let i = startIdx; i < allLines.length; i++) {
-      dataRows.push(parseTableCells(allLines[i]));
+      if (!isSeparatorRow(allLines[i])) {
+        rows.push(parseTableCells(allLines[i]));
+      }
     }
-
-    blocks.push(
-      <div key={key} className="my-3 overflow-x-auto">
-        <table className="w-full text-[0.82rem] border-collapse">
-          <thead>
-            <tr>
-              {headerCells.map((cell, ci) => (
-                <th
-                  key={`${key}-th-${ci}`}
-                  className="border border-ink/[0.1] bg-ink/[0.03] px-2.5 py-1.5 text-left font-semibold text-ink text-[0.78rem] uppercase tracking-wide"
-                >
-                  {renderInline(cell, `${key}-th-${ci}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {dataRows.map((row, ri) => (
-              <tr key={`${key}-tr-${ri}`}>
-                {row.map((cell, ci) => (
-                  <td
-                    key={`${key}-td-${ri}-${ci}`}
-                    className="border border-ink/[0.1] px-2.5 py-1.5 text-ink/80"
-                  >
-                    {renderInline(cell, `${key}-td-${ri}-${ci}`)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>,
-    );
+    blocks.push({ type: "table", header, rows });
   };
 
-  const flushLists = (key: string) => {
-    flushBullets(`${key}-ul`);
-    flushOrdered(`${key}-ol`);
+  const flushLists = () => {
+    flushBullets();
+    flushOrdered();
   };
 
-  const flushAll = (key: string) => {
-    flushLists(key);
-    flushTable(`${key}-tbl`);
+  const flushAll = () => {
+    flushLists();
+    flushQuote();
+    flushTable();
   };
 
-  lines.forEach((raw, idx) => {
+  for (const raw of lines) {
     const line = raw.trimEnd();
-    const key = `ln-${idx}`;
+    const trimmed = line.trim();
 
-    /* blank line */
-    if (line.trim() === "") {
-      flushAll(key);
-      return;
+    /* blank line — flush everything */
+    if (trimmed === "") {
+      flushAll();
+      continue;
     }
 
     /* horizontal rule */
-    if (/^(\-\-\-|\*\*\*|___)$/.test(line.trim())) {
-      flushAll(key);
-      blocks.push(<hr key={key} className="my-4 border-ink/[0.08]" />);
-      return;
+    if (/^(---|___|\*\*\*)$/.test(trimmed)) {
+      flushAll();
+      blocks.push({ type: "hr" });
+      continue;
     }
 
     /* table row */
     if (isTableRow(line)) {
-      flushLists(key);
-      tableLines.push(line);
-      return;
-    } else {
-      /* leaving table context */
-      if (tableLines.length > 0) {
-        flushTable(`${key}-tbl`);
-      }
+      flushLists();
+      flushQuote();
+      tableAcc.push(line);
+      continue;
+    } else if (tableAcc.length > 0) {
+      flushTable();
     }
 
-    /* ### sub-heading */
-    if (line.startsWith("### ")) {
-      flushAll(key);
-      blocks.push(
-        <h3
-          key={key}
-          className="font-semibold text-[0.9rem] text-ink mt-4 mb-1.5"
-        >
-          {renderInline(line.slice(4), key)}
-        </h3>,
-      );
-      return;
+    /* blockquote */
+    if (line.startsWith("> ") || line === ">") {
+      flushLists();
+      flushTable();
+      quoteAcc.push(line.startsWith("> ") ? line.slice(2) : "");
+      continue;
+    } else if (quoteAcc.length > 0) {
+      flushQuote();
+    }
+
+    /* # heading (treated as h2) */
+    if (line.startsWith("# ") && !line.startsWith("## ")) {
+      flushAll();
+      blocks.push({ type: "h2", text: line.slice(2) });
+      continue;
     }
 
     /* ## heading */
-    if (line.startsWith("## ")) {
-      flushAll(key);
-      blocks.push(
-        <h2
-          key={key}
-          className="font-display text-[1.05rem] text-ink mt-5 mb-2 pb-1.5 border-b border-ink/[0.07] first:mt-0"
-        >
-          {renderInline(line.slice(3), key)}
-        </h2>,
-      );
-      return;
+    if (line.startsWith("## ") && !line.startsWith("### ")) {
+      flushAll();
+      blocks.push({ type: "h2", text: line.slice(3) });
+      continue;
     }
 
-    /* # top-level heading (treat same as ##) */
-    if (line.startsWith("# ")) {
-      flushAll(key);
-      blocks.push(
-        <h2
-          key={key}
-          className="font-display text-[1.05rem] text-ink mt-5 mb-2 pb-1.5 border-b border-ink/[0.07] first:mt-0"
-        >
-          {renderInline(line.slice(2), key)}
-        </h2>,
-      );
-      return;
-    }
-
-    /* > blockquote */
-    if (line.startsWith("> ")) {
-      flushAll(key);
-      blocks.push(
-        <blockquote
-          key={key}
-          className="border-l-2 border-ink/20 pl-3 text-ink/60 text-[0.85rem] italic my-2"
-        >
-          {renderInline(line.slice(2), key)}
-        </blockquote>,
-      );
-      return;
+    /* ### heading */
+    if (line.startsWith("### ")) {
+      flushAll();
+      blocks.push({ type: "h3", text: line.slice(4) });
+      continue;
     }
 
     /* numbered list */
-    const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+    const orderedMatch = line.match(/^(\d+)\.\s+(.*)$/);
     if (orderedMatch) {
-      flushBullets(`${key}-ul`);
-      ordered.push(orderedMatch[1]);
-      return;
+      flushBullets();
+      flushQuote();
+      flushTable();
+      orderedAcc.push({ num: parseInt(orderedMatch[1], 10), text: orderedMatch[2] });
+      continue;
     }
 
-    /* bullet list: "- " or "* " but NOT "* * *" (already handled above) */
+    /* bullet list: "- " or "* " */
     if (line.startsWith("- ") || line.startsWith("* ")) {
-      flushOrdered(`${key}-ol`);
-      bullets.push(line.slice(2));
-      return;
+      flushOrdered();
+      flushQuote();
+      flushTable();
+      bulletAcc.push(line.slice(2));
+      continue;
     }
 
     /* paragraph */
-    flushAll(key);
-    blocks.push(
-      <p key={key} className="mb-2.5 last:mb-0 text-ink/90 text-[0.9rem] leading-relaxed">
-        {renderInline(line, key)}
-      </p>,
-    );
+    flushAll();
+    blocks.push({ type: "p", text: line });
+  }
+
+  /* flush any remaining accumulators */
+  flushAll();
+
+  /* ── render blocks ─────────────────────────────────────────────────── */
+
+  const rendered = blocks.map((block, bi) => {
+    const key = `b-${bi}`;
+
+    switch (block.type) {
+      case "h2":
+        return (
+          <h2
+            key={key}
+            className="mb-3 mt-6 border-b border-ink/[0.1] pb-2 font-display text-[1.15rem] font-normal tracking-tight text-ink first:mt-0"
+          >
+            {renderInline(block.text, key)}
+          </h2>
+        );
+
+      case "h3":
+        return (
+          <h3
+            key={key}
+            className="mb-2 mt-5 font-sans text-[0.95rem] font-semibold uppercase tracking-[0.08em] text-ink/70 first:mt-0"
+          >
+            {renderInline(block.text, key)}
+          </h3>
+        );
+
+      case "p":
+        return (
+          <p
+            key={key}
+            className="mb-3 text-[0.9rem] leading-[1.75] text-ink/90 last:mb-0"
+          >
+            {renderInline(block.text, key)}
+          </p>
+        );
+
+      case "hr":
+        return <hr key={key} className="my-5 border-ink/[0.1]" />;
+
+      case "blockquote":
+        return (
+          <blockquote
+            key={key}
+            className="my-4 border-l-[3px] border-ink/20 pl-4 text-[0.875rem] italic text-ink/60 leading-relaxed"
+          >
+            {block.lines.map((l, li) => (
+              <Fragment key={`${key}-l-${li}`}>
+                {renderInline(l, `${key}-l-${li}`)}
+                {li < block.lines.length - 1 && <br />}
+              </Fragment>
+            ))}
+          </blockquote>
+        );
+
+      case "ul":
+        return (
+          <ul key={key} className="my-3 space-y-1.5 pl-1">
+            {block.items.map((item, ii) => (
+              <li
+                key={`${key}-${ii}`}
+                className="flex gap-2.5 text-[0.9rem] leading-relaxed text-ink/90"
+              >
+                <span
+                  aria-hidden
+                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ink/40"
+                />
+                <span>{renderInline(item, `${key}-li-${ii}`)}</span>
+              </li>
+            ))}
+          </ul>
+        );
+
+      case "ol":
+        return (
+          <ol key={key} className="my-3 space-y-1.5 pl-1">
+            {block.items.map((item, ii) => (
+              <li
+                key={`${key}-${ii}`}
+                className="flex gap-2.5 text-[0.9rem] leading-relaxed text-ink/90"
+              >
+                <span className="min-w-[1.2rem] shrink-0 text-[0.8rem] font-semibold text-ink/50">
+                  {item.num}.
+                </span>
+                <span>{renderInline(item.text, `${key}-li-${ii}`)}</span>
+              </li>
+            ))}
+          </ol>
+        );
+
+      case "table":
+        return (
+          <div
+            key={key}
+            className="my-4 w-full overflow-x-auto rounded-lg ring-1 ring-ink/[0.08]"
+          >
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr>
+                  {block.header.map((cell, ci) => (
+                    <th
+                      key={`${key}-th-${ci}`}
+                      className="border border-ink/[0.12] bg-ink/[0.03] px-3 py-2 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-ink/70"
+                    >
+                      {renderInline(cell, `${key}-th-${ci}`)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {block.rows.map((row, ri) => (
+                  <tr key={`${key}-tr-${ri}`}>
+                    {row.map((cell, ci) => (
+                      <td
+                        key={`${key}-td-${ri}-${ci}`}
+                        className="border border-ink/[0.08] px-3 py-2 text-[0.85rem] text-ink/85 leading-snug"
+                      >
+                        {renderInline(cell, `${key}-td-${ri}-${ci}`)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   });
 
-  flushAll("final");
-  return <div className="space-y-1">{blocks}</div>;
+  return <div className="space-y-0.5">{rendered}</div>;
 }

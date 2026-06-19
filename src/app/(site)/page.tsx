@@ -224,7 +224,6 @@ export default function HomePage() {
                   ["AI coaching", "Scenario training for brokers", GraduationCap],
                 ].map(([t, d, Icon]) => (
                   <div key={t as string} className="glass rounded-2xl p-5">
-                    {/* @ts-expect-error dynamic icon */}
                     <Icon className="h-5 w-5 text-azure-bright" />
                     <div className="mt-3 font-display text-lg text-white">{t as string}</div>
                     <div className="mt-1 text-[0.84rem] text-slate-300">{d as string}</div>
