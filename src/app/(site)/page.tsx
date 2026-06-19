@@ -37,7 +37,7 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section id="main-content" className="relative min-h-[85vh] sm:min-h-[92vh] overflow-hidden">
+      <section id="main-content" className="relative min-h-[70vh] sm:min-h-[92vh] overflow-hidden">
         {/* Background image */}
         <div className="absolute inset-0 ken-burns">
           <Image
@@ -46,12 +46,12 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[center_25%] sm:object-center"
+            className="object-cover object-[20%_10%] sm:object-[center_20%]"
           />
         </div>
 
-        {/* Gradient: dark at BOTTOM on all sizes — text sits in the desk/floor area, logo above stays clear */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
+        {/* Gradient: dark at BOTTOM — lighter on mobile so the office reads through */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent sm:via-ink/55" />
         {/* Subtle gold warmth at center-bottom */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
         {/* Noise texture for film grain premium feel */}
@@ -59,7 +59,7 @@ export default function HomePage() {
           style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }} />
 
         {/* Content: always anchored to bottom — sits in desk area, never covers logo wall */}
-        <div className="relative z-10 flex min-h-[85vh] sm:min-h-[92vh] items-end">
+        <div className="relative z-10 flex min-h-[70vh] sm:min-h-[92vh] items-end">
           <Container className="pt-20">
             {/* Wide text block across the bottom — like a caption on an architectural photo */}
             <div className="w-full pb-24 sm:pb-14 lg:pb-16 max-w-3xl">
