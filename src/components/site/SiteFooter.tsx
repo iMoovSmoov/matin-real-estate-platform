@@ -43,7 +43,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-ink text-white">
       {/* Premium gold accent rule */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(210,160,80,0.35)] to-transparent" />
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(210,160,80,0.55)] to-transparent" />
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo className="h-10 text-white" />

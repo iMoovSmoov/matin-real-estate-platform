@@ -114,7 +114,7 @@ export default function HomePage() {
       <div className="h-px bg-ink/[0.05]" />
 
       {/* ---------- FEATURED LISTINGS ---------- */}
-      <Section>
+      <Section className="pb-14 md:pb-20">
         <Container>
           <div className="rule-accent mb-6" />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -143,7 +143,7 @@ export default function HomePage() {
       </Section>
 
       {/* ---------- COMMUNITIES ---------- */}
-      <Section className="bg-[linear-gradient(180deg,#f6f6f5_0%,#ececeb_100%)]">
+      <Section className="bg-[linear-gradient(180deg,#f6f6f5_0%,#ececeb_100%)] pt-14 md:pt-20">
         <Container>
           <SectionHeading
             eyebrow="Explore communities"
@@ -151,7 +151,7 @@ export default function HomePage() {
             intro="From West Linn bluffs to Lake Oswego lakefront and the Vancouver waterfront — we live where we sell."
             align="center"
           />
-          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
+          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {popularCommunities.map((c, i) => (
               <Reveal key={c.slug} delay={(i % 6) * 0.05}>
                 <CommunityCard community={c} />
@@ -282,25 +282,32 @@ export default function HomePage() {
       </Section>
 
       {/* ---------- TESTIMONIALS ---------- */}
-      <Section className="bg-paper-200/60">
+      <Section className="bg-paper-200/60 pt-0">
         <Container>
-          <SectionHeading eyebrow="Client stories" title="People who trusted us with the biggest move of their lives" align="center" />
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+          <SectionHeading eyebrow="Client stories" title="People who trusted us with the biggest move of their lives" align="center" className="pt-20 md:pt-28" />
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-5">
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
-                <figure className="flex h-full flex-col rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06] sm:p-7">
-                  <Quote className="h-6 w-6 text-azure/30 sm:h-8 sm:w-8" />
-                  <blockquote className="mt-3 flex-1 text-[0.98rem] leading-relaxed text-ink/85">
-                    &ldquo;{t.quote}&rdquo;
+                <figure className="flex h-full flex-col rounded-2xl bg-cloud p-6 shadow-soft ring-1 ring-ink/[0.07] sm:p-7">
+                  {/* Stars up top — more scannable */}
+                  <div className="flex items-center gap-0.5 text-ink/65">
+                    {Array.from({ length: 5 }).map((_, s) => (
+                      <Star key={s} className="h-3.5 w-3.5 fill-current" />
+                    ))}
+                  </div>
+                  {/* Quote mark — visible but decorative */}
+                  <Quote className="mt-4 h-8 w-8 text-ink/[0.10]" />
+                  <blockquote className="mt-2 flex-1 font-display text-[1.05rem] leading-relaxed text-ink/80 italic">
+                    {t.quote}
                   </blockquote>
-                  <figcaption className="mt-5 border-t border-ink/[0.07] pt-4">
-                    <div className="flex items-center gap-0.5 text-azure">
-                      {Array.from({ length: 5 }).map((_, s) => (
-                        <Star key={s} className="h-3.5 w-3.5 fill-current" />
-                      ))}
+                  <figcaption className="mt-6 flex items-center gap-3 border-t border-ink/[0.07] pt-5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[0.8rem] font-semibold text-white">
+                      {t.name.split(" ")[0][0]}{t.name.includes("&") ? t.name.split("&")[1]?.trim()?.[0] ?? "" : (t.name.split(" ")[1]?.[0] ?? "")}
                     </div>
-                    <div className="mt-2 font-medium text-ink">{t.name}</div>
-                    <div className="text-[0.82rem] text-slate">{t.area}</div>
+                    <div>
+                      <div className="text-[0.88rem] font-semibold text-ink">{t.name}</div>
+                      <div className="text-[0.78rem] text-slate">{t.area}</div>
+                    </div>
                   </figcaption>
                 </figure>
               </Reveal>
