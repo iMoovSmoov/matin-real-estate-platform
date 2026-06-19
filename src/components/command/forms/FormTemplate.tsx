@@ -254,21 +254,15 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
                 className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-ink focus:outline-none"
                 aria-label="Source record for auto-fill"
               >
-                <option value="" className="bg-ink text-ink">
-                  Pick a listing or lead…
-                </option>
-                <optgroup label="Listings" className="bg-ink text-ink">
+                <option value="">Pick a listing or lead…</option>
+                <optgroup label="Listings">
                   {records.listings.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink text-ink">
-                      {r.label}
-                    </option>
+                    <option key={r.key} value={r.key}>{r.label}</option>
                   ))}
                 </optgroup>
-                <optgroup label="Leads" className="bg-ink text-ink">
+                <optgroup label="Leads">
                   {records.leads.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink text-ink">
-                      {r.label}
-                    </option>
+                    <option key={r.key} value={r.key}>{r.label}</option>
                   ))}
                 </optgroup>
               </select>
@@ -328,9 +322,9 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
       </div>
 
       {/* Scrollable document body */}
-      <div className="flex-1 overflow-y-auto bg-ink px-5 py-5 print:overflow-visible">
+      <div className="flex-1 overflow-y-auto bg-[#1a1a1a] px-5 py-5 print:overflow-visible">
         {/* The branded paper */}
-        <article className="mx-auto max-w-[640px] rounded-2xl border border-ink/[0.08] bg-ink text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
+        <article className="mx-auto max-w-[640px] rounded-2xl border border-ink/[0.08] bg-white text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
           {/* Document letterhead */}
           <div className="flex items-start justify-between gap-4 border-b-2 border-slate-900/90 px-8 pb-5 pt-8">
             <div className="flex items-center gap-3 text-slate-900">
@@ -447,7 +441,7 @@ function DocField({
 }) {
   const full = field.type === "textarea" || field.type === "signature";
   const inputCls =
-    "w-full rounded-md border border-slate-300 bg-ink px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/20";
+    "w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/20";
 
   return (
     <div className={cn("flex flex-col gap-1", full && "sm:col-span-2")}>
