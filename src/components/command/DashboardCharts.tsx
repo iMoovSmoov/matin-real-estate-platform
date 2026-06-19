@@ -27,15 +27,15 @@ type TipProps = {
 
 const GRID = "#1c2532";
 const AXIS = "#5d6b7d";
-const AZURE = "#d8d8da";
-const AZURE_DEEP = "#6e6e72";
+const AZURE = "#f0f0f2";
+const AZURE_DEEP = "#9a9aa0";
 const SUCCESS = "#2fa36b";
 
 /* ── Shared dark tooltip ─────────────────────────────────────────────── */
 function DarkTooltip({ active, payload, label, fmt }: TipProps) {
   if (!active || !payload || payload.length === 0) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-ink-800/95 px-3 py-2 text-[0.78rem] shadow-xl backdrop-blur">
+    <div className="rounded-lg border border-white/10 bg-white/[0.06]/95 px-3 py-2 text-[0.78rem] shadow-xl backdrop-blur">
       {label != null && (
         <p className="mb-1 font-semibold text-white">{String(label)}</p>
       )}

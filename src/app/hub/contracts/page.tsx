@@ -45,7 +45,7 @@ export default function ContractsPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Hero header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-ink-800/80 to-ink-900/80 px-6 py-7">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.04] px-6 py-7">
         <div className="pointer-events-none absolute -right-12 top-0 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.4]" />
         <div className="relative max-w-2xl">

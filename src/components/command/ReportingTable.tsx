@@ -72,7 +72,7 @@ export function ReportingTable({ agents }: { agents: Agent[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
       <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5">
         <div>
           <h3 className="text-[0.95rem] font-semibold text-white">Per-Agent Production</h3>

@@ -84,7 +84,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Scrim */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/55 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -154,7 +154,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
 
               {/* Assigned agent */}
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink-800/50 px-3.5 py-3">
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3.5 py-3">
                   <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
                     <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
                   </span>
@@ -175,7 +175,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               </div>
 
               {/* ── AI reply generator — the flagship demo ── */}
-              <div className="rounded-xl border border-white/10 bg-ink-800/40">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04]">
                 <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4 text-azure-bright" />

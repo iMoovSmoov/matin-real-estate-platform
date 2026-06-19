@@ -65,7 +65,7 @@ export function AiChat({
   const fresh = messages.length <= 1;
 
   return (
-    <div className="flex h-[calc(100vh-13rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="flex h-[calc(100vh-13rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex items-center gap-3">

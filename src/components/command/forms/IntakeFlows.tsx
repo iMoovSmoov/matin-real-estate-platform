@@ -71,7 +71,7 @@ export function IntakeFlows() {
 
 function FlowCard({ flow, onPreview }: { flow: IntakeFlow; onPreview: () => void }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-ink-900/70 p-4 transition-colors hover:border-azure/30">
+    <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-azure/30">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ function FlowPreview({ flow, onClose }: { flow: IntakeFlow | null; onClose: () =
     <>
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/55 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -340,11 +340,11 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
                 <select
                   value={f.type}
                   onChange={(e) => retype(f._id, e.target.value as FieldType)}
-                  className="rounded border border-white/10 bg-ink-800 px-1 py-0.5 text-[0.66rem] text-slate-300 focus:outline-none"
+                  className="rounded border border-white/10 bg-white/[0.06] px-1 py-0.5 text-[0.66rem] text-slate-300 focus:outline-none"
                   aria-label="Field type"
                 >
                   {FIELD_TYPES.map((t) => (
-                    <option key={t} value={t} className="bg-ink-800">
+                    <option key={t} value={t} className="bg-white/[0.06]">
                       {t}
                     </option>
                   ))}
@@ -367,7 +367,7 @@ function FlowPreviewInner({ flow, onClose }: { flow: IntakeFlow; onClose: () => 
       </div>
 
       {/* Publish bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-ink-800/50 px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-white/[0.05] px-5 py-3.5">
         <div className="flex items-center gap-2 text-[0.78rem] text-slate-300">
           <Link2 className="h-3.5 w-3.5 text-slate-300/60" />
           <code className="rounded bg-white/[0.06] px-2 py-1 font-mono text-[0.74rem] text-azure-300">
@@ -411,11 +411,11 @@ function PreviewControl({ field }: { field: ReFormField }) {
   if (field.type === "select")
     return (
       <select className={cls} defaultValue="">
-        <option value="" className="bg-ink-800">
+        <option value="" className="bg-white/[0.06]">
           Select…
         </option>
         {field.options?.map((o) => (
-          <option key={o} value={o} className="bg-ink-800">
+          <option key={o} value={o} className="bg-white/[0.06]">
             {o}
           </option>
         ))}

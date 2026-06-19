@@ -101,8 +101,8 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex items-center gap-3 border-b border-white/10 px-5 py-[1.15rem]">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-azure/15 text-azure-bright ring-1 ring-inset ring-azure/25">
-          <MatinMark className="h-4 text-azure-bright" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-inset ring-white/15">
+          <MatinMark className="h-4 text-white" />
         </span>
         <div className="min-w-0 leading-tight">
           <span className="block truncate font-display text-[1.05rem] text-white">Matin Hub</span>
@@ -141,7 +141,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                           className={cn(
                             "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.85rem] font-medium transition-colors",
                             active
-                              ? "bg-azure/12 text-white ring-1 ring-inset ring-azure/25"
+                              ? "bg-white/10 text-white ring-1 ring-inset ring-white/15"
                               : "text-slate-300 hover:bg-white/[0.05] hover:text-white",
                           )}
                         >
@@ -161,7 +161,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 
       {/* Footer status card */}
       <div className="border-t border-white/10 p-3">
-        <div className="rounded-xl border border-white/10 bg-ink-800/60 p-3">
+        <div className="rounded-xl border border-white/10 bg-white/[0.055] p-3">
           <div className="flex items-center gap-2">
             <LiveDot tone="success" />
             <span className="text-[0.74rem] font-semibold text-white">All systems operational</span>
@@ -183,14 +183,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-ink-900/80 backdrop-blur-md lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-white/[0.05] backdrop-blur-md lg:flex">
         <SidebarContent pathname={pathname} />
       </aside>
 
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-hidden />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setMobileOpen(false)} aria-hidden />
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[82vw] border-r border-white/10 bg-ink-900 shadow-2xl">
             <button
               onClick={() => setMobileOpen(false)}
@@ -294,7 +294,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Back-to-site strip */}
-        <div className="flex items-center border-b border-white/[0.06] bg-ink-900/40 px-4 py-1.5 md:px-6">
+        <div className="flex items-center border-b border-white/[0.06] bg-white/[0.025] px-4 py-1.5 md:px-6">
           <Link
             href="/"
             className="group inline-flex items-center gap-1.5 text-[0.72rem] font-medium text-slate-300/70 transition-colors hover:text-azure-bright"

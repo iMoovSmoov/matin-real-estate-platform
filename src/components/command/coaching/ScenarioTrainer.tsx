@@ -125,7 +125,7 @@ export function ScenarioTrainer() {
   /* ── Library view ─────────────────────────────────────────────────────── */
   if (!active) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-ink-900/70">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.045]">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
@@ -172,7 +172,7 @@ export function ScenarioTrainer() {
             <button
               key={s.id}
               onClick={() => start(s)}
-              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-white/10 bg-ink-800/40 p-4 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.06]"
+              className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.06]"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -197,7 +197,7 @@ export function ScenarioTrainer() {
 
   /* ── Active role-play view ────────────────────────────────────────────── */
   return (
-    <div className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">

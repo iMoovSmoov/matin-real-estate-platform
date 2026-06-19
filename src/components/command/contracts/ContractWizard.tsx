@@ -256,9 +256,9 @@ export function ContractWizard() {
     step === 5;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
       {/* Summary header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-ink-800/40 px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
             <FileSignature className="h-4 w-4" />
@@ -290,7 +290,7 @@ export function ContractWizard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)]">
         {/* ── Left rail · step progress ── */}
-        <aside className="border-b border-white/10 bg-ink-900/40 p-4 lg:border-b-0 lg:border-r">
+        <aside className="border-b border-white/10 bg-white/[0.025] p-4 lg:border-b-0 lg:border-r">
           <SectionLabel className="mb-3 px-1">Workflow</SectionLabel>
           <ol className="space-y-1">
             {STEPS.map((s, i) => {
@@ -522,17 +522,17 @@ function StepAutofill({
           onChange={(e) => onPick(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[0.85rem] text-white transition-colors focus:border-azure/50 focus:outline-none"
         >
-          <option value="" className="bg-ink-800">Select a CRM record…</option>
-          <optgroup label="Listings" className="bg-ink-800">
+          <option value="" className="bg-white/[0.06]">Select a CRM record…</option>
+          <optgroup label="Listings" className="bg-white/[0.06]">
             {listings.slice(0, 14).map((l) => (
-              <option key={l.id} value={`L:${l.id}`} className="bg-ink-800">
+              <option key={l.id} value={`L:${l.id}`} className="bg-white/[0.06]">
                 {l.address}, {l.city} · {usd(l.price)}
               </option>
             ))}
           </optgroup>
-          <optgroup label="Buyer leads" className="bg-ink-800">
+          <optgroup label="Buyer leads" className="bg-white/[0.06]">
             {leads.slice(0, 14).map((d) => (
-              <option key={d.id} value={`D:${d.id}`} className="bg-ink-800">
+              <option key={d.id} value={`D:${d.id}`} className="bg-white/[0.06]">
                 {d.name} · {d.community}
               </option>
             ))}
@@ -619,9 +619,9 @@ function FieldInput({
         />
       ) : field.type === "select" ? (
         <select value={value} onChange={(e) => onChange(e.target.value)} className={cn(base, ring)}>
-          <option value="" className="bg-ink-800">Select…</option>
+          <option value="" className="bg-white/[0.06]">Select…</option>
           {field.options?.map((o) => (
-            <option key={o} value={o} className="bg-ink-800">
+            <option key={o} value={o} className="bg-white/[0.06]">
               {o}
             </option>
           ))}
@@ -696,7 +696,7 @@ function StepDraft({
       </div>
 
       {/* Document preview */}
-      <div className="mt-4 rounded-xl border border-white/10 bg-ink-800/40">
+      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04]">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
           <div className="flex items-center gap-2">
             {drafting ? <LiveDot tone="azure" /> : <FileSignature className="h-3.5 w-3.5 text-azure-bright" />}
@@ -869,7 +869,7 @@ function StepSign({
           </div>
 
           {/* Audit log */}
-          <div className="rounded-xl border border-white/10 bg-ink-800/40">
+          <div className="rounded-xl border border-white/10 bg-white/[0.04]">
             <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
               <ShieldCheck className="h-3.5 w-3.5 text-azure-bright" />
               <span className="text-[0.8rem] font-semibold text-white">Audit log</span>

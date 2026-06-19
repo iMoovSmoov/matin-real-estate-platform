@@ -23,7 +23,7 @@ export function Panel({
   return (
     <Tag
       className={cn(
-        "relative rounded-2xl border border-white/10 bg-ink-900/70 backdrop-blur-sm",
+        "relative rounded-2xl border border-white/10 bg-white/[0.045] backdrop-blur-md",
         glow && "shadow-glow",
         className,
       )}
@@ -150,7 +150,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 transition-colors hover:border-azure/30",
+        "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition-colors hover:border-azure/30",
         accent && "bg-azure/[0.07]",
         className,
       )}
@@ -238,7 +238,7 @@ export function LiveDot({
 export function Sparkline({
   data,
   className,
-  stroke = "#d8d8da",
+  stroke = "#f0f0f2",
   fill = true,
 }: {
   data: number[];

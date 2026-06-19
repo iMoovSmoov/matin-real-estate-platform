@@ -52,7 +52,7 @@ export function TransactionsBoard({ transactions }: { transactions: Transaction[
             const items = transactions.filter((t) => t.stage === stage);
             const colValue = items.reduce((s, t) => s + t.price, 0);
             return (
-              <div key={stage} className="flex w-[18rem] shrink-0 flex-col rounded-2xl border border-white/10 bg-ink-900/50">
+              <div key={stage} className="flex w-[18rem] shrink-0 flex-col rounded-2xl border border-white/10 bg-white/[0.03]">
                 <div className="border-b border-white/10 px-4 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[0.8rem] font-semibold text-white">{stage}</span>
@@ -69,7 +69,7 @@ export function TransactionsBoard({ transactions }: { transactions: Transaction[
                       <button
                         key={t.id}
                         onClick={() => setActive(t)}
-                        className="group rounded-xl border border-white/10 bg-ink-800/60 p-3.5 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
+                        className="group rounded-xl border border-white/10 bg-white/[0.055] p-3.5 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[0.82rem] font-semibold leading-snug text-white">{t.address}</p>
@@ -128,7 +128,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     <>
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/55 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -169,7 +169,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               </div>
 
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink-800/50 px-3.5 py-3">
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3.5 py-3">
                   <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
                     <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
                   </span>

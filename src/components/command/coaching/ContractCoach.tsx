@@ -74,7 +74,7 @@ export function ContractCoach() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.045]">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
         <div className="flex items-start gap-3">
@@ -176,7 +176,7 @@ export function ContractCoach() {
 
           <div
             className={cn(
-              "min-h-[18rem] flex-1 overflow-y-auto rounded-xl border border-white/10 bg-ink-800/40 px-4 py-3.5",
+              "min-h-[18rem] flex-1 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5",
               !output && "grid place-items-center",
             )}
           >

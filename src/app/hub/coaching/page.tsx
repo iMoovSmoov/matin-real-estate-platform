@@ -77,7 +77,7 @@ export default function CoachingPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Header / hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-ink-800/80 via-ink-900/60 to-ink-900/80 px-6 py-7">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-white/[0.03] to-white/[0.05] px-6 py-7">
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.5]" />
         <div className="relative">

@@ -68,7 +68,7 @@ export default function AiStudioPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-ink-800/80 to-ink-900/80 px-6 py-7">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.04] px-6 py-7">
         <div className="pointer-events-none absolute -right-10 top-0 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
         <div className="relative max-w-2xl">
           <div className="mb-2 flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function AiStudioPage() {
             <Link
               key={t.href}
               href={t.href}
-              className="group relative flex flex-col rounded-2xl border border-white/10 bg-ink-900/70 p-5 transition-all hover:-translate-y-0.5 hover:border-azure/40 hover:bg-azure/[0.05] hover:shadow-glow"
+              className="group relative flex flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-5 transition-all hover:-translate-y-0.5 hover:border-azure/40 hover:bg-azure/[0.05] hover:shadow-glow"
             >
               <div className="flex items-center justify-between">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20 transition-colors group-hover:bg-azure/20">

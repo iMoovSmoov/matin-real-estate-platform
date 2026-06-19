@@ -13,8 +13,13 @@ export default function CommandCenterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid-tech min-h-screen bg-ink text-white antialiased">
-      <Shell>{children}</Shell>
+    <div className="relative min-h-screen bg-ink text-white antialiased">
+      {/* depth: faint grid + a soft top highlight so glass panels float */}
+      <div className="pointer-events-none fixed inset-0 grid-tech opacity-50" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(255,255,255,0.07),transparent_60%)]" />
+      <div className="relative">
+        <Shell>{children}</Shell>
+      </div>
     </div>
   );
 }

@@ -132,7 +132,7 @@ function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-ink-900/70 p-4 text-left transition-all hover:border-azure/40 hover:bg-ink-800/60 hover:shadow-glow"
+      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-left transition-all hover:border-azure/40 hover:bg-white/[0.055] hover:shadow-glow"
     >
       {/* Top row: code + tags */}
       <div className="flex items-center justify-between gap-2">

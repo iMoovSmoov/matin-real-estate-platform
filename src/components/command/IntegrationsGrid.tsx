@@ -63,9 +63,9 @@ export function IntegrationsGrid({ integrations }: { integrations: Integration[]
             onChange={(e) => setStatus(e.target.value as typeof status)}
             className="h-9 appearance-none rounded-lg border border-white/10 bg-white/[0.04] pl-3 pr-8 text-[0.8rem] font-medium text-white focus:border-azure/50 focus:outline-none"
           >
-            <option value="all" className="bg-ink-800">All statuses</option>
-            <option value="connected" className="bg-ink-800">Connected</option>
-            <option value="available" className="bg-ink-800">Available</option>
+            <option value="all" className="bg-white/[0.06]">All statuses</option>
+            <option value="connected" className="bg-white/[0.06]">Connected</option>
+            <option value="available" className="bg-white/[0.06]">Available</option>
           </select>
           <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300/50" />
         </div>
@@ -79,7 +79,7 @@ export function IntegrationsGrid({ integrations }: { integrations: Integration[]
             <div
               key={i.name}
               className={cn(
-                "group flex flex-col rounded-2xl border bg-ink-900/70 p-4 transition-colors",
+                "group flex flex-col rounded-2xl border bg-white/[0.045] p-4 transition-colors",
                 connected ? "border-white/10 hover:border-azure/30" : "border-dashed border-white/12 hover:border-azure/30",
               )}
             >

@@ -114,7 +114,7 @@ export function FormTemplate({ form, onClose }: { form: ReForm | null; onClose: 
       {/* Scrim */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/55 backdrop-blur-sm transition-opacity duration-300 print:hidden",
+          "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300 print:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -288,19 +288,19 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
                 className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-white focus:outline-none"
                 aria-label="Source record for auto-fill"
               >
-                <option value="" className="bg-ink-800">
+                <option value="" className="bg-white/[0.06]">
                   Pick a record…
                 </option>
-                <optgroup label="Listings" className="bg-ink-800">
+                <optgroup label="Listings" className="bg-white/[0.06]">
                   {records.listings.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink-800">
+                    <option key={r.key} value={r.key} className="bg-white/[0.06]">
                       {r.label}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Leads" className="bg-ink-800">
+                <optgroup label="Leads" className="bg-white/[0.06]">
                   {records.leads.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-ink-800">
+                    <option key={r.key} value={r.key} className="bg-white/[0.06]">
                       {r.label}
                     </option>
                   ))}

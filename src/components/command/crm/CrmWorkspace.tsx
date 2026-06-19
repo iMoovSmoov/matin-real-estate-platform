@@ -123,7 +123,7 @@ function TableView({
   toggleSort: (k: SortKey) => void;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left">
           <thead>
@@ -251,7 +251,7 @@ function KanbanView({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => voi
         {columns.map((col) => {
           const items = leads.filter((l) => l.stage === col);
           return (
-            <div key={col} className="flex w-[16.5rem] shrink-0 flex-col rounded-2xl border border-white/10 bg-ink-900/50">
+            <div key={col} className="flex w-[16.5rem] shrink-0 flex-col rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3.5 py-2.5">
                 <div className="flex items-center gap-2">
                   <span className={cn("h-2 w-2 rounded-full", stageDot(col))} />
@@ -264,7 +264,7 @@ function KanbanView({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => voi
                   <button
                     key={l.id}
                     onClick={() => onOpen(l)}
-                    className="group rounded-xl border border-white/10 bg-ink-800/60 p-3 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
+                    className="group rounded-xl border border-white/10 bg-white/[0.055] p-3 text-left transition-all hover:border-azure/40 hover:bg-azure/[0.05]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="truncate text-[0.82rem] font-semibold text-white">{l.name}</p>
@@ -306,7 +306,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
         className="h-9 appearance-none rounded-lg border border-white/10 bg-white/[0.04] pl-3 pr-8 text-[0.82rem] font-medium text-white focus:border-azure/50 focus:outline-none"
       >
         {options.map((o) => (
-          <option key={o} value={o} className="bg-ink-800">
+          <option key={o} value={o} className="bg-white/[0.06]">
             {o}
           </option>
         ))}

@@ -98,7 +98,7 @@ export function AiToolPanel({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
       {/* ── Input column ── */}
-      <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
             <Wand2 className="h-5 w-5" />
@@ -166,11 +166,11 @@ export function AiToolPanel({
                   onChange={(e) => set(f.name, e.target.value)}
                   className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.85rem] text-white transition-colors focus:border-azure/50 focus:outline-none"
                 >
-                  <option value="" className="bg-ink-800">
+                  <option value="" className="bg-white/[0.06]">
                     Select…
                   </option>
                   {f.options?.map((o) => (
-                    <option key={o} value={o} className="bg-ink-800">
+                    <option key={o} value={o} className="bg-white/[0.06]">
                       {o}
                     </option>
                   ))}
@@ -209,7 +209,7 @@ export function AiToolPanel({
       </div>
 
       {/* ── Output column ── */}
-      <div className="flex flex-col rounded-2xl border border-white/10 bg-ink-900/70">
+      <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.045]">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3.5">
           <div className="flex items-center gap-2">
             {busy ? <LiveDot tone="azure" /> : <Sparkles className="h-4 w-4 text-azure-bright" />}

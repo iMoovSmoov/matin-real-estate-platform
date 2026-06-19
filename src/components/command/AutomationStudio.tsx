@@ -58,7 +58,7 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
             <div
               key={a.id}
               className={cn(
-                "flex flex-col rounded-2xl border bg-ink-900/70 p-5 transition-colors",
+                "flex flex-col rounded-2xl border bg-white/[0.045] p-5 transition-colors",
                 on ? "border-white/10" : "border-white/[0.06] opacity-70",
               )}
             >
@@ -112,7 +112,7 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
               </p>
 
               {/* When → result */}
-              <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/[0.07] bg-ink-800/40 px-3 py-2.5">
+              <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5">
                 <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-slate-300/55">When</span>
                 <span className="min-w-0 flex-1 truncate text-[0.78rem] text-white">{a.trigger}</span>
                 <ArrowRight className={cn("h-3.5 w-3.5 shrink-0", on ? "text-azure-bright" : "text-slate-300/30")} />
@@ -138,7 +138,7 @@ export function AutomationStudio({ automations }: { automations: Automation[] })
 
 function Mini({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
-    <div className={cn("rounded-2xl border border-white/10 p-4", accent ? "bg-azure/[0.07]" : "bg-ink-900/70")}>
+    <div className={cn("rounded-2xl border border-white/10 p-4", accent ? "bg-azure/[0.07]" : "bg-white/[0.045]")}>
       <div className="flex items-center gap-2 text-slate-300/70">
         <span className="text-azure-bright">{icon}</span>
         <span className="text-[0.72rem] font-medium uppercase tracking-wider">{label}</span>
