@@ -37,6 +37,14 @@ import { cn } from "@/lib/utils";
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 type NavGroup = { label: string; items: NavItem[] };
 
+/** Bottom-tab items shown on mobile — the 4 most-used destinations + More */
+const BOTTOM_TABS = [
+  { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
+  { label: "Workspace", href: "/hub/agent", icon: BrainCircuit },
+  { label: "CRM", href: "/hub/crm", icon: Users },
+  { label: "Deals", href: "/hub/transactions", icon: FileText },
+] satisfies { label: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
+
 const NAV: NavGroup[] = [
   {
     label: "OVERVIEW",
@@ -414,8 +422,48 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <main className="flex-1 overflow-x-hidden">{children}</main>
+        <main className="flex-1 overflow-x-hidden pb-16 lg:pb-0">{children}</main>
       </div>
+
+      {/* ── Mobile bottom tab bar ─────────────────────────────────────────── */}
+      <nav
+        aria-label="Main navigation"
+        className="fixed bottom-0 inset-x-0 z-30 flex h-16 items-stretch border-t border-ink/[0.08] bg-white shadow-[0_-1px_0_0_rgb(0,0,0,0.06)] lg:hidden"
+      >
+        {BOTTOM_TABS.map(({ label, href, icon: Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[0.58rem] font-semibold uppercase tracking-wider transition-colors",
+                active ? "text-ink" : "text-slate/50 hover:text-slate/80",
+              )}
+            >
+              <Icon
+                className={cn(
+                  "h-5 w-5 transition-colors",
+                  active ? "text-ink" : "text-slate/40",
+                )}
+              />
+              {label}
+              {active && (
+                <span className="absolute bottom-0 left-0 right-0 mx-auto h-0.5 w-8 rounded-full bg-ink" />
+              )}
+            </Link>
+          );
+        })}
+        {/* More — opens the full sidebar drawer */}
+        <button
+          onClick={() => setMobileOpen(true)}
+          aria-label="More navigation"
+          className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[0.58rem] font-semibold uppercase tracking-wider text-slate/50 transition-colors hover:text-slate/80"
+        >
+          <Menu className="h-5 w-5 text-slate/40" />
+          More
+        </button>
+      </nav>
     </div>
   );
 }
