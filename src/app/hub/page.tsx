@@ -11,11 +11,12 @@ import {
   Scale,
   ArrowUpRight,
   Database,
-  Gauge,
   Bot,
-  Workflow,
   FileSignature,
-  GraduationCap,
+  MessageSquareText,
+  PenSquare,
+  Calculator,
+  Users,
 } from "lucide-react";
 import { metrics, agentLeaderboard, activities, company } from "@/lib/data";
 import { usd, compactUsd, num, timeAgo } from "@/lib/utils";
@@ -40,13 +41,13 @@ const KPIS = [
   { label: "List-to-Sold", value: `${k.listVsSold}%`, delta: { value: "0.4pt", dir: "up" as const }, icon: <Scale className="h-4 w-4" /> },
 ];
 
-const PILLARS = [
-  { n: 1, name: "Structured Data Systems", module: "CRM & Leads", href: "/hub/crm", icon: Database, note: "Spreadsheets → live database" },
-  { n: 2, name: "Centralized Dashboard", module: "Real-time Reporting", href: "/hub/reporting", icon: Gauge, note: "One source of truth" },
-  { n: 3, name: "AI Integration", module: "AI Studio", href: "/hub/ai", icon: Bot, note: "AI in every workflow" },
-  { n: 4, name: "Automation", module: "Automation Studio", href: "/hub/automations", icon: Workflow, note: "8 flows eliminating busywork" },
-  { n: 5, name: "Contract Systems", module: "AI Agreements", href: "/hub/ai/agreements", icon: FileSignature, note: "Listing & buyer agreements" },
-  { n: 6, name: "AI Coaching", module: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap, note: "Scenario role-play training" },
+const TOOLS = [
+  { label: "Draft a lead reply", href: "/hub/ai/lead-responder", icon: MessageSquareText },
+  { label: "Write a listing", href: "/hub/ai/listing-writer", icon: PenSquare },
+  { label: "Run a CMA", href: "/hub/ai/cma", icon: Calculator },
+  { label: "New agreement", href: "/hub/ai/agreements", icon: FileSignature },
+  { label: "Manage leads", href: "/hub/crm", icon: Users },
+  { label: "Generate a form", href: "/hub/forms", icon: Database },
 ];
 
 const topVolume = agentLeaderboard[0]?.volume || 1;
@@ -59,10 +60,6 @@ export default function DashboardPage() {
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2">
-              <LiveDot tone="success" />
-              <SectionLabel>Operations · Live</SectionLabel>
-            </div>
             <h1 className="font-display text-3xl text-white md:text-[2.4rem]">
               Good morning, {company.founder.split(" ")[0]}.
             </h1>
@@ -74,7 +71,7 @@ export default function DashboardPage() {
           <div className="flex shrink-0 gap-2.5">
             <Link
               href="/hub/crm"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-azure px-4 py-2.5 text-[0.85rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200"
             >
               Work the queue <ArrowUpRight className="h-4 w-4" />
             </Link>
@@ -93,6 +90,31 @@ export default function DashboardPage() {
         {KPIS.map((kpi) => (
           <StatTile key={kpi.label} {...kpi} />
         ))}
+      </div>
+
+      {/* Your tools */}
+      <div>
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="font-display text-xl text-white">Your tools</h2>
+          <span className="text-[0.78rem] text-slate-300/60">Open a tool, get a result.</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {TOOLS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-5 text-center transition-all hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.07]"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.08] text-white ring-1 ring-inset ring-white/10 transition group-hover:bg-white/15">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="text-[0.82rem] font-medium leading-tight text-white">{t.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Charts row */}
@@ -194,48 +216,6 @@ export default function DashboardPage() {
         </Panel>
       </div>
 
-      {/* 6 pillars system status */}
-      <Panel>
-        <PanelHeader
-          title="Platform modules"
-          subtitle="Every part of the brokerage, connected in one system"
-          icon={<Gauge className="h-4 w-4" />}
-          action={
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-success/12 px-2.5 py-1 text-[0.72rem] font-semibold text-success ring-1 ring-inset ring-success/20">
-              <LiveDot tone="success" /> 6 / 6 live
-            </span>
-          }
-        />
-        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PILLARS.map((p) => {
-            const Icon = p.icon;
-            return (
-              <Link
-                key={p.n}
-                href={p.href}
-                className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 transition-all hover:border-azure/40 hover:bg-azure/[0.06]"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-azure/12 text-azure-bright ring-1 ring-inset ring-azure/20">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[0.62rem] font-bold uppercase tracking-wider text-success/80">
-                      Live
-                    </span>
-                    <LiveDot tone="success" className="h-1.5 w-1.5" />
-                  </div>
-                  <p className="mt-0.5 text-[0.88rem] font-semibold text-white">{p.name}</p>
-                  <p className="mt-0.5 text-[0.74rem] text-slate-300/75">{p.note}</p>
-                  <p className="mt-1.5 inline-flex items-center gap-1 text-[0.72rem] font-semibold text-azure-bright opacity-80 transition-opacity group-hover:opacity-100">
-                    {p.module} <ArrowUpRight className="h-3 w-3" />
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </Panel>
 
       <p className="pb-2 text-center text-[0.72rem] text-slate-300/45">
         {company.name} · {company.stats.annualVolume} annual volume · {company.stats.agents} agents · {usd(metrics.kpis.pipelineValue)} active pipeline

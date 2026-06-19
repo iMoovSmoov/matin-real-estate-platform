@@ -26,6 +26,7 @@ import {
   X,
   ArrowLeft,
   ChevronDown,
+  LifeBuoy,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn, initials } from "@/lib/utils";
@@ -37,7 +38,7 @@ type NavGroup = { label: string; items: NavItem[] };
 const NAV: NavGroup[] = [
   { label: "Overview", items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }] },
   {
-    label: "Pipeline",
+    label: "Clients",
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
       { label: "Transactions", href: "/hub/transactions", icon: Wallet },
@@ -64,11 +65,10 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "Operations",
+    label: "Insights",
     items: [
-      { label: "Automations", href: "/hub/automations", icon: Workflow },
-      { label: "Integrations", href: "/hub/integrations", icon: Plug },
       { label: "Reporting", href: "/hub/reporting", icon: BarChart3 },
+      { label: "Integrations", href: "/hub/integrations", icon: Plug },
     ],
   },
 ];
@@ -159,17 +159,14 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         })}
       </nav>
 
-      {/* Footer status card */}
+      {/* Footer */}
       <div className="border-t border-white/10 p-3">
-        <div className="rounded-xl border border-white/10 bg-white/[0.055] p-3">
-          <div className="flex items-center gap-2">
-            <LiveDot tone="success" />
-            <span className="text-[0.74rem] font-semibold text-white">All systems operational</span>
-          </div>
-          <p className="mt-1 text-[0.68rem] leading-relaxed text-slate-300/70">
-            12 integrations · 8 automations active
-          </p>
-        </div>
+        <a
+          href="tel:+15036229624"
+          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-white/[0.05] hover:text-white"
+        >
+          <LifeBuoy className="h-[1.05rem] w-[1.05rem]" /> Help &amp; support
+        </a>
       </div>
     </div>
   );
