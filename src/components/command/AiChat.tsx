@@ -65,7 +65,7 @@ export function AiChat({
   const fresh = messages.length <= 1;
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] min-h-[24rem] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white sm:h-[calc(100vh-13rem)] sm:min-h-[32rem]">
+    <div className="flex h-[400px] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white sm:h-[500px]">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex items-center gap-3">
@@ -105,7 +105,7 @@ export function AiChat({
             </span>
             <div
               className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
+                "min-w-0 max-w-[80%] overflow-hidden rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed break-words",
                 m.role === "user"
                   ? "rounded-tr-sm bg-ink text-white"
                   : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
@@ -146,7 +146,7 @@ export function AiChat({
             e.preventDefault();
             send(input);
           }}
-          className="flex items-end gap-2 rounded-2xl border border-ink/10 bg-white py-2 pl-4 pr-2 focus-within:border-ink/20"
+          className="flex w-full items-end gap-2 rounded-2xl border border-ink/10 bg-white py-2 pl-4 pr-2 focus-within:border-ink/20"
         >
           <textarea
             value={input}
@@ -159,12 +159,12 @@ export function AiChat({
             }}
             rows={1}
             placeholder={placeholder}
-            className="max-h-32 flex-1 resize-none bg-transparent py-1.5 text-[0.88rem] text-ink placeholder:text-slate/40 focus:outline-none"
+            className="max-h-32 min-w-0 flex-1 resize-none bg-transparent py-1.5 text-[0.88rem] text-ink placeholder:text-slate/40 focus:outline-none"
           />
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white transition-colors hover:bg-ink/90 disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
           </button>
@@ -183,7 +183,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70"
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/30"
           style={{ animationDelay: `${i * 120}ms` }}
         />
       ))}

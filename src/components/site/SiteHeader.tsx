@@ -40,12 +40,20 @@ export function SiteHeader() {
           : "border-b border-ink/10 bg-cloud/95 shadow-soft backdrop-blur-xl py-2.5",
       )}
     >
+      {/* Skip to main content — visible on focus, hidden otherwise */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-azure focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none"
+      >
+        Skip to content
+      </a>
+
       <div className="container-x flex items-center justify-between gap-6">
         <Link href="/" className={cn("transition-colors", onDark ? "text-white" : "text-ink")}>
           <Logo className="h-9" />
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-7 lg:flex">
           {NAV.map((n) => {
             const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
             return (
@@ -53,7 +61,7 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  "link-underline text-[0.92rem] font-medium transition-colors",
+                  "link-underline text-[0.92rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2 rounded-sm",
                   onDark
                     ? active ? "text-white" : "text-white/75 hover:text-white"
                     : active ? "text-ink" : "text-ink/60 hover:text-ink",
@@ -88,9 +96,11 @@ export function SiteHeader() {
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <button
-            className={cn("lg:hidden", onDark ? "text-white" : "text-ink")}
+            className={cn("lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2 rounded-sm", onDark ? "text-white" : "text-ink")}
             onClick={() => setMenu((m) => !m)}
-            aria-label="Menu"
+            aria-label={menu ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menu}
+            aria-controls="mobile-nav"
           >
             {menu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -99,12 +109,14 @@ export function SiteHeader() {
 
       {/* Mobile menu */}
       <div
+        id="mobile-nav"
         className={cn(
           "overflow-hidden bg-cloud lg:hidden transition-all duration-300",
           menu ? "max-h-[28rem] border-t border-ink/10" : "max-h-0",
         )}
+        aria-hidden={!menu}
       >
-        <nav className="container-x flex flex-col gap-1 py-4">
+        <nav aria-label="Mobile navigation" className="container-x flex flex-col gap-1 py-4">
           {NAV.map((n) => {
             const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
             return (
@@ -112,7 +124,7 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors",
+                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2",
                   active ? "bg-ink/[0.05] font-medium text-ink" : "text-ink/70 hover:bg-ink/5 hover:text-ink",
                 )}
               >

@@ -61,7 +61,7 @@ export default function BuyPage() {
         <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
-              <span className="eyebrow-light">Buy with Matin</span>
+              <span className="eyebrow eyebrow-light">Buy with Matin</span>
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
@@ -147,7 +147,7 @@ export default function BuyPage() {
               View all listings <ArrowRight className="h-4 w-4" />
             </ButtonLink>
           </div>
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 sm:mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredListings.slice(0, 3).map((l, i) => (
               <Reveal key={l.id} delay={i * 0.08}>
                 <ListingCard listing={l} />
@@ -200,14 +200,14 @@ export default function BuyPage() {
       {/* ---------- CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-ink px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
-              <span className="eyebrow-light">Ready when you are</span>
+              <span className="eyebrow eyebrow-light">Ready when you are</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 Let&apos;s find your next front door
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-white/90">
+              <p className="mx-auto mt-4 max-w-xl text-base sm:text-lg leading-relaxed text-white/90 text-pretty">
                 Tell us what you&apos;re looking for and we&apos;ll match you with the right broker and the
                 right homes — many before they hit the open market.
               </p>

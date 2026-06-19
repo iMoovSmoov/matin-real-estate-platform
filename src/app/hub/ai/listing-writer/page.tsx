@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { ChevronLeft, PenLine } from "lucide-react";
 import { listings, getCommunity } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
 
@@ -50,10 +52,25 @@ export default function ListingWriterPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4 sm:space-y-5">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-[0.78rem] text-slate/60">
+        <Link href="/hub/ai" className="inline-flex items-center gap-1 hover:text-ink transition-colors">
+          <ChevronLeft className="h-3.5 w-3.5" />
+          AI Studio
+        </Link>
+        <span>/</span>
+        <span className="text-ink/70">Listing Writer</span>
+      </nav>
+
       {/* Page header */}
-      <div>
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">Listing Writer</h1>
-        <p className="mt-1 text-[0.92rem] text-slate">Write MLS-ready listing descriptions that sell.</p>
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
+          <PenLine className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl">Listing Writer</h1>
+          <p className="mt-1 text-[0.92rem] text-slate">Write MLS-ready listing descriptions that sell.</p>
+        </div>
       </div>
 
       {/* Load from Listings select */}

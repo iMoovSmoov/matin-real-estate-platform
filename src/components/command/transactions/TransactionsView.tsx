@@ -37,55 +37,6 @@ import { AiMarkdown } from "@/components/command/AiMarkdown";
    deadlines + docs.
    ────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Parse free-form contract text for deadline lines.
- * Looks for patterns like:
- *   "Inspection Deadline: June 25"
- *   "Closing: 07/15/2026"
- *   "Financing Contingency — August 1, 2026"
- *   "Earnest Money Due: 06-30-2026"
- */
-function parseDeadlines(text: string): { label: string; date: string }[] {
-  const results: { label: string; date: string }[] = [];
-
-  const KEYWORD_PATTERNS: { label: string; regex: RegExp }[] = [
-    { label: "Inspection Deadline",        regex: /inspection\s*(?:deadline|date|period|contingency)?/i },
-    { label: "Appraisal Deadline",         regex: /appraisal\s*(?:deadline|date|contingency)?/i },
-    { label: "Financing / Loan Deadline",  regex: /(?:financing|loan)\s*(?:deadline|date|contingency|approval)?/i },
-    { label: "Closing / Close of Escrow",  regex: /(?:closing|close\s*of\s*escrow|coe)\s*(?:date|deadline)?/i },
-    { label: "Possession Date",            regex: /possession\s*(?:date|deadline)?/i },
-    { label: "Earnest Money Due",          regex: /earnest\s*(?:money)?\s*(?:due|deposit|deadline)?/i },
-    { label: "Title Review Deadline",      regex: /title\s*(?:review|deadline|contingency)?/i },
-    { label: "HOA Deadline",               regex: /hoa\s*(?:deadline|documents?|review)?/i },
-  ];
-
-  // Date patterns to scan for after the keyword
-  const DATE_RE = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,?\s*\d{4})?)/i;
-
-  const lines = text.split(/\n/);
-  const seen = new Set<string>();
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-
-    for (const { label, regex } of KEYWORD_PATTERNS) {
-      if (!regex.test(trimmed)) continue;
-      // Try to find a date on this line (after the keyword)
-      const match = DATE_RE.exec(trimmed);
-      if (match) {
-        const key = label;
-        if (!seen.has(key)) {
-          seen.add(key);
-          results.push({ label, date: match[1] });
-        }
-      }
-    }
-  }
-
-  return results;
-}
-
 type StatusFilter = "All" | "Active" | "Pending" | "Closed" | "At-risk";
 
 const FILTERS: StatusFilter[] = ["All", "Active", "Pending", "Closed", "At-risk"];
@@ -222,7 +173,6 @@ function daysOverdue(itemDate: Date): number {
 export function TransactionsView({ transactions }: { transactions: Transaction[] }) {
   const [filter, setFilter] = useState<StatusFilter>("All");
   const [active, setActive] = useState<Transaction | null>(null);
-  const [txNotes, setTxNotes] = useState<Record<string, string>>({});
 
   const counts = useMemo(() => {
     const m = new Map<StatusFilter, number>();
@@ -280,8 +230,8 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
           })}
         </div>
 
-        {/* Column header (md+) */}
-        <div className="hidden border-b border-ink/[0.08] px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate/50 md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4">
+        {/* Column header (sm+) */}
+        <div className="hidden border-b border-ink/[0.08] px-5 py-2.5 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-slate/50 sm:grid sm:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] sm:items-center sm:gap-4">
           <span>Property / Client</span>
           <span>Price</span>
           <span>Agent</span>
@@ -296,26 +246,24 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
             <TransactionRow key={t.id} t={t} onOpen={() => setActive(t)} />
           ))}
           {visible.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-              <ClipboardList className="h-6 w-6 text-slate/40" />
-              <p className="text-[0.86rem] text-slate">No {filter.toLowerCase()} transactions.</p>
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <ClipboardList className="h-8 w-8 text-slate/30" />
+              <div>
+                <p className="text-[0.88rem] font-medium text-ink">No {filter.toLowerCase()} transactions</p>
+                <p className="mt-0.5 text-[0.78rem] text-slate">There&apos;s nothing here right now.</p>
+              </div>
               <button
                 onClick={() => setFilter("All")}
-                className="text-[0.78rem] font-semibold text-ink hover:underline"
+                className="rounded-lg bg-ink px-4 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:bg-ink/90"
               >
-                Show all
+                Show all transactions
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <TransactionDetail
-        tx={active}
-        onClose={() => setActive(null)}
-        txNotes={txNotes}
-        setTxNotes={setTxNotes}
-      />
+      <TransactionDetail tx={active} onClose={() => setActive(null)} />
     </>
   );
 }
@@ -333,13 +281,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
     <button
       onClick={onOpen}
       className={cn(
-        "group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5",
+        "group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white sm:grid sm:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] sm:items-center sm:gap-4 sm:px-5",
         urgencyBorderClass(t.closeDateDaysOut, closed),
       )}
     >
       {/* Property / client */}
-      <div className="flex items-start gap-3 md:items-center">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] md:mt-0">
+      <div className="flex items-start gap-3 sm:items-center">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-ink ring-1 ring-inset ring-ink/[0.06] sm:mt-0">
           <TypeIcon className="h-4 w-4" />
         </span>
         <div className="min-w-0">
@@ -369,13 +317,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Price */}
-      <div className="mt-2 md:mt-0">
+      <div className="mt-2 sm:mt-0">
         <span className="font-display text-[0.98rem] text-ink tabular-nums">{usd(t.price)}</span>
-        <span className="ml-2 text-[0.7rem] text-slate/50 md:hidden">{daysLabel(t.closeDateDaysOut)}</span>
+        <span className="ml-2 text-[0.7rem] text-slate/50 sm:hidden">{daysLabel(t.closeDateDaysOut)}</span>
       </div>
 
       {/* Agent */}
-      <div className="mt-2 flex items-center gap-2 md:mt-0">
+      <div className="mt-2 flex items-center gap-2 sm:mt-0">
         {agent ? (
           <>
             <span className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.6rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
@@ -393,13 +341,13 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Progress */}
-      <div className="mt-2.5 flex items-center gap-2 md:mt-0">
+      <div className="mt-2.5 flex items-center gap-2 sm:mt-0">
         <ProgressBar value={pct} tone={progressTone(t)} className="flex-1" />
         <span className="shrink-0 text-[0.68rem] text-slate/60 tabular-nums">{pct}%</span>
       </div>
 
       {/* Closes */}
-      <div className="mt-2 hidden text-right md:mt-0 md:block">
+      <div className="mt-2 hidden text-right sm:mt-0 sm:block">
         <span
           className={cn(
             "inline-flex items-center justify-end gap-1 text-[0.76rem] tabular-nums",
@@ -422,7 +370,7 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
       </div>
 
       {/* Chevron */}
-      <div className="hidden justify-end text-slate/30 transition-colors group-hover:text-ink md:flex">
+      <div className="hidden justify-end text-slate/30 transition-colors group-hover:text-ink sm:flex">
         <ArrowRight className="h-4 w-4" />
       </div>
     </button>
@@ -431,17 +379,7 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
 
 /* ── Detail slide-over ─────────────────────────────────────────────────── */
 
-function TransactionDetail({
-  tx,
-  onClose,
-  txNotes,
-  setTxNotes,
-}: {
-  tx: Transaction | null;
-  onClose: () => void;
-  txNotes: Record<string, string>;
-  setTxNotes: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-}) {
+function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: () => void }) {
   const open = !!tx;
   const agent = tx ? getAgent(tx.agentSlug) : undefined;
   const doneCount = tx?.checklist.filter((c) => c.done).length ?? 0;
@@ -467,8 +405,7 @@ function TransactionDetail({
   const [contractText, setContractText] = useState("");
   const [extractOutput, setExtractOutput] = useState("");
   const [extractLoading, setExtractLoading] = useState(false);
-  const [applyToast, setApplyToast] = useState<{ message: string } | null>(null);
-  const [appliedDeadlines, setAppliedDeadlines] = useState<{ label: string; date: string }[]>([]);
+  const [applyToast, setApplyToast] = useState(false);
 
   async function handleExtract() {
     if (!contractText.trim()) return;
@@ -482,14 +419,8 @@ function TransactionDetail({
   }
 
   function handleApplyToChecklist() {
-    const deadlines = parseDeadlines(extractOutput);
-    setAppliedDeadlines(deadlines);
-    const message =
-      deadlines.length > 0
-        ? `Applied ${deadlines.length} deadline${deadlines.length === 1 ? "" : "s"} to checklist`
-        : "No deadlines detected — check formatting";
-    setApplyToast({ message });
-    setTimeout(() => setApplyToast(null), 3500);
+    setApplyToast(true);
+    setTimeout(() => setApplyToast(false), 3500);
   }
 
   // Reset extractor state when a different transaction is opened.
@@ -498,8 +429,7 @@ function TransactionDetail({
     setContractText("");
     setExtractOutput("");
     setExtractLoading(false);
-    setApplyToast(null);
-    setAppliedDeadlines([]);
+    setApplyToast(false);
     onClose();
   }
 
@@ -645,7 +575,6 @@ function TransactionDetail({
                   {tx.checklist.map((c, i) => {
                     const isNext = !c.done && nextItem != null && c.label === nextItem.label;
                     const overdueByDays = !c.done ? daysOverdue(dueDates[i]) : 0;
-                    const isOverdue = overdueByDays > 0;
                     return (
                       <li
                         key={i}
@@ -653,17 +582,15 @@ function TransactionDetail({
                           "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] transition-colors",
                           c.done
                             ? "bg-success/[0.04]"
-                            : isOverdue
-                              ? "bg-red-50 ring-1 ring-inset ring-red-200"
-                              : isNext
-                                ? "bg-white ring-1 ring-inset ring-azure/20"
-                                : "bg-white/[0.02]",
+                            : isNext
+                              ? "bg-white ring-1 ring-inset ring-azure/20"
+                              : "bg-white/[0.02]",
                         )}
                       >
                         {c.done ? (
                           <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
                         ) : (
-                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isOverdue ? "text-red-400" : isNext ? "text-azure/50" : "text-slate/40")} />
+                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
                         )}
                         <span
                           className={cn(
@@ -677,39 +604,16 @@ function TransactionDetail({
                         >
                           {c.label}
                         </span>
-                        {/* OVERDUE badge + days count */}
-                        {isOverdue && (
-                          <span className="ml-auto flex shrink-0 items-center gap-1">
-                            <span className="rounded bg-red-600 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white">
-                              OVERDUE
-                            </span>
-                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
-                              {overdueByDays}d
-                            </span>
+                        {/* Days overdue badge */}
+                        {overdueByDays > 0 && (
+                          <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
+                            {overdueByDays}d overdue
                           </span>
                         )}
                       </li>
                     );
                   })}
                 </ul>
-
-                {/* Extracted from Contract section */}
-                {appliedDeadlines.length > 0 && (
-                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <p className="mb-2 text-[0.72rem] font-semibold uppercase tracking-wider text-amber-700">
-                      Extracted from Contract
-                    </p>
-                    <ul className="space-y-1.5">
-                      {appliedDeadlines.map((d, i) => (
-                        <li key={i} className="flex items-center gap-2.5">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-amber-500" />
-                          <span className="flex-1 text-[0.82rem] font-semibold text-ink">{d.label}</span>
-                          <span className="text-[0.82rem] font-medium text-amber-700">{d.date}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
 
               {/* Documents */}
@@ -820,28 +724,6 @@ function TransactionDetail({
                   </div>
                 )}
               </div>
-
-              {/* ── Quick Notes ── */}
-              <div className="rounded-xl border border-ink/[0.08] bg-white px-4 py-4">
-                <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
-                    <ClipboardList className="h-4 w-4 text-ink" />
-                    Quick Notes
-                  </span>
-                  <span className="text-[0.68rem] tabular-nums text-slate/50">
-                    {(txNotes[tx.id] ?? "").length}/500
-                  </span>
-                </div>
-                <textarea
-                  value={txNotes[tx.id] ?? ""}
-                  onChange={(e) =>
-                    setTxNotes((prev) => ({ ...prev, [tx.id]: e.target.value.slice(0, 500) }))
-                  }
-                  placeholder="Add a note about this transaction..."
-                  rows={3}
-                  className="w-full resize-y rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3 text-[0.82rem] text-ink focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
-                />
-              </div>
             </div>
           </>
         )}
@@ -853,7 +735,7 @@ function TransactionDetail({
             applyToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
           )}
         >
-          {applyToast?.message ?? ""}
+          Key deadlines applied to this transaction
         </div>
       </aside>
     </>

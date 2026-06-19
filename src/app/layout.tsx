@@ -35,6 +35,29 @@ export const metadata: Metadata = {
     description:
       "Portland & SW Washington's most technologically advanced real estate brokerage.",
     type: "website",
+    siteName: "Matin Real Estate",
+    locale: "en_US",
+    images: [
+      {
+        url: "/matin/brand/hero-3586_hero_mre-office-west-linn-interior-26-20260604075258.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "Matin Real Estate — Portland Oregon",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Matin Real Estate",
+    description:
+      "Portland & SW Washington's most technologically advanced real estate brokerage.",
+    images: ["/matin/brand/hero-3586_hero_mre-office-west-linn-interior-26-20260604075258.jpeg"],
+  },
+  icons: {
+    icon: [
+      { url: "/matin/brand/logo-favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/matin/brand/logo-favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
   },
 };
 

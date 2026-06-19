@@ -17,7 +17,7 @@ export function AgentCard({ agent }: { agent: Agent }) {
           alt={agent.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+          className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
         />
         {/* Persistent gradient at bottom for legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
@@ -53,6 +53,9 @@ export function AgentCard({ agent }: { agent: Agent }) {
             <Star className="h-3.5 w-3.5 fill-azure text-azure" /> {agent.rating}
           </span>
           <span className="text-slate">{agent.licenses.join(" · ")}</span>
+        </div>
+        <div className="mt-2 flex items-center gap-1 text-[0.75rem] font-medium text-ink transition-transform duration-200 group-hover:translate-x-1">
+          View profile <span aria-hidden>→</span>
         </div>
       </div>
     </Link>

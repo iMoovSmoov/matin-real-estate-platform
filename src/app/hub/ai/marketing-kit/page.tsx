@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { listings, getCommunity } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
-import { Megaphone, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Megaphone, CheckCircle2 } from "lucide-react";
 
 // One-click demo example using first active listing
 const EXAMPLE = listings.find((l) => l.status !== "Sold") ?? listings[0];
@@ -64,12 +65,27 @@ export default function MarketingKitPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-[0.78rem] text-slate/60">
+        <Link href="/hub/ai" className="inline-flex items-center gap-1 hover:text-ink transition-colors">
+          <ChevronLeft className="h-3.5 w-3.5" />
+          AI Studio
+        </Link>
+        <span>/</span>
+        <span className="text-ink/70">Marketing Kit</span>
+      </nav>
+
       {/* Page header */}
-      <div>
-        <h1 className="font-display text-2xl text-ink md:text-3xl">Marketing Kit</h1>
-        <p className="mt-1 text-[0.92rem] text-slate">
-          Generate a complete listing marketing kit — MLS copy, Instagram, Facebook, email blast, and open house invite.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
+          <Megaphone className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="font-display text-2xl text-ink md:text-3xl">Marketing Kit</h1>
+          <p className="mt-1 text-[0.92rem] text-slate">
+            Generate a complete listing marketing kit — MLS copy, Instagram, Facebook, email blast, and open house invite.
+          </p>
+        </div>
       </div>
 
       {/* Load from Listings select */}

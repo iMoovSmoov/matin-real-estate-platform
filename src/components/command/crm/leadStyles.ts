@@ -8,14 +8,14 @@ import type { LeadStage } from "@/lib/types";
    a hot lead, a won deal, a lost deal. */
 
 const STAGE: Record<LeadStage, string> = {
-  New: "bg-ink/[0.08] text-ink ring-ink/10",
+  New: "bg-blue-50 text-blue-700 ring-blue-200",
   Nurture: "bg-white text-slate ring-ink/[0.06]",
   Active: "bg-ink/[0.06] text-ink ring-ink/[0.08]",
   Showing: "bg-ink/[0.06] text-ink ring-ink/[0.08]",
-  Offer: "bg-ink/[0.08] text-ink ring-ink/10",
-  "Under Contract": "bg-ink/[0.08] text-ink ring-ink/10",
-  Closed: "bg-success/12 text-success ring-success/30",
-  Lost: "bg-white text-slate/60 ring-ink/[0.06]",
+  Offer: "bg-amber-50 text-amber-700 ring-amber-200",
+  "Under Contract": "bg-amber-50 text-amber-700 ring-amber-200",
+  Closed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  Lost: "bg-slate-100 text-slate-500 ring-slate-200",
 };
 
 export const LEAD_STAGES: LeadStage[] = [
@@ -49,19 +49,22 @@ export function stageDot(stage: string): string {
   return STAGE_DOT[stage as LeadStage] ?? "bg-slate-300/50";
 }
 
-/** Score pill tone. Only the two extremes carry color (hot = green, cold = red);
-    the middle band stays monochrome. */
+/** Score pill tone maps to Hot/Warm/Cold/New semantic colors.
+    Hot  → red-50 / red-700 / red-200 ring
+    Warm → amber-50 / amber-700 / amber-200 ring
+    Cold → slate-100 / slate-600 (no ring)
+*/
 export function scoreTone(score: number): string {
-  if (score >= 80) return "bg-success/12 text-success ring-success/30";
-  if (score >= 50) return "bg-ink/[0.06] text-ink ring-ink/[0.08]";
-  return "bg-danger/12 text-danger ring-danger/30";
+  if (score >= 80) return "bg-red-50 text-red-700 ring-red-200";
+  if (score >= 50) return "bg-amber-50 text-amber-700 ring-amber-200";
+  return "bg-slate-100 text-slate-600";
 }
 
 /** Bare score color (for dots / small accents). */
 export function scoreDot(score: number): string {
-  if (score >= 80) return "bg-success";
-  if (score >= 50) return "bg-white/60";
-  return "bg-danger";
+  if (score >= 80) return "bg-red-500";
+  if (score >= 50) return "bg-amber-500";
+  return "bg-slate-400";
 }
 
 /** Score → tone keyword for the ProgressBar component. */
@@ -76,4 +79,14 @@ export function scoreLabel(score: number): string {
   if (score >= 80) return "Hot";
   if (score >= 50) return "Warm";
   return "Cold";
+}
+
+/** Status pill classes for the named lead status labels (Hot / Warm / Cold / New). */
+export function statusPill(label: "Hot" | "Warm" | "Cold" | "New"): string {
+  switch (label) {
+    case "Hot":  return "bg-red-50 text-red-700 ring-1 ring-red-200";
+    case "Warm": return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+    case "Cold": return "bg-slate-100 text-slate-600";
+    case "New":  return "bg-blue-50 text-blue-700 ring-1 ring-blue-200";
+  }
 }

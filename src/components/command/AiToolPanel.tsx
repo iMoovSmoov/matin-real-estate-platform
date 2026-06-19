@@ -165,7 +165,7 @@ export function AiToolPanel({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
       {/* ── Input column ── */}
-      <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
+      <div className="rounded-2xl border border-ink/[0.08] bg-white px-4 py-5 md:px-6 md:py-6">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <Wand2 className="h-5 w-5" />
@@ -252,7 +252,7 @@ export function AiToolPanel({
                   onChange={(e) => set(f.name, e.target.value)}
                   placeholder={f.placeholder}
                   rows={3}
-                  className="resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none"
+                  className="w-full resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink placeholder:text-slate/40 transition-colors focus:border-ink/40 focus:bg-white focus:outline-none"
                 />
               ) : f.type === "select" ? (
                 <select
@@ -305,7 +305,7 @@ export function AiToolPanel({
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 font-semibold text-white transition-colors hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 font-semibold text-white transition-colors hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {busy ? (
                 <>

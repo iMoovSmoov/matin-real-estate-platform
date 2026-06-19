@@ -5,12 +5,12 @@ type Variant = "primary" | "ink" | "outline" | "ghost" | "white" | "outline-ligh
 type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-ink text-white hover:bg-ink-700 shadow-soft",
-  ink: "bg-ink text-white hover:bg-ink-700",
-  outline: "border border-ink/20 text-ink hover:border-ink/50 hover:bg-ink/[0.03]",
-  "outline-light": "border border-white/30 text-white hover:border-white/70 hover:bg-white/10",
-  ghost: "text-ink hover:bg-ink/[0.05]",
-  white: "bg-white text-ink hover:bg-paper-200 shadow-soft",
+  primary: "bg-ink text-white hover:bg-ink-700 hover:shadow-lift shadow-soft",
+  ink: "bg-ink text-white hover:bg-ink-700 hover:shadow-lift",
+  outline: "border border-ink/20 text-ink hover:border-ink/60 hover:bg-ink/[0.06]",
+  "outline-light": "border border-white/30 text-white hover:border-white/80 hover:bg-white/15",
+  ghost: "text-ink hover:bg-ink/[0.08]",
+  white: "bg-white text-ink hover:bg-paper-200 hover:shadow-lift shadow-soft",
 };
 
 const sizes: Record<Size, string> = {
@@ -27,7 +27,7 @@ type CommonProps = {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-azure/50 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap";
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ink active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none whitespace-nowrap";
 
 export function Button({
   variant = "primary",

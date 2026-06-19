@@ -17,16 +17,16 @@ export function CommunityCard({ community, large = false }: { community: Communi
           alt={community.name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
         {/* Gradient overlay + text */}
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent p-3 sm:p-4">
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent group-hover:from-ink/70 group-hover:via-ink/25 transition-all duration-300 p-3 sm:p-4">
           <div className="flex items-end justify-between gap-1">
             <div className="min-w-0">
               <div className="font-display text-white font-semibold text-[0.82rem] leading-tight sm:text-base">{community.name}</div>
               <div className="text-[0.65rem] uppercase tracking-wider text-white/60 sm:text-[0.72rem]">{community.state}</div>
             </div>
-            <ArrowUpRight className="h-4 w-4 shrink-0 text-white/0 -translate-y-0.5 transition-all duration-300 group-hover:translate-y-0 group-hover:text-white sm:h-5 sm:w-5" />
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-white/0 -translate-y-0.5 transition-all duration-200 group-hover:translate-x-1 group-hover:translate-y-0 group-hover:text-white sm:h-5 sm:w-5" />
           </div>
           <div className="mt-1 flex items-center gap-1.5 text-white/65 text-[0.6rem] sm:text-[0.72rem]">
             <span>Median {compactUsd(community.medianPrice)}</span>

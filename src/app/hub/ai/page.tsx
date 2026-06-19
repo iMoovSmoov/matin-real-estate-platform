@@ -9,7 +9,7 @@ import {
   Megaphone,
   DollarSign,
   PhoneCall,
-  ArrowUpRight,
+  ArrowRight,
 } from "lucide-react";
 
 const TOOLS = [
@@ -94,26 +94,27 @@ export default function AiStudioPage() {
         {TOOLS.map((t) => {
           const Icon = t.icon;
           return (
-            <Link
+            <div
               key={t.href}
-              href={t.href}
-              className="group relative flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-ink/20 hover:bg-azure/[0.05] hover:shadow-soft"
+              className="flex flex-col rounded-xl bg-white ring-1 ring-ink/[0.06] p-5 transition-shadow hover:ring-ink/[0.14] hover:shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink/[0.05] text-ink ring-1 ring-inset ring-ink/[0.08]">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.05] text-ink ring-1 ring-inset ring-ink/[0.08]">
                   <Icon className="h-5 w-5" />
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-slate/40 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink" />
+                <span className="mt-0.5 rounded-full bg-ink/[0.04] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink/60">
+                  {t.pillar}
+                </span>
               </div>
-              <p className="mt-4 text-[0.62rem] font-semibold uppercase tracking-wider text-ink/70">
-                {t.pillar}
-              </p>
-              <h3 className="mt-1 font-semibold text-[1.05rem] text-ink">{t.name}</h3>
-              <p className="mt-1.5 flex-1 text-[0.84rem] leading-relaxed text-slate/85">{t.desc}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-[0.78rem] font-semibold text-ink opacity-80 transition-opacity group-hover:opacity-100">
-                Open tool <ArrowUpRight className="h-3.5 w-3.5" />
-              </span>
-            </Link>
+              <h3 className="mt-4 font-semibold text-[1.02rem] text-ink">{t.name}</h3>
+              <p className="mt-1.5 flex-1 text-[0.84rem] leading-relaxed text-slate">{t.desc}</p>
+              <Link
+                href={t.href}
+                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90"
+              >
+                Launch <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           );
         })}
       </div>

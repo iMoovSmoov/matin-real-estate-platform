@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Check,
   ChevronDown,
+  ChevronLeft,
   Copy,
   FileText,
   Loader2,
+  MessageSquareText,
   RefreshCw,
   Wand2,
 } from "lucide-react";
@@ -191,35 +194,42 @@ export default function LeadResponderPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
+      {/* ── breadcrumb ── */}
+      <nav className="mb-4 flex items-center gap-1.5 text-[0.78rem] text-slate/60">
+        <Link href="/hub/ai" className="inline-flex items-center gap-1 hover:text-ink transition-colors">
+          <ChevronLeft className="h-3.5 w-3.5" />
+          AI Studio
+        </Link>
+        <span>/</span>
+        <span className="text-ink/70">Lead Responder</span>
+      </nav>
+
       {/* ── page header ── */}
-      <div className="mb-5">
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">Lead Reply</h1>
-        <p className="mt-1 text-[0.92rem] text-slate">
-          Craft the perfect first response, personalized to each lead.
-        </p>
+      <div className="mb-5 flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
+          <MessageSquareText className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl">Lead Responder</h1>
+          <p className="mt-1 text-[0.92rem] text-slate">
+            Craft the perfect first response, personalized to each lead.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* ════════════════ INPUT COLUMN ════════════════ */}
         <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
           {/* panel header */}
-          <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
-              <Wand2 className="h-5 w-5" />
+          <div>
+            <span className="inline-block rounded-full bg-ink/[0.04] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink/60">
+              Lead Conversion
             </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display text-xl text-ink">Lead Reply</h2>
-                <span className="rounded bg-white px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-slate/70 ring-1 ring-inset ring-ink/[0.06]">
-                  Lead Conversion
-                </span>
-              </div>
-              <p className="mt-1 text-[0.86rem] leading-relaxed text-slate">
-                Speed-to-lead wins deals. Draft a personalized, ready-to-send
-                first reply that references the lead&apos;s area, price point,
-                and intent — under 130 words, signed by the Matin team.
-              </p>
-            </div>
+            <p className="mt-2 text-[0.86rem] leading-relaxed text-slate">
+              Speed-to-lead wins deals. Draft a personalized, ready-to-send
+              first reply that references the lead&apos;s area, price point,
+              and intent — under 130 words, signed by the Matin team.
+            </p>
           </div>
 
           {/* ── One-click example ── */}

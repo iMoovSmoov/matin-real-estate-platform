@@ -37,7 +37,7 @@ export default function HomePage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-screen">
+      <section id="main-content" className="relative flex min-h-[72vh] items-center overflow-hidden lg:min-h-screen">
         <div className="absolute inset-0">
           <Image
             src={company.officeHero}
@@ -60,8 +60,8 @@ export default function HomePage() {
           <div className="ml-auto max-w-[22rem] sm:max-w-[28rem] lg:max-w-xl">
             <Reveal>
               {/* Short on mobile, full on sm+ */}
-              <span className="hero-text-shadow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
-              <span className="hero-text-shadow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
+              <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
+              <span className="hero-text-shadow eyebrow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.15rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-5xl lg:text-[3.5rem]">
@@ -222,8 +222,8 @@ export default function HomePage() {
         <Container className="relative">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
             <div>
-              <span className="eyebrow-light border-l-2 border-white/40 pl-3">The future of the brokerage</span>
-              <h2 className="mt-4 font-display text-2xl text-white text-balance sm:text-3xl md:text-4xl">
+              <span className="eyebrow eyebrow-light border-l-2 border-white/40 pl-3">The future of the brokerage</span>
+              <h2 className="display-2 mt-4 font-display text-white text-balance">
                 The most technologically advanced brokerage in Oregon
               </h2>
               <p className="mt-5 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg text-pretty">
@@ -331,7 +331,7 @@ export default function HomePage() {
             {/* Subtle ambient warmth */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_80%,rgba(255,255,255,0.03),transparent)]" />
             <div className="relative">
-              <h2 className="font-display text-2xl text-white text-balance sm:text-3xl md:text-[2.5rem]">Ready to make your move?</h2>
+              <h2 className="display-2 font-display text-white text-balance">Ready to make your move?</h2>
               <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/75 text-pretty sm:text-base">
                 Whether you&apos;re buying, selling, or just exploring — let&apos;s talk. Or ask our AI concierge anything,
                 right now.

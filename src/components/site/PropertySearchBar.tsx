@@ -31,6 +31,7 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="City, neighborhood, or ZIP"
+            aria-label="Search by city, neighborhood, or ZIP"
             className={`w-full bg-transparent py-2.5 text-[0.95rem] focus:outline-none ${
               dark ? "text-white placeholder:text-white/50" : "text-ink placeholder:text-slate"
             }`}
@@ -39,6 +40,7 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
+          aria-label="Property type"
           className={`shrink-0 rounded-full border-l px-3 py-2.5 text-[0.9rem] focus:outline-none ${
             dark ? "bg-transparent text-white border-white/20" : "bg-transparent text-ink/80 border-ink/10"
           }`}
@@ -52,11 +54,12 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
       </div>
       <button
         type="submit"
-        className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-medium transition ${
+        aria-label="Search properties"
+        className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-azure ${
           dark ? "bg-white text-ink hover:bg-paper" : "bg-azure text-white hover:bg-azure-deep"
         }`}
       >
-        <Search className="h-4 w-4" /> Search
+        <Search className="h-4 w-4" aria-hidden="true" /> Search
       </button>
     </form>
   );

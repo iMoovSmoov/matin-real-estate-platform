@@ -73,6 +73,10 @@ export function AskMatin() {
 
       {/* ── Panel ── */}
       <div
+        role="dialog"
+        aria-label="Matin concierge chat"
+        aria-modal={open}
+        aria-hidden={!open}
         className={cn(
           "fixed bottom-24 right-5 z-50 flex flex-col overflow-hidden sm:right-7",
           "w-[min(400px,calc(100vw-2.5rem))]",
@@ -106,10 +110,10 @@ export function AskMatin() {
           </div>
           <button
             onClick={() => setOpen(false)}
-            aria-label="Close"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/30 transition hover:bg-white/8 hover:text-white/70"
+            aria-label="Close Matin concierge chat"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/30 transition hover:bg-white/8 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
 
@@ -162,14 +166,16 @@ export function AskMatin() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything…"
+              aria-label="Message to Matin concierge"
               className="flex-1 bg-transparent text-[0.85rem] text-white placeholder:text-white/35 focus:outline-none"
             />
             <button
               type="submit"
               disabled={busy || !input.trim()}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-ink transition hover:bg-white/90 disabled:opacity-30"
+              aria-label="Send message"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-ink transition hover:bg-white/90 disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-1"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </form>
           <a

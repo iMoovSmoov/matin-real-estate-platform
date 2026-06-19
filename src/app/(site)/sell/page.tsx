@@ -66,7 +66,7 @@ export default function SellPage() {
         <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
-              <span className="eyebrow-light">Sell with Matin</span>
+              <span className="eyebrow eyebrow-light">Sell with Matin</span>
             </Reveal>
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
@@ -144,12 +144,12 @@ export default function SellPage() {
             <div>
               <div className="flex items-center gap-3">
                 <Badge tone="azure">Sister company</Badge>
-                <span className="eyebrow-light">Cash Is King Home Buyers</span>
+                <span className="eyebrow eyebrow-light">Cash Is King Home Buyers</span>
               </div>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 Need to sell fast? Get a guaranteed cash offer.
               </h2>
-              <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">
+              <p className="mt-5 max-w-lg text-base sm:text-lg leading-relaxed text-slate-300 text-pretty">
                 Not every move fits the open market. Through our sister company,{" "}
                 <strong className="text-white">Cash Is King Home Buyers</strong>, you can take a guaranteed
                 cash offer, sell completely as-is, and pick the closing date that works for you — with the
@@ -254,14 +254,14 @@ export default function SellPage() {
       {/* ---------- CTA ---------- */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-ink px-6 py-14 text-center text-white shadow-glow sm:px-8 sm:py-16 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
-              <span className="eyebrow-light">Two ways to sell, one trusted team</span>
+              <span className="eyebrow eyebrow-light">Two ways to sell, one trusted team</span>
               <h2 className="display-2 mt-4 font-display text-white text-balance">
                 Ready to see what your home is worth?
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-white/90">
+              <p className="mx-auto mt-4 max-w-xl text-base sm:text-lg leading-relaxed text-white/90 text-pretty">
                 List it on the open market for top dollar, or take a guaranteed cash offer and close on your
                 timeline. We&apos;ll help you choose.
               </p>
