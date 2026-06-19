@@ -93,19 +93,28 @@ interface ScorecardRow {
   score: number;
 }
 
+// Weekly targets — used to normalize each metric to a 0-100 component score.
+const SW_TARGETS = { calls: 25, texts: 40, appts: 6, agreements: 3, showings: 10, offers: 2 };
+const SW_WEIGHTS = { calls: 0.15, texts: 0.10, appts: 0.20, agreements: 0.20, showings: 0.15, offers: 0.20 };
+
+function computeScorecardScore(sw: { calls: number; texts: number; appts: number; agreements: number; showings: number; offers: number }): number {
+  const pct = (actual: number, target: number) => Math.min(100, Math.round((actual / target) * 100));
+  const weighted =
+    pct(sw.calls, SW_TARGETS.calls) * SW_WEIGHTS.calls +
+    pct(sw.texts, SW_TARGETS.texts) * SW_WEIGHTS.texts +
+    pct(sw.appts, SW_TARGETS.appts) * SW_WEIGHTS.appts +
+    pct(sw.agreements, SW_TARGETS.agreements) * SW_WEIGHTS.agreements +
+    pct(sw.showings, SW_TARGETS.showings) * SW_WEIGHTS.showings +
+    pct(sw.offers, SW_TARGETS.offers) * SW_WEIGHTS.offers;
+  return Math.round(weighted);
+}
+
 function computeScorecardRows(): ScorecardRow[] {
   return [...agents]
     .filter((a) => !a.leadership && !a.support)
     .slice(0, 8)
     .map((a): ScorecardRow => {
       const sw = a.scorecardWeek ?? { calls: 0, texts: 0, appts: 0, agreements: 0, showings: 0, offers: 0 };
-      const raw =
-        sw.calls * 2 +
-        sw.texts * 1 +
-        sw.appts * 8 +
-        sw.agreements * 15 +
-        sw.showings * 3 +
-        sw.offers * 20;
       return {
         id: a.id,
         name: a.name,
@@ -115,7 +124,7 @@ function computeScorecardRows(): ScorecardRow[] {
         agreements: sw.agreements,
         showings: sw.showings,
         offers: sw.offers,
-        score: Math.min(100, raw),
+        score: computeScorecardScore(sw),
       };
     })
     .sort((x, y) => y.score - x.score);
