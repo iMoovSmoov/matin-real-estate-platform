@@ -62,7 +62,7 @@ export default function HomePage() {
         <div className="relative z-10 flex min-h-[85vh] sm:min-h-[92vh] items-end">
           <Container className="pt-20">
             {/* Wide text block across the bottom — like a caption on an architectural photo */}
-            <div className="w-full pb-10 sm:pb-14 lg:pb-16 max-w-3xl">
+            <div className="w-full pb-24 sm:pb-14 lg:pb-16 max-w-3xl">
               <Reveal>
                 {/* Short on mobile, full on sm+ */}
                 <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
