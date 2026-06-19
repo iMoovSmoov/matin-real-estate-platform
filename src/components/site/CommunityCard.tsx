@@ -67,7 +67,7 @@ export function CommunityCard({
     <Link
       href={`/communities/${community.slug}`}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-ink/[0.07] shadow-soft",
+        "card-luxury group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-ink/[0.07] shadow-soft",
         "transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:-translate-y-0.5",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure",
         large ? "aspect-[4/5] md:aspect-auto" : "",

@@ -46,20 +46,24 @@ export default function HomePage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[60%_center] sm:object-[55%_center]"
+            className="object-cover object-[40%_center] sm:object-[45%_center]"
+            style={{ transform: "scaleX(-1)" }}
           />
         </div>
 
-        {/* Gradient: dark at BOTTOM on mobile; dark on LEFT on desktop so text reads over the left side */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent sm:bg-gradient-to-r sm:from-ink/85 sm:via-ink/50 sm:to-transparent" />
-        {/* Subtle gold warmth on the left (desktop) */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_20%_55%,rgba(210,160,80,0.07),transparent)]" />
+        {/* Gradient: dark at BOTTOM on all sizes — text sits in the desk/floor area, logo above stays clear */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
+        {/* Subtle gold warmth at center-bottom */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
+        {/* Noise texture for film grain premium feel */}
+        <div className="absolute inset-0 opacity-[0.025] mix-blend-overlay"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }} />
 
-        {/* Content: anchored to bottom on mobile, centered vertically + pushed LEFT on desktop */}
-        <div className="relative z-10 flex min-h-[85vh] sm:min-h-[92vh] items-end sm:items-center">
-          <Container className="pt-20 sm:pt-0">
-            {/* Full-width at bottom on mobile; pushed LEFT on desktop so right side of image shows */}
-            <div className="w-full pb-10 sm:pb-0 sm:mr-auto sm:max-w-[32rem] lg:max-w-[38rem]">
+        {/* Content: always anchored to bottom — sits in desk area, never covers logo wall */}
+        <div className="relative z-10 flex min-h-[85vh] sm:min-h-[92vh] items-end">
+          <Container className="pt-20">
+            {/* Wide text block across the bottom — like a caption on an architectural photo */}
+            <div className="w-full pb-10 sm:pb-14 lg:pb-16 max-w-3xl">
               <Reveal>
                 {/* Short on mobile, full on sm+ */}
                 <span className="hero-text-shadow eyebrow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
@@ -68,7 +72,7 @@ export default function HomePage() {
               <Reveal delay={0.08}>
                 <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.15rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-5xl lg:text-[3.5rem]">
                   Find your place in the{" "}
-                  <span className="italic text-azure-bright">Pacific Northwest.</span>
+                  <span className="italic gradient-gold">Pacific Northwest.</span>
                 </h1>
               </Reveal>
               {/* Body copy — hidden on mobile to reduce clutter */}
@@ -110,8 +114,8 @@ export default function HomePage() {
         <Container>
           <dl className="grid grid-cols-2 divide-ink/[0.07] py-8 sm:grid-cols-5 md:divide-x md:py-10 [&>*:nth-child(5)]:col-span-2 sm:[&>*:nth-child(5)]:col-span-1">
             {stats.map(([n, l], i) => (
-              <Reveal key={l} delay={i * 0.06} className="relative px-4 py-4 text-center sm:py-3 [&:not(:nth-child(odd))]:before:absolute [&:not(:nth-child(odd))]:before:left-0 [&:not(:nth-child(odd))]:before:top-1/4 [&:not(:nth-child(odd))]:before:h-1/2 [&:not(:nth-child(odd))]:before:w-px [&:not(:nth-child(odd))]:before:bg-ink/[0.08] sm:[&:not(:nth-child(odd))]:before:hidden">
-                <dt className="font-display text-[1.85rem] leading-none text-ink sm:text-[2.2rem] md:text-[2.8rem]">{n}</dt>
+              <Reveal key={l} delay={i * 0.06} className="card-luxury relative px-4 py-4 text-center sm:py-3 [&:not(:nth-child(odd))]:before:absolute [&:not(:nth-child(odd))]:before:left-0 [&:not(:nth-child(odd))]:before:top-1/4 [&:not(:nth-child(odd))]:before:h-1/2 [&:not(:nth-child(odd))]:before:w-px [&:not(:nth-child(odd))]:before:bg-ink/[0.08] sm:[&:not(:nth-child(odd))]:before:hidden">
+                <dt className="stat-number font-display text-[1.85rem] leading-none text-ink sm:text-[2.2rem] md:text-[2.8rem]">{n}</dt>
                 <dd className="mt-1.5 text-[0.72rem] leading-snug text-slate sm:text-[0.8rem]">{l}</dd>
               </Reveal>
             ))}
@@ -330,6 +334,7 @@ export default function HomePage() {
       <Section className="pb-24 md:pb-28">
         <Container>
           <div className="relative overflow-hidden rounded-3xl bg-ink px-6 py-14 text-center text-white shadow-glow sm:px-10 sm:py-16 md:px-16 md:py-20">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
             <div className="absolute inset-0 grid-tech opacity-20" />
             {/* Subtle ambient warmth */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_80%,rgba(255,255,255,0.03),transparent)]" />

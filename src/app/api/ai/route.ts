@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-const MODEL = process.env.MATIN_AI_MODEL || "claude-opus-4-8";
+const MODEL = process.env.MATIN_AI_MODEL || "claude-haiku-4-5-20251001";
 const EFFORT = process.env.MATIN_AI_EFFORT || "low";
 
 const MAX_TOKENS: Record<AiTool, number> = {

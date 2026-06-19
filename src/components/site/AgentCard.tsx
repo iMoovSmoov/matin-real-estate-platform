@@ -8,7 +8,7 @@ export function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link
       href={`/agents/${agent.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
+      className="card-luxury group flex flex-col overflow-hidden rounded-2xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
     >
       {/* Photo — portrait (4:5) at all sizes */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-paper-200">

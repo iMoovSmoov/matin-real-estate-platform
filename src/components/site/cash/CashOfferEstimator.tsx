@@ -9,12 +9,15 @@ export function CashOfferEstimator() {
   const [value, setValue] = useState(650000);
   const [revealed, setRevealed] = useState(false);
   const [shown, setShown] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const raf = useRef<number | null>(null);
 
   const low = value * 0.9;
   const high = value * 0.94;
 
   function getOffer() {
+    if (submitting) return;
+    setSubmitting(true);
     setRevealed(true);
     const start = performance.now();
     const from = 0;
@@ -24,7 +27,11 @@ export function CashOfferEstimator() {
       const p = Math.min(1, (t - start) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
       setShown(from + (to - from) * eased);
-      if (p < 1) raf.current = requestAnimationFrame(tick);
+      if (p < 1) {
+        raf.current = requestAnimationFrame(tick);
+      } else {
+        setSubmitting(false);
+      }
     };
     if (raf.current) cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(tick);
@@ -51,7 +58,7 @@ export function CashOfferEstimator() {
             max={2500000}
             step={10000}
             value={value}
-            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); }}
+            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); setSubmitting(false); }}
             className="mt-2 w-full accent-emerald-500"
           />
           <div className="mt-1 flex justify-between text-[0.66rem] text-slate-300/50">
@@ -61,7 +68,8 @@ export function CashOfferEstimator() {
 
         <button
           onClick={getOffer}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(16,122,80,.4)] transition hover:bg-emerald-500"
+          disabled={submitting}
+          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(16,122,80,.4)] transition hover:bg-emerald-500 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           Get my cash offer <ArrowRight className="h-4 w-4" />
         </button>

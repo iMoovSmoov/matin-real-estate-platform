@@ -10,7 +10,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
     <Link
       href={`/listings/${listing.id}`}
       aria-label={`View listing — ${listing.address}, ${listing.city}, ${listing.state}`}
-      className="group block rounded-xl overflow-hidden bg-cloud ring-1 ring-ink/[0.06] shadow-sm hover:shadow-lg transition-shadow duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
+      className="card-luxury group block rounded-xl overflow-hidden bg-cloud ring-1 ring-ink/[0.06] shadow-sm hover:shadow-lg transition-shadow duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
     >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3] w-full">

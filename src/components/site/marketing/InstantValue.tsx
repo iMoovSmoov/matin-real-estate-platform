@@ -5,58 +5,189 @@ import { Home, Loader2, ShieldCheck, ArrowRight, TrendingUp, AlertCircle } from 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// ── Shared field styles (spec-compliant) ─────────────────────────────────────
-const fieldCls =
-  "w-full rounded-lg border border-ink/[0.15] bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink/40 transition";
+// ── Shared field styles ───────────────────────────────────────────────────────
 const labelCls = "text-sm font-medium text-ink mb-1 block";
 
-// ── Price estimation formula ──────────────────────────────────────────────────
-function estimateRange(beds: string, baths: string, sqft: string, yearBuilt: string) {
-  const sqftNum = Math.max(500, Number(sqft) || 1850);
-  const yr = Number(yearBuilt) || 1998;
+function fieldCls(hasError: boolean) {
+  return cn(
+    "w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition",
+    hasError
+      ? "border-red-400 focus:ring-red-300 focus:border-red-400"
+      : "border-ink/[0.15] focus:ring-ink/20 focus:border-ink/40",
+  );
+}
+
+// ── Validation helpers ────────────────────────────────────────────────────────
+type FormErrors = {
+  sqft?: string;
+  yearBuilt?: string;
+  beds?: string;
+  baths?: string;
+  address?: string;
+};
+
+function validateAddress(val: string): string | undefined {
+  if (!val.trim()) return undefined; // optional
+  // Must contain at least one digit followed by something word-like
+  if (!/\d+\s+\S/.test(val.trim())) {
+    return "Please enter a full street address (e.g., 1234 Oak St)";
+  }
+  return undefined;
+}
+
+function validateAll(
+  sqft: string,
+  yearBuilt: string,
+  beds: string,
+  baths: string,
+  address: string,
+): FormErrors {
+  const errors: FormErrors = {};
+
+  // Square footage
+  if (!sqft.trim()) {
+    errors.sqft = "Square footage is required";
+  } else {
+    const n = Number(sqft);
+    if (n < 400) errors.sqft = "Square footage seems too low — minimum 400 sqft";
+    else if (n > 15000) errors.sqft = "Please verify — that's larger than most Portland-area homes";
+  }
+
+  // Year built (optional but validated if entered)
+  if (yearBuilt.trim()) {
+    const yr = Number(yearBuilt);
+    if (isNaN(yr) || yr < 1880 || yr > 2025) {
+      errors.yearBuilt = "Year built must be between 1880 and 2025";
+    }
+  }
+
+  // Beds — must have a selection (non-empty string)
+  if (!beds) errors.beds = "Please select number of bedrooms";
+
+  // Baths — must have a selection
+  if (!baths) errors.baths = "Please select number of bathrooms";
+
+  // Address (optional, format check)
+  const addrErr = validateAddress(address);
+  if (addrErr) errors.address = addrErr;
+
+  return errors;
+}
+
+// ── Smarter estimate formula ──────────────────────────────────────────────────
+function estimateRange(
+  beds: string,
+  sqft: string,
+  yearBuilt: string,
+  condition: string,
+): { low: number; high: number; mid: number } {
+  const sqftNum = Number(sqft) || 1850;
   const bedsNum = Number(beds) || 3;
-  const bathsNum = Number(baths) || 2;
 
-  // Base $/sqft from year built
-  const age = 2026 - yr;
-  const basePerSqft = age < 5 ? 340 : age < 15 ? 310 : age < 30 ? 285 : 260;
+  const basePPSF =
+    ({ excellent: 340, good: 295, fair: 250, poor: 200 } as Record<string, number>)[condition] ??
+    295;
 
-  // Bed/bath premiums
-  const bedPremium = (bedsNum - 3) * 15000;
-  const bathPremium = (bathsNum - 2) * 12000;
+  const bedMult =
+    bedsNum <= 1 ? 0.88 : bedsNum === 2 ? 0.94 : bedsNum === 3 ? 1.0 : bedsNum === 4 ? 1.05 : 1.08;
 
-  const base = sqftNum * basePerSqft + bedPremium + bathPremium;
+  const age = 2026 - (Number(yearBuilt) || 2000);
+  const ageMult = age < 5 ? 1.1 : age < 15 ? 1.05 : age < 30 ? 1.0 : age < 50 ? 0.94 : 0.88;
 
-  // +/-4% spread, rounded to nearest $5k
-  const low = Math.round((base * 0.96) / 5000) * 5000;
-  const high = Math.round((base * 1.04) / 5000) * 5000;
+  const sqftMult =
+    sqftNum < 1000
+      ? 1.08
+      : sqftNum < 1800
+        ? 1.04
+        : sqftNum < 3000
+          ? 1.0
+          : sqftNum < 4500
+            ? 0.96
+            : 0.92;
 
-  return { low, high };
+  const mid = Math.round((sqftNum * basePPSF * bedMult * ageMult * sqftMult) / 5000) * 5000;
+  const low = Math.round((mid * 0.94) / 5000) * 5000;
+  const high = Math.round((mid * 1.06) / 5000) * 5000;
+
+  return { low, high, mid };
 }
 
 function formatDollars(n: number) {
   return "$" + n.toLocaleString("en-US");
 }
 
+// ── Animated loading dots ─────────────────────────────────────────────────────
+function LoadingDots() {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-azure"
+          style={{ animationDelay: `${i * 0.18}s` }}
+        />
+      ))}
+    </span>
+  );
+}
+
 type Phase = "idle" | "loading" | "result" | "error";
+
+const CONDITIONS = [
+  { value: "excellent", label: "Excellent — recently updated" },
+  { value: "good", label: "Good — well maintained" },
+  { value: "fair", label: "Fair — needs some work" },
+  { value: "poor", label: "Poor — significant repairs needed" },
+];
 
 export function InstantValue() {
   const [address, setAddress] = useState("");
-  const [beds, setBeds] = useState("3");
-  const [baths, setBaths] = useState("2");
+  const [beds, setBeds] = useState("");
+  const [baths, setBaths] = useState("");
   const [sqft, setSqft] = useState("");
   const [yearBuilt, setYearBuilt] = useState("");
+  const [condition, setCondition] = useState("good");
+
   const [phase, setPhase] = useState<Phase>("idle");
-  const [range, setRange] = useState<{ low: number; high: number } | null>(null);
+  const [range, setRange] = useState<{ low: number; high: number; mid: number } | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
+  // Track which fields have been blurred so we show inline errors only after touch
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  function blurField(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    // Re-validate on blur
+    const errs = validateAll(sqft, yearBuilt, beds, baths, address);
+    setErrors(errs);
+  }
+
+  function clearFieldError(field: keyof FormErrors) {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (phase === "loading") return;
+
+    // Mark all required fields touched
+    setTouched({ sqft: true, beds: true, baths: true, yearBuilt: true, address: true });
+    const errs = validateAll(sqft, yearBuilt, beds, baths, address);
+    setErrors(errs);
+
+    // Block if any errors
+    if (Object.keys(errs).length > 0) return;
+
     setPhase("loading");
     setRange(null);
 
+    const computed = estimateRange(beds, sqft, yearBuilt, condition);
+
     try {
-      // Fire seller-intel request; we show the formula result regardless
+      // Fire seller-intel request in background; we show formula result regardless
       const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,17 +198,13 @@ export function InstantValue() {
             beds,
             baths,
             sqft: sqft || "1850",
-            yearBuilt: yearBuilt || "1998",
+            yearBuilt: yearBuilt || "2000",
+            condition,
           },
         }),
       });
 
-      // Compute local formula range
-      const computed = estimateRange(beds, baths, sqft, yearBuilt);
-      setRange(computed);
-      setPhase("result");
-
-      // Drain the stream so the connection closes cleanly
+      // Drain stream so connection closes cleanly
       if (res.ok && res.body) {
         const reader = res.body.getReader();
         // eslint-disable-next-line no-constant-condition
@@ -87,28 +214,38 @@ export function InstantValue() {
         }
       }
     } catch {
-      // Network failure — still show formula estimate
-      const computed = estimateRange(beds, baths, sqft, yearBuilt);
+      // Network failure — still show formula estimate below
+    }
+
+    // Always show result after 1.5s "comp analysis" delay
+    setTimeout(() => {
       setRange(computed);
       setPhase("result");
-    }
+    }, 1500);
   }
 
   function reset() {
     setAddress("");
-    setBeds("3");
-    setBaths("2");
+    setBeds("");
+    setBaths("");
     setSqft("");
     setYearBuilt("");
+    setCondition("good");
     setPhase("idle");
     setRange(null);
+    setErrors({});
+    setTouched({});
   }
+
+  const showError = (field: keyof FormErrors) =>
+    touched[field] && errors[field] ? errors[field] : undefined;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
       {/* ── Form ─────────────────────────────────────────────────────────── */}
       <form
         onSubmit={onSubmit}
+        noValidate
         className="rounded-3xl bg-cloud p-7 shadow-lift ring-1 ring-ink/[0.06] md:p-8"
       >
         <div className="flex items-center gap-2 text-azure">
@@ -117,11 +254,12 @@ export function InstantValue() {
         </div>
         <h3 className="mt-3 font-display text-2xl text-ink">Tell us about your home</h3>
         <p className="mt-1.5 text-[0.92rem] leading-relaxed text-slate">
-          Get an instant price range based on your home&apos;s details — no phone call, no obligation.
+          Get an instant price range based on your home&apos;s details — no phone call, no
+          obligation.
         </p>
 
         <div className="mt-6 space-y-4">
-          {/* Address */}
+          {/* Address (optional) */}
           <div>
             <label className={labelCls} htmlFor="iv-address">
               Street address{" "}
@@ -129,63 +267,73 @@ export function InstantValue() {
             </label>
             <input
               id="iv-address"
-              className={fieldCls}
+              className={fieldCls(!!showError("address"))}
               placeholder="18825 Willamette Dr"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                setAddress(e.target.value);
+                clearFieldError("address");
+              }}
+              onBlur={() => blurField("address")}
             />
+            {showError("address") && (
+              <p className="mt-1 text-xs text-red-500">{showError("address")}</p>
+            )}
           </div>
 
           {/* Beds + Baths */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls} htmlFor="iv-beds">
-                Beds
+                Beds <span className="text-red-500">*</span>
               </label>
               <select
                 id="iv-beds"
-                className={fieldCls}
+                className={fieldCls(!!showError("beds"))}
                 value={beds}
-                onChange={(e) => setBeds(e.target.value)}
+                onChange={(e) => {
+                  setBeds(e.target.value);
+                  clearFieldError("beds");
+                }}
+                onBlur={() => blurField("beds")}
               >
-                {[
-                  { label: "1", value: "1" },
-                  { label: "2", value: "2" },
-                  { label: "3", value: "3" },
-                  { label: "4", value: "4" },
-                  { label: "5", value: "5" },
-                  { label: "6+", value: "6" },
-                ].map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                <option value="">Select…</option>
+                {["1", "2", "3", "4", "5"].map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
+                <option value="6">6+</option>
               </select>
+              {showError("beds") && (
+                <p className="mt-1 text-xs text-red-500">{showError("beds")}</p>
+              )}
             </div>
             <div>
               <label className={labelCls} htmlFor="iv-baths">
-                Baths
+                Baths <span className="text-red-500">*</span>
               </label>
               <select
                 id="iv-baths"
-                className={fieldCls}
+                className={fieldCls(!!showError("baths"))}
                 value={baths}
-                onChange={(e) => setBaths(e.target.value)}
+                onChange={(e) => {
+                  setBaths(e.target.value);
+                  clearFieldError("baths");
+                }}
+                onBlur={() => blurField("baths")}
               >
-                {[
-                  { label: "1", value: "1" },
-                  { label: "1.5", value: "1.5" },
-                  { label: "2", value: "2" },
-                  { label: "2.5", value: "2.5" },
-                  { label: "3", value: "3" },
-                  { label: "3.5", value: "3.5" },
-                  { label: "4+", value: "4" },
-                ].map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                <option value="">Select…</option>
+                {["1", "1.5", "2", "2.5", "3", "3.5"].map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
+                <option value="4">4+</option>
               </select>
+              {showError("baths") && (
+                <p className="mt-1 text-xs text-red-500">{showError("baths")}</p>
+              )}
             </div>
           </div>
 
@@ -196,13 +344,19 @@ export function InstantValue() {
             </label>
             <input
               id="iv-sqft"
-              className={fieldCls}
+              className={fieldCls(!!showError("sqft"))}
               inputMode="numeric"
               placeholder="1,850"
               value={sqft}
-              onChange={(e) => setSqft(e.target.value.replace(/[^0-9]/g, ""))}
-              required
+              onChange={(e) => {
+                setSqft(e.target.value.replace(/[^0-9]/g, ""));
+                clearFieldError("sqft");
+              }}
+              onBlur={() => blurField("sqft")}
             />
+            {showError("sqft") && (
+              <p className="mt-1 text-xs text-red-500">{showError("sqft")}</p>
+            )}
           </div>
 
           {/* Year Built */}
@@ -213,12 +367,38 @@ export function InstantValue() {
             </label>
             <input
               id="iv-year"
-              className={fieldCls}
+              className={fieldCls(!!showError("yearBuilt"))}
               inputMode="numeric"
               placeholder="1998"
               value={yearBuilt}
-              onChange={(e) => setYearBuilt(e.target.value.replace(/[^0-9]/g, ""))}
+              onChange={(e) => {
+                setYearBuilt(e.target.value.replace(/[^0-9]/g, ""));
+                clearFieldError("yearBuilt");
+              }}
+              onBlur={() => blurField("yearBuilt")}
             />
+            {showError("yearBuilt") && (
+              <p className="mt-1 text-xs text-red-500">{showError("yearBuilt")}</p>
+            )}
+          </div>
+
+          {/* Condition */}
+          <div>
+            <label className={labelCls} htmlFor="iv-condition">
+              Overall condition
+            </label>
+            <select
+              id="iv-condition"
+              className={fieldCls(false)}
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+            >
+              {CONDITIONS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -240,9 +420,13 @@ export function InstantValue() {
             )}
           </Button>
           {phase === "result" && (
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
-              Start over
-            </Button>
+            <button
+              type="button"
+              className="text-sm text-azure underline-offset-2 hover:underline"
+              onClick={reset}
+            >
+              Try another address
+            </button>
           )}
         </div>
 
@@ -281,9 +465,20 @@ export function InstantValue() {
 
             {/* Loading */}
             {phase === "loading" && (
-              <div className="flex h-full min-h-[18rem] flex-col items-center justify-center text-center">
+              <div className="flex h-full min-h-[18rem] flex-col items-center justify-center gap-5 text-center">
                 <Loader2 className="h-10 w-10 animate-spin text-azure" />
-                <p className="mt-4 text-[0.95rem] text-slate">Analyzing your home&hellip;</p>
+                <div>
+                  <p className="text-[0.95rem] font-medium text-ink">
+                    Analyzing neighborhood comps <LoadingDots />
+                  </p>
+                  <p className="mt-1 text-[0.82rem] text-slate">
+                    Pulling recent Portland metro sales data
+                  </p>
+                </div>
+                {/* Subtle progress bar */}
+                <div className="w-48 overflow-hidden rounded-full bg-ink/[0.07] h-1">
+                  <div className="h-full w-full origin-left animate-[grow_1.5s_ease-in-out_forwards] rounded-full bg-azure" />
+                </div>
               </div>
             )}
 
@@ -302,10 +497,19 @@ export function InstantValue() {
                   {formatDollars(range.low)}&nbsp;&ndash;&nbsp;{formatDollars(range.high)}
                 </p>
                 <p className="mt-2 text-[0.88rem] text-slate">
-                  Based on recent neighborhood comps
+                  Estimated market value:{" "}
+                  <span className="font-semibold text-ink">~{formatDollars(range.mid)}</span>
                 </p>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 rounded-2xl bg-paper p-5 ring-1 ring-ink/[0.06]">
+                <p className="mt-1 text-[0.82rem] text-slate/80">
+                  Based on Portland metro comps for {beds || "3"}BR&nbsp;/&nbsp;
+                  {Number(sqft).toLocaleString()}&nbsp;sqft in{" "}
+                  {CONDITIONS.find((c) => c.value === condition)?.label?.split(" — ")[0].toLowerCase() ??
+                    condition}{" "}
+                  condition
+                </p>
+
+                <div className="mt-5 grid grid-cols-2 gap-4 rounded-2xl bg-paper p-5 ring-1 ring-ink/[0.06]">
                   <div>
                     <p className="text-[0.74rem] font-semibold uppercase tracking-wide text-slate">
                       Beds
@@ -338,7 +542,12 @@ export function InstantValue() {
                   )}
                 </div>
 
-                <div className="mt-6 rounded-2xl bg-paper p-5 ring-1 ring-ink/[0.06]">
+                <p className="mt-3 text-[0.76rem] leading-relaxed text-slate/70">
+                  This estimate is for informational purposes. A licensed broker CMA may vary by
+                  ±8–12%.
+                </p>
+
+                <div className="mt-5 rounded-2xl bg-paper p-5 ring-1 ring-ink/[0.06]">
                   <p className="text-[0.9rem] leading-relaxed text-ink/80">
                     Want a precise CMA from a broker? We&apos;ll hand-build your full analysis and
                     walk the pricing strategy with you.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,9 @@ import {
   ArrowLeft,
   ChevronDown,
   Building2,
+  Settings,
+  LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { NotificationCenter } from "@/components/command/NotificationCenter";
@@ -101,6 +104,95 @@ function AgentPhoto({ size = "sm" }: { size?: "sm" | "md" }) {
         className="object-cover object-top"
         sizes="36px"
       />
+    </div>
+  );
+}
+
+function ProfileDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label="User menu"
+        className={cn(
+          "flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 shadow-sm transition-colors hover:border-ink/20 md:pr-3",
+          open && "border-ink/20 bg-paper",
+        )}
+      >
+        <AgentPhoto size="sm" />
+        <div className="hidden leading-tight md:block">
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+            <span className="text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
+          </div>
+          <div className="text-[0.63rem] text-slate/60">Oregon Principal Broker</div>
+        </div>
+        <ChevronDown className={cn("hidden h-3 w-3 shrink-0 text-slate/40 transition-transform md:block", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+          {/* User header */}
+          <div className="flex items-center gap-2.5 border-b border-ink/[0.07] px-4 py-3">
+            <AgentPhoto size="sm" />
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[0.82rem] font-semibold text-ink">Jordan Matin</p>
+              <p className="truncate text-[0.68rem] text-slate/60">Principal Broker</p>
+            </div>
+          </div>
+          {/* Menu items */}
+          <div className="py-1">
+            <Link
+              href="/hub/settings#profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
+            >
+              <AgentPhoto size="sm" />
+              My Profile
+            </Link>
+            <Link
+              href="/hub/settings"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
+            >
+              <Settings className="h-4 w-4 shrink-0 text-slate/50" />
+              Settings
+            </Link>
+            <a
+              href="#"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper"
+            >
+              <HelpCircle className="h-4 w-4 shrink-0 text-slate/50" />
+              Help
+            </a>
+          </div>
+          <div className="border-t border-ink/[0.07] py-1">
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-red-600 transition-colors hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              Sign out
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -190,8 +282,16 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         })}
       </nav>
 
-      {/* Footer — user + phone */}
-      <div className="border-t border-ink/[0.08] p-3">
+      {/* Footer — settings + user */}
+      <div className="border-t border-ink/[0.08] p-3 space-y-1">
+        <Link
+          href="/hub/settings"
+          onClick={onNavigate}
+          className="group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium text-slate/70 transition-all duration-100 hover:bg-ink/[0.04] hover:text-ink"
+        >
+          <Settings className="h-4 w-4 shrink-0 text-slate/50 group-hover:text-ink" />
+          <span className="truncate">Settings</span>
+        </Link>
         <div className="flex items-center gap-2.5 rounded-xl border border-ink/[0.06] bg-paper/60 px-3 py-2.5">
           <AgentPhoto size="sm" />
           <div className="min-w-0 leading-tight">
@@ -299,17 +399,8 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             {/* Notifications */}
             <NotificationCenter />
 
-            {/* User pill */}
-            <div className="flex items-center gap-2.5 rounded-full border border-ink/[0.08] bg-white py-1 pl-1 pr-1 shadow-sm md:pr-3">
-              <AgentPhoto size="sm" />
-              <div className="hidden leading-tight md:block">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                  <span className="text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
-                </div>
-                <div className="text-[0.63rem] text-slate/60">Oregon Principal Broker</div>
-              </div>
-            </div>
+            {/* User dropdown */}
+            <ProfileDropdown />
           </div>
         </header>
 

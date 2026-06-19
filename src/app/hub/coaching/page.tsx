@@ -15,6 +15,8 @@ import {
   Clock,
   Users,
   DollarSign,
+  Search,
+  Dumbbell,
 } from "lucide-react";
 import { agents, salesAgents, company } from "@/lib/data";
 import { cn, initials, num } from "@/lib/utils";
@@ -27,6 +29,7 @@ import {
   LiveDot,
   SectionLabel,
 } from "@/components/command/ui";
+import { EmptyState } from "@/components/command/ui/EmptyState";
 import { ScenarioTrainer } from "@/components/command/coaching/ScenarioTrainer";
 import { ContractCoach } from "@/components/command/coaching/ContractCoach";
 import { scenarios } from "@/components/command/coaching/scenarios";
@@ -145,6 +148,7 @@ type CoachingTab = "train" | "scorecard" | "leaderboard";
 
 export default function CoachingPage() {
   const [tab, setTab] = useState<CoachingTab>("train");
+  const [scenarioSearch, setScenarioSearch] = useState("");
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
@@ -230,14 +234,26 @@ export default function CoachingPage() {
       {/* ── Tab: Train ── */}
       {tab === "train" && (
         <div className="space-y-5">
+          {/* Scenario search */}
+          <div className="relative max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/50" />
+            <input
+              type="text"
+              placeholder="Search scenarios…"
+              value={scenarioSearch}
+              onChange={(e) => setScenarioSearch(e.target.value)}
+              className="h-10 w-full rounded-xl border border-ink/[0.08] bg-white pl-9 pr-3 text-[0.84rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+            />
+          </div>
+
           {/* Recommended This Week */}
           <section>
             <div className="mb-2.5 flex items-center gap-2">
               <SectionLabel>Recommended This Week</SectionLabel>
               <span className="h-px flex-1 bg-ink/[0.06]" />
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {[
+            {(() => {
+              const ALL_RECS = [
                 {
                   icon: <Clock className="h-4 w-4 text-amber-600" />,
                   bg: "bg-amber-50/60 border-amber-200/60",
@@ -262,31 +278,54 @@ export default function CoachingPage() {
                   scenario: "Seller thinks Zillow is too high",
                   id: "zillow-high",
                 },
-              ].map((rec) => (
-                <div
-                  key={rec.id}
-                  className={cn(
-                    "flex items-start gap-3 rounded-2xl border p-4",
-                    rec.bg,
-                  )}
-                >
-                  <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl", rec.iconBg)}>
-                    {rec.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/60">
-                      {rec.label}
-                    </p>
-                    <p className="mt-0.5 text-[0.86rem] font-semibold text-ink leading-snug">
-                      {rec.scenario}
-                    </p>
-                  </div>
-                  <span className="mt-0.5 shrink-0 text-[0.72rem] font-semibold text-slate/50 flex items-center gap-0.5 whitespace-nowrap">
-                    Practice now <ChevronRight className="h-3 w-3" />
-                  </span>
+              ];
+              const q = scenarioSearch.trim().toLowerCase();
+              const filtered = q
+                ? ALL_RECS.filter(
+                    (r) =>
+                      r.scenario.toLowerCase().includes(q) ||
+                      r.label.toLowerCase().includes(q),
+                  )
+                : ALL_RECS;
+              if (filtered.length === 0) {
+                return (
+                  <EmptyState
+                    icon={Dumbbell}
+                    title="No scenarios match"
+                    description="Try a different search term, or browse all available training scenarios."
+                    action={{ label: "Clear search", onClick: () => setScenarioSearch("") }}
+                  />
+                );
+              }
+              return (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {filtered.map((rec) => (
+                    <div
+                      key={rec.id}
+                      className={cn(
+                        "flex items-start gap-3 rounded-2xl border p-4",
+                        rec.bg,
+                      )}
+                    >
+                      <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl", rec.iconBg)}>
+                        {rec.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/60">
+                          {rec.label}
+                        </p>
+                        <p className="mt-0.5 text-[0.86rem] font-semibold text-ink leading-snug">
+                          {rec.scenario}
+                        </p>
+                      </div>
+                      <span className="mt-0.5 shrink-0 text-[0.72rem] font-semibold text-slate/50 flex items-center gap-0.5 whitespace-nowrap">
+                        Practice now <ChevronRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </section>
 
           {/* Scenario trainer */}

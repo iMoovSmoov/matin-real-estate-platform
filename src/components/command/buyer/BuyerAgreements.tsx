@@ -621,11 +621,22 @@ export default function BuyerAgreements() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="px-4 py-10 text-center text-[0.82rem] text-slate/50"
-                    >
-                      No buyers match your search.
+                    <td colSpan={8}>
+                      {buyerAgreements.length === 0 ? (
+                        <EmptyState
+                          icon={UserCheck}
+                          title="No buyer clients yet"
+                          description="When you start working with buyers, track their agreement status, showings, and preapproval here."
+                          action={{ label: "Add buyer client", href: "/hub/buyer-agreements?new=1" }}
+                        />
+                      ) : (
+                        <EmptyState
+                          icon={Users}
+                          title="No buyers found"
+                          description="Try adjusting your search to find the buyer you're looking for."
+                          action={{ label: "Clear search", onClick: () => setSearch("") }}
+                        />
+                      )}
                     </td>
                   </tr>
                 ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -22,6 +22,8 @@ import {
   Activity,
   Zap,
   Timer,
+  X,
+  Sparkles,
 } from "lucide-react";
 import { metrics, agentLeaderboard, salesAgents, company } from "@/lib/data";
 import { usd, compactUsd } from "@/lib/utils";
@@ -282,9 +284,68 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "analytics",  label: "Analytics" },
 ];
 
+/* ── Onboarding banner ───────────────────────────────────────────────────── */
+
+const ONBOARDING_LINKS = [
+  { label: "Add your first lead", href: "/hub/crm?new=1" },
+  { label: "Start a transaction", href: "/hub/transactions?new=1" },
+  { label: "Launch a listing", href: "/hub/listing-launch?new=1" },
+  { label: "Explore AI tools", href: "/hub/ai/lead-responder" },
+];
+
+function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-ink to-ink/90 text-cloud p-6 mb-6">
+      <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/[0.04] blur-2xl" />
+      <button
+        onClick={onDismiss}
+        aria-label="Dismiss onboarding"
+        className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      <div className="relative">
+        <div className="mb-2 flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-white/70" />
+          <span className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/60">
+            Getting started
+          </span>
+        </div>
+        <h2 className="font-display text-xl text-white">
+          Welcome to Command Center — here&apos;s what you can do:
+        </h2>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {ONBOARDING_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-[0.82rem] font-medium text-white transition-colors hover:border-white/40 hover:bg-white/20"
+            >
+              {link.label}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>("overview");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("hub_onboarded")) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  function dismissOnboarding() {
+    localStorage.setItem("hub_onboarded", "1");
+    setShowOnboarding(false);
+  }
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -294,6 +355,9 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+
+      {/* ── Onboarding banner ────────────────────────────────────────────── */}
+      {showOnboarding && <OnboardingBanner onDismiss={dismissOnboarding} />}
 
       {/* ── Header (always visible) ───────────────────────────────────────── */}
       <div>

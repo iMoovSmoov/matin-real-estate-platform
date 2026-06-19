@@ -31,14 +31,27 @@ export function ContactForm() {
   const [touched, setTouched] = useState<Touched>({ name: false, email: false, message: false });
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
 
-  const nameErr = touched.name && name.trim() === "" ? "Name is required." : "";
+  const nameErr =
+    touched.name && name.trim() === ""
+      ? "Name is required."
+      : touched.name && name.trim().length < 2
+        ? "Name must be at least 2 characters."
+        : "";
   const emailErr =
     touched.email && email.trim() === ""
       ? "Email is required."
       : touched.email && !validateEmail(email)
         ? "Enter a valid email address."
         : "";
-  const messageErr = touched.message && message.trim() === "" ? "Message is required." : "";
+  const messageErr =
+    touched.message && message.trim() === ""
+      ? "Message is required."
+      : touched.message && message.trim().length < 20
+        ? "Message must be at least 20 characters."
+        : "";
+
+  const hasErrors = !!nameErr || !!emailErr || !!messageErr;
+  const hasEmpty = !name.trim() || !email.trim() || !message.trim();
 
   function blur(field: keyof Touched) {
     setTouched((t) => ({ ...t, [field]: true }));
@@ -118,6 +131,7 @@ export function ContactForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={() => blur("name")}
+              aria-required="true"
               aria-invalid={!!nameErr}
               aria-describedby={nameErr ? "cf-name-err" : undefined}
             />
@@ -155,6 +169,7 @@ export function ContactForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => blur("email")}
+            aria-required="true"
             aria-invalid={!!emailErr}
             aria-describedby={emailErr ? "cf-email-err" : undefined}
           />
@@ -205,20 +220,28 @@ export function ContactForm() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onBlur={() => blur("message")}
+            aria-required="true"
             aria-invalid={!!messageErr}
             aria-describedby={messageErr ? "cf-message-err" : undefined}
           />
-          {messageErr && (
-            <p id="cf-message-err" className={errorMsgCls} role="alert">
-              {messageErr}
-            </p>
-          )}
+          <div className="mt-1 flex items-start justify-between gap-2">
+            {messageErr ? (
+              <p id="cf-message-err" className={errorMsgCls} role="alert">
+                {messageErr}
+              </p>
+            ) : (
+              <span />
+            )}
+            <span className={cn("text-xs tabular-nums", message.length < 20 ? "text-slate/50" : "text-green-600")}>
+              {message.length} / 20 minimum
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Submit row */}
       <div className="mt-7 flex flex-wrap items-center gap-4">
-        <Button type="submit" size="lg" disabled={status === "sending"}>
+        <Button type="submit" size="lg" disabled={status === "sending" || hasErrors || hasEmpty}>
           {status === "sending" ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" /> Sending&hellip;
