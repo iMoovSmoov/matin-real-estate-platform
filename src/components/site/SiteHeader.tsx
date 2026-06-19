@@ -71,7 +71,7 @@ export function SiteHeader() {
             <Phone className="h-4 w-4" /> (503) 622-9624
           </a>
           <Link
-            href="/command-center"
+            href="/hub"
             className="hidden items-center gap-1.5 rounded-full bg-azure px-4 py-2 text-[0.82rem] font-semibold text-white shadow-[0_8px_24px_rgba(46,144,224,.35)] transition hover:bg-azure-deep sm:inline-flex"
           >
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ export function SiteHeader() {
             Contact
           </Link>
           <Link
-            href="/command-center"
+            href="/hub"
             className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-azure px-4 py-2.5 font-semibold text-white"
           >
             Matin Hub <ArrowRight className="h-4 w-4" />

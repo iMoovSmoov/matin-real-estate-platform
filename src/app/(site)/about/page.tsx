@@ -303,7 +303,7 @@ export default function AboutPage() {
                 system. It&apos;s how a 40-person team delivers a boutique experience at scale.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/command-center" variant="primary" size="lg">
+                <ButtonLink href="/hub" variant="primary" size="lg">
                   <Cpu className="h-4 w-4" /> Tour the Matin Hub
                 </ButtonLink>
                 <ButtonLink href="/contact" variant="outline-light" size="lg">

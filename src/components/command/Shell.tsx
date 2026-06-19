@@ -35,47 +35,55 @@ type NavItem = { label: string; href: string; icon: React.ComponentType<{ classN
 type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
-  { label: "Overview", items: [{ label: "Dashboard", href: "/command-center", icon: LayoutDashboard }] },
+  { label: "Overview", items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }] },
   {
     label: "Pipeline",
     items: [
-      { label: "CRM & Leads", href: "/command-center/crm", icon: Users },
-      { label: "Transactions", href: "/command-center/transactions", icon: Wallet },
+      { label: "CRM & Leads", href: "/hub/crm", icon: Users },
+      { label: "Transactions", href: "/hub/transactions", icon: Wallet },
     ],
   },
   {
     label: "AI Tools",
     items: [
-      { label: "AI Studio", href: "/command-center/ai", icon: Bot },
-      { label: "Lead Responder", href: "/command-center/ai/lead-responder", icon: MessageSquareText },
-      { label: "Listing Writer", href: "/command-center/ai/listing-writer", icon: PenSquare },
-      { label: "Agent Coach", href: "/command-center/ai/coach", icon: GraduationCap },
-      { label: "CMA Generator", href: "/command-center/ai/cma", icon: Calculator },
-      { label: "Agreements", href: "/command-center/ai/agreements", icon: FileSignature },
-      { label: "Ask Matin", href: "/command-center/ai/ask", icon: Sparkles },
+      { label: "AI Studio", href: "/hub/ai", icon: Bot },
+      { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
+      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenSquare },
+      { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
+      { label: "CMA Generator", href: "/hub/ai/cma", icon: Calculator },
+      { label: "Agreements", href: "/hub/ai/agreements", icon: FileSignature },
+      { label: "Ask Matin", href: "/hub/ai/ask", icon: Sparkles },
     ],
   },
   {
     label: "Workflows",
     items: [
-      { label: "Forms & Data Flows", href: "/command-center/forms", icon: Database },
-      { label: "Contract Builder", href: "/command-center/contracts", icon: ScrollText },
-      { label: "Coaching Academy", href: "/command-center/coaching", icon: Trophy },
+      { label: "Forms & Data Flows", href: "/hub/forms", icon: Database },
+      { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
+      { label: "Coaching Academy", href: "/hub/coaching", icon: Trophy },
     ],
   },
   {
     label: "Operations",
     items: [
-      { label: "Automations", href: "/command-center/automations", icon: Workflow },
-      { label: "Integrations", href: "/command-center/integrations", icon: Plug },
-      { label: "Reporting", href: "/command-center/reporting", icon: BarChart3 },
+      { label: "Automations", href: "/hub/automations", icon: Workflow },
+      { label: "Integrations", href: "/hub/integrations", icon: Plug },
+      { label: "Reporting", href: "/hub/reporting", icon: BarChart3 },
     ],
   },
 ];
 
+const NOTIFICATIONS = [
+  { title: "New lead — Olivia Bennett", meta: "Zillow · West Linn · 2m ago", tone: "azure" as const },
+  { title: "Offer accepted", meta: "8457 NW Lakeshore Ave · 18m ago", tone: "success" as const },
+  { title: "Inspection deadline tomorrow", meta: "TX-4003 · due in 1 day", tone: "warn" as const },
+  { title: "New 5★ review from the Harrisons", meta: "West Linn · 1h ago", tone: "success" as const },
+  { title: "Seller opened your CMA", meta: "Lake Oswego lead · 2h ago", tone: "azure" as const },
+];
+
 function isActive(pathname: string, href: string) {
-  if (href === "/command-center") return pathname === "/command-center";
-  if (href === "/command-center/ai") return pathname === "/command-center/ai";
+  if (href === "/hub") return pathname === "/hub";
+  if (href === "/hub/ai") return pathname === "/hub/ai";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -170,6 +178,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
@@ -220,15 +229,57 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
-            <button
-              aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              <Bell className="h-[1.15rem] w-[1.15rem]" />
-              <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.58rem] font-bold text-white ring-2 ring-ink">
-                7
-              </span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen((o) => !o)}
+                aria-label="Notifications"
+                className={cn(
+                  "relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-white/5 hover:text-white",
+                  notifOpen ? "bg-white/5 text-white" : "text-slate-300",
+                )}
+              >
+                <Bell className="h-[1.15rem] w-[1.15rem]" />
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[0.58rem] font-bold text-white ring-2 ring-ink">
+                  {NOTIFICATIONS.length}
+                </span>
+              </button>
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} aria-hidden />
+                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-white/10 bg-ink-900 shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                      <span className="text-[0.84rem] font-semibold text-white">Notifications</span>
+                      <span className="rounded-md bg-azure/15 px-1.5 py-0.5 text-[0.62rem] font-semibold text-azure-bright">
+                        {NOTIFICATIONS.length} new
+                      </span>
+                    </div>
+                    <ul className="max-h-80 divide-y divide-white/[0.06] overflow-y-auto">
+                      {NOTIFICATIONS.map((n, i) => (
+                        <li key={i} className="flex gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]">
+                          <span
+                            className={cn(
+                              "mt-1 h-2 w-2 shrink-0 rounded-full",
+                              n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-azure-bright",
+                            )}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-[0.82rem] font-medium text-white">{n.title}</p>
+                            <p className="mt-0.5 text-[0.72rem] text-slate-300/65">{n.meta}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/hub/crm"
+                      onClick={() => setNotifOpen(false)}
+                      className="block border-t border-white/10 px-4 py-2.5 text-center text-[0.76rem] font-semibold text-azure-bright hover:bg-white/[0.03]"
+                    >
+                      View all in CRM
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
 
             <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-azure to-azure-deep text-[0.66rem] font-bold text-white">

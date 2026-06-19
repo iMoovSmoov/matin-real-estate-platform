@@ -34,7 +34,7 @@ const cols = [
       ["Contact", "/contact"],
       ["Blog & resources", "/blog"],
       ["Cash offer", "/sell#cash-offer"],
-      ["Matin Hub", "/command-center"],
+      ["Matin Hub", "/hub"],
     ],
   },
 ];

@@ -207,7 +207,7 @@ export default function HomePage() {
                 dashboards, AI coaching, and automated workflows so our brokers spend their time on you.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/command-center" variant="primary" size="lg">
+                <ButtonLink href="/hub" variant="primary" size="lg">
                   <Cpu className="h-4 w-4" /> Tour the Matin Hub
                 </ButtonLink>
                 <ButtonLink href="/about" variant="outline-light" size="lg">

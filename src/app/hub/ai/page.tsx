@@ -15,42 +15,42 @@ import { Panel, SectionLabel, LiveDot } from "@/components/command/ui";
 
 const TOOLS = [
   {
-    href: "/command-center/ai/lead-responder",
+    href: "/hub/ai/lead-responder",
     name: "Lead Responder",
     icon: MessageSquareText,
     pillar: "Lead Conversion",
     desc: "Drafts a warm, personalized first reply to any inbound lead in seconds — referencing their area, budget, and intent.",
   },
   {
-    href: "/command-center/ai/listing-writer",
+    href: "/hub/ai/listing-writer",
     name: "Listing Writer",
     icon: PenSquare,
     pillar: "Marketing",
     desc: "Turns raw property facts into vivid, MLS-ready, fair-housing-compliant listing copy — load any active listing to start.",
   },
   {
-    href: "/command-center/ai/coach",
+    href: "/hub/ai/coach",
     name: "Agent Coach",
     icon: GraduationCap,
     pillar: "Coaching",
     desc: "Live scenario role-play and tactical feedback — objection handling, listing presentations, buyer consults.",
   },
   {
-    href: "/command-center/ai/cma",
+    href: "/hub/ai/cma",
     name: "CMA Generator",
     icon: Calculator,
     pillar: "Pricing",
     desc: "Produces a decisive comparative market analysis with a list-price range, comps talking points, and a recommendation.",
   },
   {
-    href: "/command-center/ai/agreements",
+    href: "/hub/ai/agreements",
     name: "Agreements",
     icon: FileSignature,
     pillar: "Contracts",
     desc: "Generates clear listing & buyer-representation agreement language from your terms, with broker-review flags.",
   },
   {
-    href: "/command-center/ai/ask",
+    href: "/hub/ai/ask",
     name: "Ask Matin",
     icon: Sparkles,
     pillar: "Team Assistant",

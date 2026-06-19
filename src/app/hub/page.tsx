@@ -41,12 +41,12 @@ const KPIS = [
 ];
 
 const PILLARS = [
-  { n: 1, name: "Structured Data Systems", module: "CRM & Leads", href: "/command-center/crm", icon: Database, note: "Spreadsheets → live database" },
-  { n: 2, name: "Centralized Dashboard", module: "Real-time Reporting", href: "/command-center/reporting", icon: Gauge, note: "One source of truth" },
-  { n: 3, name: "AI Integration", module: "AI Studio", href: "/command-center/ai", icon: Bot, note: "AI in every workflow" },
-  { n: 4, name: "Automation", module: "Automation Studio", href: "/command-center/automations", icon: Workflow, note: "8 flows eliminating busywork" },
-  { n: 5, name: "Contract Systems", module: "AI Agreements", href: "/command-center/ai/agreements", icon: FileSignature, note: "Listing & buyer agreements" },
-  { n: 6, name: "AI Coaching", module: "Agent Coach", href: "/command-center/ai/coach", icon: GraduationCap, note: "Scenario role-play training" },
+  { n: 1, name: "Structured Data Systems", module: "CRM & Leads", href: "/hub/crm", icon: Database, note: "Spreadsheets → live database" },
+  { n: 2, name: "Centralized Dashboard", module: "Real-time Reporting", href: "/hub/reporting", icon: Gauge, note: "One source of truth" },
+  { n: 3, name: "AI Integration", module: "AI Studio", href: "/hub/ai", icon: Bot, note: "AI in every workflow" },
+  { n: 4, name: "Automation", module: "Automation Studio", href: "/hub/automations", icon: Workflow, note: "8 flows eliminating busywork" },
+  { n: 5, name: "Contract Systems", module: "AI Agreements", href: "/hub/ai/agreements", icon: FileSignature, note: "Listing & buyer agreements" },
+  { n: 6, name: "AI Coaching", module: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap, note: "Scenario role-play training" },
 ];
 
 const topVolume = agentLeaderboard[0]?.volume || 1;
@@ -73,13 +73,13 @@ export default function DashboardPage() {
           </div>
           <div className="flex shrink-0 gap-2.5">
             <Link
-              href="/command-center/crm"
+              href="/hub/crm"
               className="inline-flex items-center gap-1.5 rounded-xl bg-azure px-4 py-2.5 text-[0.85rem] font-semibold text-white shadow-glow transition-colors hover:bg-azure-bright"
             >
               Work the queue <ArrowUpRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/command-center/ai"
+              href="/hub/ai"
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:border-azure/40 hover:bg-white/[0.07]"
             >
               <Bot className="h-4 w-4 text-azure-bright" /> AI Studio
@@ -143,7 +143,7 @@ export default function DashboardPage() {
             subtitle="Top producers by closed volume"
             icon={<TrendingUp className="h-4 w-4" />}
             action={
-              <Link href="/command-center/reporting" className="text-[0.74rem] font-semibold text-azure-bright hover:text-azure-300">
+              <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure-bright hover:text-azure-300">
                 Full report →
               </Link>
             }

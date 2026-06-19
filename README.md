@@ -8,7 +8,7 @@ It's two things in one app:
 2. **The "Matin Command Center"** — the internal platform the role is actually about: structured data, real-time dashboards, AI woven into the CRM, automation, AI contract workflows, and agent coaching.
 
 ### 🔗 Live demo → **https://matin-realestate.vercel.app**
-### 🧠 Command Center → **https://matin-realestate.vercel.app/command-center**
+### 🧠 Command Center → **https://matin-realestate.vercel.app/hub**
 
 ---
 
@@ -16,14 +16,14 @@ It's two things in one app:
 
 | Pillar (their words) | Where to see it |
 |---|---|
-| **Structured Data Systems** — replace spreadsheets & Google Forms | [`/command-center/forms`](https://matin-realestate.vercel.app/command-center/forms) — branded, editable templates for the real **OREF** forms + structured intake flows |
-| **Centralized Dashboard** — real-time reporting | [`/command-center`](https://matin-realestate.vercel.app/command-center) — live KPIs, charts, leaderboard, activity feed |
-| **AI Integration** — Claude in the CRM | [`/command-center/crm`](https://matin-realestate.vercel.app/command-center/crm) — one-click **AI-drafted lead replies**, lead scoring, pipeline |
-| **Automation** — eliminate busy work | [`/command-center/automations`](https://matin-realestate.vercel.app/command-center/automations) — n8n-style flows (speed-to-lead < 60s, listing launch, nurture…) |
-| **Contract Systems** — AI listing & buyer agreements | [`/command-center/contracts`](https://matin-realestate.vercel.app/command-center/contracts) — a 5-step **AI contract builder** with CRM auto-fill + compliance checks |
-| **AI Coaching** — contract writing & scenario training | [`/command-center/coaching`](https://matin-realestate.vercel.app/command-center/coaching) — scored role-plays + an AI contract-writing coach |
+| **Structured Data Systems** — replace spreadsheets & Google Forms | [`/hub/forms`](https://matin-realestate.vercel.app/hub/forms) — branded, editable templates for the real **OREF** forms + structured intake flows |
+| **Centralized Dashboard** — real-time reporting | [`/hub`](https://matin-realestate.vercel.app/hub) — live KPIs, charts, leaderboard, activity feed |
+| **AI Integration** — Claude in the CRM | [`/hub/crm`](https://matin-realestate.vercel.app/hub/crm) — one-click **AI-drafted lead replies**, lead scoring, pipeline |
+| **Automation** — eliminate busy work | [`/hub/automations`](https://matin-realestate.vercel.app/hub/automations) — n8n-style flows (speed-to-lead < 60s, listing launch, nurture…) |
+| **Contract Systems** — AI listing & buyer agreements | [`/hub/contracts`](https://matin-realestate.vercel.app/hub/contracts) — a 5-step **AI contract builder** with CRM auto-fill + compliance checks |
+| **AI Coaching** — contract writing & scenario training | [`/hub/coaching`](https://matin-realestate.vercel.app/hub/coaching) — scored role-plays + an AI contract-writing coach |
 
-The **[Playbook](https://matin-realestate.vercel.app/command-center/playbook)** page lays out the strategy, the Oregon forms research, and a competitor benchmark (Dotloop, SkySlope, Follow Up Boss, BoldTrail, Lofty…). See also [`docs/real-estate-systems-playbook.md`](docs/real-estate-systems-playbook.md).
+The **[Playbook](https://matin-realestate.vercel.app/hub/playbook)** page lays out the strategy, the Oregon forms research, and a competitor benchmark (Dotloop, SkySlope, Follow Up Boss, BoldTrail, Lofty…). See also [`docs/real-estate-systems-playbook.md`](docs/real-estate-systems-playbook.md).
 
 ## Highlights
 
