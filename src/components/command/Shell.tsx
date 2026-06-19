@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Users,
   DollarSign,
-  FileCheck,
   FileText,
   ClipboardList,
   FilePlus2,
@@ -31,7 +30,6 @@ import {
   ArrowLeft,
   ChevronDown,
   Building2,
-  User,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
@@ -44,7 +42,7 @@ const NAV: NavGroup[] = [
     label: "OVERVIEW",
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
-      { label: "My Workspace", href: "/hub/agent", icon: User },
+      { label: "My Workspace", href: "/hub/agent", icon: LayoutDashboard },
     ],
   },
   {
@@ -52,7 +50,7 @@ const NAV: NavGroup[] = [
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
       { label: "Cash Offers", href: "/hub/cash-offer", icon: DollarSign },
-      { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileCheck },
+      { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
       { label: "Transactions", href: "/hub/transactions", icon: FileText },
     ],
   },

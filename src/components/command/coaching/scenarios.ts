@@ -11,9 +11,11 @@ export type ScenarioCategory =
   | "Buyer Consultation"
   | "Negotiation"
   | "Price Reduction"
-  | "FSBO / Expired";
+  | "FSBO / Expired"
+  | "Lead Conversion"
+  | "Cash Offer";
 
-export type ScenarioDifficulty = "Starter" | "Pro" | "Elite";
+export type ScenarioDifficulty = "Starter" | "Pro" | "Elite" | "Beginner" | "Intermediate" | "Advanced";
 
 export interface Scenario {
   id: string;
@@ -185,5 +187,56 @@ export const scenarios: Scenario[] = [
       "You haven't contacted this lead in 10 days. They just visited the website again. Craft a re-engagement message that feels warm, not neglectful.",
     opening:
       "Oh hey — I was just browsing some listings again. I wasn't sure if you were still… around, honestly. It's been a while.",
+  },
+  // ── New scenarios added 2026-06-18 ───────────────────────────────────────
+  {
+    id: "zillow-high",
+    title: "Seller thinks Zillow is too high",
+    category: "Listing Presentation",
+    difficulty: "Intermediate",
+    summary:
+      "Seller received a Zillow Zestimate of $50K over your CMA. Handle the objection.",
+    opening:
+      "I pulled up Zillow this morning and it says my home is worth $50,000 more than what your CMA is showing. Why should I trust your numbers over Zillow?",
+  },
+  {
+    id: "buyer-agreement-refusal",
+    title: "Buyer refuses to sign buyer agreement",
+    category: "Buyer Consultation",
+    difficulty: "Advanced",
+    summary:
+      "Motivated buyer but won't sign. Navigate the conversation to signed agreement.",
+    opening:
+      "I'm really motivated to buy — I've been looking for months. But I just don't see why I need to sign a buyer agreement before we even look at houses. Can't we just skip that part?",
+  },
+  {
+    id: "wait-6-months",
+    title: "Lead wants to wait 6 months",
+    category: "Lead Conversion",
+    difficulty: "Beginner",
+    summary:
+      "Buyer/seller wants to wait. Create urgency without being pushy.",
+    opening:
+      "I've been thinking about it and I just want to hold off for six months or so. Maybe rates come down, maybe prices drop a bit — it just feels like better timing later.",
+  },
+  {
+    id: "cash-vs-top-dollar",
+    title: "Seller wants cash AND top dollar",
+    category: "Cash Offer",
+    difficulty: "Advanced",
+    summary:
+      "Seller doesn't understand the trade-off. Educate while keeping the deal alive.",
+    opening:
+      "I want a cash offer only — no financing, no contingencies. But I'm also not taking a penny under full market value. That shouldn't be a problem, right?",
+  },
+  {
+    id: "speed-to-lead-recovery-10day",
+    title: "Speed-to-lead recovery: 10-day gap",
+    category: "Lead Conversion",
+    difficulty: "Intermediate",
+    summary:
+      "You missed a lead for 10 days. Craft an apologetic but compelling recovery message.",
+    opening:
+      "Honestly, I reached out over a week ago and didn't hear back. I'm still interested but I'm already talking to another agent now. What happened on your end?",
   },
 ];

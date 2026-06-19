@@ -1,418 +1,530 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Flame, TrendingUp, Calendar, Phone, Mail, ArrowRight } from "lucide-react";
-import { leads, transactions, agents, metrics } from "@/lib/data";
+import Link from "next/link";
 import {
-  Panel,
-  PanelHeader,
-  Pill,
-  ProgressBar,
-} from "@/components/command/ui";
-import { daysLabel, initials } from "@/lib/utils";
+  Phone,
+  MessageSquare,
+  Calendar,
+  Clock,
+  Flame,
+  CheckCircle2,
+  Circle,
+  ChevronRight,
+  Target,
+  TrendingUp,
+  AlertCircle,
+} from "lucide-react";
+import { Panel, PanelHeader, Pill } from "@/components/command/ui";
 
-/* Deterministic mock appointments derived from agent slug. */
-interface Appt {
-  time: string;
-  client: string;
-  type: "Call" | "Showing" | "Consultation" | "Listing Appointment";
-  note: string;
-  tone: "azure" | "warn" | "success" | "neutral";
-}
+/* ─── Types ─────────────────────────────────────────────────────────────── */
 
-function buildAppointments(agentSlug: string): Appt[] {
-  // Stable seed from slug length so it's deterministic but varies per agent.
-  const seed = agentSlug.length % 4;
-  const base: Appt[] = [
-    { time: "9:00 AM", client: "Sarah Mitchell", type: "Call", note: "West Linn — Zillow lead, 2nd follow-up", tone: "azure" },
-    { time: "11:30 AM", client: "Derek & Pam Okafor", type: "Showing", note: "4BR Sellwood bungalow — active buyers", tone: "success" },
-    { time: "1:00 PM", client: "Rina Tanaka", type: "Listing Appointment", note: "Milwaukie — motivated to sell within 60d", tone: "warn" },
-    { time: "3:30 PM", client: "Carlos Vega", type: "Consultation", note: "First-time buyer, pre-approved $450k Gresham", tone: "neutral" },
-  ];
-  // Rotate slightly by seed so different agents show slightly different appts.
-  return [...base.slice(seed % 2), ...base.slice(0, seed % 2)];
-}
+type Priority = "high" | "mid" | "low";
 
 interface Task {
   id: string;
-  text: string;
-  label: string;
-  urgency: "high" | "normal";
+  priority: Priority;
+  bold: string;
+  detail: string;
+  href: string;
   done: boolean;
 }
 
-export function AgentWorkspace({ agentSlug }: { agentSlug: string }) {
-  const agent = agents.find((a) => a.slug === agentSlug);
-  const agentLeads = leads.filter((l) => l.assignedAgent === agentSlug);
-  const agentTransactions = transactions.filter((t) => t.agentSlug === agentSlug);
-  const teamAvg = metrics.kpis.avgResponseMins;
-  const agentMins = agent?.responseTimeMins ?? 13;
+interface HotLead {
+  id: string;
+  name: string;
+  source: string;
+  budget: string;
+  lastContact: string;
+  nextAction: string;
+  phone: string;
+}
 
-  // ── Build deterministic task list ────────────────────────────────────────
-  const initialTasks: Task[] = [];
+interface Deal {
+  id: string;
+  address: string;
+  stage: "Active" | "Under Contract" | "Closing Soon";
+  nextDeadline: string;
+  daysToClose: number;
+  client: string;
+}
 
-  // From hot leads (score >= 80) assigned to agent
-  const hotLeads = agentLeads.filter((l) => l.score >= 80);
+interface Appointment {
+  time: string;
+  type: "Call" | "Showing" | "Consultation" | "Listing Appointment";
+  client: string;
+  phone: string;
+  note: string;
+}
 
-  for (const lead of hotLeads) {
-    if (initialTasks.length >= 8) break;
-    if (lead.lastContactDaysAgo >= 3) {
-      initialTasks.push({
-        id: `lead-call-${lead.id}`,
-        text: `Call ${lead.firstName} — ${lead.lastContactDaysAgo}d no contact`,
-        label: lead.community,
-        urgency: "high",
-        done: false,
-      });
-    } else if (lead.lastContactDaysAgo >= 1) {
-      initialTasks.push({
-        id: `lead-followup-${lead.id}`,
-        text: `Follow up with ${lead.firstName} — ${lead.nextBestAction ?? "check in"}`,
-        label: lead.community,
-        urgency: "normal",
-        done: false,
-      });
-    }
-  }
+/* ─── Static demo data ───────────────────────────────────────────────────── */
 
-  // From transactions closing soon (closeDateDaysOut <= 7)
-  for (const tx of agentTransactions) {
-    if (initialTasks.length >= 8) break;
-    if (tx.closeDateDaysOut <= 7) {
-      initialTasks.push({
-        id: `tx-deadline-${tx.id}`,
-        text: `Deadline: ${tx.address} closes in ${tx.closeDateDaysOut}d`,
-        label: tx.stage,
-        urgency: "high",
-        done: false,
-      });
-    }
-  }
+const INITIAL_TASKS: Task[] = [
+  {
+    id: "t1",
+    priority: "high",
+    bold: "Call Sarah M.",
+    detail: "Zillow lead · No response to 2 texts (3 days ago)",
+    href: "/hub/crm",
+    done: false,
+  },
+  {
+    id: "t2",
+    priority: "high",
+    bold: "Send buyer agreement to Torres family",
+    detail: "Meeting was yesterday — unsigned agreement blocks the showing",
+    href: "/hub/buyer-agreements",
+    done: false,
+  },
+  {
+    id: "t3",
+    priority: "mid",
+    bold: "Schedule showing for Kim Tran",
+    detail: "Interested in West Linn 4BR · Available this weekend",
+    href: "/hub/crm",
+    done: false,
+  },
+  {
+    id: "t4",
+    priority: "mid",
+    bold: "Follow up: Harrison listing",
+    detail: "Offer expires today — confirm buyer intent before 5 PM",
+    href: "/hub/transactions",
+    done: false,
+  },
+  {
+    id: "t5",
+    priority: "low",
+    bold: "Review CMA draft for Chen family",
+    detail: "Meeting at 2 PM — CMA was auto-generated, verify comps",
+    href: "/hub/ai/cma",
+    done: false,
+  },
+  {
+    id: "t6",
+    priority: "low",
+    bold: "Log notes from last night's showing",
+    detail: "1204 NW Lovejoy — clients left with questions about HOA",
+    href: "/hub/crm",
+    done: false,
+  },
+];
 
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const appointments = buildAppointments(agentSlug);
+const HOT_LEADS: HotLead[] = [
+  {
+    id: "l1",
+    name: "Sarah Mitchell",
+    source: "Zillow",
+    budget: "$650k–$800k",
+    lastContact: "3 days ago",
+    nextAction: "Call now — missed 2 texts",
+    phone: "+15035550001",
+  },
+  {
+    id: "l2",
+    name: "Derek & Pam Okafor",
+    source: "Referral",
+    budget: "$900k–$1.1M",
+    lastContact: "1 day ago",
+    nextAction: "Confirm weekend showing",
+    phone: "+15035550002",
+  },
+  {
+    id: "l3",
+    name: "Rina Tanaka",
+    source: "Website",
+    budget: "$550k–$700k",
+    lastContact: "2 days ago",
+    nextAction: "Text listing recommendations",
+    phone: "+15035550003",
+  },
+];
+
+const DEALS: Deal[] = [
+  {
+    id: "d1",
+    address: "8457 NW Lakeshore Dr",
+    stage: "Closing Soon",
+    nextDeadline: "Closing Thu Jun 20",
+    daysToClose: 2,
+    client: "Harrison family",
+  },
+  {
+    id: "d2",
+    address: "1204 NW Lovejoy St",
+    stage: "Under Contract",
+    nextDeadline: "Inspection Jun 22",
+    daysToClose: 9,
+    client: "Chen family",
+  },
+  {
+    id: "d3",
+    address: "714 SE Morrison Ave",
+    stage: "Active",
+    nextDeadline: "Offer review Jun 25",
+    daysToClose: 18,
+    client: "Torres family",
+  },
+];
+
+const APPOINTMENTS: Appointment[] = [
+  {
+    time: "9:00 AM",
+    type: "Call",
+    client: "Sarah Mitchell",
+    phone: "+15035550001",
+    note: "West Linn — Zillow lead, 2nd follow-up",
+  },
+  {
+    time: "11:30 AM",
+    type: "Showing",
+    client: "Derek & Pam Okafor",
+    phone: "+15035550002",
+    note: "4BR Sellwood bungalow — active buyers",
+  },
+  {
+    time: "2:00 PM",
+    type: "Consultation",
+    client: "Chen family",
+    phone: "+15035550003",
+    note: "CMA review before listing conversation",
+  },
+  {
+    time: "4:30 PM",
+    type: "Listing Appointment",
+    client: "Rina Tanaka",
+    phone: "+15035550004",
+    note: "Milwaukie — motivated to sell within 60 days",
+  },
+];
+
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+
+function todayLabel(): string {
+  return new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const PRIORITY_DOT: Record<Priority, string> = {
+  high: "bg-red-500",
+  mid: "bg-amber-400",
+  low: "bg-emerald-400",
+};
+
+const STAGE_PILL: Record<Deal["stage"], "azure" | "warn" | "success"> = {
+  Active: "azure",
+  "Under Contract": "warn",
+  "Closing Soon": "success",
+};
+
+const APPT_PILL: Record<Appointment["type"], "azure" | "warn" | "success" | "neutral"> = {
+  Call: "azure",
+  Showing: "success",
+  Consultation: "neutral",
+  "Listing Appointment": "warn",
+};
+
+/* ─── Sub-components ─────────────────────────────────────────────────────── */
+
+function TaskCard({
+  task,
+  onToggle,
+}: {
+  task: Task;
+  onToggle: (id: string) => void;
+}) {
+  return (
+    <div
+      className={[
+        "flex items-start gap-3 rounded-xl border p-4 transition-all",
+        task.done
+          ? "border-ink/[0.06] bg-ink/[0.02] opacity-50"
+          : "border-ink/[0.08] bg-white hover:border-azure/30",
+      ].join(" ")}
+    >
+      {/* Checkbox */}
+      <button
+        onClick={() => onToggle(task.id)}
+        aria-label={task.done ? "Mark incomplete" : "Mark complete"}
+        className="mt-0.5 shrink-0 text-slate transition-colors hover:text-ink"
+      >
+        {task.done ? (
+          <CheckCircle2 className="h-5 w-5 text-success" />
+        ) : (
+          <Circle className="h-5 w-5" />
+        )}
+      </button>
+
+      {/* Priority dot */}
+      <span
+        className={[
+          "mt-[7px] h-2 w-2 shrink-0 rounded-full",
+          PRIORITY_DOT[task.priority],
+        ].join(" ")}
+      />
+
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <p
+          className={[
+            "text-[0.88rem] font-semibold leading-snug",
+            task.done ? "text-slate line-through" : "text-ink",
+          ].join(" ")}
+        >
+          {task.bold}
+        </p>
+        <p className="mt-0.5 text-[0.76rem] text-slate">{task.detail}</p>
+      </div>
+
+      {/* Action link */}
+      {!task.done && (
+        <Link
+          href={task.href}
+          className="ml-1 shrink-0 text-[0.76rem] font-semibold text-azure transition-colors hover:underline"
+        >
+          Do it
+          <ChevronRight className="inline h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function LeadCard({ lead }: { lead: HotLead }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border-l-4 border-l-red-400 bg-white p-4 shadow-sm ring-1 ring-inset ring-ink/[0.06]">
+      <div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[0.9rem] font-semibold text-ink">{lead.name}</span>
+          <Pill tone="neutral">{lead.source}</Pill>
+        </div>
+        <p className="mt-1 text-[0.76rem] text-slate">
+          Budget: <span className="font-medium text-ink">{lead.budget}</span>
+        </p>
+        <p className="mt-0.5 text-[0.76rem] text-slate">
+          Last contact: <span className="font-medium text-ink">{lead.lastContact}</span>
+        </p>
+      </div>
+      <p className="rounded-lg bg-ink/[0.04] px-2.5 py-1.5 text-[0.76rem] font-medium text-ink ring-1 ring-inset ring-ink/[0.06]">
+        <Target className="mr-1 inline h-3.5 w-3.5 text-azure" />
+        {lead.nextAction}
+      </p>
+      <div className="flex gap-2">
+        <a
+          href={`tel:${lead.phone}`}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:bg-ink/80"
+        >
+          <Phone className="h-3.5 w-3.5" />
+          Call now
+        </a>
+        <a
+          href={`sms:${lead.phone}`}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-2 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Text
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function DealCard({ deal }: { deal: Deal }) {
+  const urgency = deal.daysToClose <= 3 ? "text-danger" : deal.daysToClose <= 10 ? "text-warn" : "text-slate";
+  return (
+    <div className="flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-[0.85rem] font-semibold text-ink">{deal.address}</p>
+          <p className="mt-0.5 text-[0.73rem] text-slate">{deal.client}</p>
+        </div>
+        <Pill tone={STAGE_PILL[deal.stage]}>{deal.stage}</Pill>
+      </div>
+      <div className="flex items-center justify-between gap-2 rounded-lg bg-paper px-3 py-2">
+        <p className="text-[0.73rem] text-slate">
+          <Calendar className="mr-1 inline h-3.5 w-3.5 text-slate/60" />
+          {deal.nextDeadline}
+        </p>
+        <span className={["text-[0.73rem] font-semibold tabular-nums", urgency].join(" ")}>
+          {deal.daysToClose}d to close
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ApptRow({ appt }: { appt: Appointment }) {
+  return (
+    <li className="flex items-start gap-3 px-5 py-3.5">
+      {/* Time */}
+      <div className="w-[4.5rem] shrink-0 text-right">
+        <span className="text-[0.76rem] font-semibold tabular-nums text-slate">{appt.time}</span>
+      </div>
+      {/* Dot */}
+      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink/15" />
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[0.85rem] font-semibold leading-snug text-ink">{appt.client}</p>
+        <p className="mt-0.5 text-[0.73rem] text-slate">{appt.note}</p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <Pill tone={APPT_PILL[appt.type]}>{appt.type}</Pill>
+          {(appt.type === "Call" || appt.type === "Showing") && (
+            <a
+              href={`tel:${appt.phone}`}
+              className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-azure transition-colors hover:underline"
+            >
+              <Phone className="h-3 w-3" />
+              Dial
+            </a>
+          )}
+        </div>
+      </div>
+    </li>
+  );
+}
+
+/* ─── Main component ─────────────────────────────────────────────────────── */
+
+export default function AgentWorkspace() {
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
 
   function toggleTask(id: string) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    );
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   }
 
-  // ── Hot leads panel ───────────────────────────────────────────────────────
-  const attentionLeads = agentLeads
-    .filter((l) => l.score >= 80 || l.lastContactDaysAgo >= 7)
-    .sort((a, b) => b.lastContactDaysAgo - a.lastContactDaysAgo)
-    .slice(0, 6);
-
-  // ── Pipeline panel ────────────────────────────────────────────────────────
-  const pipelineItems = agentTransactions.slice(0, 4);
-
-  // ── Response time color ──────────────────────────────────────────────────
-  const ratio = agentMins / (teamAvg || 1);
-  const respColor =
-    ratio <= 1
-      ? "text-success"
-      : ratio <= 2
-        ? "text-warn"
-        : "text-danger";
-
-  // ── Stage pill tones ─────────────────────────────────────────────────────
-  function stageTone(
-    stage: string,
-  ): "success" | "danger" | "warn" | "neutral" | "azure" {
-    if (stage === "Closed") return "success";
-    if (stage === "Clear to Close") return "success";
-    if (stage === "Financing") return "azure";
-    if (stage === "Inspection") return "warn";
-    if (stage === "Active") return "azure";
-    if (stage === "Pending") return "neutral";
-    return "neutral";
-  }
+  const pendingCount = tasks.filter((t) => !t.done).length;
+  const hotCount = HOT_LEADS.length;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
-      {/* ── Left column: tasks + response widget ── */}
-      <div className="space-y-5 lg:col-span-1">
-        {/* Priority Tasks */}
+    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+
+      {/* ── 1. Greeting header ─────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="mb-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate/50">
+            {todayLabel()}
+          </p>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl">
+            Good morning, Jordan.
+          </h1>
+          <p className="mt-1.5 text-[0.9rem] text-slate">
+            You have{" "}
+            <span className="font-semibold text-danger">{hotCount} hot lead{hotCount !== 1 ? "s" : ""}</span>
+            {" "}and{" "}
+            <span className="font-semibold text-ink">{pendingCount} task{pendingCount !== 1 ? "s" : ""}</span>
+            {" "}due today.
+          </p>
+        </div>
+
+        {/* Response time badge pair */}
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="flex flex-col items-end gap-1">
+            <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[0.76rem] font-semibold text-success ring-1 ring-inset ring-success/20">
+              <Clock className="h-3.5 w-3.5" />
+              Your avg: 4 min
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.76rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
+              Team avg: 18 min
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. Today's priority list ───────────────────────────────────────── */}
+      <section>
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="font-display text-[1.05rem] font-semibold text-ink">Today&rsquo;s priorities</h2>
+          <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-ink px-1.5 text-[0.64rem] font-bold text-white">
+            {pendingCount}
+          </span>
+        </div>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onToggle={toggleTask} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── 3. Hot leads panel ────────────────────────────────────────────── */}
+      <section>
         <Panel>
           <PanelHeader
-            title="Today's priorities"
-            icon={<Clock className="h-4 w-4" />}
+            title="Hot leads"
+            icon={<Flame className="h-4 w-4" />}
+            subtitle={`${HOT_LEADS.length} leads need a response today`}
+            action={
+              <Link
+                href="/hub/crm"
+                className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
+              >
+                View all
+              </Link>
+            }
           />
-          <div className="divide-y divide-ink/[0.06]">
-            {tasks.length === 0 ? (
-              <p className="px-5 py-6 text-center text-[0.85rem] text-slate">
-                No urgent tasks — great day to prospect.
-              </p>
-            ) : (
-              tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={[
-                    "flex flex-col gap-2.5 px-5 py-3.5 transition-colors hover:bg-ink/[0.02]",
-                    task.done ? "opacity-50" : "",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Priority dot */}
-                    <span
-                      className={[
-                        "mt-[5px] h-2 w-2 shrink-0 rounded-full",
-                        task.urgency === "high" ? "bg-danger" : "bg-ink/20",
-                      ].join(" ")}
-                    />
-                    {/* Text */}
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className={[
-                          "text-[0.85rem] font-medium leading-snug",
-                          task.done ? "text-slate line-through" : "text-ink",
-                        ].join(" ")}
-                      >
-                        {task.text}
-                      </p>
-                      <p className="mt-0.5 text-[0.72rem] text-slate">
-                        {task.label}
-                      </p>
-                    </div>
-                    {/* Checkbox */}
-                    <input
-                      type="checkbox"
-                      checked={task.done}
-                      onChange={() => toggleTask(task.id)}
-                      aria-label="Mark done"
-                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-ink"
-                    />
-                  </div>
-                  {!task.done && (
-                    <button
-                      onClick={() => toggleTask(task.id)}
-                      className="ml-5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink/80"
-                    >
-                      Do it <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-              ))
-            )}
+          <div className="grid gap-4 p-5 sm:grid-cols-3">
+            {HOT_LEADS.map((lead) => (
+              <LeadCard key={lead.id} lead={lead} />
+            ))}
+          </div>
+        </Panel>
+      </section>
+
+      {/* ── 4 + 5. My pipeline + Appointments (two-column on lg) ─────────── */}
+      <div className="grid gap-5 lg:grid-cols-2">
+
+        {/* My pipeline */}
+        <Panel>
+          <PanelHeader
+            title="My active transactions"
+            icon={<TrendingUp className="h-4 w-4" />}
+            subtitle={`${DEALS.length} deals in flight`}
+            action={
+              <Link
+                href="/hub/transactions"
+                className="rounded-lg border border-ink/[0.1] px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-ink/[0.04]"
+              >
+                See all
+              </Link>
+            }
+          />
+          <div className="grid gap-3 p-5 sm:grid-cols-1">
+            {DEALS.map((deal) => (
+              <DealCard key={deal.id} deal={deal} />
+            ))}
           </div>
         </Panel>
 
-        {/* Response Time Widget */}
-        <Panel className="px-5 py-4">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate">
-            Response time
-          </p>
-          <div className="mt-2 flex items-end gap-2">
-            <span className={["font-display text-4xl leading-none tabular-nums", respColor].join(" ")}>
-              {agentMins}
-            </span>
-            <span className="mb-0.5 text-[0.85rem] text-slate">min</span>
-          </div>
-          <p className="mt-1 text-[0.72rem] text-slate">Your avg response</p>
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <p className="text-[0.72rem] text-slate/70">
-              Team avg:{" "}
-              <span className="font-semibold text-ink">{teamAvg}m</span>
-            </p>
-            {ratio <= 1 && (
-              <span className="rounded-full bg-success/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-success ring-1 ring-inset ring-success/20">
-                {Math.round(teamAvg - agentMins)}m faster
-              </span>
-            )}
-            {ratio > 1 && ratio <= 2 && (
-              <span className="rounded-full bg-warn/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-warn ring-1 ring-inset ring-warn/20">
-                {Math.round(agentMins - teamAvg)}m slower
-              </span>
-            )}
-            {ratio > 2 && (
-              <span className="rounded-full bg-danger/10 px-2.5 py-0.5 text-[0.66rem] font-semibold text-danger ring-1 ring-inset ring-danger/20">
-                {Math.round(agentMins - teamAvg)}m above avg
-              </span>
-            )}
-          </div>
-        </Panel>
-
-        {/* Appointments Today */}
+        {/* Appointments today */}
         <Panel>
           <PanelHeader
             title="Appointments today"
             icon={<Calendar className="h-4 w-4" />}
-            subtitle={`${appointments.length} scheduled`}
+            subtitle={`${APPOINTMENTS.length} scheduled`}
           />
-          <ul className="divide-y divide-ink/[0.06]">
-            {appointments.map((appt, i) => (
-              <li key={i} className="flex items-start gap-3 px-5 py-3.5">
-                {/* Time */}
-                <div className="w-[4.5rem] shrink-0 text-right">
-                  <span className="text-[0.76rem] font-semibold tabular-nums text-slate">
-                    {appt.time}
-                  </span>
-                </div>
-                {/* Divider dot */}
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ink/15" />
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-[0.85rem] font-semibold leading-snug text-ink">
-                    {appt.client}
-                  </p>
-                  <p className="mt-0.5 text-[0.72rem] text-slate">{appt.note}</p>
-                  <div className="mt-1.5 flex items-center gap-2">
-                    <Pill tone={appt.tone}>{appt.type}</Pill>
-                    {appt.type === "Call" && (
-                      <a
-                        href="tel:"
-                        className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-azure hover:underline"
-                      >
-                        <Phone className="h-3 w-3" /> Dial
-                      </a>
-                    )}
-                    {appt.type !== "Call" && (
-                      <a
-                        href="mailto:"
-                        className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-azure hover:underline"
-                      >
-                        <Mail className="h-3 w-3" /> Prep
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {APPOINTMENTS.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+              <AlertCircle className="h-8 w-8 text-slate/40" />
+              <p className="text-[0.88rem] text-slate">No appointments scheduled today.</p>
+              <Link
+                href="/hub/crm"
+                className="rounded-lg bg-ink px-4 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/80"
+              >
+                Call a lead
+              </Link>
+            </div>
+          ) : (
+            <ul className="divide-y divide-ink/[0.06]">
+              {APPOINTMENTS.map((appt, i) => (
+                <ApptRow key={i} appt={appt} />
+              ))}
+            </ul>
+          )}
         </Panel>
       </div>
 
-      {/* ── Right column: hot leads + pipeline ── */}
-      <div className="space-y-5 lg:col-span-2">
-        {/* Hot Leads */}
-        <Panel>
-          <PanelHeader
-            title="Leads needing attention"
-            icon={<Flame className="h-4 w-4" />}
-            subtitle={`${attentionLeads.length} lead${attentionLeads.length !== 1 ? "s" : ""} sorted by days since contact`}
-          />
-          <div className="divide-y divide-ink/[0.06]">
-            {attentionLeads.length === 0 ? (
-              <p className="px-5 py-6 text-center text-[0.85rem] text-slate">
-                All leads are up to date.
-              </p>
-            ) : (
-              attentionLeads.map((lead) => {
-                const scoreColor =
-                  lead.score >= 85
-                    ? "success"
-                    : lead.score >= 70
-                      ? "warn"
-                      : "neutral";
-                return (
-                  <div
-                    key={lead.id}
-                    className="flex flex-col gap-2 px-5 py-3.5 sm:flex-row sm:items-center"
-                  >
-                    {/* Avatar */}
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-semibold text-white">
-                      {initials(lead.name)}
-                    </div>
-
-                    {/* Info */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[0.85rem] font-semibold text-ink">
-                          {lead.name}
-                        </span>
-                        <Pill tone="neutral">{lead.source}</Pill>
-                        <Pill tone={scoreColor as "success" | "warn" | "neutral"}>
-                          {lead.score}
-                        </Pill>
-                        {lead.lastContactDaysAgo >= 7 && (
-                          <Pill tone="danger">
-                            {lead.lastContactDaysAgo}d no contact
-                          </Pill>
-                        )}
-                      </div>
-                      <p className="mt-0.5 truncate text-[0.78rem] text-slate">
-                        {lead.nextBestAction ?? `Last contact: ${daysLabel(-lead.lastContactDaysAgo)}`}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex shrink-0 gap-2">
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04]"
-                      >
-                        Call
-                      </a>
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04]"
-                      >
-                        Email
-                      </a>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </Panel>
-
-        {/* My Pipeline */}
-        <Panel>
-          <PanelHeader
-            title="Active transactions"
-            icon={<TrendingUp className="h-4 w-4" />}
-            subtitle={
-              pipelineItems.length > 0
-                ? `${pipelineItems.length} deal${pipelineItems.length !== 1 ? "s" : ""} in pipeline`
-                : "No active transactions"
-            }
-          />
-          <div className="divide-y divide-ink/[0.06]">
-            {pipelineItems.length === 0 ? (
-              <p className="px-5 py-8 text-center text-[0.85rem] text-slate">
-                No active transactions — time to build pipeline.
-              </p>
-            ) : (
-              pipelineItems.map((tx) => (
-                <div key={tx.id} className="px-5 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-[0.85rem] font-semibold text-ink">
-                        {tx.address}
-                      </p>
-                      <p className="mt-0.5 text-[0.72rem] text-slate">
-                        {tx.client} · {tx.type}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                      <Pill tone={stageTone(tx.stage)}>{tx.stage}</Pill>
-                      {tx.riskFlag && (
-                        <Pill tone="danger">{tx.riskFlag}</Pill>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <ProgressBar value={tx.progress} tone={tx.riskFlag ? "danger" : "azure"} />
-                    <div className="mt-1.5 flex items-center justify-between">
-                      <span className="text-[0.72rem] text-slate">
-                        {tx.progress}% complete
-                      </span>
-                      <span className="text-[0.72rem] text-slate">
-                        Closes{" "}
-                        <span className="font-medium text-ink">
-                          {daysLabel(tx.closeDateDaysOut)}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Panel>
-      </div>
     </div>
   );
 }

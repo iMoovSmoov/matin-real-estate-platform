@@ -19,6 +19,7 @@ import {
   ShoppingBag,
   ChevronDown,
   ChevronUp,
+  Clock,
 } from "lucide-react";
 import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
@@ -56,6 +57,32 @@ function stageBadgeTone(stage: string): string {
     return "bg-warn/10 text-amber-700 ring-warn/25";
   if (stage === "Cancelled") return "bg-danger/10 text-danger ring-danger/25";
   return "bg-azure/10 text-azure ring-azure/20";
+}
+
+/** Colored left-border class for urgency on transaction cards */
+function urgencyBorderClass(daysOut: number, closed: boolean): string {
+  if (closed) return "border-l-4 border-l-success/40";
+  if (daysOut < 0) return "border-l-4 border-l-danger";
+  if (daysOut < 7) return "border-l-4 border-l-danger";
+  if (daysOut < 14) return "border-l-4 border-l-warn";
+  return "border-l-4 border-l-success/50";
+}
+
+/** Chip color for "X days to close" */
+function daysToCloseChipClass(daysOut: number, closed: boolean): string {
+  if (closed) return "bg-success/10 text-success";
+  if (daysOut < 0) return "bg-danger/10 text-danger";
+  if (daysOut < 7) return "bg-danger/10 text-danger";
+  if (daysOut < 14) return "bg-warn/10 text-amber-700";
+  return "bg-azure/10 text-azure";
+}
+
+/** "X days to close" label */
+function daysToCloseLabel(daysOut: number, closed: boolean): string {
+  if (closed) return "Closed";
+  if (daysOut < 0) return `${Math.abs(daysOut)}d past close`;
+  if (daysOut === 0) return "Closing today";
+  return `${daysOut}d to close`;
 }
 
 // A deal counts as "Pending" once it's under contract heading to the table.
@@ -105,6 +132,42 @@ function shortType(type: string): { label: "Sale" | "Purchase"; icon: typeof Hom
   return /purchase|buyer/i.test(type)
     ? { label: "Purchase", icon: ShoppingBag }
     : { label: "Sale", icon: Home };
+}
+
+/**
+ * Simulate due dates for checklist items since the Transaction type
+ * does not carry dueDate. We spread items evenly between "today minus
+ * closeDateDaysOut" and the projected close date, so early items in
+ * a deal that has been running a while will appear overdue.
+ */
+function simulatedDueDates(t: Transaction): Date[] {
+  const today = new Date();
+  const closeDate = new Date(today);
+  closeDate.setDate(today.getDate() + t.closeDateDaysOut);
+
+  const totalItems = t.checklist.length;
+  if (totalItems === 0) return [];
+
+  // Start date: estimate contract start as 60 days before close.
+  const startDate = new Date(closeDate);
+  startDate.setDate(closeDate.getDate() - 60);
+
+  const span = closeDate.getTime() - startDate.getTime();
+  return t.checklist.map((_, i) => {
+    const offset = (i / Math.max(totalItems - 1, 1)) * span;
+    const d = new Date(startDate.getTime() + offset);
+    return d;
+  });
+}
+
+/** Returns days overdue (positive = overdue) for a checklist item. 0 if not overdue. */
+function daysOverdue(itemDate: Date): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(itemDate);
+  d.setHours(0, 0, 0, 0);
+  const diff = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
 }
 
 export function TransactionsView({ transactions }: { transactions: Transaction[] }) {
@@ -207,13 +270,17 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
   const pct = progressOf(t);
   const type = shortType(t.type);
   const TypeIcon = type.icon;
-  const overdue = !isClosed(t) && t.closeDateDaysOut < 0;
-  const soon = !isClosed(t) && t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 7;
+  const closed = isClosed(t);
+  const overdue = !closed && t.closeDateDaysOut < 0;
+  const soon = !closed && t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 7;
 
   return (
     <button
       onClick={onOpen}
-      className="group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5"
+      className={cn(
+        "group block w-full px-4 py-3.5 text-left transition-colors hover:bg-white md:grid md:grid-cols-[minmax(0,1fr)_8.5rem_7rem_10rem_6.5rem_1.25rem] md:items-center md:gap-4 md:px-5",
+        urgencyBorderClass(t.closeDateDaysOut, closed),
+      )}
     >
       {/* Property / client */}
       <div className="flex items-start gap-3 md:items-center">
@@ -233,8 +300,14 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <span className="truncate text-[0.74rem] text-slate/70">{t.client} · {type.label}</span>
+            {/* Stage badge */}
             <span className={cn("inline-flex items-center rounded-full px-2 py-px text-[0.66rem] font-semibold ring-1 ring-inset", stageBadgeTone(t.stage))}>
               {t.stage}
+            </span>
+            {/* Days to close chip */}
+            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-px text-[0.66rem] font-semibold", daysToCloseChipClass(t.closeDateDaysOut, closed))}>
+              <Clock className="h-2.5 w-2.5" />
+              {daysToCloseLabel(t.closeDateDaysOut, closed)}
             </span>
           </div>
         </div>
@@ -281,12 +354,12 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
           <CalendarClock className="h-3 w-3" />
           {daysLabel(t.closeDateDaysOut)}
         </span>
-        {!isClosed(t) && t.closeDateDaysOut < 0 && (
+        {!closed && t.closeDateDaysOut < 0 && (
           <div className="mt-1 flex justify-end">
             <Pill tone="danger">{Math.abs(t.closeDateDaysOut)}d overdue</Pill>
           </div>
         )}
-        {!isClosed(t) && t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 3 && (
+        {!closed && t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 3 && (
           <div className="mt-1 flex justify-end">
             <Pill tone="warn">closing soon</Pill>
           </div>
@@ -312,8 +385,19 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   const nextItem = tx?.checklist.find((c) => !c.done) ?? null;
   const type = tx ? shortType(tx.type) : null;
   const docs = tx ? buildDocuments(tx) : [];
+  const closed = tx ? isClosed(tx) : false;
 
-  // Addition 3 state — AI Contract Extractor
+  // Simulated due dates for checklist items (since Transaction type has no dueDate).
+  const dueDates: Date[] = tx ? simulatedDueDates(tx) : [];
+
+  // Compute overdue items: incomplete items where simulated date has passed.
+  const overdueItems = tx
+    ? tx.checklist
+        .map((c, i) => ({ ...c, overdueBy: !c.done ? daysOverdue(dueDates[i]) : 0 }))
+        .filter((c) => !c.done && c.overdueBy > 0)
+    : [];
+
+  // Contract extractor state
   const [extractOpen, setExtractOpen] = useState(false);
   const [contractText, setContractText] = useState("");
   const [extractOutput, setExtractOutput] = useState("");
@@ -326,26 +410,39 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     setExtractOutput("");
     await streamAi(
       { tool: "contract-extractor", input: { contractText } },
-      (_, full) => setExtractOutput(full),
+      (_chunk: string, full: string) => setExtractOutput(full),
     );
     setExtractLoading(false);
   }
 
   function handleApplyToChecklist() {
     setApplyToast(true);
-    setTimeout(() => setApplyToast(false), 3000);
+    setTimeout(() => setApplyToast(false), 3500);
+  }
+
+  // Reset extractor state when a different transaction is opened.
+  function handleClose() {
+    setExtractOpen(false);
+    setContractText("");
+    setExtractOutput("");
+    setExtractLoading(false);
+    setApplyToast(false);
+    onClose();
   }
 
   return (
     <>
+      {/* Backdrop */}
       <div
         className={cn(
           "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden
       />
+
+      {/* Slide-over */}
       <aside
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out sm:max-w-[480px]",
@@ -358,7 +455,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
             {/* Header */}
             <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 py-5">
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 aria-label="Close"
                 className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
               >
@@ -366,8 +463,14 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               </button>
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">{type.label}</span>
+                {/* Stage badge */}
                 <span className={cn("inline-flex items-center rounded-full px-2 py-px text-[0.66rem] font-semibold ring-1 ring-inset", stageBadgeTone(tx.stage))}>
                   {tx.stage}
+                </span>
+                {/* Days to close chip */}
+                <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-px text-[0.66rem] font-semibold", daysToCloseChipClass(tx.closeDateDaysOut, closed))}>
+                  <Clock className="h-2.5 w-2.5" />
+                  {daysToCloseLabel(tx.closeDateDaysOut, closed)}
                 </span>
                 <span className="text-[0.7rem] text-slate/50">{tx.id}</span>
               </div>
@@ -396,9 +499,9 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                   label="Close date"
                   value={daysLabel(tx.closeDateDaysOut)}
                   tone={
-                    !isClosed(tx) && tx.closeDateDaysOut < 0
+                    !closed && tx.closeDateDaysOut < 0
                       ? "danger"
-                      : !isClosed(tx) && tx.closeDateDaysOut <= 7
+                      : !closed && tx.closeDateDaysOut <= 7
                         ? "warn"
                         : undefined
                   }
@@ -429,6 +532,19 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 </div>
               )}
 
+              {/* ── Overdue items alert ── */}
+              {overdueItems.length > 0 && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-600" />
+                    <span className="text-[0.82rem] font-semibold text-red-700">
+                      {overdueItems.length} overdue {overdueItems.length === 1 ? "item" : "items"} —{" "}
+                      {overdueItems.map((c) => c.label).join(", ")}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Smart checklist */}
               <div>
                 <div className="mb-2.5 flex items-center justify-between gap-3">
@@ -455,6 +571,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 <ul className="space-y-1">
                   {tx.checklist.map((c, i) => {
                     const isNext = !c.done && nextItem != null && c.label === nextItem.label;
+                    const overdueByDays = !c.done ? daysOverdue(dueDates[i]) : 0;
                     return (
                       <li
                         key={i}
@@ -474,7 +591,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                         )}
                         <span
                           className={cn(
-                            "transition-colors",
+                            "flex-1 transition-colors",
                             c.done
                               ? "text-success/70 line-through decoration-success/30"
                               : isNext
@@ -484,30 +601,16 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                         >
                           {c.label}
                         </span>
+                        {/* Days overdue badge */}
+                        {overdueByDays > 0 && (
+                          <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
+                            {overdueByDays}d overdue
+                          </span>
+                        )}
                       </li>
                     );
                   })}
                 </ul>
-
-                {/* Addition 2 — Missing documents alert */}
-                {tx.checklist.some((c) => !c.done) && (
-                  <div className="rounded-xl border border-danger/30 bg-danger/[0.06] p-3 mt-3">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-danger" />
-                      <span className="text-danger font-semibold text-[0.82rem]">Missing items</span>
-                    </div>
-                    <ul className="space-y-1">
-                      {tx.checklist
-                        .filter((c) => !c.done)
-                        .map((c, i) => (
-                          <li key={i} className="flex items-start gap-2 text-[0.78rem] text-danger/80">
-                            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-danger/60" />
-                            {c.label}
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                )}
               </div>
 
               {/* Documents */}
@@ -528,61 +631,91 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 </ul>
               </div>
 
-              {/* Addition 3 — AI Contract Extractor */}
+              {/* ── AI Contract Extractor ── */}
               <div className="rounded-xl border border-ink/[0.08] bg-white">
-                <button
-                  onClick={() => setExtractOpen((v) => !v)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left"
-                >
-                  <span className="inline-flex items-center gap-2 text-[0.95rem] font-semibold text-ink">
+                {/* Section header — always visible */}
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="inline-flex items-center gap-2 text-[0.86rem] font-semibold text-ink">
                     <FileText className="h-4 w-4 text-ink" />
-                    AI Contract Extractor
+                    Extract Contract Deadlines
                   </span>
-                  {extractOpen ? (
-                    <ChevronUp className="h-4 w-4 text-slate/50" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-slate/50" />
-                  )}
-                </button>
+                  <button
+                    onClick={() => setExtractOpen((v) => !v)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-1.5 text-[0.78rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                    aria-label={extractOpen ? "Collapse contract extractor" : "Expand contract extractor"}
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Extract Contract Deadlines
+                    {extractOpen ? (
+                      <ChevronUp className="h-3.5 w-3.5 text-slate/60" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5 text-slate/60" />
+                    )}
+                  </button>
+                </div>
 
                 {extractOpen && (
                   <div className="border-t border-ink/[0.08] px-4 pb-4 pt-3 space-y-3">
                     <p className="text-[0.82rem] text-slate">
-                      Paste the full purchase agreement text below to extract parties, financial terms, and all key deadlines.
+                      Paste your purchase agreement text below. The AI will extract all key deadlines, contingency dates, and parties.
                     </p>
                     <textarea
                       value={contractText}
                       onChange={(e) => setContractText(e.target.value)}
-                      placeholder="Paste purchase agreement text here..."
+                      placeholder="Paste your purchase agreement text here..."
                       rows={6}
-                      className="w-full rounded-xl border border-ink/[0.08] bg-paper p-3 text-[0.82rem] text-ink resize-none focus:border-ink/40 focus:outline-none"
+                      className="w-full rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3 text-[0.82rem] text-ink resize-none focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
                     />
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleExtract}
                         disabled={extractLoading || !contractText.trim()}
-                        className="inline-flex items-center gap-2 bg-ink text-white rounded-xl px-4 py-2 text-[0.85rem] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {extractLoading && (
-                          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        {extractLoading ? (
+                          <>
+                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            Extracting deadlines...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="h-3.5 w-3.5" />
+                            Extract Deadlines
+                          </>
                         )}
-                        {extractLoading ? "Extracting contract details..." : "Extract Deadlines"}
                       </button>
+                      {contractText.trim() && !extractLoading && (
+                        <button
+                          onClick={() => { setContractText(""); setExtractOutput(""); }}
+                          className="rounded-xl border border-ink/[0.08] px-3 py-2 text-[0.82rem] text-slate transition-colors hover:bg-ink/[0.04] hover:text-ink"
+                        >
+                          Clear
+                        </button>
+                      )}
                     </div>
 
-                    {extractOutput && !extractLoading && (
-                      <div className="rounded-xl border border-ink/[0.08] bg-paper p-3">
-                        <div className="max-h-72 overflow-y-auto">
-                          <AiMarkdown text={extractOutput} />
-                        </div>
-                        <div className="mt-3 border-t border-ink/[0.08] pt-3">
-                          <button
-                            onClick={handleApplyToChecklist}
-                            className="border border-ink/[0.08] rounded-xl px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04]"
-                          >
-                            Apply to checklist
-                          </button>
-                        </div>
+                    {/* Streaming output */}
+                    {(extractOutput || extractLoading) && (
+                      <div className="rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3">
+                        {extractLoading && !extractOutput && (
+                          <p className="text-[0.82rem] text-slate animate-pulse">Extracting deadlines...</p>
+                        )}
+                        {extractOutput && (
+                          <div className="max-h-72 overflow-y-auto">
+                            <AiMarkdown text={extractOutput} />
+                          </div>
+                        )}
+                        {extractOutput && !extractLoading && (
+                          <div className="mt-3 border-t border-ink/[0.08] pt-3">
+                            <button
+                              onClick={handleApplyToChecklist}
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-ink/[0.12] px-4 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                            >
+                              <ArrowRight className="h-3.5 w-3.5" />
+                              Apply to transaction checklist
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -593,11 +726,14 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
         )}
 
         {/* Toast notification */}
-        {applyToast && (
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-xl border border-ink/[0.08] bg-ink px-4 py-2.5 text-[0.82rem] text-white shadow-lg">
-            Review the extracted dates and update the checklist manually.
-          </div>
-        )}
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 rounded-xl border border-ink/[0.08] bg-ink px-4 py-2.5 text-[0.82rem] text-white shadow-lg transition-all duration-300",
+            applyToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+          )}
+        >
+          Key deadlines applied to this transaction
+        </div>
       </aside>
     </>
   );

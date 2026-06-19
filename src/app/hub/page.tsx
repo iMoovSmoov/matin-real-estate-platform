@@ -21,8 +21,10 @@ import {
   AlertCircle,
   Calendar,
   Activity,
+  Zap,
+  Timer,
 } from "lucide-react";
-import { metrics, agentLeaderboard, company } from "@/lib/data";
+import { metrics, agentLeaderboard, salesAgents, company } from "@/lib/data";
 import { usd, compactUsd, num } from "@/lib/utils";
 import {
   Panel,
@@ -65,7 +67,7 @@ const ALERTS = [
   },
 ];
 
-/** 4 KPI tiles */
+/** 6 KPI tiles */
 const KPIS = [
   {
     label: "MTD Volume",
@@ -73,24 +75,50 @@ const KPIS = [
     delta: { value: "+12% vs last month", dir: "up" as const },
     icon: <TrendingUp className="h-4 w-4" />,
     accent: true,
+    href: null,
+    chip: null,
   },
   {
     label: "Active Leads",
     value: "47",
     delta: { value: "8 new today", dir: "up" as const },
     icon: <Users className="h-4 w-4" />,
+    href: null,
+    chip: null,
   },
   {
     label: "Listings Active",
     value: "12",
     delta: { value: "3 under offer", dir: "up" as const },
     icon: <Home className="h-4 w-4" />,
+    href: null,
+    chip: null,
   },
   {
     label: "Avg Days to Close",
     value: "28",
     delta: { value: "team avg: 34", dir: "up" as const },
     icon: <Clock className="h-4 w-4" />,
+    href: null,
+    chip: null,
+  },
+  {
+    label: "Speed to Lead",
+    value: "4 min",
+    delta: null,
+    icon: <Zap className="h-4 w-4" />,
+    accent: false,
+    href: null,
+    chip: { label: "Team goal: <5 min", tone: "green" as const },
+  },
+  {
+    label: "Stale Leads",
+    value: "8",
+    delta: null,
+    icon: <Timer className="h-4 w-4" />,
+    accent: false,
+    href: "/hub/crm",
+    chip: { label: "> 14 days no contact", tone: "amber" as const },
   },
 ];
 
@@ -209,6 +237,52 @@ const TOOLS = [
 
 const topVolume = agentLeaderboard[0]?.volume || 1;
 
+/** Source ROI table data */
+const SOURCE_ROI = metrics.sourceRoi ?? [
+  { source: "Google Ads",       leads: 189, closed: 14, revenue: 4900000, spend: 52000  },
+  { source: "Facebook Ads",     leads: 88,  closed: 8,  revenue: 2800000, spend: 28000  },
+  { source: "Instagram",        leads: 310, closed: 22, revenue: 7700000, spend: 18000  },
+  { source: "Zillow",           leads: 98,  closed: 9,  revenue: 3150000, spend: 42000  },
+  { source: "Organic / Website",leads: 306, closed: 28, revenue: 9800000, spend: 8000   },
+  { source: "Referral",         leads: 193, closed: 31, revenue: 10850000,spend: 0      },
+  { source: "Cash Offer Funnel",leads: 47,  closed: 12, revenue: 4200000, spend: 6000   },
+];
+
+/** Compute ROI multiple: revenue/spend, or Infinity for $0 spend */
+function roiMultiple(revenue: number, spend: number): string {
+  if (spend === 0) return "∞";
+  return `${(revenue / spend).toFixed(1)}x`;
+}
+
+/** Best-ROI row: highest multiple (finite wins over infinite for highlight purposes) */
+const bestRoiSource = SOURCE_ROI.reduce<string>((best, row) => {
+  const prev = SOURCE_ROI.find((r) => r.source === best);
+  if (!prev) return row.source;
+  const prevR = prev.spend === 0 ? Infinity : prev.revenue / prev.spend;
+  const curR  = row.spend  === 0 ? Infinity : row.revenue  / row.spend;
+  // prefer finite best; if both infinite pick first
+  if (prevR === Infinity && curR === Infinity) return best;
+  if (prevR === Infinity) return best;
+  if (curR  === Infinity) return row.source;
+  return curR > prevR ? row.source : best;
+}, SOURCE_ROI[0]?.source ?? "");
+
+/** Agent speed-to-lead ranking — top 6 by responseTimeMins from agents data */
+const RESPONSE_RANKING = [...salesAgents]
+  .filter((a) => a.responseTimeMins != null)
+  .sort((a, b) => (a.responseTimeMins ?? 99) - (b.responseTimeMins ?? 99))
+  .slice(0, 6)
+  .map((a) => {
+    const mins = a.responseTimeMins ?? 0;
+    const status: "fast" | "mid" | "slow" =
+      mins < 5 ? "fast" : mins <= 15 ? "mid" : "slow";
+    // leadsThisMonth from metrics.agentLeaderboard if available
+    const metricsEntry = (metrics.agentLeaderboard ?? []).find(
+      (m) => m.slug === a.slug,
+    );
+    return { ...a, leadsThisMonth: metricsEntry?.leadsThisMonth ?? 0, status };
+  });
+
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
 function alertChipClass(tone: "amber" | "red" | "blue") {
@@ -265,40 +339,67 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── KPI tiles (2x2 → 4x1) ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {KPIS.map((kpi) => (
-          <div
-            key={kpi.label}
-            className="flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]"
-          >
-            {/* Icon + label */}
-            <div className="flex items-center justify-between">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate/60">
-                {kpi.label}
-              </span>
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink/[0.05] text-slate/60">
-                {kpi.icon}
-              </span>
-            </div>
-            {/* Value */}
-            <span className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
-              {kpi.value}
-            </span>
-            {/* Trend chip */}
-            <span
+      {/* ── KPI tiles (2x3 → 6x1) ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {KPIS.map((kpi) => {
+          const inner = (
+            <div
+              key={kpi.label}
               className={[
-                "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
-                kpi.delta.dir === "up"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-red-50 text-red-700",
+                "flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-all",
+                kpi.href ? "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer" : "",
               ].join(" ")}
             >
-              <TrendingUp className="h-3 w-3" />
-              {kpi.delta.value}
-            </span>
-          </div>
-        ))}
+              {/* Icon + label */}
+              <div className="flex items-center justify-between">
+                <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate/60">
+                  {kpi.label}
+                </span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink/[0.05] text-slate/60">
+                  {kpi.icon}
+                </span>
+              </div>
+              {/* Value */}
+              <span className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
+                {kpi.value}
+              </span>
+              {/* Delta or chip */}
+              {kpi.delta ? (
+                <span
+                  className={[
+                    "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
+                    kpi.delta.dir === "up"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-700",
+                  ].join(" ")}
+                >
+                  <TrendingUp className="h-3 w-3" />
+                  {kpi.delta.value}
+                </span>
+              ) : kpi.chip ? (
+                <span
+                  className={[
+                    "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
+                    kpi.chip.tone === "green"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : kpi.chip.tone === "amber"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-slate-100 text-slate-600",
+                  ].join(" ")}
+                >
+                  {kpi.chip.label}
+                </span>
+              ) : null}
+            </div>
+          );
+          return kpi.href ? (
+            <Link key={kpi.label} href={kpi.href} className="block">
+              {inner}
+            </Link>
+          ) : (
+            <div key={kpi.label}>{inner}</div>
+          );
+        })}
       </div>
 
       {/* ── Quick Tools ────────────────────────────────────────────────────── */}
@@ -578,6 +679,198 @@ export default function DashboardPage() {
           <SourceRoiChart />
         </div>
       </Panel>
+
+      {/* ── Source ROI Table ────────────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+        <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div>
+            <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+              Source ROI &mdash; this month
+            </h2>
+            <p className="mt-0.5 text-[0.73rem] text-slate/50">
+              Revenue generated vs. marketing spend per channel
+            </p>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr className="border-b border-ink/[0.05]">
+                <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Channel
+                </th>
+                <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Leads
+                </th>
+                <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Closed
+                </th>
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Revenue
+                </th>
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Spend
+                </th>
+                <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  ROI
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {SOURCE_ROI.map((row) => {
+                const isBest = row.source === bestRoiSource;
+                return (
+                  <tr
+                    key={row.source}
+                    className={[
+                      "border-b border-ink/[0.05] text-sm last:border-0 transition-colors",
+                      isBest ? "bg-emerald-50/50" : "hover:bg-paper/60",
+                    ].join(" ")}
+                  >
+                    <td className="px-5 py-3">
+                      <span className="font-medium text-ink">{row.source}</span>
+                      {isBest && (
+                        <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[0.62rem] font-semibold text-emerald-700">
+                          Best ROI
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[0.72rem] font-medium text-ink">
+                        {row.leads}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-center tabular-nums text-slate">
+                      {row.closed}
+                    </td>
+                    <td className="px-3 py-3 text-right tabular-nums font-semibold text-ink">
+                      {compactUsd(row.revenue)}
+                    </td>
+                    <td className="px-3 py-3 text-right tabular-nums text-slate">
+                      {row.spend === 0 ? (
+                        <span className="font-semibold text-emerald-600">Organic</span>
+                      ) : (
+                        compactUsd(row.spend)
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <span
+                        className={[
+                          "font-display font-semibold tabular-nums",
+                          row.spend === 0
+                            ? "text-emerald-600"
+                            : row.revenue / row.spend >= 100
+                            ? "text-emerald-600"
+                            : row.revenue / row.spend >= 50
+                            ? "text-ink"
+                            : "text-slate",
+                        ].join(" ")}
+                      >
+                        {roiMultiple(row.revenue, row.spend)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Agent Response Time Ranking ─────────────────────────────────────── */}
+      <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+        <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div>
+            <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+              Response time ranking
+            </h2>
+            <p className="mt-0.5 text-[0.73rem] text-slate/50">
+              Top 6 agents by speed-to-lead &mdash; goal: under 5 minutes
+            </p>
+          </div>
+          <Link
+            href="/hub/reporting"
+            className="text-[0.74rem] font-semibold text-azure hover:opacity-70"
+          >
+            Full report
+          </Link>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px]">
+            <thead>
+              <tr className="border-b border-ink/[0.05]">
+                <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Agent
+                </th>
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Avg Response
+                </th>
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Leads Today
+                </th>
+                <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {RESPONSE_RANKING.map((agent) => (
+                <tr
+                  key={agent.slug}
+                  className="border-b border-ink/[0.05] text-sm transition-colors last:border-0 hover:bg-paper/60"
+                >
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
+                        {agent.photo ? (
+                          <Image
+                            src={agent.photo}
+                            alt={agent.name}
+                            fill
+                            sizes="32px"
+                            className="object-cover object-top"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-[0.68rem] font-semibold text-ink/60">
+                            {agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[0.85rem] font-medium text-ink">
+                        {agent.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums font-semibold text-ink">
+                    {agent.responseTimeMins} min
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums text-slate">
+                    {agent.leadsThisMonth}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    <span
+                      className={[
+                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold",
+                        agent.status === "fast"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : agent.status === "mid"
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-red-50 text-red-700",
+                      ].join(" ")}
+                    >
+                      {agent.status === "fast"
+                        ? "< 5 min"
+                        : agent.status === "mid"
+                        ? "5–15 min"
+                        : "> 15 min"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <p className="pb-2 text-center text-[0.72rem] text-slate/45">

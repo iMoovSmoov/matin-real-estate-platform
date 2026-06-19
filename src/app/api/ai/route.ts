@@ -19,10 +19,10 @@ const MAX_TOKENS: Record<AiTool, number> = {
   coach: 1200,
   cma: 2500,
   agreement: 2500,
-  "marketing-kit": 2000,
-  "seller-intel": 1500,
-  "contract-extractor": 2500,
-  "cash-offer-eval": 1500,
+  "marketing-kit": 1400,
+  "seller-intel": 1000,
+  "contract-extractor": 1400,
+  "cash-offer-eval": 900,
 };
 
 function textStream(text: string) {

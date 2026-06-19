@@ -8,6 +8,10 @@ import {
   TrendingUp,
   MessageSquareText,
   BarChart2,
+  ChevronRight,
+  Clock,
+  Users,
+  DollarSign,
 } from "lucide-react";
 import { agents, salesAgents, company } from "@/lib/data";
 import { cn, initials, num } from "@/lib/utils";
@@ -209,7 +213,7 @@ export default function CoachingPage() {
                       key={row.id}
                       className={cn(
                         "transition-colors hover:bg-ink/[0.02]",
-                        isTop && "bg-ink/[0.015]",
+                        isTop && "bg-emerald-50/40",
                       )}
                     >
                       <td className={cn("px-5 py-3 text-ink", isTop && "font-semibold")}>
@@ -291,6 +295,65 @@ export default function CoachingPage() {
           hint="Active this week"
         />
       </div>
+
+      {/* Recommended This Week */}
+      <section>
+        <div className="mb-2.5 flex items-center gap-2">
+          <SectionLabel>Recommended This Week</SectionLabel>
+          <span className="h-px flex-1 bg-ink/[0.06]" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[
+            {
+              icon: <Clock className="h-4 w-4 text-amber-600" />,
+              bg: "bg-amber-50/60 border-amber-200/60",
+              iconBg: "bg-amber-100",
+              label: "Appt-set rate below avg",
+              scenario: "Lead wants to wait 6 months",
+              id: "wait-6-months",
+            },
+            {
+              icon: <Users className="h-4 w-4 text-blue-600" />,
+              bg: "bg-blue-50/60 border-blue-200/60",
+              iconBg: "bg-blue-100",
+              label: "Buyer agreement conversion low",
+              scenario: "Buyer refuses to sign buyer agreement",
+              id: "buyer-agreement-refusal",
+            },
+            {
+              icon: <DollarSign className="h-4 w-4 text-emerald-600" />,
+              bg: "bg-emerald-50/60 border-emerald-200/60",
+              iconBg: "bg-emerald-100",
+              label: "Listing appt prep",
+              scenario: "Seller thinks Zillow is too high",
+              id: "zillow-high",
+            },
+          ].map((rec) => (
+            <div
+              key={rec.id}
+              className={cn(
+                "flex items-start gap-3 rounded-2xl border p-4",
+                rec.bg,
+              )}
+            >
+              <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl", rec.iconBg)}>
+                {rec.icon}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/60">
+                  {rec.label}
+                </p>
+                <p className="mt-0.5 text-[0.86rem] font-semibold text-ink leading-snug">
+                  {rec.scenario}
+                </p>
+              </div>
+              <span className="mt-0.5 shrink-0 text-[0.72rem] font-semibold text-slate/50 flex items-center gap-0.5 whitespace-nowrap">
+                Practice now <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Scenario trainer */}
       <section>

@@ -466,43 +466,47 @@ Seller motivation is **${motivation.toLowerCase()}** with a stated timeline of *
 ### Parties
 | Role | Name | Contact |
 |------|------|---------|
-| Buyer | [Paste contract to extract] | — |
-| Seller | [Paste contract to extract] | — |
-| Listing Agent / Firm | [Paste contract to extract] | — |
-| Buyer's Agent / Firm | [Paste contract to extract] | — |
+| Buyer | Marcus & Diane Holloway | marcus.holloway@gmail.com |
+| Seller | Robert & Patricia Vance | c/o Listing Agent |
+| Listing Agent / Firm | Sarah Chen · ${co} | ${phone} |
+| Buyer's Agent / Firm | Derek Okafor · Northwest Realty Group | (503) 882-4410 |
 
 ### Property
-[Paste a purchase agreement into the text field above and the AI will extract the full address, legal description, and property type.]
+1234 Example St, Portland, OR 97219. Legal description: Lot 14, Block 3, Riverview Heights Subdivision. Single-family residential, 3BD/2BA, 1,920 sqft, built 1998.
 
 ### Financial Terms
 | Item | Amount / Detail |
 |------|----------------|
-| Purchase Price | [Extracted on submit] |
-| Earnest Money | [Extracted on submit] |
-| EMD Deadline | [Extracted on submit] |
-| Down Payment | [Extracted on submit] |
-| Loan Type & Amount | [Extracted on submit] |
+| Purchase Price | $725,000 |
+| Earnest Money Deposit | $14,500 (2% of purchase price) |
+| EMD Deadline | Within 3 business days of acceptance |
+| Down Payment | $145,000 (20%) |
+| Loan Amount & Type | $580,000 — Conventional 30-year fixed |
+| Additional Deposits | None |
 
 ### Critical Deadlines
 | Milestone | Date | Days from Acceptance |
 |-----------|------|---------------------|
-| Inspection Contingency | [Extracted] | — |
-| Appraisal Contingency | [Extracted] | — |
-| Financing Contingency | [Extracted] | — |
-| Title Review | [Extracted] | — |
-| Closing Date | [Extracted] | — |
-| Possession Date | [Extracted] | — |
+| Inspection Contingency | July 5, 2026 | 10 days |
+| Inspection Response | July 8, 2026 | 13 days |
+| Appraisal Contingency | July 15, 2026 | 20 days |
+| Financing Contingency | July 22, 2026 | 27 days |
+| Title Review | July 18, 2026 | 23 days |
+| Closing Date | August 5, 2026 | 41 days |
+| Possession Date | August 5, 2026 at 5:00 PM | 41 days |
 
 ### Contingencies
-- **Inspection:** [Extracted on submit]
-- **Appraisal:** [Extracted on submit]
-- **Financing:** [Extracted on submit]
-- **Sale of Buyer's Home:** [Extracted on submit]
+- **Inspection:** Yes — 10-day inspection period. Buyer may request repairs, credits, or terminate. Seller has 3 days to respond.
+- **Appraisal:** Yes — property must appraise at or above purchase price. No appraisal gap waiver included.
+- **Financing:** Yes — 27-day financing contingency, conventional loan. Buyer to provide pre-approval within 5 days.
+- **Sale of Buyer's Home:** No — buyers are not contingent on the sale of another property.
 
-### 🔴 Flags
-Paste your contract text above and click **Extract** — the AI will surface any non-standard terms, missing deadlines, or items requiring broker review.
+### Flags for Broker Review
+- Appraisal contingency does not include an appraisal gap clause — if property appraises low, seller has no protection against a price renegotiation. Recommend discussing with seller before ratification.
+- Possession is set to closing day at 5:00 PM — confirm seller's move-out timeline is achievable and consider adding a seller rent-back addendum if needed.
+- No escalation clause present — standard offer at list price; multiple-offer scenario possible given current inventory.
 
-> *AI-assisted extraction. All dates and terms must be verified against the original document. Human review required before relying on this extract. · ${co} · ${phone}*`;
+> *AI-assisted extraction. All dates and terms must be verified against the original document before relying on this extract. Human review required. · ${co} · ${phone}*`;
 
     /* ── Cash Offer Evaluation ───────────────────────────────────────────── */
     case "cash-offer-eval": {

@@ -159,16 +159,16 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
                 className={cn(
                   "inline-flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2 text-[0.82rem] font-semibold transition-colors",
                   on
-                    ? "border-ink/15 bg-ink/[0.06] text-ink"
-                    : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-white hover:text-ink",
+                    ? "border-ink bg-ink text-white"
+                    : "border-ink/[0.08] bg-white text-slate hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink",
                 )}
               >
-                <Icon className={cn("h-3.5 w-3.5", on ? "text-ink" : "text-slate")} />
+                <Icon className={cn("h-3.5 w-3.5", on ? "text-white" : "text-slate")} />
                 {sl.label}
                 <span
                   className={cn(
                     "rounded-md px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums",
-                    on ? "bg-ink text-white" : "bg-paper text-slate",
+                    on ? "bg-white/20 text-white" : "bg-paper text-slate",
                   )}
                 >
                   {counts[sl.id]}
@@ -227,7 +227,16 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   );
 }
 
-/* ── Response time dot ─────────────────────────────────────────────────────── */
+/* ── Response time dot + label ─────────────────────────────────────────────── */
+function formatResponseTime(minutes: number): string {
+  if (minutes < 5) return "< 5 min";
+  if (minutes < 60) return `${minutes} min`;
+  const hrs = minutes / 60;
+  if (hrs < 24) return `${hrs % 1 === 0 ? hrs : hrs.toFixed(1)} hrs`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
+}
+
 function ResponseDot({ minutes }: { minutes: number }) {
   const color =
     minutes <= 5
@@ -244,7 +253,9 @@ function ResponseDot({ minutes }: { minutes: number }) {
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
       <span className={cn("h-1.5 w-1.5 rounded-full", color)} />
-      <span className={cn("text-[0.68rem] font-medium tabular-nums", textColor)}>{minutes}m</span>
+      <span className={cn("text-[0.68rem] font-medium tabular-nums", textColor)}>
+        {formatResponseTime(minutes)}
+      </span>
     </span>
   );
 }
@@ -301,10 +312,10 @@ function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
 
         {/* Next action chip */}
         {lead.nextBestAction && (
-          <div className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-lg bg-azure/[0.07] px-2 py-0.5">
+          <div className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full bg-azure/[0.07] px-2 py-0.5">
             <ChevronRight className="h-3 w-3 shrink-0 text-azure" />
-            <span className="truncate text-[0.72rem] font-medium text-azure">
-              {lead.nextBestAction.length > 45 ? lead.nextBestAction.slice(0, 45) + "…" : lead.nextBestAction}
+            <span className="truncate text-[0.7rem] font-medium text-azure">
+              {lead.nextBestAction.length > 40 ? lead.nextBestAction.slice(0, 40) + "…" : lead.nextBestAction}
             </span>
           </div>
         )}
@@ -362,10 +373,10 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
           </div>
           {/* Next best action chip */}
           {lead.nextBestAction && (
-            <div className="mt-1 inline-flex max-w-[200px] items-center gap-1 rounded-lg bg-azure/[0.07] px-2 py-0.5">
+            <div className="mt-1 inline-flex max-w-[200px] items-center gap-1 rounded-full bg-azure/[0.07] px-2 py-0.5">
               <ChevronRight className="h-3 w-3 shrink-0 text-azure" />
-              <span className="truncate text-[0.70rem] font-medium text-azure">
-                {lead.nextBestAction.length > 38 ? lead.nextBestAction.slice(0, 38) + "…" : lead.nextBestAction}
+              <span className="truncate text-[0.7rem] font-medium text-azure">
+                {lead.nextBestAction.length > 40 ? lead.nextBestAction.slice(0, 40) + "…" : lead.nextBestAction}
               </span>
             </div>
           )}

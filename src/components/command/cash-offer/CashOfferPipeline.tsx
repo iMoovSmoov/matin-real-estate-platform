@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import {
+  DollarSign,
   X,
-  User,
-  Target,
-  Clock,
+  Phone,
   Home,
+  Clock,
+  AlertCircle,
+  User,
   Bed,
   Bath,
   Maximize2,
@@ -14,13 +16,18 @@ import {
   StickyNote,
   Wand2,
   Sparkles,
+  Send,
+  ArrowRightLeft,
 } from "lucide-react";
 import { sellerLeads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
-import { Pill } from "@/components/command/ui";
-import { compactUsd, initials, cn } from "@/lib/utils";
+import { StatTile, Pill, SectionLabel, LiveDot } from "@/components/command/ui";
+import { cn, initials } from "@/lib/utils";
 import type { SellerLead, SellerLeadStage, PropertyCondition } from "@/lib/types";
+
+/* ── Suppress unused-import lint on icons that are available for future use ── */
+void AlertCircle;
 
 /* ── Constants ──────────────────────────────────────────────────────────────── */
 
@@ -34,21 +41,23 @@ const STAGES: SellerLeadStage[] = [
   "Dead",
 ];
 
-/* Column header tones — subtle colored backgrounds per stage */
+/* Stage column header color tokens */
 const STAGE_HEADER_TONE: Record<SellerLeadStage, string> = {
-  "New Request":          "bg-ink/[0.05] text-ink border-ink/[0.08]",
-  "Needs Valuation":      "bg-azure/[0.07] text-azure border-azure/20",
-  "Offer Pending":        "bg-warn/[0.07] text-amber-700 border-warn/20",
-  "Offer Sent":           "bg-warn/10 text-amber-700 border-warn/25",
-  "Accepted":             "bg-success/[0.07] text-success border-success/20",
-  "Converted to Listing": "bg-success/10 text-success border-success/25",
-  "Dead":                 "bg-ink/[0.04] text-slate/60 border-ink/[0.06]",
+  "New Request":          "bg-blue-50   text-blue-700   border-blue-200",
+  "Needs Valuation":      "bg-purple-50 text-purple-700 border-purple-200",
+  "Offer Pending":        "bg-amber-50  text-amber-700  border-amber-200",
+  "Offer Sent":           "bg-orange-50 text-orange-700 border-orange-200",
+  "Accepted":             "bg-green-50  text-green-700  border-green-200",
+  "Converted to Listing": "bg-emerald-50 text-emerald-700 border-emerald-200",
+  "Dead":                 "bg-slate-50  text-slate-500  border-slate-200",
 };
+
+const DEAD_OR_TERMINAL: SellerLeadStage[] = ["Dead", "Accepted", "Converted to Listing"];
 
 /* ── Helpers ─────────────────────────────────────────────────────────────────── */
 
-function conditionTone(condition: PropertyCondition): "success" | "azure" | "warn" | "danger" {
-  switch (condition) {
+function conditionTone(c: PropertyCondition): "success" | "azure" | "warn" | "danger" {
+  switch (c) {
     case "Excellent":  return "success";
     case "Good":       return "azure";
     case "Fair":       return "warn";
@@ -56,21 +65,15 @@ function conditionTone(condition: PropertyCondition): "success" | "azure" | "war
   }
 }
 
-function stageDaysTone(days: number): "success" | "warn" | "danger" {
-  if (days > 7)  return "danger";
-  if (days >= 4) return "warn";
-  return "success";
+function formatUsd(n: number): string {
+  return "$" + n.toLocaleString("en-US");
 }
 
-/** Deterministic two-letter initials from a slug (e.g. "joshua-rose" → "JR"). */
-function agentInitials(slug: string): string {
-  return initials(slug.replace(/-/g, " "));
+function compactK(n: number): string {
+  return "$" + (n / 1000).toFixed(0) + "K";
 }
 
-/**
- * Stable hue (0–360) derived from a slug so each agent avatar has a
- * consistent, distinct tint — no Math.random().
- */
+/** Deterministic hue from agent slug for avatar color. */
 function slugHue(slug: string): number {
   let h = 0;
   for (let i = 0; i < slug.length; i++) {
@@ -79,9 +82,8 @@ function slugHue(slug: string): number {
   return h % 360;
 }
 
-/** Format a number as "$1,234,567" with commas (no compact suffix). */
-function formatUsd(n: number): string {
-  return "$" + n.toLocaleString("en-US");
+function agentInitials(slug: string): string {
+  return initials(slug.replace(/-/g, " "));
 }
 
 /* ── Sub-components ──────────────────────────────────────────────────────────── */
@@ -90,7 +92,7 @@ function AgentAvatar({ slug }: { slug: string }) {
   const hue = slugHue(slug);
   return (
     <span
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink/10 text-[0.7rem] font-bold text-ink"
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.7rem] font-bold"
       style={{ backgroundColor: `hsl(${hue},38%,88%)`, color: `hsl(${hue},45%,30%)` }}
       title={slug}
     >
@@ -99,88 +101,63 @@ function AgentAvatar({ slug }: { slug: string }) {
   );
 }
 
-function FactRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function DaysPill({ days }: { days: number }) {
+  const cls =
+    days > 7
+      ? "bg-red-50 text-red-600"
+      : days >= 4
+      ? "bg-amber-50 text-amber-700"
+      : "bg-emerald-50 text-emerald-700";
+  return (
+    <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-semibold", cls)}>
+      {days}d in stage
+    </span>
+  );
+}
+
+function FactRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2.5">
       <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-ink/[0.06] text-ink">
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-          {label}
-        </p>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">{label}</p>
         <p className="text-[0.85rem] text-ink">{value}</p>
       </div>
     </div>
   );
 }
 
-/* ── Days-in-stage pill ──────────────────────────────────────────────────────── */
-
-function DaysPill({ days }: { days: number }) {
-  const tone = stageDaysTone(days);
-  const cls =
-    tone === "danger"
-      ? "bg-danger/10 text-danger"
-      : tone === "warn"
-      ? "bg-warn/10 text-amber-700"
-      : "bg-success/10 text-emerald-700";
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.68rem] font-semibold",
-        cls,
-      )}
-    >
-      {days}d in stage
-    </span>
-  );
-}
-
 /* ── Kanban card ─────────────────────────────────────────────────────────────── */
 
-function LeadCard({
-  lead,
-  onClick,
-}: {
-  lead: SellerLead;
-  onClick: () => void;
-}) {
+function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) {
   const isStale = lead.daysInStage > 7;
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
       onClick={onClick}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
       className={cn(
-        "cursor-pointer rounded-xl bg-white ring-1 shadow-soft p-3 transition-shadow hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
-        isStale ? "ring-danger/25" : "ring-ink/[0.07]",
+        "w-full cursor-pointer rounded-xl bg-white text-left shadow-soft ring-1 p-3 transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+        isStale ? "ring-red-200" : "ring-ink/[0.07]",
       )}
     >
       {/* Seller name */}
-      <p className="truncate font-semibold text-[0.9rem] text-ink leading-snug">
-        {lead.sellerName}
-      </p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="truncate font-medium text-[0.88rem] text-ink leading-tight">{lead.sellerName}</p>
+        {isStale && (
+          <span className="shrink-0 text-[0.65rem] font-semibold text-red-600 bg-red-50 rounded-full px-1.5 py-0.5">
+            {lead.daysInStage}d
+          </span>
+        )}
+      </div>
 
       {/* Address */}
-      <p className="mt-0.5 truncate text-[0.78rem] text-slate/65">
-        {lead.address}, {lead.city}
-      </p>
+      <p className="mt-1 truncate text-[0.75rem] text-slate">{lead.address}, {lead.city}</p>
 
-      {/* Est value + condition */}
+      {/* Value + condition */}
       <div className="mt-2 flex items-center justify-between gap-1.5">
-        <span className="font-semibold text-[0.86rem] text-ink tabular-nums">
-          {formatUsd(lead.estValue)}
+        <span className="font-display text-[0.9rem] font-semibold text-ink tabular-nums">
+          {compactK(lead.estValue)}
         </span>
         <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
       </div>
@@ -191,18 +168,12 @@ function LeadCard({
         <AgentAvatar slug={lead.assignedAgent} />
       </div>
 
-      {/* AI Eval button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick();
-        }}
-        className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-azure/25 bg-azure/[0.07] py-1.5 text-[0.74rem] font-semibold text-azure transition-colors hover:bg-azure/[0.12]"
-      >
+      {/* Quick AI CTA */}
+      <div className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-ink/10 bg-ink/[0.04] py-1.5 text-[0.74rem] font-semibold text-ink/70 transition-colors hover:bg-ink/[0.08]">
         <Sparkles className="h-3 w-3" />
         AI Eval
-      </button>
-    </div>
+      </div>
+    </button>
   );
 }
 
@@ -226,7 +197,7 @@ function SlideOver({
   const [aiMode, setAiMode] = useState<AiMode>(null);
   const [noteText, setNoteText] = useState("");
 
-  // Reset AI state when lead changes
+  // Reset AI state when a different lead is opened
   const [activeId, setActiveId] = useState<string | null>(null);
   if (lead && lead.id !== activeId) {
     setActiveId(lead.id);
@@ -302,7 +273,7 @@ function SlideOver({
         aria-hidden
       />
 
-      {/* Panel */}
+      {/* Slide-over panel */}
       <aside
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full sm:max-w-[480px] flex-col border-l border-ink/[0.08] bg-white shadow-2xl transition-transform duration-300 ease-out",
@@ -314,7 +285,6 @@ function SlideOver({
           <>
             {/* Header */}
             <div className="relative shrink-0 border-b border-ink/[0.08] px-5 pb-4 pt-5">
-              {/* Close — always visible, high z */}
               <button
                 onClick={onClose}
                 aria-label="Close"
@@ -322,14 +292,9 @@ function SlideOver({
               >
                 <X className="h-4 w-4" />
               </button>
-
               <div className="pr-10">
-                <h2 className="font-display text-xl text-ink leading-tight">
-                  {lead.address}
-                </h2>
-                <p className="mt-0.5 text-[0.85rem] text-slate">{lead.city}</p>
-
-                {/* Value + condition + stage row */}
+                <h2 className="font-display text-xl text-ink leading-tight">{lead.sellerName}</h2>
+                <p className="mt-0.5 text-[0.85rem] text-slate">{lead.address}, {lead.city}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="font-display text-2xl leading-none text-ink tabular-nums">
                     {formatUsd(lead.estValue)}
@@ -342,127 +307,116 @@ function SlideOver({
 
             {/* Body — scrollable */}
             <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-              {/* Stage select */}
+              {/* Move to stage */}
               <div>
                 <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
                   Move to stage
                 </p>
                 <select
                   value={lead.stage}
-                  onChange={(e) =>
-                    onStageChange(lead.id, e.target.value as SellerLeadStage)
-                  }
+                  onChange={(e) => onStageChange(lead.id, e.target.value as SellerLeadStage)}
                   className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink focus:border-ink/20 focus:outline-none"
                 >
                   {STAGES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Key facts grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-ink/[0.03] rounded-xl p-3">
+                  <div className="text-[0.7rem] uppercase tracking-wide text-slate/60">Est. Value</div>
+                  <div className="font-display text-xl text-ink mt-1">{formatUsd(lead.estValue)}</div>
+                </div>
+                <div className="bg-ink/[0.03] rounded-xl p-3">
+                  <div className="text-[0.7rem] uppercase tracking-wide text-slate/60">Condition</div>
+                  <div className="font-medium text-ink mt-1">{lead.condition}</div>
+                </div>
               </div>
 
               {/* Property details */}
               <div className="grid grid-cols-2 gap-2 rounded-xl border border-ink/[0.08] bg-white p-3">
                 <div className="col-span-2">
-                  <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-                    Property
-                  </p>
+                  <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">Property</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-[0.82rem] text-slate">
-                  <Bed className="h-3.5 w-3.5 text-ink/60" />
-                  {lead.beds} bed
+                  <Bed className="h-3.5 w-3.5 text-ink/60" />{lead.beds} bed
                 </div>
                 <div className="flex items-center gap-1.5 text-[0.82rem] text-slate">
-                  <Bath className="h-3.5 w-3.5 text-ink/60" />
-                  {lead.baths} bath
+                  <Bath className="h-3.5 w-3.5 text-ink/60" />{lead.baths} bath
                 </div>
                 <div className="flex items-center gap-1.5 text-[0.82rem] text-slate">
-                  <Maximize2 className="h-3.5 w-3.5 text-ink/60" />
-                  {lead.sqft.toLocaleString()} sqft
+                  <Maximize2 className="h-3.5 w-3.5 text-ink/60" />{lead.sqft.toLocaleString()} sqft
                 </div>
                 <div className="flex items-center gap-1.5 text-[0.82rem] text-slate">
-                  <CalendarDays className="h-3.5 w-3.5 text-ink/60" />
-                  Built {lead.yearBuilt}
+                  <CalendarDays className="h-3.5 w-3.5 text-ink/60" />Built {lead.yearBuilt}
                 </div>
               </div>
 
               {/* Seller info */}
               <div className="space-y-3 rounded-xl border border-ink/[0.08] bg-white p-3">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-                  Seller
-                </p>
-                <FactRow
-                  icon={<User className="h-3.5 w-3.5" />}
-                  label="Name"
-                  value={lead.sellerName}
-                />
-                <FactRow
-                  icon={<Target className="h-3.5 w-3.5" />}
-                  label="Motivation"
-                  value={lead.motivation}
-                />
-                <FactRow
-                  icon={<Clock className="h-3.5 w-3.5" />}
-                  label="Timeline"
-                  value={lead.timeline}
-                />
+                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">Seller</p>
+                <FactRow icon={<User className="h-3.5 w-3.5" />} label="Name" value={lead.sellerName} />
+                <FactRow icon={<AlertCircle className="h-3.5 w-3.5" />} label="Motivation" value={lead.motivation} />
+                <FactRow icon={<Clock className="h-3.5 w-3.5" />} label="Timeline" value={lead.timeline} />
               </div>
 
-              {/* AI action buttons */}
-              <div className="flex gap-2">
+              {/* Notes */}
+              {lead.notes && (
+                <div className="text-sm text-slate bg-amber-50 border border-amber-100 rounded-xl p-4">
+                  <span className="font-semibold text-amber-700">Seller note: </span>{lead.notes}
+                </div>
+              )}
+
+              {/* AI Action buttons */}
+              <div className="flex flex-col gap-2">
                 <button
                   onClick={runEval}
                   disabled={aiLoading}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-ink text-white py-2.5 px-4 text-sm font-semibold hover:bg-ink/90 disabled:opacity-50 transition-colors"
                 >
                   {aiLoading && aiMode === "eval" ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      Evaluating…
+                      Evaluating...
                     </>
                   ) : (
                     <>
-                      <Wand2 className="h-4 w-4" />
-                      AI Seller Brief
+                      <DollarSign className="h-4 w-4" /> Generate Cash Offer Eval
                     </>
                   )}
                 </button>
                 <button
                   onClick={runScript}
                   disabled={aiLoading}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-ink/[0.08] px-4 py-2.5 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04] disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-ink/20 text-ink py-2.5 px-4 text-sm font-semibold hover:bg-ink/5 disabled:opacity-50 transition-colors"
                 >
                   {aiLoading && aiMode === "script" ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                      Scripting…
+                      Scripting...
                     </>
                   ) : (
                     <>
-                      <Wand2 className="h-4 w-4" />
-                      Call Script
+                      <Phone className="h-4 w-4" /> Generate Call Script
                     </>
                   )}
                 </button>
               </div>
 
-              {/* AI output — shown while streaming too */}
+              {/* AI Output */}
               {(aiOutput || (aiLoading && aiMode)) && (
                 <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
                   <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-                    {aiMode === "eval" ? "AI Seller Brief" : "Call Script"}
+                    {aiMode === "eval" ? "Cash Offer Eval" : "Call Script"}
                   </p>
-
                   {aiLoading && !aiOutput && (
                     <div className="flex items-center gap-2 text-[0.82rem] text-slate">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                      {aiMode === "eval"
-                        ? "Evaluating offer range…"
-                        : "Generating call script…"}
+                      {aiMode === "eval" ? "Evaluating offer range..." : "Generating call script..."}
                     </div>
                   )}
-
                   {aiOutput && (
                     <div className="max-h-64 overflow-y-auto">
                       <AiMarkdown text={aiOutput} />
@@ -471,28 +425,23 @@ function SlideOver({
                 </div>
               )}
 
-              {/* Notes */}
+              {/* Notes textarea */}
               <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
                 <div className="mb-2 flex items-center gap-1.5">
                   <StickyNote className="h-3.5 w-3.5 text-ink" />
                   <p className="text-[0.78rem] font-semibold text-ink">Notes</p>
                 </div>
-                {lead.notes && (
-                  <p className="mb-2.5 text-[0.82rem] leading-relaxed text-slate">
-                    {lead.notes}
-                  </p>
-                )}
                 <textarea
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                   rows={2}
-                  placeholder="Add a note…"
+                  placeholder="Add a note..."
                   className="min-h-[2.5rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Footer — convert button */}
+            {/* Footer — convert to listing */}
             <div className="shrink-0 border-t border-ink/[0.08] px-5 py-4">
               <button
                 onClick={() => {
@@ -517,42 +466,90 @@ function SlideOver({
 
 /* ── Main board ──────────────────────────────────────────────────────────────── */
 
-export function CashOfferPipeline() {
+export default function CashOfferPipeline() {
   const [leads, setLeads] = useState<SellerLead[]>(sellerLeads as SellerLead[]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
+  // Derived stats
+  const activeCount = leads.filter((l) => !DEAD_OR_TERMINAL.includes(l.stage)).length;
+  const acceptedCount = leads.filter((l) => l.stage === "Accepted").length;
+  const portfolioValue = leads
+    .filter((l) => !DEAD_OR_TERMINAL.includes(l.stage))
+    .reduce((sum, l) => sum + l.estValue, 0);
+
   function handleStageChange(id: string, stage: SellerLeadStage) {
-    setLeads((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, stage } : l)),
-    );
+    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, stage } : l)));
   }
 
   function handleConvert(id: string) {
     setLeads((prev) =>
-      prev.map((l) =>
-        l.id === id ? { ...l, stage: "Converted to Listing" } : l,
-      ),
+      prev.map((l) => (l.id === id ? { ...l, stage: "Converted to Listing" } : l)),
     );
   }
 
   return (
-    <>
-      {/* Kanban scroll wrapper */}
-      <div className="overflow-x-auto">
-        <div className="inline-flex min-w-max gap-4 p-4">
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 md:px-6 md:py-8">
+      {/* Page header */}
+      <div>
+        <div className="mb-1.5 flex items-center gap-2">
+          <LiveDot tone="azure" />
+          <SectionLabel>Cash Is King Home Buyers — active seller pipeline</SectionLabel>
+        </div>
+        <h1 className="font-display text-2xl text-ink sm:text-3xl">Cash Offer Pipeline</h1>
+        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
+          Track every seller request from initial inquiry through cash offer acceptance and listing
+          conversion.
+        </p>
+      </div>
+
+      {/* KPI tiles */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatTile
+          label="Active Deals"
+          value={activeCount}
+          icon={<DollarSign className="h-4 w-4" />}
+          accent
+          hint="Leads not yet dead, accepted, or converted"
+        />
+        <StatTile
+          label="Est. Portfolio Value"
+          value={"$" + (portfolioValue / 1_000_000).toFixed(1) + "M"}
+          icon={<Send className="h-4 w-4" />}
+          hint="Active deal pipeline"
+        />
+        <StatTile
+          label="Accepted"
+          value={acceptedCount}
+          icon={<ArrowRightLeft className="h-4 w-4" />}
+          delta={
+            acceptedCount > 0
+              ? { value: `${acceptedCount} deal${acceptedCount !== 1 ? "s" : ""}`, dir: "up" }
+              : { value: "none yet", dir: "flat" }
+          }
+        />
+      </div>
+
+      {/* Kanban board — horizontally scrollable */}
+      <div className="overflow-x-auto pb-4">
+        <div className="inline-flex min-w-max gap-4">
           {STAGES.map((stage) => {
             const stageLeads = leads.filter((l) => l.stage === stage);
             const headerTone = STAGE_HEADER_TONE[stage];
             return (
-              <div key={stage} className="w-[220px] shrink-0">
-                {/* Color-coded column header */}
-                <div className={cn("mb-2.5 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5", headerTone)}>
-                  <span className="font-semibold text-[0.78rem] leading-snug flex-1 truncate">
+              <div key={stage} className="w-[240px] shrink-0">
+                {/* Column header */}
+                <div
+                  className={cn(
+                    "mb-3 flex items-center justify-between rounded-lg border px-2.5 py-1.5",
+                    headerTone,
+                  )}
+                >
+                  <span className="text-[0.72rem] font-bold uppercase tracking-wide flex-1 truncate">
                     {stage}
                   </span>
-                  <span className="rounded-md bg-black/[0.06] px-1.5 py-0.5 text-[0.68rem] font-bold tabular-nums">
+                  <span className="ml-1.5 rounded-full bg-black/[0.06] px-2 py-0.5 text-[0.7rem] font-semibold tabular-nums">
                     {stageLeads.length}
                   </span>
                 </div>
@@ -586,6 +583,6 @@ export function CashOfferPipeline() {
         onStageChange={handleStageChange}
         onConvert={handleConvert}
       />
-    </>
+    </div>
   );
 }

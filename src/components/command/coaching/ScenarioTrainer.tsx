@@ -16,6 +16,8 @@ import {
   Handshake,
   TrendingDown,
   Home,
+  Target,
+  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
@@ -37,6 +39,8 @@ const CATEGORY_ICONS: Record<ScenarioCategory, LucideIcon> = {
   "Negotiation": Handshake,
   "Price Reduction": TrendingDown,
   "FSBO / Expired": Home,
+  "Lead Conversion": Target,
+  "Cash Offer": DollarSign,
 };
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -48,12 +52,17 @@ const CATEGORIES: ScenarioCategory[] = [
   "Negotiation",
   "Price Reduction",
   "FSBO / Expired",
+  "Lead Conversion",
+  "Cash Offer",
 ];
 
 const DIFF_TONE: Record<ScenarioDifficulty, "success" | "warn" | "danger"> = {
   Starter: "success",
   Pro: "warn",
   Elite: "danger",
+  Beginner: "success",
+  Intermediate: "warn",
+  Advanced: "danger",
 };
 
 /** Build the framing message that seeds the AI client role-play. */
@@ -127,10 +136,11 @@ export function ScenarioTrainer() {
             {
               role: "user",
               content:
-                `Grade this agent response to the scenario '${active.title}': \n\n${agentResponse}\n\n` +
-                `Score it on: Tone (1-10), Clarity (1-10), Did they handle the objection (yes/no). ` +
-                `Give a one-line improvement tip. Format as: Tone: X/10 | Clarity: X/10 | Objection handled: yes/no\n` +
-                `\u{1F4A1} Tip: [one-line tip]`,
+                `Scenario: ${active.title}. User's response: ${agentResponse}\n\n` +
+                `Grade this response on Tone (1-10), Clarity (1-10), Objection handled (yes/no). ` +
+                `Provide one improvement suggestion and a better phrasing example.\n` +
+                `Format the first line exactly as: Tone: X/10 | Clarity: X/10 | Objection handled: yes/no\n` +
+                `Then provide the improvement suggestion and example phrasing.`,
             },
           ],
         },
@@ -405,12 +415,9 @@ export function ScenarioTrainer() {
         {coachGrade && (
           <div className="mt-3 rounded-xl border border-azure/20 bg-azure/[0.03] p-3.5">
             <div className="mb-2.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
-              <Bot className="h-3.5 w-3.5" /> AI Coach Feedback
+              <Bot className="h-3.5 w-3.5" /> AI Grade
             </div>
-            {/* Parse and render score chips if present */}
-            <CoachScoreChips text={coachGrade} />
-            {/* Improvement tip with left accent */}
-            <CoachTip text={coachGrade} />
+            <CoachGradePanel text={coachGrade} />
           </div>
         )}
       </div>
@@ -418,60 +425,75 @@ export function ScenarioTrainer() {
   );
 }
 
-/** Extract "Label: X/10" pairs from coach grade text and render colored chips. */
-function CoachScoreChips({ text }: { text: string }) {
-  // Match patterns like "Tone: 8/10" or "Clarity: 7/10"
-  const chips: { label: string; score: number; max: number }[] = [];
-  const scoreRegex = /(\w[\w\s]*?):\s*(\d+)\/(\d+)/g;
-  let m: RegExpExecArray | null;
-  while ((m = scoreRegex.exec(text)) !== null) {
-    const label = m[1].trim();
-    const score = parseInt(m[2], 10);
-    const max = parseInt(m[3], 10);
-    // Skip "Objection handled" and purely boolean values
-    if (max > 1) chips.push({ label, score, max });
+/** Parse the AI grade output and render score chips + the full markdown body. */
+function CoachGradePanel({ text }: { text: string }) {
+  // Parse numeric scores: "Tone: 8/10", "Clarity: 7/10"
+  const scoreChips: { label: string; value: string; variant: string }[] = [];
+
+  const toneMatch = text.match(/Tone:\s*(\d+)\/(\d+)/i);
+  const clarityMatch = text.match(/Clarity:\s*(\d+)\/(\d+)/i);
+  const handledMatch = text.match(/Objection\s+handled?:\s*(yes|no)/i);
+
+  if (toneMatch) {
+    const pct = parseInt(toneMatch[1], 10) / parseInt(toneMatch[2], 10);
+    scoreChips.push({
+      label: "Tone",
+      value: `${toneMatch[1]}/${toneMatch[2]}`,
+      variant:
+        pct >= 0.8
+          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+          : pct >= 0.6
+            ? "bg-amber-50 border-amber-200 text-amber-700"
+            : "bg-red-50 border-red-200 text-red-700",
+    });
   }
-  if (chips.length === 0) return <AiMarkdown text={text} />;
+
+  if (clarityMatch) {
+    const pct = parseInt(clarityMatch[1], 10) / parseInt(clarityMatch[2], 10);
+    scoreChips.push({
+      label: "Clarity",
+      value: `${clarityMatch[1]}/${clarityMatch[2]}`,
+      variant:
+        pct >= 0.8
+          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+          : pct >= 0.6
+            ? "bg-amber-50 border-amber-200 text-amber-700"
+            : "bg-red-50 border-red-200 text-red-700",
+    });
+  }
+
+  if (handledMatch) {
+    const handled = handledMatch[1].toLowerCase() === "yes";
+    scoreChips.push({
+      label: "Handled",
+      value: handled ? "Yes" : "No",
+      variant: handled
+        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+        : "bg-red-50 border-red-200 text-red-700",
+    });
+  }
+
+  // If parsing failed entirely, show raw markdown
+  if (scoreChips.length === 0) {
+    return <AiMarkdown text={text} />;
+  }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {chips.map((c) => {
-        const pct = c.score / c.max;
-        const tone =
-          pct >= 0.8
-            ? "bg-success/10 text-success ring-success/20"
-            : pct >= 0.6
-              ? "bg-warn/10 text-warn ring-warn/20"
-              : "bg-danger/10 text-danger ring-danger/20";
-        return (
+    <div className="mt-1 space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {scoreChips.map((c) => (
           <span
             key={c.label}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.78rem] font-semibold ring-1 ring-inset",
-              tone,
+              "rounded-full border px-3 py-1 text-xs font-semibold",
+              c.variant,
             )}
           >
-            {c.label}:{" "}
-            <span className="tabular-nums">
-              {c.score}/{c.max}
-            </span>
+            {c.label}: {c.value}
           </span>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Extract a tip line from the coach grade and render with left border accent. */
-function CoachTip({ text }: { text: string }) {
-  // Match lines starting with "Tip:" or containing tip marker
-  const tipMatch = text.match(/(?:Tip|tip)[:\s]+(.+)/);
-  if (!tipMatch) return null;
-  const tip = tipMatch[1].replace(/[\u{1F4A1}\u{2728}]/gu, "").trim();
-  return (
-    <div className="mt-2.5 border-l-4 border-azure bg-azure/[0.04] px-3 py-2 text-[0.8rem] leading-relaxed text-ink">
-      <span className="font-semibold text-azure">Tip: </span>
-      {tip}
+        ))}
+      </div>
+      <AiMarkdown text={text} />
     </div>
   );
 }

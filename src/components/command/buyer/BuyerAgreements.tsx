@@ -1,64 +1,69 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import { X, Search, Send, FileSignature, Eye, Bell } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import {
+  FileSignature,
+  X,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Search,
+  Filter,
+  Users,
+  Send,
+  MapPin,
+  DollarSign,
+} from "lucide-react";
 import { buyerAgreements } from "@/lib/data";
 import type { BuyerAgreement, BuyerAgreementStatus, PreapprovalStatus } from "@/lib/types";
-import { Panel, PanelHeader, Pill } from "@/components/command/ui";
+import { Panel, PanelHeader, StatTile } from "@/components/command/ui";
 import { cn, compactUsd, daysLabel, initials } from "@/lib/utils";
 
-/* ── Types ─────────────────────────────────────────────────────────────────── */
-
-type FilterChip = "All" | BuyerAgreementStatus;
-
-/* ── Helpers ────────────────────────────────────────────────────────────────── */
-
-function agreementTone(
-  status: BuyerAgreementStatus,
-): "danger" | "warn" | "success" {
-  if (status === "Not Signed") return "danger";
-  if (status === "Sent") return "warn";
-  return "success";
-}
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
 
 function agreementBadgeClasses(status: BuyerAgreementStatus): string {
-  if (status === "Not Signed") return "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25";
-  if (status === "Sent") return "bg-warn/10 text-amber-700 ring-1 ring-inset ring-warn/25";
-  return "bg-success/10 text-success ring-1 ring-inset ring-success/25";
+  if (status === "Not Signed")
+    return "bg-red-50 text-red-700 border border-red-200";
+  if (status === "Sent")
+    return "bg-amber-50 text-amber-700 border border-amber-200";
+  return "bg-emerald-50 text-emerald-700 border border-emerald-200";
 }
 
-function preapprovalTone(
-  status: PreapprovalStatus,
-): "success" | "danger" | "warn" {
-  if (status === "Yes") return "success";
-  if (status === "No") return "danger";
-  return "warn";
+function preapprovalBadgeClasses(status: PreapprovalStatus): string {
+  if (status === "Yes")
+    return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+  if (status === "In Progress")
+    return "bg-amber-50 text-amber-700 border border-amber-200";
+  return "bg-red-50 text-red-700 border border-red-200";
 }
 
-/* ── Step progress indicator ────────────────────────────────────────────────── */
+/* ─── Step progress ──────────────────────────────────────────────────────── */
 
-const STEPS = ["Intake", "Agreement Sent", "Signed"] as const;
+const STEPS: { label: string }[] = [
+  { label: "Not Signed" },
+  { label: "Agreement Sent" },
+  { label: "Signed" },
+];
 
-function stepDone(stepIndex: number, status: BuyerAgreementStatus): boolean {
-  if (stepIndex === 0) return true; // Intake always done
-  if (stepIndex === 1) return status === "Sent" || status === "Signed";
-  if (stepIndex === 2) return status === "Signed";
-  return false;
+function stepActiveIndex(status: BuyerAgreementStatus): number {
+  if (status === "Signed") return 2;
+  if (status === "Sent") return 1;
+  return 0;
 }
 
 function AgreementProgress({ status }: { status: BuyerAgreementStatus }) {
+  const activeIdx = stepActiveIndex(status);
   return (
-    <div className="flex items-center gap-0">
-      {STEPS.map((label, i) => {
-        const done = stepDone(i, status);
+    <div className="flex items-start gap-0">
+      {STEPS.map((step, i) => {
+        const done = i <= activeIdx;
         const isLast = i === STEPS.length - 1;
         return (
-          <div key={label} className="flex flex-1 items-center">
+          <div key={step.label} className="flex flex-1 items-start">
             <div className="flex flex-col items-center gap-1">
               <div
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full border-2 text-[0.6rem] font-bold transition-colors",
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[0.6rem] font-bold transition-colors",
                   done
                     ? "border-ink bg-ink text-white"
                     : "border-ink/20 bg-white text-slate",
@@ -85,18 +90,18 @@ function AgreementProgress({ status }: { status: BuyerAgreementStatus }) {
               </div>
               <span
                 className={cn(
-                  "whitespace-nowrap text-[0.65rem] font-medium",
-                  done ? "text-ink" : "text-slate/60",
+                  "whitespace-nowrap text-[0.62rem] font-medium text-center",
+                  done ? "text-ink" : "text-slate/50",
                 )}
               >
-                {label}
+                {step.label}
               </span>
             </div>
             {!isLast && (
               <div
                 className={cn(
-                  "mx-1 mb-3.5 h-px flex-1 transition-colors",
-                  stepDone(i + 1, status) ? "bg-ink" : "bg-ink/15",
+                  "mx-1 mt-3 h-px flex-1 transition-colors",
+                  i + 1 <= activeIdx ? "bg-ink" : "bg-ink/15",
                 )}
               />
             )}
@@ -107,9 +112,8 @@ function AgreementProgress({ status }: { status: BuyerAgreementStatus }) {
   );
 }
 
-/* ── Agent avatar ────────────────────────────────────────────────────────────── */
+/* ─── Avatar ─────────────────────────────────────────────────────────────── */
 
-// Deterministic colour from agent name
 const AVATAR_COLORS = [
   "bg-[#e8e4df] text-[#3d3530]",
   "bg-[#dfe5ea] text-[#2c3e4a]",
@@ -125,7 +129,7 @@ function avatarColor(name: string): string {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-function AgentAvatar({ name }: { name: string }) {
+function BuyerAvatar({ name }: { name: string }) {
   return (
     <div
       className={cn(
@@ -138,7 +142,37 @@ function AgentAvatar({ name }: { name: string }) {
   );
 }
 
-/* ── Slide-over ──────────────────────────────────────────────────────────────── */
+/* ─── Toast ──────────────────────────────────────────────────────────────── */
+
+function Toast({ message }: { message: string }) {
+  return (
+    <div className="fixed bottom-5 right-5 z-[70] rounded-xl bg-ink px-4 py-2.5 text-[0.82rem] font-medium text-white shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+      {message}
+    </div>
+  );
+}
+
+/* ─── Slide-over ─────────────────────────────────────────────────────────── */
+
+// Deterministic showing log — derive from showingCount so no real dates needed
+function simulatedShowings(count: number): string[] {
+  if (count === 0) return [];
+  const labels = [
+    "Showing #1 — initial tour",
+    "Showing #2 — second look",
+    "Showing #3 — brought family",
+    "Showing #4 — revisit after offer fell through",
+    "Showing #5 — comparing with another property",
+    "Showing #6 — final walkthrough",
+    "Showing #7 — contractor visit",
+    "Showing #8 — pre-offer inspection prep",
+    "Showing #9 — revisit",
+    "Showing #10 — re-evaluation",
+    "Showing #11 — lender walkthrough",
+    "Showing #12 — final decision visit",
+  ];
+  return labels.slice(0, Math.min(count, labels.length));
+}
 
 function SlideOver({
   buyer,
@@ -149,24 +183,22 @@ function SlideOver({
   onClose: () => void;
   onToast: (msg: string) => void;
 }) {
-  const [contractHint, setContractHint] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
 
-  function handleGeneratePacket() {
-    onToast("Opening Contract Builder with buyer pre-filled...");
-    setContractHint(true);
+  function handleSendAgreement() {
+    onToast("Agreement sent via DocuSign");
   }
 
   function handleSendReminder() {
-    onToast("Reminder sent via DocuSign");
+    setReminderSent(true);
+    onToast("Reminder sent");
   }
 
-  function handleViewSigned() {
-    onToast("Opening document viewer...");
+  function handleViewAgreement() {
+    onToast("Opening signed agreement...");
   }
 
-  function handleSendEsignature() {
-    onToast(`Sent to ${buyer.name} via DocuSign · ${buyer.email}`);
-  }
+  const showings = simulatedShowings(buyer.showingCount);
 
   return (
     <>
@@ -177,207 +209,236 @@ function SlideOver({
         aria-hidden
       />
 
-      {/* Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full sm:w-[480px] flex-col bg-white border-l border-ink/[0.08] shadow-2xl overflow-hidden">
+      {/* Slide-over panel */}
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl overflow-y-auto sm:max-w-[480px]">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-ink/[0.08] px-5 py-4 shrink-0">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-ink/[0.08] bg-white px-5 py-4">
           <div className="min-w-0">
-            <h2 className="font-sans text-[0.95rem] font-semibold tracking-tight text-ink truncate">
+            <h2 className="font-display truncate text-[1rem] font-semibold tracking-tight text-ink">
               {buyer.name}
             </h2>
-            <p className="mt-0.5 text-[0.78rem] text-slate truncate">{buyer.agentName}</p>
+            <p className="mt-0.5 truncate text-[0.78rem] text-slate">
+              {buyer.agentName} &middot; {buyer.showingCount} showing
+              {buyer.showingCount !== 1 ? "s" : ""}
+            </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold", agreementBadgeClasses(buyer.agreementStatus))}>
-              {buyer.agreementStatus}
-            </span>
-            <button
-              onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          {/* Progress */}
-          <div>
-            <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/80">
-              Agreement Progress
+        {/* Body */}
+        <div className="flex-1 space-y-6 px-5 py-5">
+          {/* 1. Agreement status progress */}
+          <section>
+            <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate/70">
+              Agreement Status
             </p>
             <AgreementProgress status={buyer.agreementStatus} />
-          </div>
+          </section>
 
-          {/* Details grid */}
-          <div>
-            <p className="mb-2.5 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/80">
+          {/* 2. Buyer details */}
+          <section>
+            <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate/70">
               Buyer Details
             </p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Budget
-                </p>
-                <p className="text-[0.85rem] font-semibold text-ink">
-                  {compactUsd(buyer.budgetMin)}&ndash;{compactUsd(buyer.budgetMax)}
-                </p>
+            <div className="space-y-3">
+              {/* Budget */}
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 shrink-0 text-slate/50" />
+                <div>
+                  <p className="text-[0.68rem] text-slate/50 uppercase tracking-wider mb-0.5">
+                    Budget
+                  </p>
+                  <p className="font-display text-2xl leading-none text-ink">
+                    {compactUsd(buyer.budgetMin)}&ndash;{compactUsd(buyer.budgetMax)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Areas
-                </p>
-                <p className="text-[0.85rem] font-semibold text-ink">
-                  {buyer.areas.join(", ")}
-                </p>
+
+              {/* Areas */}
+              <div className="flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate/50" />
+                <div>
+                  <p className="text-[0.68rem] text-slate/50 uppercase tracking-wider mb-1">
+                    Areas
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {buyer.areas.map((area) => (
+                      <span
+                        key={area}
+                        className="rounded-md border border-ink/[0.08] bg-[#f4f4f3] px-2 py-0.5 text-[0.75rem] font-medium text-ink"
+                      >
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Preapproval
-                </p>
-                <Pill tone={preapprovalTone(buyer.preapproval)}>
-                  {buyer.preapproval}
-                </Pill>
-              </div>
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Showings
-                </p>
-                <p className="text-[0.85rem] font-semibold text-ink">
-                  {buyer.showingCount}
-                </p>
-              </div>
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Timeline
-                </p>
-                <p className="text-[0.85rem] font-semibold text-ink">{buyer.timeline}</p>
-              </div>
-              <div>
-                <p className="text-[0.68rem] font-medium text-slate/60 uppercase tracking-wider mb-0.5">
-                  Last Contact
-                </p>
-                <p className="text-[0.85rem] font-semibold text-ink">
-                  {daysLabel(-buyer.lastContactDaysAgo)}
-                </p>
+
+              {/* Preapproval + Timeline grid */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <p className="text-[0.68rem] text-slate/50 uppercase tracking-wider mb-1">
+                    Preapproval
+                  </p>
+                  <span
+                    className={cn(
+                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold",
+                      preapprovalBadgeClasses(buyer.preapproval),
+                    )}
+                  >
+                    {buyer.preapproval}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[0.68rem] text-slate/50 uppercase tracking-wider mb-1">
+                    Timeline
+                  </p>
+                  <p className="text-[0.85rem] font-semibold text-ink">
+                    {buyer.timeline}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Notes */}
+          {/* 3. Action buttons */}
+          <section>
+            {buyer.agreementStatus === "Not Signed" && (
+              <button
+                onClick={handleSendAgreement}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90"
+              >
+                <Send className="h-4 w-4" />
+                Send Agreement
+              </button>
+            )}
+            {buyer.agreementStatus === "Sent" && (
+              <div className="space-y-2">
+                <button
+                  onClick={handleSendReminder}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink/[0.12] px-4 py-2.5 text-[0.85rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                >
+                  <Clock className="h-4 w-4" />
+                  Send Reminder
+                </button>
+                {reminderSent && (
+                  <p className="text-center text-[0.78rem] font-medium text-emerald-600">
+                    Reminder sent
+                  </p>
+                )}
+              </div>
+            )}
+            {buyer.agreementStatus === "Signed" && (
+              <button
+                onClick={handleViewAgreement}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[0.85rem] font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+              >
+                <FileSignature className="h-4 w-4" />
+                View Agreement
+              </button>
+            )}
+          </section>
+
+          {/* 4. Showing history */}
+          <section>
+            <p className="mb-2.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate/70">
+              Showing History
+            </p>
+            {buyer.showingCount === 0 ? (
+              <p className="text-[0.82rem] text-slate/60">No showings completed yet.</p>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="text-[0.82rem] text-slate">
+                  {buyer.showingCount} showing{buyer.showingCount !== 1 ? "s" : ""} completed
+                </p>
+                <ul className="space-y-1 rounded-xl border border-ink/[0.07] bg-[#f4f4f3] px-3.5 py-2.5">
+                  {showings.map((entry, i) => (
+                    <li key={i} className="text-[0.78rem] text-ink/70">
+                      {entry}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+
+          {/* 5. Last contact */}
+          <section>
+            <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate/70">
+              Last Contact
+            </p>
+            <p className="text-[0.85rem] text-ink">
+              {daysLabel(-buyer.lastContactDaysAgo)}
+            </p>
+          </section>
+
+          {/* 6. Notes */}
           {buyer.notes && (
-            <div>
-              <p className="mb-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate/80">
+            <section>
+              <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate/70">
                 Notes
               </p>
-              <p className="rounded-xl border border-ink/[0.07] bg-[#f4f4f3] px-3.5 py-3 text-[0.82rem] text-ink/80 leading-relaxed">
-                {buyer.notes}
-              </p>
-            </div>
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3">
+                <p className="text-[0.82rem] leading-relaxed text-ink/80">
+                  {buyer.notes}
+                </p>
+              </div>
+            </section>
           )}
-
-          {/* Contract hint box */}
-          {contractHint && buyer.agreementStatus === "Not Signed" && (
-            <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] px-4 py-3">
-              <p className="text-[0.82rem] text-ink/70 mb-1.5">
-                Go to Contract Builder &rarr; Buyer Representation Agreement — pre-filled for{" "}
-                <span className="font-semibold text-ink">{buyer.name}</span>
-              </p>
-              <Link
-                href="/hub/contracts"
-                className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-ink underline underline-offset-2"
-              >
-                Open Contract Builder
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Footer actions */}
-        <div className="shrink-0 space-y-2 border-t border-ink/[0.08] px-5 py-4">
-          {buyer.agreementStatus === "Not Signed" && (
-            <button
-              onClick={handleGeneratePacket}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white hover:bg-ink/90 transition-colors"
-            >
-              <FileSignature className="h-4 w-4" />
-              Generate Agreement Packet
-            </button>
-          )}
-          {buyer.agreementStatus === "Sent" && (
-            <button
-              onClick={handleSendReminder}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04] transition-colors"
-            >
-              <Bell className="h-4 w-4" />
-              Send Reminder
-            </button>
-          )}
-          {buyer.agreementStatus === "Signed" && (
-            <button
-              onClick={handleViewSigned}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink/[0.08] px-4 py-2 text-[0.85rem] font-medium text-ink hover:bg-ink/[0.04] transition-colors"
-            >
-              <Eye className="h-4 w-4" />
-              View Signed Copy
-            </button>
-          )}
-          <button
-            onClick={handleSendEsignature}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white hover:bg-ink/90 transition-colors"
-          >
-            <Send className="h-4 w-4" />
-            Send for E-Signature
-          </button>
         </div>
       </div>
     </>
   );
 }
 
-/* ── Toast ───────────────────────────────────────────────────────────────────── */
+/* ─── Main component ─────────────────────────────────────────────────────── */
 
-function Toast({ message }: { message: string }) {
-  return (
-    <div className="fixed bottom-5 right-5 z-[60] rounded-xl bg-ink px-4 py-2.5 text-[0.82rem] font-medium text-white shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-      {message}
-    </div>
-  );
-}
-
-/* ── Filter chips ────────────────────────────────────────────────────────────── */
-
-const CHIPS: FilterChip[] = ["All", "Not Signed", "Sent", "Signed"];
-
-/* ── Main component ──────────────────────────────────────────────────────────── */
-
-export function BuyerAgreements() {
-  const [filter, setFilter] = useState<FilterChip>("All");
+export default function BuyerAgreements() {
+  const [selected, setSelected] = useState<BuyerAgreement | null>(null);
   const [search, setSearch] = useState("");
-  const [selectedBuyer, setSelectedBuyer] = useState<BuyerAgreement | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  // Auto-dismiss toast after 3s
+  // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(t);
   }, [toast]);
 
+  // Stat counts
+  const missingCount = useMemo(
+    () => buyerAgreements.filter((b) => b.agreementStatus === "Not Signed").length,
+    [],
+  );
+  const sentCount = useMemo(
+    () => buyerAgreements.filter((b) => b.agreementStatus === "Sent").length,
+    [],
+  );
+  const signedThisMonth = useMemo(
+    () =>
+      buyerAgreements.filter(
+        (b) => b.agreementStatus === "Signed" && b.lastContactDaysAgo <= 30,
+      ).length,
+    [],
+  );
+
+  // Filtered rows
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return buyerAgreements.filter((b) => {
-      const matchesFilter = filter === "All" || b.agreementStatus === filter;
-      const matchesSearch =
-        !q ||
+    if (!q) return buyerAgreements;
+    return buyerAgreements.filter(
+      (b) =>
         b.name.toLowerCase().includes(q) ||
         b.agentName.toLowerCase().includes(q) ||
-        b.areas.some((a) => a.toLowerCase().includes(q));
-      return matchesFilter && matchesSearch;
-    });
-  }, [filter, search]);
+        b.areas.some((a) => a.toLowerCase().includes(q)),
+    );
+  }, [search]);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -385,163 +446,185 @@ export function BuyerAgreements() {
 
   return (
     <>
-      <Panel>
-        <PanelHeader
-          title="All Buyers"
-          subtitle={`${filtered.length} of ${buyerAgreements.length} buyers`}
-        />
+      <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
+        {/* Page heading */}
+        <div>
+          <h1 className="font-display text-2xl text-ink sm:text-3xl">
+            Buyer Agreement Workspace
+          </h1>
+          <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
+            Track every buyer&apos;s representation agreement from intake through
+            signature. Send via DocuSign and keep every agent compliant.
+          </p>
+        </div>
 
-        {/* Filter row */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-ink/[0.08] px-5 py-3">
-          <div className="flex items-center gap-1.5">
-            {CHIPS.map((chip) => (
-              <button
-                key={chip}
-                onClick={() => setFilter(chip)}
-                className={cn(
-                  "rounded-lg border px-3 py-1 text-[0.78rem] font-medium transition-colors",
-                  filter === chip
-                    ? "border-ink bg-ink text-white"
-                    : "border-ink/[0.08] text-slate hover:bg-ink/[0.04]",
-                )}
-              >
-                {chip}
-              </button>
-            ))}
+        {/* Stat tiles */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
+            <StatTile
+              label="Missing Agreements"
+              value={missingCount}
+              icon={<AlertCircle className="h-4 w-4 text-red-500" />}
+              hint={missingCount > 0 ? "Needs action" : "All covered"}
+            />
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50 pointer-events-none" />
+          <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
+            <StatTile
+              label="Sent — Pending Signature"
+              value={sentCount}
+              icon={<Clock className="h-4 w-4 text-amber-500" />}
+              hint="Awaiting buyer signature"
+            />
+          </div>
+          <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
+            <StatTile
+              label="Signed This Month"
+              value={signedThisMonth}
+              icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+              hint="Last 30 days"
+            />
+          </div>
+        </div>
+
+        {/* Table panel */}
+        <Panel>
+          <PanelHeader
+            title="All Buyers"
+            subtitle={`${filtered.length} of ${buyerAgreements.length} buyers`}
+            icon={<Users className="h-4 w-4" />}
+          />
+
+          {/* Search bar */}
+          <div className="flex items-center gap-3 border-b border-ink/[0.08] px-5 py-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
               <input
                 type="text"
                 placeholder="Search buyers, agents, areas…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-8 w-56 rounded-lg border border-ink/[0.08] bg-white pl-8 pr-3 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                className="h-8 w-full rounded-lg border border-ink/[0.08] bg-white pl-8 pr-3 text-[0.82rem] text-ink placeholder:text-slate/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
               />
             </div>
+            <Filter className="h-4 w-4 shrink-0 text-slate/40" />
           </div>
-        </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-[0.82rem]">
-            <thead>
-              <tr className="border-b border-ink/[0.06]">
-                {[
-                  "Name",
-                  "Agent",
-                  "Budget",
-                  "Areas",
-                  "Agreement",
-                  "Preapproval",
-                  "Showings",
-                  "Last Contact",
-                  "",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-2.5 text-left text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate/70 whitespace-nowrap"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className="px-4 py-10 text-center text-[0.82rem] text-slate/50"
-                  >
-                    No buyers match your filters.
-                  </td>
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] border-collapse text-[0.82rem]">
+              <thead>
+                <tr className="border-b border-ink/[0.06]">
+                  {[
+                    "Name",
+                    "Agent",
+                    "Budget",
+                    "Areas",
+                    "Agreement",
+                    "Preapproval",
+                    "Showings",
+                    "Last Contact",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="whitespace-nowrap px-4 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-wider text-slate/50"
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                filtered.map((buyer) => (
-                  <tr
-                    key={buyer.id}
-                    onClick={() => setSelectedBuyer(buyer)}
-                    className="cursor-pointer border-b border-ink/[0.04] transition-colors hover:bg-ink/[0.025] last:border-0"
-                  >
-                    {/* Name */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <AgentAvatar name={buyer.name} />
-                        <span className="font-medium text-ink">{buyer.name}</span>
-                      </div>
-                    </td>
-
-                    {/* Agent */}
-                    <td className="px-4 py-3 text-slate whitespace-nowrap">
-                      {buyer.agentName}
-                    </td>
-
-                    {/* Budget */}
-                    <td className="px-4 py-3 text-ink whitespace-nowrap">
-                      {compactUsd(buyer.budgetMin)}&ndash;{compactUsd(buyer.budgetMax)}
-                    </td>
-
-                    {/* Areas */}
-                    <td className="px-4 py-3 text-slate max-w-[180px]">
-                      <span className="line-clamp-1">{buyer.areas.join(", ")}</span>
-                    </td>
-
-                    {/* Agreement Status */}
-                    <td className="px-4 py-3">
-                      <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold", agreementBadgeClasses(buyer.agreementStatus))}>
-                        {buyer.agreementStatus}
-                      </span>
-                    </td>
-
-                    {/* Preapproval */}
-                    <td className="px-4 py-3">
-                      <Pill tone={preapprovalTone(buyer.preapproval)}>
-                        {buyer.preapproval}
-                      </Pill>
-                    </td>
-
-                    {/* Showings */}
-                    <td className="px-4 py-3 text-ink text-center">
-                      {buyer.showingCount}
-                    </td>
-
-                    {/* Last Contact */}
-                    <td className="px-4 py-3 text-slate whitespace-nowrap">
-                      {daysLabel(-buyer.lastContactDaysAgo)}
-                    </td>
-
-                    {/* Quick action */}
-                    <td className="px-4 py-3">
-                      {buyer.agreementStatus === "Not Signed" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedBuyer(buyer);
-                            showToast("Opening Contract Builder with buyer pre-filled...");
-                          }}
-                          className="flex items-center gap-1.5 rounded-lg border border-ink/[0.08] px-2.5 py-1 text-[0.75rem] font-medium text-ink hover:bg-ink/[0.04] transition-colors whitespace-nowrap"
-                          title="Send agreement"
-                        >
-                          <Send className="h-3 w-3" />
-                          Send
-                        </button>
-                      )}
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="px-4 py-10 text-center text-[0.82rem] text-slate/50"
+                    >
+                      No buyers match your search.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
+                ) : (
+                  filtered.map((buyer) => (
+                    <tr
+                      key={buyer.id}
+                      onClick={() => setSelected(buyer)}
+                      className="cursor-pointer border-b border-ink/[0.04] transition-colors hover:bg-ink/[0.02] last:border-0"
+                    >
+                      {/* Name */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <BuyerAvatar name={buyer.name} />
+                          <span className="font-medium text-ink">
+                            {buyer.name}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Agent */}
+                      <td className="whitespace-nowrap px-4 py-3 text-slate">
+                        {buyer.agentName}
+                      </td>
+
+                      {/* Budget */}
+                      <td className="whitespace-nowrap px-4 py-3 text-ink">
+                        {compactUsd(buyer.budgetMin)}&ndash;
+                        {compactUsd(buyer.budgetMax)}
+                      </td>
+
+                      {/* Areas */}
+                      <td className="max-w-[180px] px-4 py-3 text-slate">
+                        <span className="line-clamp-1">
+                          {buyer.areas.join(", ")}
+                        </span>
+                      </td>
+
+                      {/* Agreement status */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold",
+                            agreementBadgeClasses(buyer.agreementStatus),
+                          )}
+                        >
+                          {buyer.agreementStatus}
+                        </span>
+                      </td>
+
+                      {/* Preapproval */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold",
+                            preapprovalBadgeClasses(buyer.preapproval),
+                          )}
+                        >
+                          {buyer.preapproval}
+                        </span>
+                      </td>
+
+                      {/* Showings */}
+                      <td className="px-4 py-3 text-center text-ink">
+                        {buyer.showingCount}
+                      </td>
+
+                      {/* Last contact */}
+                      <td className="whitespace-nowrap px-4 py-3 text-slate">
+                        {daysLabel(-buyer.lastContactDaysAgo)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      </div>
 
       {/* Slide-over */}
-      {selectedBuyer && (
+      {selected !== null && (
         <SlideOver
-          buyer={selectedBuyer}
-          onClose={() => setSelectedBuyer(null)}
+          buyer={selected}
+          onClose={() => setSelected(null)}
           onToast={showToast}
         />
       )}
