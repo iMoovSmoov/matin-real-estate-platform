@@ -57,11 +57,11 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "Workflows",
+    label: "Tools",
     items: [
-      { label: "Forms & Data Flows", href: "/hub/forms", icon: Database },
+      { label: "Forms", href: "/hub/forms", icon: Database },
       { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
-      { label: "Coaching Academy", href: "/hub/coaching", icon: Trophy },
+      { label: "Coaching", href: "/hub/coaching", icon: Trophy },
     ],
   },
   {
