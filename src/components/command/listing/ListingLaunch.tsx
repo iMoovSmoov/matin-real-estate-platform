@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, Sparkles, CheckCircle2, Circle, ToggleLeft, ToggleRight, Copy, Check } from "lucide-react";
+import { Search, Wand2, CheckCircle2, Circle, ToggleLeft, ToggleRight, Copy, Check } from "lucide-react";
 import { Panel, PanelHeader, Pill, ProgressBar } from "@/components/command/ui";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { streamAi } from "@/lib/ai/client";
@@ -532,7 +532,7 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
             <Panel className="overflow-hidden">
               <div className="border-b border-ink/[0.08] px-5 py-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-ink" />
+                  <Wand2 className="h-4 w-4 text-ink" />
                   <h3 className="text-[0.95rem] font-semibold text-ink">Generate Marketing Kit</h3>
                 </div>
               </div>

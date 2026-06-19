@@ -172,7 +172,7 @@ function SlideOver({
       />
 
       {/* Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 flex w-[480px] flex-col bg-white border-l border-ink/[0.08] shadow-2xl overflow-hidden">
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full sm:w-[480px] flex-col bg-white border-l border-ink/[0.08] shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-ink/[0.08] px-5 py-4 shrink-0">
           <div className="min-w-0">
