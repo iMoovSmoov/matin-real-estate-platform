@@ -46,18 +46,24 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
-          {NAV.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={cn(
-                "link-underline text-[0.92rem] font-medium transition-colors",
-                onDark ? "text-white/90 hover:text-white" : "text-ink/80 hover:text-ink",
-              )}
-            >
-              {n.label}
-            </Link>
-          ))}
+          {NAV.map((n) => {
+            const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={cn(
+                  "link-underline text-[0.92rem] font-medium transition-colors",
+                  onDark
+                    ? active ? "text-white" : "text-white/75 hover:text-white"
+                    : active ? "text-ink" : "text-ink/60 hover:text-ink",
+                  active && "!bg-[100%_1px]",
+                )}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -99,12 +105,22 @@ export function SiteHeader() {
         )}
       >
         <nav className="container-x flex flex-col gap-1 py-4">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="rounded-lg px-3 py-2.5 text-ink/85 hover:bg-ink/5">
-              {n.label}
-            </Link>
-          ))}
-          <Link href="/contact" className="rounded-lg px-3 py-2.5 text-ink/85 hover:bg-ink/5">
+          {NAV.map((n) => {
+            const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={cn(
+                  "rounded-lg px-3 py-2.5 text-[0.95rem] transition-colors",
+                  active ? "bg-ink/[0.05] font-medium text-ink" : "text-ink/70 hover:bg-ink/5 hover:text-ink",
+                )}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+          <Link href="/contact" className="rounded-lg px-3 py-2.5 text-ink/70 text-[0.95rem] hover:bg-ink/5 hover:text-ink">
             Contact
           </Link>
           <Link

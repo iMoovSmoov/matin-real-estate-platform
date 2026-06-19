@@ -91,7 +91,7 @@ export default function AboutPage() {
       {/* ---------- STAT BAND ---------- */}
       <div className="border-y border-ink/[0.07] bg-cloud">
         <Container>
-          <dl className="grid grid-cols-2 divide-ink/[0.07] py-10 md:grid-cols-5 md:divide-x">
+          <dl className="grid grid-cols-2 [&>*:nth-child(5)]:col-span-2 divide-ink/[0.07] py-10 md:grid-cols-5 md:[&>*:nth-child(5)]:col-span-1 md:divide-x">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
                 <dt className="font-display text-4xl text-ink md:text-[2.6rem]">{n}</dt>
