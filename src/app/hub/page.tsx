@@ -171,7 +171,7 @@ export default function DashboardPage() {
           {/* Left — heading + alert chips */}
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-3xl text-ink md:text-[2.4rem]">
-              Jordan&rsquo;s Command Center
+              Jordan&rsquo;s Dashboard
             </h1>
             <p className="mt-1 text-[0.92rem] text-slate">
               {num(k.newLeadsToday)} new leads in the queue &mdash; {num(k.activeDeals)} deals in flight &mdash; {compactUsd(k.pipelineValue)} pipeline.

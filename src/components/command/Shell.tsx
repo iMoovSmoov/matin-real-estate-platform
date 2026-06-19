@@ -40,12 +40,11 @@ type NavGroup = { label: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
   {
-    label: "COMMAND CENTER",
-    items: [{ label: "Dashboard", href: "/hub", icon: LayoutDashboard }],
-  },
-  {
-    label: "MY WORKSPACE",
-    items: [{ label: "My Workspace", href: "/hub/agent", icon: User }],
+    label: "OVERVIEW",
+    items: [
+      { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
+      { label: "My Workspace", href: "/hub/agent", icon: User },
+    ],
   },
   {
     label: "CLIENTS & DEALS",
@@ -124,7 +123,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
             <span className="block truncate font-display text-[1.05rem] font-semibold text-ink">Matin</span>
           </div>
           <span className="block text-[0.68rem] font-medium uppercase tracking-widest text-slate/50">
-            Brokerage Operating System
+            Matin Hub
           </span>
         </div>
       </div>

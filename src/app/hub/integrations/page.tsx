@@ -10,7 +10,7 @@ export default function IntegrationsPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="success" />
-          <SectionLabel>Command Center · Integrations</SectionLabel>
+          <SectionLabel>Matin Hub · Integrations</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-ink">Integrations</h1>
         <p className="mt-1 text-[0.9rem] text-slate/70">

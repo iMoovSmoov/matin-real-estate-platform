@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     "Matin Real Estate's internal AI & operations platform — CRM, automation, live reporting, and AI wired into every workflow.",
 };
 
-export default function CommandCenterLayout({
+export default function HubLayout({
   children,
 }: {
   children: React.ReactNode;
