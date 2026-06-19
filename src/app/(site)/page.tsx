@@ -56,31 +56,34 @@ export default function HomePage() {
         <Container className="relative z-10 pt-20 sm:pt-28">
           <div className="max-w-3xl">
             <Reveal>
-              <span className="hero-text-shadow eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
+              {/* Short on mobile, full on sm+ */}
+              <span className="hero-text-shadow eyebrow-light sm:hidden">Portland · Lake Oswego · SW Washington</span>
+              <span className="hero-text-shadow eyebrow-light hidden sm:inline">Portland · Lake Oswego · West Linn · SW Washington</span>
             </Reveal>
             <Reveal delay={0.08}>
-              <h1 className="hero-text-shadow display-1 mt-5 font-display text-4xl text-white text-balance sm:text-6xl lg:text-7xl">
+              <h1 className="hero-text-shadow display-1 mt-4 font-display text-[2.4rem] leading-[1.1] text-white text-balance sm:mt-5 sm:text-6xl lg:text-7xl">
                 Find your place in the{" "}
                 <span className="italic text-azure-bright">Pacific Northwest.</span>
               </h1>
             </Reveal>
+            {/* Body copy — hidden on mobile to keep image visible */}
             <Reveal delay={0.16}>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
+              <p className="hidden sm:block mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
                 The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
                 annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
               </p>
             </Reveal>
             <Reveal delay={0.24}>
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <PropertySearchBar dark />
               </div>
             </Reveal>
             <Reveal delay={0.32}>
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/80">
+              <div className="mt-5 flex items-center gap-2 text-sm text-white/80 sm:mt-7 sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
                 <span className="flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
                 </span>
-                <span className="flex items-center gap-2">
+                <span className="hidden items-center gap-2 sm:flex">
                   <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
                 </span>
               </div>
