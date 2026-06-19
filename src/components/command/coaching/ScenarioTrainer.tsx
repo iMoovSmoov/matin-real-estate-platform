@@ -18,6 +18,8 @@ import {
   Home,
   Target,
   DollarSign,
+  GraduationCap,
+  Wand2,
   type LucideIcon,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
@@ -43,7 +45,7 @@ const CATEGORY_ICONS: Record<ScenarioCategory, LucideIcon> = {
   "Cash Offer": DollarSign,
 };
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; isGrade?: boolean };
 
 const CATEGORIES: ScenarioCategory[] = [
   "Listing Presentation",
@@ -77,7 +79,12 @@ function seedPrompt(s: Scenario): string {
   ].join(" ");
 }
 
-export function ScenarioTrainer() {
+interface ScenarioTrainerProps {
+  startScenarioId?: string | null;
+  onStarted?: () => void;
+}
+
+export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerProps) {
   const [active, setActive] = useState<Scenario | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -93,20 +100,32 @@ export function ScenarioTrainer() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  // Pre-select a scenario when startScenarioId is provided
+  useEffect(() => {
+    if (startScenarioId && !active) {
+      const s = scenarios.find((sc) => sc.id === startScenarioId);
+      if (s) {
+        start(s);
+        onStarted?.();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startScenarioId]);
+
   const filtered = useMemo(
     () => (catFilter === "All" ? scenarios : scenarios.filter((s) => s.category === catFilter)),
     [catFilter],
   );
 
   /** Stream a turn: append the seed/user msg + an empty assistant msg, fill it in. */
-  async function runTurn(history: Msg[], display: Msg[]) {
-    setMessages([...display, { role: "assistant", content: "" }]);
+  async function runTurn(history: Msg[], display: Msg[], isGrade = false) {
+    setMessages([...display, { role: "assistant", content: "", isGrade }]);
     setBusy(true);
     try {
       await streamAi({ tool: "coach", messages: history }, (_chunk, full) => {
         setMessages((m) => {
           const copy = [...m];
-          copy[copy.length - 1] = { role: "assistant", content: full };
+          copy[copy.length - 1] = { role: "assistant", content: full, isGrade };
           return copy;
         });
       });
@@ -127,25 +146,32 @@ export function ScenarioTrainer() {
     if (!agentResponse) return;
     setCoachGrade("");
     setGradeLoading(true);
+    let result = "";
     try {
       await streamAi(
         {
           tool: "coach",
-          input: {},
           messages: [
             {
               role: "user",
               content:
                 `Scenario: ${active.title}. User's response: ${agentResponse}\n\n` +
-                `Grade this response on Tone (1-10), Clarity (1-10), Objection handled (yes/no). ` +
-                `Provide one improvement suggestion and a better phrasing example.\n` +
-                `Format the first line exactly as: Tone: X/10 | Clarity: X/10 | Objection handled: yes/no\n` +
+                `Grade this response on Tone (1-10), Clarity (1-10), Close Attempt (1-10). ` +
+                `Provide one improvement suggestion and a better phrasing example in a blockquote.\n` +
+                `Format the first line exactly as: Tone: X/10 | Clarity: X/10 | Close: X/10\n` +
                 `Then provide the improvement suggestion and example phrasing.`,
             },
           ],
         },
-        (_chunk, full) => setCoachGrade(full),
+        (_chunk, full) => {
+          result = full;
+          setCoachGrade(full);
+        },
       );
+      // Step 5: Append grade as assistant bubble in transcript (visible on mobile + desktop)
+      if (result) {
+        setMessages((m) => [...m, { role: "assistant", content: result, isGrade: true }]);
+      }
     } finally {
       setGradeLoading(false);
     }
@@ -185,8 +211,8 @@ export function ScenarioTrainer() {
         "then `### What worked` and `### Sharpen these` with the top 3 specific, tactical tips. Be direct and useful.",
     };
     const history: Msg[] = [seed, ...messages, grade];
-    const display: Msg[] = [...messages, { role: "user", content: "📊 Get my score & feedback" }];
-    await runTurn(history, display);
+    const display: Msg[] = [...messages, { role: "user", content: "Get my score & feedback" }];
+    await runTurn(history, display, true);
   }
 
   function reset() {
@@ -197,6 +223,7 @@ export function ScenarioTrainer() {
     setScored(false);
     setCoachGrade("");
     setGradeLoading(false);
+    // catFilter is preserved intentionally
   }
 
   /* ── Library view ─────────────────────────────────────────────────────── */
@@ -222,8 +249,8 @@ export function ScenarioTrainer() {
           </Pill>
         </div>
 
-        {/* Category filter chips */}
-        <div className="flex flex-wrap gap-2 px-5 pb-1 pt-4">
+        {/* Category filter chips — horizontal scroll on mobile (no wrap) */}
+        <div className="flex gap-2 overflow-x-auto px-5 pb-1 pt-4 scrollbar-hide">
           {(["All", ...CATEGORIES] as const).map((c) => {
             const on = catFilter === c;
             return (
@@ -231,7 +258,7 @@ export function ScenarioTrainer() {
                 key={c}
                 onClick={() => setCatFilter(c)}
                 className={cn(
-                  "rounded-full border px-3 py-1.5 text-[0.74rem] font-medium transition-colors",
+                  "shrink-0 rounded-full border px-3 py-1.5 text-[0.74rem] font-medium transition-colors",
                   on
                     ? "border-ink/20 bg-ink/[0.08] text-ink"
                     : "border-ink/10 bg-white text-slate hover:border-ink/20 hover:text-ink",
@@ -286,7 +313,73 @@ export function ScenarioTrainer() {
 
   /* ── Active role-play view ────────────────────────────────────────────── */
   return (
-    <div className="flex h-[calc(100dvh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-white">
+    /* Step 9: Desktop two-column split layout */
+    <div className="flex h-[calc(100dvh-12rem)] min-h-[34rem] overflow-hidden rounded-2xl border border-ink/[0.08] bg-white lg:h-[calc(100dvh-10rem)]">
+
+      {/* Step 9: Desktop left rail — scenario detail + score panel (hidden on mobile) */}
+      <div className="hidden w-[360px] shrink-0 flex-col border-r border-ink/[0.08] lg:flex">
+        {/* Left rail header */}
+        <div className="border-b border-ink/[0.08] px-5 py-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
+              <Drama className="h-4 w-4" />
+            </span>
+            <span className="font-sans text-[0.9rem] font-semibold text-ink">Scenario</span>
+          </div>
+        </div>
+        {/* Scenario detail */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          <div className="space-y-3">
+            <div>
+              <p className="font-display text-[1rem] font-semibold leading-snug text-ink">
+                {active.title}
+              </p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-slate/50">
+                  {active.category}
+                </span>
+                <Pill tone={DIFF_TONE[active.difficulty]}>{active.difficulty}</Pill>
+              </div>
+            </div>
+            <p className="text-[0.82rem] leading-relaxed text-slate">{active.summary}</p>
+            <blockquote className="border-l-2 border-ink/20 pl-4">
+              <p className="text-[0.8rem] italic leading-relaxed text-slate/70">
+                &ldquo;{active.opening}&rdquo;
+              </p>
+            </blockquote>
+            {/* Performance / last-line grade section */}
+            <div className="mt-4 border-t border-ink/[0.06] pt-4">
+              <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-slate/50">
+                Performance
+              </p>
+              {coachGrade ? (
+                <div className="rounded-xl border border-azure/20 bg-azure/[0.03] p-3.5">
+                  <div className="mb-2.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
+                    <GraduationCap className="h-3.5 w-3.5" /> Last Line Grade
+                  </div>
+                  <CoachGradePanel text={coachGrade} />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-ink/[0.06] bg-ink/[0.02] px-4 py-3 text-[0.8rem] text-slate/60">
+                  Run 3+ exchanges then tap &ldquo;Grade last line&rdquo; to score a response.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* New Scenario button at bottom of left rail */}
+        <div className="border-t border-ink/[0.06] p-4">
+          <button
+            onClick={reset}
+            className="w-full rounded-xl border border-ink/[0.08] bg-white px-4 py-2.5 text-[0.84rem] font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.04]"
+          >
+            New Scenario
+          </button>
+        </div>
+      </div>
+
+      {/* Right pane / full column on mobile: header + transcript + composer */}
+      <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
@@ -305,9 +398,17 @@ export function ScenarioTrainer() {
             </div>
           </div>
         </div>
+        {/* Mobile: X icon; Desktop: text button */}
         <button
           onClick={reset}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink lg:hidden"
+          aria-label="Exit scenario"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={reset}
+          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink lg:inline-flex"
         >
           <RotateCcw className="h-3.5 w-3.5" /> New scenario
         </button>
@@ -320,41 +421,66 @@ export function ScenarioTrainer() {
             <LiveDot tone="azure" /> Putting the client in character…
           </div>
         )}
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={cn("flex gap-3", m.role === "user" ? "flex-row-reverse" : "flex-row")}
-          >
-            <span
-              className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
-                m.role === "user"
-                  ? "bg-ink text-ink"
-                  : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
-              )}
-            >
-              {m.role === "user" ? "YOU" : <Bot className="h-4 w-4" />}
-            </span>
+        {messages.map((m, i) => {
+          const isGradeBubble = m.role === "assistant" && m.isGrade;
+          return (
             <div
-              className={cn(
-                "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
-                m.role === "user"
-                  ? "rounded-tr-sm bg-ink text-white"
-                  : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
-              )}
+              key={i}
+              className={cn("flex gap-3", m.role === "user" ? "flex-row-reverse" : "flex-row")}
             >
-              {m.role === "assistant" ? (
-                m.content ? (
-                  <AiMarkdown text={m.content} />
+              <span
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold",
+                  m.role === "user"
+                    ? "bg-ink text-white"
+                    : isGradeBubble
+                      ? "bg-azure/[0.12] text-azure ring-1 ring-inset ring-azure/20"
+                      : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
+                )}
+              >
+                {m.role === "user" ? (
+                  "YOU"
+                ) : isGradeBubble ? (
+                  <GraduationCap className="h-4 w-4" />
                 ) : (
-                  <TypingDots />
-                )
-              ) : (
-                <span className="whitespace-pre-wrap">{m.content}</span>
-              )}
+                  <Bot className="h-4 w-4" />
+                )}
+              </span>
+              <div
+                className={cn(
+                  "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
+                  m.role === "user"
+                    ? "rounded-tr-sm bg-ink text-white"
+                    : isGradeBubble
+                      ? "rounded-tl-sm bg-azure/[0.04] text-slate ring-1 ring-inset ring-azure/20"
+                      : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
+                )}
+              >
+                {m.role === "assistant" ? (
+                  m.content ? (
+                    <AiMarkdown text={m.content} />
+                  ) : (
+                    <TypingDots />
+                  )
+                ) : (
+                  <span className="whitespace-pre-wrap">{m.content}</span>
+                )}
+              </div>
             </div>
+          );
+        })}
+
+        {/* Step 7: "Start New Scenario" CTA — renders below last bubble after scoring */}
+        {scored && !busy && (
+          <div className="pt-2">
+            <button
+              onClick={reset}
+              className="mt-4 w-full rounded-xl bg-ink px-4 py-3 text-center text-[0.88rem] font-semibold text-white transition-colors hover:bg-ink/90"
+            >
+              Start New Scenario
+            </button>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Composer + score */}
@@ -412,65 +538,42 @@ export function ScenarioTrainer() {
           <Flame className="h-3 w-3 text-ink/80/60" /> Coaching notes appear in [brackets] after each
           reply · stay sharp
         </p>
-        {coachGrade && (
-          <div className="mt-3 rounded-xl border border-azure/20 bg-azure/[0.03] p-3.5">
-            <div className="mb-2.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
-              <Bot className="h-3.5 w-3.5" /> AI Grade
-            </div>
-            <CoachGradePanel text={coachGrade} />
-          </div>
-        )}
       </div>
+      </div>{/* end right pane */}
     </div>
   );
 }
 
-/** Parse the AI grade output and render score chips + the full markdown body. */
-function CoachGradePanel({ text }: { text: string }) {
-  // Parse numeric scores: "Tone: 8/10", "Clarity: 7/10"
-  const scoreChips: { label: string; value: string; variant: string }[] = [];
 
+/** Parse the AI grade output and render score pill badges + the full markdown body.
+ *  Parses Tone: X/10 | Clarity: X/10 | Close: X/10 */
+function CoachGradePanel({ text }: { text: string }) {
   const toneMatch = text.match(/Tone:\s*(\d+)\/(\d+)/i);
   const clarityMatch = text.match(/Clarity:\s*(\d+)\/(\d+)/i);
-  const handledMatch = text.match(/Objection\s+handled?:\s*(yes|no)/i);
+  // Step 4: Parse "Close: X/10" instead of "Objection handled: yes/no"
+  const closeMatch = text.match(/Close:\s*(\d+)\/(\d+)/i);
+
+  const scoreChips: { label: string; value: string; variant: string }[] = [];
+
+  function chipVariant(pct: number) {
+    return pct >= 0.8
+      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+      : pct >= 0.6
+        ? "bg-amber-50 border-amber-200 text-amber-700"
+        : "bg-red-50 border-red-200 text-red-700";
+  }
 
   if (toneMatch) {
     const pct = parseInt(toneMatch[1], 10) / parseInt(toneMatch[2], 10);
-    scoreChips.push({
-      label: "Tone",
-      value: `${toneMatch[1]}/${toneMatch[2]}`,
-      variant:
-        pct >= 0.8
-          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-          : pct >= 0.6
-            ? "bg-amber-50 border-amber-200 text-amber-700"
-            : "bg-red-50 border-red-200 text-red-700",
-    });
+    scoreChips.push({ label: "Tone", value: `${toneMatch[1]}/${toneMatch[2]}`, variant: chipVariant(pct) });
   }
-
   if (clarityMatch) {
     const pct = parseInt(clarityMatch[1], 10) / parseInt(clarityMatch[2], 10);
-    scoreChips.push({
-      label: "Clarity",
-      value: `${clarityMatch[1]}/${clarityMatch[2]}`,
-      variant:
-        pct >= 0.8
-          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-          : pct >= 0.6
-            ? "bg-amber-50 border-amber-200 text-amber-700"
-            : "bg-red-50 border-red-200 text-red-700",
-    });
+    scoreChips.push({ label: "Clarity", value: `${clarityMatch[1]}/${clarityMatch[2]}`, variant: chipVariant(pct) });
   }
-
-  if (handledMatch) {
-    const handled = handledMatch[1].toLowerCase() === "yes";
-    scoreChips.push({
-      label: "Handled",
-      value: handled ? "Yes" : "No",
-      variant: handled
-        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-        : "bg-red-50 border-red-200 text-red-700",
-    });
+  if (closeMatch) {
+    const pct = parseInt(closeMatch[1], 10) / parseInt(closeMatch[2], 10);
+    scoreChips.push({ label: "Close", value: `${closeMatch[1]}/${closeMatch[2]}`, variant: chipVariant(pct) });
   }
 
   // If parsing failed entirely, show raw markdown
@@ -478,22 +581,42 @@ function CoachGradePanel({ text }: { text: string }) {
     return <AiMarkdown text={text} />;
   }
 
+  // Separate the score line from the rest of the body
+  const lines = text.split("\n");
+  const bodyLines = lines.filter(
+    (l) => !l.match(/^Tone:\s*\d+\/\d+\s*\|\s*Clarity:\s*\d+\/\d+/i),
+  );
+  const bodyText = bodyLines.join("\n").trim();
+
+  const hasBetterPhrasing = /better\s+phrasing|example\s+phrasing|stronger\s+phrasing/i.test(bodyText);
+
   return (
-    <div className="mt-1 space-y-3">
+    <div className="space-y-3">
+      {/* Score pill badges — Tone / Clarity / Close */}
       <div className="flex flex-wrap gap-2">
         {scoreChips.map((c) => (
           <span
             key={c.label}
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-semibold",
-              c.variant,
-            )}
+            className={cn("rounded-full border px-3 py-1 text-xs font-semibold", c.variant)}
           >
             {c.label}: {c.value}
           </span>
         ))}
       </div>
-      <AiMarkdown text={text} />
+
+      {/* Body text */}
+      {bodyText && (
+        hasBetterPhrasing ? (
+          <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 p-3">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-amber-700">
+              <Wand2 className="h-3.5 w-3.5" /> Stronger phrasing
+            </div>
+            <AiMarkdown text={bodyText} />
+          </div>
+        ) : (
+          <AiMarkdown text={bodyText} />
+        )
+      )}
     </div>
   );
 }
@@ -504,7 +627,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/70"
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/25"
           style={{ animationDelay: `${i * 120}ms` }}
         />
       ))}

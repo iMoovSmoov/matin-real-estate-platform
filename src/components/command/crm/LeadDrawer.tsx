@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   X,
@@ -170,6 +170,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
   const [noteText, setNoteText] = useState("");
   const [extra, setExtra] = useState<TimelineEntry[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const draftSectionRef = useRef<HTMLDivElement>(null);
 
   // Reset transient state whenever a different lead is opened.
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -349,7 +350,10 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                   <Phone className="h-3.5 w-3.5" /> Call
                 </a>
                 <button
-                  onClick={() => flash(`Texting ${lead.firstName}…`)}
+                  onClick={() => {
+                    draftSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    if (!draft && !busy) generate();
+                  }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-ink/12 bg-white py-2.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper min-h-[44px]"
                 >
                   <MessageSquare className="h-3.5 w-3.5" /> Text
@@ -459,7 +463,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
               )}
 
               {/* ── Draft reply ── */}
-              <div className="rounded-xl border border-ink/[0.08] bg-white">
+              <div ref={draftSectionRef} className="rounded-xl border border-ink/[0.08] bg-white">
                 <div className="flex items-center justify-between gap-2 border-b border-ink/[0.08] px-4 py-2.5">
                   <div className="flex items-center gap-1.5">
                     <Wand2 className="h-4 w-4 text-ink" />

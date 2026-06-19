@@ -17,6 +17,10 @@ import {
   Building2,
   UserRound,
   FileText,
+  Clipboard,
+  ClipboardCheck,
+  Download,
+  X,
 } from "lucide-react";
 import { reForms, type ReForm, type ReFormField } from "@/lib/forms";
 import { listings, leads, getAgent, getListing } from "@/lib/data";
@@ -106,8 +110,26 @@ export function ContractWizard() {
   const [editing, setEditing] = useState(false);
   const [sent, setSent] = useState(false);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [mobileEditOpen, setMobileEditOpen] = useState(false);
+  const [mobileEditDraft, setMobileEditDraft] = useState("");
+  const [formSearch, setFormSearch] = useState("");
+  const [recipientEmails, setRecipientEmails] = useState<Record<number, string>>({});
 
   const form = useMemo(() => CONTRACT_FORMS.find((f) => f.code === formCode) ?? null, [formCode]);
+
+  const filteredForms = useMemo(
+    () =>
+      formSearch.trim()
+        ? CONTRACT_FORMS.filter(
+            (f) =>
+              f.name.toLowerCase().includes(formSearch.toLowerCase()) ||
+              f.code.toLowerCase().includes(formSearch.toLowerCase()),
+          )
+        : CONTRACT_FORMS,
+    [formSearch],
+  );
 
   const record: RecordRef = useMemo(() => {
     if (!recordId) return null;
@@ -137,6 +159,7 @@ export function ContractWizard() {
     setEditing(false);
     setSent(false);
     setAudit([]);
+    setRecipientEmails({});
   }
 
   // Pick a CRM record → auto-fill the form fields (editable after).
@@ -156,6 +179,7 @@ export function ContractWizard() {
     setDrafted(false);
     setSent(false);
     setAudit([]);
+    setRecipientEmails({});
   }
 
   function setField(name: string, v: string) {
@@ -187,6 +211,27 @@ export function ContractWizard() {
     } finally {
       setDrafting(false);
     }
+  }
+
+  function copyDraft() {
+    if (!draft) return;
+    navigator.clipboard.writeText(draft).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function downloadDraft() {
+    if (!draft || !form) return;
+    setDownloading(true);
+    const blob = new Blob([draft], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${form.code}-${form.name.replace(/\s+/g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setTimeout(() => setDownloading(false), 1000);
   }
 
   // Compliance for the checklist & send gating.
@@ -224,7 +269,7 @@ export function ContractWizard() {
     const log: AuditEntry[] = [
       { ts: stamp, who: "Contract Builder", action: `Generated ${form.code} — ${form.name}` },
       { ts: stamp, who: "Compliance", action: `Passed ${compliance?.passes ?? 0}/${compliance?.applicable ?? 0} checks` },
-      ...recipients.map((r) => ({ ts: stamp, who: r.name, action: `Sent to ${r.email} (${r.role})` })),
+      ...recipients.map((r, i) => ({ ts: stamp, who: r.name, action: `Sent to ${recipientEmails[i] ?? r.email} (${r.role})` })),
       { ts: stamp, who: "E-signature", action: "Envelope created · awaiting signatures" },
     ];
     setAudit(log);
@@ -239,7 +284,7 @@ export function ContractWizard() {
   return (
     <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
       {/* Working bar: what's being built + live status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] bg-white px-5 py-3.5">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] bg-white px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
             <FileSignature className="h-4 w-4" />
@@ -275,38 +320,51 @@ export function ContractWizard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,21rem)_minmax(0,1fr)] lg:max-h-[80vh]">
         {/* ── Left · set it up ── */}
-        <aside className="space-y-6 border-b border-ink/[0.08] p-5 lg:border-b-0 lg:border-r lg:p-6">
+        <aside className="space-y-6 border-b border-ink/[0.08] p-5 lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-6">
           {/* Contract picker */}
           <section>
             <SectionHead icon={ScrollText} title="Contract" sub="Pick the document to prepare." />
-            <div className="mt-3 space-y-2">
-              {CONTRACT_FORMS.map((f) => {
-                const active = formCode === f.code;
-                return (
-                  <button
-                    key={f.code}
-                    type="button"
-                    onClick={() => chooseForm(f.code)}
-                    className={cn(
-                      "group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                      active
-                        ? "border-ink/20 bg-paper"
-                        : "border-ink/[0.08] bg-white hover:border-ink/15 hover:bg-white",
-                    )}
-                  >
-                    <span className="shrink-0 rounded bg-white px-1.5 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-ink ring-1 ring-inset ring-ink/[0.06]">
-                      {f.code}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[0.84rem] font-semibold text-ink">{f.name}</span>
-                      <span className="block truncate text-[0.72rem] text-slate/65">{f.category}</span>
-                    </span>
-                    {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-ink" />}
-                  </button>
-                );
-              })}
+            <input
+              type="text"
+              placeholder="Search by name or code…"
+              value={formSearch}
+              onChange={(e) => setFormSearch(e.target.value)}
+              className="mt-3 w-full rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.84rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
+            />
+            <div className="mt-2 space-y-2">
+              {filteredForms.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-ink/10 px-3 py-4 text-center text-[0.78rem] text-slate/65">
+                  No contracts match &ldquo;{formSearch}&rdquo;
+                </p>
+              ) : (
+                filteredForms.map((f) => {
+                  const active = formCode === f.code;
+                  return (
+                    <button
+                      key={f.code}
+                      type="button"
+                      onClick={() => chooseForm(f.code)}
+                      className={cn(
+                        "group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
+                        active
+                          ? "border-ink/20 bg-paper"
+                          : "border-ink/[0.08] bg-white hover:border-ink/15 hover:bg-white",
+                      )}
+                    >
+                      <span className="shrink-0 rounded bg-white px-1.5 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-ink ring-1 ring-inset ring-ink/[0.06]">
+                        {f.code}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.84rem] font-semibold text-ink">{f.name}</span>
+                        <span className="block truncate text-[0.72rem] text-slate/65">{f.category}</span>
+                      </span>
+                      {active && <CheckCircle2 className="h-4 w-4 shrink-0 text-ink" />}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </section>
 
@@ -370,7 +428,7 @@ export function ContractWizard() {
         </aside>
 
         {/* ── Right · the document ── */}
-        <div className="min-h-[34rem] space-y-6 p-5 md:p-6">
+        <div className="min-h-[34rem] space-y-6 overflow-y-auto p-5 md:p-6">
           {!form ? (
             <div className="flex min-h-[28rem] flex-col items-center justify-center text-center">
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ink ring-1 ring-inset ring-ink/[0.06]">
@@ -390,13 +448,24 @@ export function ContractWizard() {
                   <SectionHead icon={FileText} title="Document" sub="AI drafts the clause language — edit anything." />
                   <div className="flex items-center gap-2">
                     {drafted && !drafting && (
-                      <button
-                        type="button"
-                        onClick={() => setEditing((e) => !e)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/12 bg-white px-3 py-2 text-[0.78rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-white"
-                      >
-                        <PenTool className="h-3.5 w-3.5" /> {editing ? "Preview" : "Edit text"}
-                      </button>
+                      <>
+                        {/* Desktop inline edit toggle */}
+                        <button
+                          type="button"
+                          onClick={() => setEditing((e) => !e)}
+                          className="hidden items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.78rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-white sm:inline-flex"
+                        >
+                          <PenTool className="h-3.5 w-3.5" /> {editing ? "Preview" : "Edit text"}
+                        </button>
+                        {/* Mobile slide-over edit trigger */}
+                        <button
+                          type="button"
+                          onClick={() => { setMobileEditDraft(draft); setMobileEditOpen(true); }}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.78rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-white sm:hidden"
+                        >
+                          <PenTool className="h-3.5 w-3.5" /> Edit text
+                        </button>
+                      </>
                     )}
                     <button
                       type="button"
@@ -429,13 +498,35 @@ export function ContractWizard() {
                       <span className="text-[0.8rem] font-semibold text-ink">{form.code} · {form.name}</span>
                       {drafting && <span className="text-[0.7rem] text-slate/65">streaming live</span>}
                     </div>
-                    {drafted && !drafting && (
-                      <Pill tone="success">
-                        <CheckCircle2 className="h-3 w-3" /> Drafted
-                      </Pill>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {drafted && !drafting && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={copyDraft}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-paper"
+                          >
+                            {copied ? <ClipboardCheck className="h-3.5 w-3.5 text-success" /> : <Clipboard className="h-3.5 w-3.5" />}
+                            {copied ? "Copied!" : "Copy"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={downloadDraft}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/15 hover:bg-paper"
+                          >
+                            {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                            {downloading ? "Downloading…" : "Download"}
+                          </button>
+                        </>
+                      )}
+                      {drafted && !drafting && (
+                        <Pill tone="success">
+                          <CheckCircle2 className="h-3 w-3" /> Drafted
+                        </Pill>
+                      )}
+                    </div>
                   </div>
-                  <div className="max-h-[24rem] overflow-y-auto px-5 py-4">
+                  <div className="px-5 py-4">
                     {!drafted ? (
                       <div className="flex min-h-[12rem] flex-col items-center justify-center text-center">
                         <p className="text-[0.9rem] font-semibold text-ink">Ready to draft</p>
@@ -509,7 +600,12 @@ export function ContractWizard() {
                             </span>
                             <div className="min-w-0 leading-tight">
                               <p className="truncate text-[0.85rem] font-semibold text-ink">{r.name}</p>
-                              <p className="truncate text-[0.74rem] text-slate/65">{r.email}</p>
+                              <input
+                                type="email"
+                                value={recipientEmails[i] ?? r.email}
+                                onChange={(e) => setRecipientEmails((prev) => ({ ...prev, [i]: e.target.value }))}
+                                className="w-full max-w-[200px] truncate rounded border border-transparent bg-transparent px-0 py-0 text-[0.74rem] text-slate/65 focus:border-ink/[0.08] focus:bg-white focus:px-2 focus:outline-none"
+                              />
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
@@ -593,6 +689,51 @@ export function ContractWizard() {
           )}
         </div>
       </div>
+
+      {/* Mobile edit slide-over */}
+      {mobileEditOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-ink/40 sm:hidden"
+            onClick={() => setMobileEditOpen(false)}
+          />
+          <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl sm:hidden">
+            <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-3">
+              <p className="text-[0.95rem] font-semibold text-ink">Edit Document</p>
+              <button
+                type="button"
+                onClick={() => setMobileEditOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-ink hover:bg-paper"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <textarea
+                value={mobileEditDraft}
+                onChange={(e) => setMobileEditDraft(e.target.value)}
+                className="h-full min-h-[60vh] w-full resize-none rounded-lg border border-ink/[0.08] p-3 font-mono text-[0.84rem] text-ink focus:border-ink/20 focus:outline-none"
+              />
+            </div>
+            <div className="sticky bottom-0 flex gap-2 border-t border-ink/[0.08] bg-white px-4 py-3">
+              <button
+                type="button"
+                onClick={() => { setDraft(mobileEditDraft); setMobileEditOpen(false); }}
+                className="flex-1 rounded-xl bg-ink py-2.5 text-[0.88rem] font-semibold text-white"
+              >
+                Save changes
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileEditOpen(false)}
+                className="flex-1 rounded-xl border border-ink/[0.08] py-2.5 text-[0.88rem] font-semibold text-ink"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

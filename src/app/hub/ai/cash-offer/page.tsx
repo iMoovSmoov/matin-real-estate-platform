@@ -128,7 +128,7 @@ export default function CashOfferPage() {
           { name: "baths", label: "Baths", type: "number", placeholder: "2" },
           { name: "sqft", label: "Square feet", type: "number", placeholder: "1620" },
           { name: "yearBuilt", label: "Year built", type: "number", placeholder: "1972" },
-          { name: "estValue", label: "Estimated value (ARV)", placeholder: "$545,000" },
+          { name: "estValue", label: "Estimated value (ARV)", placeholder: "545,000", prefix: "$" },
           {
             name: "condition",
             label: "Condition",

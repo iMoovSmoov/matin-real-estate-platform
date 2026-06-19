@@ -315,3 +315,11 @@
   background: linear-gradient(135deg, rgba(210,160,80,0.4), transparent 50%, rgba(210,160,80,0.2));
   z-index: -1;
 }
+
+/* Hide scrollbar while preserving scroll functionality */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}

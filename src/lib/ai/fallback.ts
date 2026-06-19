@@ -519,8 +519,10 @@ Seller motivation is **${motivation.toLowerCase()}** with a stated timeline of *
       const condition = s(input.condition, "Good");
       const motivation = s(input.motivation, "Relocating");
 
+      const agentEstValue = Number(String(input.estValue ?? "").replace(/[$,]/g, ""));
       const pricePerSqft = /excellent/i.test(condition) ? 310 : /good/i.test(condition) ? 285 : /fair/i.test(condition) ? 255 : 220;
-      const arv = Math.round((sqft * pricePerSqft) / 1000) * 1000;
+      const computedArv = Math.round((sqft * pricePerSqft) / 1000) * 1000;
+      const arv = agentEstValue > 10000 ? agentEstValue : computedArv;
       const repairCost = /excellent/i.test(condition) ? Math.round(arv * 0.02) : /good/i.test(condition) ? Math.round(arv * 0.05) : /fair/i.test(condition) ? Math.round(arv * 0.10) : Math.round(arv * 0.17);
       const holdingCosts = Math.round(arv * 0.04);
       const margin = Math.round(arv * 0.11);
@@ -559,6 +561,29 @@ Based on a ${beds}BD/${baths}BA · ${sqft.toLocaleString()} sqft · ${yr}-built 
 For a seller with motivation **"${motivation}"** and a **${s(input.condition, "good")}** condition property, ${/excellent|good/i.test(condition) && arv > 600000 ? `the MLS path will likely net $${Math.round((arv * 0.93 - offerHigh) / 1000)}K–$${Math.round((arv * 0.93 - offerLow) / 1000)}K more — worth the extra 6–8 weeks if timeline is flexible. Consider the cash offer as a backstop if the MLS launch doesn't meet expectations in the first 10 days.` : `the certainty and speed of a cash close may outweigh the MLS premium — especially given condition factors and a seller who values a clean, contingency-free close. Recommend scheduling a no-obligation walkthrough to firm up the number.`}
 
 Schedule a walkthrough: ${phone} · ${co}`;
+    }
+
+    /* ── Form Suggest ───────────────────────────────────────────────────── */
+    case "form-suggest": {
+      const sit = (s(input.situation, "")).toLowerCase();
+      let code = "OREF-001"; let name = "Residential Real Estate Sale Agreement"; let why = "the core purchase contract for any Oregon residential transaction.";
+      if (/inspect|repair/.test(sit)) { code = "OREF-026"; name = "Repair / Inspection Addendum"; why = "the right form when a buyer is requesting repairs after the inspection period."; }
+      else if (/list|seller.*agree|agree.*sell/.test(sit)) { code = "OREF-015"; name = "Residential Listing Agreement — Exclusive"; why = "required to formally engage the seller and authorize MLS listing."; }
+      else if (/buyer.*rep|represent.*buyer|hb 4058|hb4058/.test(sit)) { code = "C-565"; name = "Buyer Representation Agreement — Exclusive"; why = "mandatory for all Oregon buyers since HB 4058 (effective Jan 1, 2025)."; }
+      else if (/disclos|agency|first.*contact|first substantial/.test(sit)) { code = "C-530"; name = "Initial Agency Disclosure Pamphlet"; why = "required at first substantial contact with any consumer."; }
+      else if (/counter|counter-?offer/.test(sit)) { code = "OREF-002"; name = "Counter Offer"; why = "the standard OREF form for responding to an offer with different terms."; }
+      else if (/amend|addend|change.*term/.test(sit)) { code = "OREF-005"; name = "Addendum / Amendment"; why = "the general-purpose form for modifying any existing agreement."; }
+      else if (/earnest|deposit|trust/.test(sit)) { code = "EMR"; name = "Earnest Money Receipt"; why = "records receipt of buyer earnest money into escrow."; }
+      else if (/dual.*agency|limited.*agency|both.*side/.test(sit)) { code = "OREF-040"; name = "Disclosed Limited Agency Agreement"; why = "required written consent when your brokerage represents both buyer and seller."; }
+      else if (/lead.*paint|1978|pre-?1978/.test(sit)) { code = "LBP"; name = "Lead-Based Paint Disclosure"; why = "federally required for any home built before 1978."; }
+      else if (/commission.*disb|CDA|closing.*split/.test(sit)) { code = "CDA"; name = "Commission Disbursement Authorization"; why = "instructs escrow on how to split and pay commission at closing."; }
+      else if (/property.*disclos|spds|seller.*disclos/.test(sit)) { code = "SPDS"; name = "Seller's Property Disclosure Statement"; why = "required by ORS 105.464 — seller must disclose all known property conditions."; }
+
+      return `**Recommended Form:** ${code} — ${name}
+
+This is ${why}
+
+**Quick tip:** Open the form directly in the Forms Library, auto-fill from the matching CRM record, then click "Generate with AI" to draft clause language tailored to the situation.`;
     }
 
     default:

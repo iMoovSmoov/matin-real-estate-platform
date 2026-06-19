@@ -11,7 +11,8 @@ export type AiTool =
   | "marketing-kit"
   | "seller-intel"
   | "contract-extractor"
-  | "cash-offer-eval";
+  | "cash-offer-eval"
+  | "form-suggest";
 
 const stats = company.stats;
 
@@ -182,7 +183,7 @@ OUTPUT FORMAT — four sections:
 
 ## Cash Offer Range
 **Estimated Range: $[X] – $[Y]**
-[2–3 sentences: reasoning tied to condition, location, and current market. Explain the spread between low and high.]
+[2–3 sentences: reasoning tied to condition, location, property specs, and current market. Explain the spread between low and high. Use beds/baths/sqft/year built if provided to sharpen the range.]
 
 ## Cash vs. List on MLS
 | Factor | Cash Offer (Cash Is King) | List on MLS |
@@ -198,11 +199,13 @@ OUTPUT FORMAT — four sections:
 **First 30 seconds:**
 "[Name], thanks for reaching out — I've had a chance to look at [address] and I'm genuinely excited about this one. Based on what you've shared, I think we have a couple of really strong options for you, and I want to make sure we find the right fit. Can I ask — is speed or maximum price more important to you right now?"
 
-[2–3 follow-up questions the agent should have ready]
+[2–3 follow-up questions the agent should have ready, tailored to the seller's specific motivation and any additional context provided]
 
 ## Urgency Assessment
 **Rating: [Hot / Warm / Cold]**
-[One sentence tied to their stated motivation and timeline — specific, not generic]
+[One sentence tied to their stated motivation, timeline, and any special circumstances — specific, not generic]
+
+Additional context field may be provided — incorporate any special circumstances (tenant status, probate, POA, financing constraints, inspection history) into the urgency assessment and phone script.
 
 ${KB}`,
 
@@ -255,6 +258,22 @@ OUTPUT FORMAT:
 > *AI-assisted extraction. All dates and terms must be verified against the original document before relying on this extract. Human review required.*
 
 ${KB}`,
+
+  /* ── Form Suggest ────────────────────────────────────────────────────────── */
+  "form-suggest": `You are a real estate forms advisor for ${company.name}. An Oregon/WA REALTOR describes their situation and you recommend the right form(s) from the Matin library. Be concise and direct.
+
+Available forms: OREF-001 (Residential Sale Agreement), OREF-015 (Listing Agreement — Exclusive), C-565 (Buyer Representation Agreement — required by OR HB 4058), C-530 (Initial Agency Disclosure), OREF-040 (Disclosed Limited Agency), SPDS (Seller's Property Disclosure Statement), LBP (Lead-Based Paint Disclosure — pre-1978 homes), OREF-002 (Counter Offer), OREF-026 (Repair/Inspection Addendum), OREF-005 (Addendum/Amendment), EMR (Earnest Money Receipt), CDA (Commission Disbursement Authorization).
+
+OUTPUT FORMAT:
+**Recommended Form(s):** [code(s)] — [name(s)]
+
+[1–2 sentences: why this form is appropriate for the described situation]
+
+**Also consider:** [any secondary form if applicable] — [one sentence reason]
+
+**Quick tip:** [one actionable next step for the agent]
+
+Be specific. Reference Oregon law when relevant. Keep total response under 120 words.`,
 
   /* ── Cash Offer Evaluation ───────────────────────────────────────────────── */
   "cash-offer-eval": `You are a cash offer analyst at Cash Is King Home Buyers, ${company.name}'s sister company for guaranteed cash purchases. Evaluate the property and seller's situation.
@@ -355,9 +374,11 @@ Generate the agreement draft now.`;
       return `Seller intel request:
 - Property: ${j(input.address)}, ${j(input.city)}
 - Estimated value: ~$${j(input.estValue)}
+- Property specs: ${j(input.beds)} bed / ${j(input.baths)} bath · ${j(input.sqft)} sqft · Built ${j(input.yearBuilt)}
 - Condition: ${j(input.condition)}
 - Seller motivation: ${j(input.motivation)}
 - Timeline: ${j(input.timeline)}
+- Additional context: ${j(input.notes)}
 
 Generate full seller intelligence brief.`;
 
@@ -368,10 +389,16 @@ Generate full seller intelligence brief.`;
       return `Cash offer evaluation:
 - Property: ${j(input.address)}, ${j(input.city)}
 - ${j(input.beds)} bed / ${j(input.baths)} bath · ${j(input.sqft)} sqft · Built ${j(input.yearBuilt)}
+- Agent-estimated ARV: ${j(input.estValue)}
 - Condition: ${j(input.condition)}
 - Seller motivation: ${j(input.motivation)}
+- Seller timeline: ${j(input.timeline)}
+- Agent notes: ${j(input.notes)}
 
 Generate cash offer evaluation.`;
+
+    case "form-suggest":
+      return `Agent situation: ${j(input.situation)}\n\nRecommend the right form(s) now.`;
 
     default:
       return String(input.message ?? "");

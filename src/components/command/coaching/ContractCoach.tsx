@@ -105,7 +105,7 @@ export function ContractCoach() {
             </p>
             {draft && (
               <button
-                onClick={() => setDraft("")}
+                onClick={() => { setDraft(""); setOutput(""); setCopied(false); }}
                 className="inline-flex items-center gap-1 text-[0.72rem] text-slate/70 transition-colors hover:text-ink"
               >
                 <Eraser className="h-3 w-3" /> Clear

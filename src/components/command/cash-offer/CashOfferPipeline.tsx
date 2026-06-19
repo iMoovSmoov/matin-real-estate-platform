@@ -7,17 +7,16 @@ import {
   Phone,
   Home,
   Clock,
-  AlertCircle,
   User,
   Bed,
   Bath,
   Maximize2,
   CalendarDays,
   StickyNote,
-  Wand2,
-  Sparkles,
   Send,
   ArrowRightLeft,
+  CheckCircle,
+  ChevronRight,
 } from "lucide-react";
 import { sellerLeads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
@@ -25,9 +24,6 @@ import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { StatTile, Pill, SectionLabel, LiveDot } from "@/components/command/ui";
 import { cn, initials } from "@/lib/utils";
 import type { SellerLead, SellerLeadStage, PropertyCondition } from "@/lib/types";
-
-/* ── Suppress unused-import lint on icons that are available for future use ── */
-void AlertCircle;
 
 /* ── Constants ──────────────────────────────────────────────────────────────── */
 
@@ -66,6 +62,15 @@ function conditionTone(c: PropertyCondition): "success" | "azure" | "warn" | "da
   }
 }
 
+function timelineTone(t: string): "warn" | "danger" | "azure" | "neutral" {
+  switch (t) {
+    case "ASAP":        return "danger";
+    case "1-3 months":  return "warn";
+    case "3-6 months":  return "azure";
+    default:            return "neutral";
+  }
+}
+
 function formatUsd(n: number): string {
   return "$" + n.toLocaleString("en-US");
 }
@@ -85,6 +90,10 @@ function slugHue(slug: string): number {
 
 function agentInitials(slug: string): string {
   return initials(slug.replace(/-/g, " "));
+}
+
+function formatAgentName(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /* ── Sub-components ──────────────────────────────────────────────────────────── */
@@ -138,7 +147,7 @@ function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) 
     <button
       onClick={onClick}
       className={cn(
-        "w-full cursor-pointer rounded-xl bg-white text-left shadow-soft ring-1 p-3 transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+        "group w-full cursor-pointer rounded-xl bg-white text-left shadow-soft ring-1 p-3 transition-all hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
         isStale ? "ring-red-200" : "ring-ink/[0.07]",
       )}
     >
@@ -155,6 +164,13 @@ function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) 
       {/* Address */}
       <p className="mt-1 truncate text-[0.75rem] text-slate">{lead.address}, {lead.city}</p>
 
+      {/* Motivation snippet — surfaces urgency signal without opening slide-over */}
+      {lead.motivation && (
+        <p className="mt-1 line-clamp-1 text-[0.72rem] italic text-slate/70">
+          {lead.motivation}
+        </p>
+      )}
+
       {/* Value + condition */}
       <div className="mt-2 flex items-center justify-between gap-1.5">
         <span className="font-display text-[0.9rem] font-semibold text-ink tabular-nums">
@@ -163,16 +179,13 @@ function LeadCard({ lead, onClick }: { lead: SellerLead; onClick: () => void }) 
         <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
       </div>
 
-      {/* Days in stage + agent avatar */}
+      {/* Days in stage + agent avatar + open hint */}
       <div className="mt-2 flex items-center justify-between">
         <DaysPill days={lead.daysInStage} />
-        <AgentAvatar slug={lead.assignedAgent} />
-      </div>
-
-      {/* Quick AI CTA — full-width, prominent */}
-      <div className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-ink/15 bg-ink/[0.06] py-2 text-[0.74rem] font-semibold text-ink/80 transition-colors hover:bg-ink/[0.12] hover:text-ink">
-        <Sparkles className="h-3 w-3 text-ink/60" />
-        AI Eval
+        <div className="flex items-center gap-1.5">
+          <ChevronRight className="h-4 w-4 text-slate/40 opacity-0 transition-opacity group-hover:opacity-100" />
+          <AgentAvatar slug={lead.assignedAgent} />
+        </div>
       </div>
     </button>
   );
@@ -197,8 +210,11 @@ function SlideOver({
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMode, setAiMode] = useState<AiMode>(null);
   const [noteText, setNoteText] = useState("");
+  const [noteSaved, setNoteSaved] = useState(false);
+  const [stageConfirm, setStageConfirm] = useState<string | null>(null);
+  const [converting, setConverting] = useState(false);
 
-  // Reset AI state when a different lead is opened
+  // Reset all state when a different lead is opened
   const [activeId, setActiveId] = useState<string | null>(null);
   if (lead && lead.id !== activeId) {
     setActiveId(lead.id);
@@ -206,6 +222,9 @@ function SlideOver({
     setAiLoading(false);
     setAiMode(null);
     setNoteText("");
+    setNoteSaved(false);
+    setStageConfirm(null);
+    setConverting(false);
   }
 
   const open = !!lead;
@@ -302,26 +321,54 @@ function SlideOver({
                   </span>
                   <Pill tone={conditionTone(lead.condition)}>{lead.condition}</Pill>
                   <Pill tone="neutral">{lead.stage}</Pill>
+                  <Pill tone="neutral">{lead.daysInStage}d in stage</Pill>
                 </div>
               </div>
             </div>
 
             {/* Body — scrollable */}
             <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-              {/* Move to stage */}
+
+              {/* STEP 10 — Motivation highlight block (first in body, most critical intel) */}
+              <div className="rounded-xl border border-amber-100 bg-amber-50 p-3">
+                <div className="mb-1 flex items-start justify-between gap-2">
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-amber-700/80">
+                    Motivation
+                  </p>
+                  <Pill tone={timelineTone(lead.timeline)}>{lead.timeline}</Pill>
+                </div>
+                <p className="text-[0.85rem] text-ink/90 leading-snug">{lead.motivation}</p>
+                {lead.notes && (
+                  <p className="mt-2 border-t border-amber-200/60 pt-2 text-[0.8rem] text-amber-800/80 italic">
+                    {lead.notes}
+                  </p>
+                )}
+              </div>
+
+              {/* STEP 3 — Move to stage with inline confirmation */}
               <div>
                 <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
                   Move to stage
                 </p>
                 <select
                   value={lead.stage}
-                  onChange={(e) => onStageChange(lead.id, e.target.value as SellerLeadStage)}
+                  onChange={(e) => {
+                    const newStage = e.target.value as SellerLeadStage;
+                    onStageChange(lead.id, newStage);
+                    setStageConfirm(newStage);
+                    setTimeout(() => setStageConfirm(null), 2000);
+                  }}
                   className="w-full rounded-xl border border-ink/[0.08] bg-white px-3 py-2 text-[0.85rem] text-ink focus:border-ink/20 focus:outline-none"
                 >
                   {STAGES.map((s) => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
+                {stageConfirm && (
+                  <p className="mt-1 text-[0.75rem] font-medium text-emerald-600">
+                    Moved to {stageConfirm}
+                  </p>
+                )}
               </div>
 
               {/* Key facts grid */}
@@ -355,20 +402,12 @@ function SlideOver({
                 </div>
               </div>
 
-              {/* Seller info */}
+              {/* Seller info — simplified (motivation now in amber block above) */}
               <div className="space-y-3 rounded-xl border border-ink/[0.08] bg-white p-3">
                 <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">Seller</p>
                 <FactRow icon={<User className="h-3.5 w-3.5" />} label="Name" value={lead.sellerName} />
-                <FactRow icon={<AlertCircle className="h-3.5 w-3.5" />} label="Motivation" value={lead.motivation} />
-                <FactRow icon={<Clock className="h-3.5 w-3.5" />} label="Timeline" value={lead.timeline} />
+                <FactRow icon={<Clock className="h-3.5 w-3.5" />} label="Assigned Agent" value={formatAgentName(lead.assignedAgent)} />
               </div>
-
-              {/* Notes */}
-              {lead.notes && (
-                <div className="text-sm text-slate bg-amber-50 border border-amber-100 rounded-xl p-4">
-                  <span className="font-semibold text-amber-700">Seller note: </span>{lead.notes}
-                </div>
-              )}
 
               {/* AI Action buttons */}
               <div className="flex flex-col gap-2">
@@ -396,7 +435,7 @@ function SlideOver({
                   {aiLoading && aiMode === "script" ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                      Scripting...
+                      Generating seller intel...
                     </>
                   ) : (
                     <>
@@ -406,27 +445,27 @@ function SlideOver({
                 </button>
               </div>
 
-              {/* AI Output */}
+              {/* STEP 1+2 — AI Output: no max-h-64 cap, full label for seller-intel */}
               {(aiOutput || (aiLoading && aiMode)) && (
-                <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
-                  <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
-                    {aiMode === "eval" ? "Cash Offer Eval" : "Call Script"}
+                <div className="rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-4">
+                  <p className="mb-3 text-[0.68rem] font-semibold uppercase tracking-wider text-slate/70">
+                    {aiMode === "eval" ? "Cash Offer Evaluation" : "Seller Intel & Call Script"}
                   </p>
                   {aiLoading && !aiOutput && (
                     <div className="flex items-center gap-2 text-[0.82rem] text-slate">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-                      {aiMode === "eval" ? "Evaluating offer range..." : "Generating call script..."}
+                      {aiMode === "eval" ? "Evaluating offer range..." : "Generating seller intel..."}
                     </div>
                   )}
                   {aiOutput && (
-                    <div className="max-h-64 overflow-y-auto">
+                    <div>
                       <AiMarkdown text={aiOutput} />
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Notes textarea */}
+              {/* STEP 4 — Notes textarea with Save Note button */}
               <div className="rounded-xl border border-ink/[0.08] bg-white p-3">
                 <div className="mb-2 flex items-center gap-1.5">
                   <StickyNote className="h-3.5 w-3.5 text-ink" />
@@ -439,23 +478,57 @@ function SlideOver({
                   placeholder="Add a note..."
                   className="min-h-[2.5rem] w-full resize-y rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink placeholder:text-slate/40 focus:border-ink/20 focus:outline-none"
                 />
+                <button
+                  onClick={() => {
+                    setNoteSaved(true);
+                    setTimeout(() => setNoteSaved(false), 2000);
+                  }}
+                  className={cn(
+                    "mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-[0.78rem] font-semibold transition-colors",
+                    noteSaved
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-ink/[0.06] text-ink hover:bg-ink/[0.1]",
+                  )}
+                >
+                  {noteSaved ? (
+                    <>
+                      <CheckCircle className="h-3.5 w-3.5" /> Saved
+                    </>
+                  ) : (
+                    "Save Note"
+                  )}
+                </button>
               </div>
             </div>
 
-            {/* Footer — convert to listing */}
+            {/* STEP 5 — Footer: Convert to Listing with 2-second success state */}
             <div className="shrink-0 border-t border-ink/[0.08] px-5 py-4">
               <button
                 onClick={() => {
-                  onConvert(lead.id);
-                  onClose();
+                  if (lead.stage === "Converted to Listing" || converting) return;
+                  setConverting(true);
+                  setTimeout(() => {
+                    onConvert(lead.id);
+                    onClose();
+                    setConverting(false);
+                  }, 800);
                 }}
                 disabled={lead.stage === "Converted to Listing"}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-medium text-white transition-colors hover:bg-ink/90 disabled:opacity-40"
               >
-                <Home className="h-4 w-4" />
-                {lead.stage === "Converted to Listing"
-                  ? "Already Converted to Listing"
-                  : "Convert to Listing"}
+                {converting ? (
+                  <>
+                    <CheckCircle className="h-4 w-4" /> Converted!
+                  </>
+                ) : lead.stage === "Converted to Listing" ? (
+                  <>
+                    <Home className="h-4 w-4" /> Already Converted to Listing
+                  </>
+                ) : (
+                  <>
+                    <Home className="h-4 w-4" /> Convert to Listing
+                  </>
+                )}
               </button>
             </div>
           </>
@@ -471,12 +544,25 @@ export default function CashOfferPipeline() {
   const [leads, setLeads] = useState<SellerLead[]>(sellerLeads as SellerLead[]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // STEP 8 — Mobile stage chip strip state (default to most populated stage)
+  const defaultMobileStage = STAGES.reduce((best, stage) => {
+    const count = leads.filter((l) => l.stage === stage).length;
+    const bestCount = leads.filter((l) => l.stage === best).length;
+    return count > bestCount ? stage : best;
+  }, "New Request" as SellerLeadStage);
+  const [mobileStage, setMobileStage] = useState<SellerLeadStage>(defaultMobileStage);
+
+  // STEP 9 — Agent filter state (desktop only)
+  const agentSlugs = [...new Set(leads.map((l) => l.assignedAgent))];
+  const [agentFilter, setAgentFilter] = useState<string>("all");
+  const displayLeads = agentFilter === "all" ? leads : leads.filter((l) => l.assignedAgent === agentFilter);
+
   const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
 
-  // Derived stats — "active" means not Dead, not Accepted, not Converted
-  const activeCount = leads.filter((l) => !ACTIVE_EXCLUDED.includes(l.stage)).length;
-  const acceptedCount = leads.filter((l) => l.stage === "Accepted").length;
-  const portfolioValue = leads
+  // Derived stats from displayLeads
+  const activeCount = displayLeads.filter((l) => !ACTIVE_EXCLUDED.includes(l.stage)).length;
+  const acceptedCount = displayLeads.filter((l) => l.stage === "Accepted").length;
+  const portfolioValue = displayLeads
     .filter((l) => !ACTIVE_EXCLUDED.includes(l.stage))
     .reduce((sum, l) => sum + l.estValue, 0);
 
@@ -503,6 +589,25 @@ export default function CashOfferPipeline() {
           Track every seller request from initial inquiry through cash offer acceptance and listing
           conversion.
         </p>
+
+        {/* STEP 9 — Agent filter (desktop only) */}
+        <div className="hidden md:flex items-center gap-2 mt-3">
+          <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
+            Agent:
+          </label>
+          <select
+            value={agentFilter}
+            onChange={(e) => setAgentFilter(e.target.value)}
+            className="rounded-lg border border-ink/[0.08] bg-white px-3 py-1.5 text-[0.82rem] text-ink focus:border-ink/20 focus:outline-none"
+          >
+            <option value="all">All Agents</option>
+            {agentSlugs.map((slug) => (
+              <option key={slug} value={slug}>
+                {formatAgentName(slug)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* KPI tiles */}
@@ -532,19 +637,64 @@ export default function CashOfferPipeline() {
         />
       </div>
 
-      {/* Kanban board — horizontally scrollable on mobile */}
-      <div className="overflow-x-auto pb-4">
+      {/* STEP 8 — Mobile: stage chip strip + single-column view */}
+      <div className="md:hidden">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+          {STAGES.map((stage) => {
+            const count = displayLeads.filter((l) => l.stage === stage).length;
+            const isActive = mobileStage === stage;
+            return (
+              <button
+                key={stage}
+                onClick={() => setMobileStage(stage)}
+                className={cn(
+                  "shrink-0 rounded-full px-3 py-1.5 text-[0.75rem] font-semibold whitespace-nowrap transition-colors",
+                  isActive ? "bg-ink text-white" : "bg-ink/[0.06] text-ink hover:bg-ink/[0.1]",
+                )}
+              >
+                {stage}
+                {count > 0 && (
+                  <span
+                    className={cn(
+                      "ml-1 rounded-full px-1.5 text-[0.68rem]",
+                      isActive ? "bg-white/20" : "bg-ink/10",
+                    )}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 space-y-3">
+          {displayLeads.filter((l) => l.stage === mobileStage).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-ink/[0.08] rounded-xl">
+              <p className="text-sm text-slate">No sellers in this stage</p>
+            </div>
+          ) : (
+            displayLeads
+              .filter((l) => l.stage === mobileStage)
+              .map((lead) => (
+                <LeadCard key={lead.id} lead={lead} onClick={() => setSelectedId(lead.id)} />
+              ))
+          )}
+        </div>
+      </div>
+
+      {/* Desktop: full horizontal Kanban */}
+      <div className="hidden md:block overflow-x-auto pb-4">
         <div className="flex gap-4" style={{ minWidth: "max-content" }}>
           {STAGES.map((stage) => {
-            const stageLeads = leads.filter((l) => l.stage === stage);
+            const stageLeads = displayLeads.filter((l) => l.stage === stage);
             const headerTone = STAGE_HEADER_TONE[stage];
             const isDead = stage === "Dead";
             return (
-              <div key={stage} className="w-[260px] shrink-0" style={{ minWidth: 220 }}>
-                {/* Column header */}
+              <div key={stage} className="w-[260px] md:w-[280px] shrink-0" style={{ minWidth: 220 }}>
+                {/* Column header — sticky */}
                 <div
                   className={cn(
-                    "mb-3 flex items-center justify-between rounded-lg border px-2.5 py-1.5",
+                    "sticky top-0 z-10 mb-3 flex items-center justify-between rounded-lg border px-2.5 py-1.5 backdrop-blur-sm",
                     headerTone,
                   )}
                 >
@@ -556,8 +706,8 @@ export default function CashOfferPipeline() {
                   </span>
                 </div>
 
-                {/* Cards */}
-                <div className="space-y-2">
+                {/* Cards — vertically scrollable within column when tall */}
+                <div className="max-h-[calc(100vh-320px)] overflow-y-auto space-y-2">
                   {stageLeads.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 px-4 text-center border-2 border-dashed border-ink/[0.08] rounded-xl">
                       <p className="text-xs text-slate">

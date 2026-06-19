@@ -106,6 +106,7 @@ export default function ListingWriterPage() {
         description="Turn raw property facts into a vivid, MLS-ready listing description — lifestyle hook first, standout features woven in, fair-housing compliant."
         submitLabel="Write description"
         outputTitle="MLS description"
+        printable={true}
         tryExample={!selectedId ? TRY_EXAMPLE : undefined}
         initial={initial}
         fields={[

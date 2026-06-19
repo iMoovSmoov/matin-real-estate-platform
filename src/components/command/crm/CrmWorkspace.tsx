@@ -16,11 +16,14 @@ import {
   SlidersHorizontal,
   UserPlus,
   ChevronRight,
+  Check,
+  X,
 } from "lucide-react";
 import type { Lead } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { cn, compactUsd, initials, timeAgo } from "@/lib/utils";
 import { LeadDrawer } from "@/components/command/crm/LeadDrawer";
+import { AddLeadDrawer } from "@/components/command/crm/AddLeadDrawer";
 import { stageTone, scoreTone } from "@/components/command/crm/leadStyles";
 
 type SortKey = "score" | "recency" | "name";
@@ -65,23 +68,26 @@ const SMART_LISTS: SmartList[] = [
 ];
 
 export function CrmWorkspace({ leads }: { leads: Lead[] }) {
+  const [localLeads, setLocalLeads] = useState<Lead[]>(leads);
   const [listId, setListId] = useState<string>("followup");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("recency");
   const [active, setActive] = useState<Lead | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addedName, setAddedName] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const sl of SMART_LISTS) c[sl.id] = leads.filter(sl.match).length;
+    for (const sl of SMART_LISTS) c[sl.id] = localLeads.filter(sl.match).length;
     return c;
-  }, [leads]);
+  }, [localLeads]);
 
   const list = SMART_LISTS.find((l) => l.id === listId) ?? SMART_LISTS[SMART_LISTS.length - 1];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const rows = leads.filter((l) => {
+    const rows = localLeads.filter((l) => {
       if (!list.match(l)) return false;
       if (q) {
         const hay = `${l.name} ${l.email} ${l.community} ${l.intent} ${l.source} ${l.tags.join(" ")}`.toLowerCase();
@@ -101,7 +107,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       }
     });
     return rows;
-  }, [leads, list, query, sort]);
+  }, [localLeads, list, query, sort]);
 
   return (
     <div>
@@ -137,7 +143,10 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
         </div>
 
         {/* Add lead — always visible, high tap target */}
-        <button className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90 shrink-0">
+        <button
+          onClick={() => setAddOpen(true)}
+          className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-3.5 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/90 shrink-0"
+        >
           <UserPlus className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Add lead</span>
         </button>
@@ -145,7 +154,8 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
 
       {/* ── Smart lists (desktop always visible; mobile collapsible) ──────────── */}
       <div className={cn("mb-3", !filtersOpen && "hidden sm:block")}>
-        <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1">
+        <div className="relative overflow-hidden">
+          <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 sm:[mask-image:none] [mask-image:linear-gradient(to_right,black_80%,transparent_100%)]">
           {SMART_LISTS.map((sl) => {
             const on = sl.id === listId;
             const Icon = sl.icon;
@@ -176,6 +186,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
               </button>
             );
           })}
+          </div>
         </div>
         {/* Mobile sort (inside expanded filter panel) */}
         <div className="mt-2 sm:hidden">
@@ -194,6 +205,21 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             {filtered.length} {filtered.length === 1 ? "lead" : "leads"}
           </p>
         </div>
+
+        {/* Inline success banner — shown after a lead is added */}
+        {addedName && (
+          <div className="flex items-center gap-2 border-b border-success/20 bg-success/[0.06] px-4 py-2 text-[0.8rem] font-medium text-success">
+            <Check className="h-3.5 w-3.5 shrink-0" />
+            {addedName} added to {list.label}
+            <button
+              onClick={() => setAddedName(null)}
+              className="ml-auto text-success/60 hover:text-success"
+              aria-label="Dismiss"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Mobile: card grid */}
         <div className="divide-y divide-ink/[0.06] sm:hidden">
@@ -223,6 +249,17 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       </div>
 
       <LeadDrawer lead={active} onClose={() => setActive(null)} />
+
+      <AddLeadDrawer
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSave={(newLead) => {
+          setLocalLeads((prev) => [newLead, ...prev]);
+          setAddOpen(false);
+          setAddedName(newLead.firstName);
+          setTimeout(() => setAddedName(null), 4000);
+        }}
+      />
     </div>
   );
 }
@@ -321,9 +358,14 @@ function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
         )}
 
         {/* Last touch */}
-        <p className={cn("mt-1 text-[0.72rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/55")}>
-          {lead.lastContactDaysAgo === 0 ? "contacted today" : `${lead.lastContactDaysAgo}d ago`}
-        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <p className={cn("text-[0.72rem] tabular-nums", overdue ? "font-semibold text-danger" : "text-slate/55")}>
+            {lead.lastContactDaysAgo === 0 ? "contacted today" : `${lead.lastContactDaysAgo}d ago`}
+          </p>
+          {lead.responseMinutes !== undefined && (
+            <ResponseDot minutes={lead.responseMinutes} />
+          )}
+        </div>
       </div>
     </button>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -24,13 +24,20 @@ import {
   Timer,
   X,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { metrics, agentLeaderboard, salesAgents, company } from "@/lib/data";
-import { usd, compactUsd } from "@/lib/utils";
+import { usd, compactUsd, cn } from "@/lib/utils";
 import {
   Panel,
   PanelHeader,
+  StatTile,
+  Pill,
+  LiveDot,
+  SectionLabel,
 } from "@/components/command/ui";
+import { AiMarkdown } from "@/components/command/AiMarkdown";
+import { streamAi } from "@/lib/ai/client";
 import {
   VolumeAreaChart,
   LeadsBySourceChart,
@@ -43,7 +50,6 @@ import {
 
 const k = metrics.kpis;
 
-/** Needs-attention alert chips — numbers driven by data where available */
 const staleCount = metrics.staleLeadsCount ?? 0;
 const ALERTS = [
   {
@@ -66,7 +72,6 @@ const ALERTS = [
   },
 ];
 
-/** 4 KPI tiles — simplified to the four most actionable metrics */
 const KPIS = [
   {
     label: "MTD Volume",
@@ -76,6 +81,8 @@ const KPIS = [
     accent: true,
     href: null,
     chip: null,
+    drillLink: "/hub/reporting",
+    drillLabel: "Closed transactions this month",
   },
   {
     label: "Active Leads",
@@ -84,6 +91,8 @@ const KPIS = [
     icon: <Users className="h-4 w-4" />,
     href: null,
     chip: null,
+    drillLink: "/hub/crm",
+    drillLabel: "All active leads in the CRM",
   },
   {
     label: "Speed to Lead",
@@ -93,6 +102,8 @@ const KPIS = [
     accent: false,
     href: null,
     chip: { label: "Benchmark: <5 min", tone: "green" as const },
+    drillLink: "/hub/reporting",
+    drillLabel: "Response time breakdown by agent",
   },
   {
     label: "Stale Leads",
@@ -102,50 +113,62 @@ const KPIS = [
     accent: false,
     href: "/hub/crm?filter=stale",
     chip: { label: "Need follow-up", tone: "amber" as const },
+    drillLink: null,
+    drillLabel: null,
   },
 ];
 
-/** Recent activity feed */
 const ACTIVITY = [
   {
     text: "New lead from Zillow — Sarah M.",
     sub: "Lake Oswego · buyer inquiry",
     ago: "2m ago",
     dot: "bg-azure",
+    type: "lead",
+    link: "/hub/crm",
   },
   {
     text: "Offer accepted on 8457 NW Lakeshore",
     sub: "Listed at $1.15M",
     ago: "18m ago",
     dot: "bg-emerald-500",
+    type: "transaction",
+    link: "/hub/transactions",
   },
   {
     text: "CMA opened by Kim Tran",
     sub: "Lake Oswego lead · viewed 3 pages",
     ago: "2h ago",
     dot: "bg-azure",
+    type: "lead",
+    link: "/hub/crm",
   },
   {
     text: "Inspection scheduled for TX-4003",
     sub: "Thursday 9 AM · 2 days away",
     ago: "3h ago",
     dot: "bg-amber-400",
+    type: "transaction",
+    link: "/hub/transactions",
   },
   {
     text: "Buyer agreement signed — Reyes family",
     sub: "Showing confirmed for Saturday",
     ago: "5h ago",
     dot: "bg-emerald-500",
+    type: "lead",
+    link: "/hub/crm",
   },
   {
     text: "5-star review from the Harrisons",
     sub: "West Linn · posted on Google",
     ago: "7h ago",
     dot: "bg-emerald-500",
+    type: "activity",
+    link: "/hub/crm",
   },
 ];
 
-/** Lead pipeline stages */
 const PIPELINE_STAGES = [
   { label: "New", count: 18, color: "bg-azure" },
   { label: "Contacted", count: 12, color: "bg-azure/70" },
@@ -154,7 +177,6 @@ const PIPELINE_STAGES = [
 ];
 const PIPELINE_MAX = 18;
 
-/** Agent leaderboard — this month */
 const LEADERBOARD = [
   {
     name: "Jordan Matin",
@@ -208,7 +230,6 @@ const LEADERBOARD = [
   },
 ];
 
-/** Quick-tool launcher cards */
 const TOOLS = [
   { label: "Draft a reply",   href: "/hub/ai/lead-responder", icon: MessageSquareText },
   { label: "Write a listing", href: "/hub/ai/listing-writer", icon: PenSquare         },
@@ -219,8 +240,8 @@ const TOOLS = [
 ];
 
 const topVolume = agentLeaderboard[0]?.volume || 1;
+void topVolume;
 
-/** Source ROI table data */
 const SOURCE_ROI = metrics.sourceRoi ?? [
   { source: "Google Ads",       leads: 189, closed: 14, revenue: 4900000, spend: 52000  },
   { source: "Facebook Ads",     leads: 88,  closed: 8,  revenue: 2800000, spend: 28000  },
@@ -231,26 +252,22 @@ const SOURCE_ROI = metrics.sourceRoi ?? [
   { source: "Cash Offer Funnel",leads: 47,  closed: 12, revenue: 4200000, spend: 6000   },
 ];
 
-/** Compute ROI multiple: revenue/spend, or Infinity for $0 spend */
 function roiMultiple(revenue: number, spend: number): string {
   if (spend === 0) return "∞";
   return `${(revenue / spend).toFixed(1)}x`;
 }
 
-/** Best-ROI row: highest multiple (finite wins over infinite for highlight purposes) */
 const bestRoiSource = SOURCE_ROI.reduce<string>((best, row) => {
   const prev = SOURCE_ROI.find((r) => r.source === best);
   if (!prev) return row.source;
   const prevR = prev.spend === 0 ? Infinity : prev.revenue / prev.spend;
   const curR  = row.spend  === 0 ? Infinity : row.revenue  / row.spend;
-  // prefer finite best; if both infinite pick first
   if (prevR === Infinity && curR === Infinity) return best;
   if (prevR === Infinity) return best;
   if (curR  === Infinity) return row.source;
   return curR > prevR ? row.source : best;
 }, SOURCE_ROI[0]?.source ?? "");
 
-/** Agent speed-to-lead ranking — top 6 by responseTimeMins from agents data */
 const RESPONSE_RANKING = [...salesAgents]
   .filter((a) => a.responseTimeMins != null)
   .sort((a, b) => (a.responseTimeMins ?? 99) - (b.responseTimeMins ?? 99))
@@ -259,7 +276,6 @@ const RESPONSE_RANKING = [...salesAgents]
     const mins = a.responseTimeMins ?? 0;
     const status: "fast" | "mid" | "slow" =
       mins < 5 ? "fast" : mins <= 15 ? "mid" : "slow";
-    // leadsThisMonth from metrics.agentLeaderboard if available
     const metricsEntry = (metrics.agentLeaderboard ?? []).find(
       (m) => m.slug === a.slug,
     );
@@ -331,16 +347,151 @@ function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
+/* ── SlideOver shell ─────────────────────────────────────────────────────── */
+
+function SlideOver({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <>
+      {/* backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-ink/30 cursor-default"
+        onClick={onClose}
+        aria-hidden
+      />
+      {/* panel — bottom sheet on mobile, right side-panel on sm+ */}
+      <div className="fixed inset-x-0 bottom-0 z-50 max-h-[75vh] overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:bottom-auto sm:max-h-full sm:w-full sm:max-w-[480px] sm:rounded-none sm:border-l sm:border-ink/[0.08]">
+        {/* drag handle (mobile only) */}
+        <div className="sticky top-0 flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-ink/20" />
+        </div>
+        {children}
+      </div>
+    </>
+  );
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  /* slide-over state */
+  const [kpiSlideOver, setKpiSlideOver] = useState<string | null>(null);
+  const [roiSlideOver, setRoiSlideOver] = useState<string | null>(null);
+  const [pipelineSlideOver, setPipelineSlideOver] = useState<string | null>(null);
+  const [activitySlideOver, setActivitySlideOver] = useState<number | null>(null);
+  const [agentSlideOver, setAgentSlideOver] = useState<string | null>(null);
+
+  /* AI state */
+  const [speedBriefOpen, setSpeedBriefOpen] = useState(false);
+  const [aiSpeedOutput, setAiSpeedOutput] = useState("");
+  const [teamBriefOpen, setTeamBriefOpen] = useState(false);
+  const [teamBrief, setTeamBrief] = useState("");
+  const [roiAiOutput, setRoiAiOutput] = useState("");
+  const [roiAnalyzing, setRoiAnalyzing] = useState(false);
+  const [coachOutput, setCoachOutput] = useState("");
+  const [isCoaching, setIsCoaching] = useState(false);
+  const [marketingBriefOpen, setMarketingBriefOpen] = useState(false);
+  const [marketingBrief, setMarketingBrief] = useState("");
+
+  /* date range for analytics tab */
+  const [dateRange, setDateRange] = useState<"month" | "quarter" | "year">("month");
 
   useEffect(() => {
     if (!localStorage.getItem("hub_onboarded")) {
       setShowOnboarding(true);
     }
   }, []);
+
+  /* Speed-to-Lead AI brief — fires when panel opens and output is empty */
+  useEffect(() => {
+    if (speedBriefOpen && !aiSpeedOutput) {
+      streamAi(
+        {
+          tool: "coach",
+          input: {
+            context: "speed-to-lead-analysis",
+            teamAvg: metrics.speedToLeadMin ?? 4,
+            benchmark: 5,
+            agents: RESPONSE_RANKING.map((a) => ({
+              name: a.name,
+              mins: a.responseTimeMins,
+              status: a.status,
+            })),
+          },
+        },
+        (_c, full) => setAiSpeedOutput(full),
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speedBriefOpen]);
+
+  /* Team brief — fires when panel opens and output is empty */
+  useEffect(() => {
+    if (teamBriefOpen && !teamBrief) {
+      streamAi(
+        {
+          tool: "coach",
+          input: {
+            context: "team-performance-brief",
+            agents: LEADERBOARD.map((a) => ({
+              name: a.name,
+              closings: a.closings,
+              volume: a.volume,
+              responseTime: a.responseTime,
+            })),
+          },
+        },
+        (_c, full) => setTeamBrief(full),
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teamBriefOpen]);
+
+  /* Marketing brief — fires when panel opens and output is empty */
+  useEffect(() => {
+    if (marketingBriefOpen && !marketingBrief) {
+      streamAi(
+        {
+          tool: "coach",
+          input: {
+            context: "marketing-roi-analysis",
+            sources: SOURCE_ROI.map((r) => ({
+              source: r.source,
+              leads: r.leads,
+              closed: r.closed,
+              revenue: r.revenue,
+              spend: r.spend,
+              roi: roiMultiple(r.revenue, r.spend),
+            })),
+          },
+        },
+        (_c, full) => setMarketingBrief(full),
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketingBriefOpen]);
+
+  /* Reset roi AI output when a different channel is opened */
+  useEffect(() => {
+    setRoiAiOutput("");
+    setRoiAnalyzing(false);
+  }, [roiSlideOver]);
+
+  /* Reset coach output when a different agent is opened */
+  useEffect(() => {
+    setCoachOutput("");
+    setIsCoaching(false);
+  }, [agentSlideOver]);
 
   function dismissOnboarding() {
     localStorage.setItem("hub_onboarded", "1");
@@ -352,6 +503,109 @@ export default function DashboardPage() {
     month: "long",
     day: "numeric",
   });
+
+  /* ── Derived data for slide-overs */
+  const activeRoiRow = SOURCE_ROI.find((r) => r.source === roiSlideOver) ?? null;
+  const activeAgent =
+    LEADERBOARD.find((a) => a.name === agentSlideOver) ??
+    RESPONSE_RANKING.find((a) => a.name === agentSlideOver) ??
+    null;
+  const activePipelineStage = PIPELINE_STAGES.find((s) => s.label === pipelineSlideOver) ?? null;
+  const activeActivity = activitySlideOver !== null ? ACTIVITY[activitySlideOver] : null;
+
+  /* ── Source ROI table (shared between Overview and Analytics tabs) */
+  function SourceRoiTable({ showSpend = false }: { showSpend?: boolean }) {
+    return (
+      <div className="overflow-x-auto">
+        <table className={cn("w-full", showSpend ? "min-w-[640px]" : "min-w-[560px]")}>
+          <thead>
+            <tr className="border-b border-ink/[0.05]">
+              <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                {showSpend ? "Channel" : "Source"}
+              </th>
+              <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                Leads
+              </th>
+              <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                Closed
+              </th>
+              <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                Revenue
+              </th>
+              {showSpend && (
+                <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                  Spend
+                </th>
+              )}
+              <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                ROI
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {SOURCE_ROI.map((row) => {
+              const isBest = row.source === bestRoiSource;
+              return (
+                <tr
+                  key={row.source}
+                  onClick={() => setRoiSlideOver(row.source)}
+                  className={cn(
+                    "border-b border-ink/[0.05] text-sm last:border-0 cursor-pointer transition-colors",
+                    isBest ? "bg-emerald-50/50 hover:bg-emerald-50" : "hover:bg-paper/60",
+                  )}
+                >
+                  <td className="px-5 py-3">
+                    <span className="font-medium text-ink">{row.source}</span>
+                    {isBest && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[0.62rem] font-semibold text-emerald-700">
+                        Best ROI
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 text-center">
+                    <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[0.72rem] font-medium text-ink">
+                      {row.leads}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3 text-center tabular-nums text-slate">
+                    {row.closed}
+                  </td>
+                  <td className="px-5 py-3 text-right tabular-nums font-semibold text-ink">
+                    {compactUsd(row.revenue)}
+                  </td>
+                  {showSpend && (
+                    <td className="px-3 py-3 text-right tabular-nums text-slate">
+                      {row.spend === 0 ? (
+                        <span className="font-semibold text-emerald-600">Organic</span>
+                      ) : (
+                        usd(row.spend)
+                      )}
+                    </td>
+                  )}
+                  <td className="px-5 py-3 text-right">
+                    <span
+                      className={cn(
+                        "font-display font-semibold tabular-nums",
+                        row.spend === 0
+                          ? "text-emerald-600"
+                          : row.revenue / row.spend >= 100
+                          ? "text-emerald-600"
+                          : row.revenue / row.spend >= 50
+                          ? "text-ink"
+                          : "text-slate",
+                      )}
+                    >
+                      {roiMultiple(row.revenue, row.spend)}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
@@ -368,7 +622,6 @@ export default function DashboardPage() {
             </h1>
             <p className="mt-0.5 text-[0.85rem] text-slate/60">{today}</p>
           </div>
-          {/* Follow-up chip */}
           <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[0.78rem] font-semibold text-amber-700 sm:self-auto">
             <TriangleAlert className="h-3.5 w-3.5" />
             8 leads need follow-up today
@@ -376,17 +629,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Needs-attention chips */}
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="-mx-4 mt-4 flex overflow-x-auto px-4 gap-2 pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
           {ALERTS.map((a) => {
             const Icon = a.icon;
             return (
               <Link
                 key={a.href}
                 href={a.href}
-                className={[
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80",
+                className={cn(
+                  "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80",
                   alertChipClass(a.tone),
-                ].join(" ")}
+                )}
               >
                 <Icon className="h-3 w-3 shrink-0" />
                 {a.label}
@@ -402,12 +655,12 @@ export default function DashboardPage() {
           <button
             key={id}
             onClick={() => setTab(id)}
-            className={[
+            className={cn(
               "shrink-0 whitespace-nowrap px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
               tab === id
                 ? "text-ink border-b-2 border-ink -mb-px"
                 : "text-slate/60 hover:text-ink",
-            ].join(" ")}
+            )}
           >
             {label}
           </button>
@@ -420,15 +673,13 @@ export default function DashboardPage() {
           {/* KPI tiles (2x2 → 4x1) */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {KPIS.map((kpi) => {
-              const inner = (
+              const tileContent = (
                 <div
-                  key={kpi.label}
-                  className={[
-                    "flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-all",
-                    kpi.href ? "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer" : "",
-                  ].join(" ")}
+                  className={cn(
+                    "flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-all h-full",
+                    !kpi.href ? "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer" : "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer",
+                  )}
                 >
-                  {/* Icon + label */}
                   <div className="flex items-center justify-between">
                     <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate/60">
                       {kpi.label}
@@ -437,45 +688,55 @@ export default function DashboardPage() {
                       {kpi.icon}
                     </span>
                   </div>
-                  {/* Value */}
                   <span className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
                     {kpi.value}
                   </span>
-                  {/* Delta or chip */}
                   {kpi.delta ? (
                     <span
-                      className={[
+                      className={cn(
                         "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
                         kpi.delta.dir === "up"
                           ? "bg-emerald-50 text-emerald-700"
                           : "bg-red-50 text-red-700",
-                      ].join(" ")}
+                      )}
                     >
                       <TrendingUp className="h-3 w-3" />
                       {kpi.delta.value}
                     </span>
                   ) : kpi.chip ? (
                     <span
-                      className={[
+                      className={cn(
                         "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
                         kpi.chip.tone === "green"
                           ? "bg-emerald-50 text-emerald-700"
                           : kpi.chip.tone === "amber"
                           ? "bg-amber-50 text-amber-700"
                           : "bg-slate-100 text-slate-600",
-                      ].join(" ")}
+                      )}
                     >
                       {kpi.chip.label}
                     </span>
                   ) : null}
                 </div>
               );
-              return kpi.href ? (
-                <Link key={kpi.label} href={kpi.href} className="block">
-                  {inner}
-                </Link>
-              ) : (
-                <div key={kpi.label}>{inner}</div>
+
+              if (kpi.href) {
+                return (
+                  <Link key={kpi.label} href={kpi.href} className="block">
+                    {tileContent}
+                  </Link>
+                );
+              }
+              return (
+                <div
+                  key={kpi.label}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setKpiSlideOver(kpi.label)}
+                  onKeyDown={(e) => e.key === "Enter" && setKpiSlideOver(kpi.label)}
+                >
+                  {tileContent}
+                </div>
               );
             })}
           </div>
@@ -494,24 +755,34 @@ export default function DashboardPage() {
                     Industry benchmark: &lt;5 minutes
                   </p>
                 </div>
-                <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
-                  Full report
-                </Link>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSpeedBriefOpen((prev) => !prev)}
+                    className="flex items-center gap-1 text-[0.74rem] font-semibold text-azure hover:opacity-70"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    AI Brief
+                  </button>
+                  <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
+                    Full report
+                  </Link>
+                </div>
               </div>
               {/* Big number */}
               <div className="mb-4 flex items-end gap-3">
-                <span className={[
+                <span className={cn(
                   "font-display text-5xl font-bold tabular-nums",
                   (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) < 5
                     ? "text-emerald-600"
                     : (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) <= 10
                     ? "text-amber-600"
                     : "text-red-600",
-                ].join(" ")}>
+                )}>
                   {metrics.speedToLeadMin ?? k.avgResponseMins ?? 4} min
                 </span>
-                <span className="mb-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.72rem] font-semibold text-emerald-700">
+                <span className="mb-2 flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.72rem] font-semibold text-emerald-700">
                   Team avg
+                  <LiveDot tone="success" className="ml-0.5" />
                 </span>
               </div>
               {/* Mini leaderboard — top 3 by response time */}
@@ -521,10 +792,10 @@ export default function DashboardPage() {
               <div className="space-y-2.5">
                 {RESPONSE_RANKING.slice(0, 3).map((agent, i) => (
                   <div key={agent.slug} className="flex items-center gap-3">
-                    <span className={[
+                    <span className={cn(
                       "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold",
                       i === 0 ? "bg-amber-100 text-amber-700" : "bg-ink/[0.05] text-slate/60",
-                    ].join(" ")}>
+                    )}>
                       {i + 1}
                     </span>
                     <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
@@ -543,14 +814,32 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <span className="flex-1 text-[0.83rem] font-medium text-ink">{agent.name}</span>
-                    <span className={[
+                    <span className={cn(
                       "text-[0.78rem] font-semibold tabular-nums",
                       (agent.responseTimeMins ?? 99) < 5 ? "text-emerald-600" : (agent.responseTimeMins ?? 99) <= 15 ? "text-amber-600" : "text-red-600",
-                    ].join(" ")}>
+                    )}>
                       {agent.responseTimeMins ?? "—"} min
                     </span>
                   </div>
                 ))}
+              </div>
+              {/* AI Brief collapsible */}
+              <div
+                className={cn(
+                  "overflow-hidden transition-all duration-300",
+                  speedBriefOpen ? "max-h-96 mt-4" : "max-h-0",
+                )}
+              >
+                <div className="pt-4 border-t border-ink/[0.06]">
+                  {aiSpeedOutput ? (
+                    <AiMarkdown text={aiSpeedOutput} />
+                  ) : (
+                    <div className="flex items-center gap-2 text-[0.82rem] text-slate/60">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Generating analysis…
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -562,7 +851,6 @@ export default function DashboardPage() {
                   Stale Leads
                 </h2>
               </div>
-              {/* Big badge */}
               <div className="mb-4 flex items-center gap-3">
                 <span className="font-display text-5xl font-bold tabular-nums text-red-600">
                   {metrics.staleLeadsCount ?? 0}
@@ -576,7 +864,7 @@ export default function DashboardPage() {
               </p>
               <Link
                 href="/hub/crm?filter=stale"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-red-700 transition-colors hover:bg-red-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-red-700 transition-colors hover:bg-red-50"
               >
                 <AlertCircle className="h-3.5 w-3.5" />
                 View stale leads
@@ -593,41 +881,14 @@ export default function DashboardPage() {
                   Source ROI
                 </h2>
                 <p className="mt-0.5 text-[0.73rem] text-slate/50">
-                  Leads, closings, and revenue by marketing channel
+                  Leads, closings, revenue, and ROI by channel — click any row for detail
                 </p>
               </div>
               <Link href="/hub/analytics?tab=marketing" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
                 Full breakdown
               </Link>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px]">
-                <thead>
-                  <tr className="border-b border-ink/[0.05]">
-                    <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Source</th>
-                    <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Leads</th>
-                    <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Closed</th>
-                    <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">Revenue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SOURCE_ROI.map((row) => (
-                    <tr key={row.source} className="border-b border-ink/[0.05] text-sm last:border-0 hover:bg-paper/50">
-                      <td className="px-5 py-3 font-medium text-ink">{row.source}</td>
-                      <td className="px-3 py-3 text-center">
-                        <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[0.72rem] font-medium text-ink">
-                          {row.leads}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-center tabular-nums text-slate">{row.closed}</td>
-                      <td className="px-5 py-3 text-right tabular-nums font-semibold text-ink">
-                        {compactUsd(row.revenue)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <SourceRoiTable showSpend={false} />
           </div>
 
           {/* Quick Tools */}
@@ -678,12 +939,16 @@ export default function DashboardPage() {
               </div>
               <ul className="space-y-3">
                 {ACTIVITY.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
+                  <li
+                    key={i}
+                    onClick={() => setActivitySlideOver(i)}
+                    className="flex min-h-[44px] cursor-pointer items-start gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-paper/60 transition-colors"
+                  >
                     <span
-                      className={[
+                      className={cn(
                         "mt-1.5 h-2 w-2 shrink-0 rounded-full",
                         item.dot,
-                      ].join(" ")}
+                      )}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm leading-snug text-ink">{item.text}</p>
@@ -701,11 +966,20 @@ export default function DashboardPage() {
                 <h2 className="font-display text-[1.05rem] font-semibold text-ink">
                   Lead pipeline
                 </h2>
-                <p className="mt-0.5 text-[0.75rem] text-slate/50">Active leads by stage</p>
+                <p className="mt-0.5 text-[0.75rem] text-slate/50">
+                  Active leads by stage — click any stage to see details
+                </p>
               </div>
               <div className="space-y-4">
                 {PIPELINE_STAGES.map((stage) => (
-                  <div key={stage.label}>
+                  <div
+                    key={stage.label}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setPipelineSlideOver(stage.label)}
+                    onKeyDown={(e) => e.key === "Enter" && setPipelineSlideOver(stage.label)}
+                    className="cursor-pointer rounded-lg px-1 py-1 -mx-1 hover:bg-paper/60 transition-colors"
+                  >
                     <div className="mb-1.5 flex items-center justify-between">
                       <span className="text-[0.83rem] font-medium text-ink">{stage.label}</span>
                       <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[0.72rem] font-semibold text-ink">
@@ -714,14 +988,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-ink/[0.06]">
                       <div
-                        className={["h-full rounded-full transition-all", stage.color].join(" ")}
+                        className={cn("h-full rounded-full transition-all", stage.color)}
                         style={{ width: `${(stage.count / PIPELINE_MAX) * 100}%` }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-              {/* Pipeline total */}
               <div className="mt-5 flex items-center justify-between border-t border-ink/[0.06] pt-4">
                 <span className="text-[0.75rem] text-slate/55">Total in pipeline</span>
                 <span className="font-display text-lg font-semibold text-ink">
@@ -736,6 +1009,48 @@ export default function DashboardPage() {
       {/* ── Tab: Team ────────────────────────────────────────────────────── */}
       {tab === "team" && (
         <div className="space-y-6">
+          {/* Team AI brief button + panel */}
+          <div>
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setTeamBriefOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-ink/[0.08] bg-white px-4 py-2 text-[0.82rem] font-medium text-ink hover:bg-paper/60 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-azure" />
+                Team Summary
+              </button>
+            </div>
+            {teamBriefOpen && (
+              <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)] mb-4">
+                <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-azure" />
+                    <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                      AI Team Brief
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => { setTeamBriefOpen(false); setTeamBrief(""); }}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+                    aria-label="Close team brief"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="p-5">
+                  {teamBrief ? (
+                    <AiMarkdown text={teamBrief} />
+                  ) : (
+                    <div className="flex items-center gap-2 text-[0.82rem] text-slate/60">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Generating team brief…
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Team leaderboard */}
           <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
             <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
@@ -743,7 +1058,9 @@ export default function DashboardPage() {
                 <h2 className="font-display text-[1.05rem] font-semibold text-ink">
                   Team leaderboard &mdash; this month
                 </h2>
-                <p className="mt-0.5 text-[0.73rem] text-slate/50">Top producers by closed volume</p>
+                <p className="mt-0.5 text-[0.73rem] text-slate/50">
+                  Top producers by closed volume — click any agent for coaching brief
+                </p>
               </div>
               <Link
                 href="/hub/reporting"
@@ -765,7 +1082,7 @@ export default function DashboardPage() {
                       <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
                         Rank
                       </th>
-                      <th className="px-3 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                      <th className="sticky left-0 bg-white px-3 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
                         Agent
                       </th>
                       <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
@@ -786,24 +1103,25 @@ export default function DashboardPage() {
                     {LEADERBOARD.map((agent, i) => (
                       <tr
                         key={agent.name}
-                        className={[
-                          "border-b border-ink/[0.05] text-sm transition-colors last:border-0",
+                        onClick={() => setAgentSlideOver(agent.name)}
+                        className={cn(
+                          "border-b border-ink/[0.05] text-sm transition-colors last:border-0 cursor-pointer",
                           agent.highlight
-                            ? "bg-azure/[0.04]"
+                            ? "bg-azure/[0.04] hover:bg-azure/[0.07]"
                             : "hover:bg-paper/60",
-                        ].join(" ")}
+                        )}
                       >
                         <td className="px-5 py-3 text-center">
                           <span
-                            className={[
+                            className={cn(
                               "font-display text-base",
                               agent.highlight ? "font-bold text-azure" : "text-slate/50",
-                            ].join(" ")}
+                            )}
                           >
                             {i + 1}
                           </span>
                         </td>
-                        <td className="px-3 py-3">
+                        <td className="sticky left-0 bg-inherit px-3 py-3">
                           <div className="flex items-center gap-2.5">
                             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
                               {agent.photo ? (
@@ -821,10 +1139,10 @@ export default function DashboardPage() {
                               )}
                             </div>
                             <span
-                              className={[
+                              className={cn(
                                 "text-[0.85rem]",
                                 agent.highlight ? "font-bold text-ink" : "font-medium text-ink",
-                              ].join(" ")}
+                              )}
                             >
                               {agent.name}
                             </span>
@@ -840,10 +1158,10 @@ export default function DashboardPage() {
                           {agent.dom} days
                         </td>
                         <td
-                          className={[
+                          className={cn(
                             "px-5 py-3 text-right tabular-nums text-[0.82rem] font-semibold",
                             parseFloat(agent.responseTime) < 5 ? "text-emerald-600" : "text-slate",
-                          ].join(" ")}
+                          )}
                         >
                           {agent.responseTime}
                         </td>
@@ -884,7 +1202,7 @@ export default function DashboardPage() {
                 <table className="w-full min-w-[480px]">
                   <thead>
                     <tr className="border-b border-ink/[0.05]">
-                      <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
+                      <th className="sticky left-0 bg-white px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
                         Agent
                       </th>
                       <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
@@ -902,9 +1220,10 @@ export default function DashboardPage() {
                     {RESPONSE_RANKING.map((agent) => (
                       <tr
                         key={agent.slug}
-                        className="border-b border-ink/[0.05] text-sm transition-colors last:border-0 hover:bg-paper/60"
+                        onClick={() => setAgentSlideOver(agent.name)}
+                        className="border-b border-ink/[0.05] text-sm transition-colors last:border-0 hover:bg-paper/60 cursor-pointer"
                       >
-                        <td className="px-5 py-3">
+                        <td className="sticky left-0 bg-inherit px-5 py-3">
                           <div className="flex items-center gap-2.5">
                             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
                               {agent.photo ? (
@@ -934,14 +1253,14 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-5 py-3 text-right">
                           <span
-                            className={[
+                            className={cn(
                               "inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.72rem] font-semibold",
                               agent.status === "fast"
                                 ? "bg-emerald-50 text-emerald-700"
                                 : agent.status === "mid"
                                 ? "bg-amber-50 text-amber-700"
                                 : "bg-red-50 text-red-700",
-                            ].join(" ")}
+                            )}
                           >
                             {agent.status === "fast"
                               ? "< 5 min"
@@ -963,6 +1282,25 @@ export default function DashboardPage() {
       {/* ── Tab: Analytics ───────────────────────────────────────────────── */}
       {tab === "analytics" && (
         <div className="space-y-6">
+          {/* Date range selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-[0.78rem] text-slate/60 mr-1">Period:</span>
+            {(["month", "quarter", "year"] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range)}
+                className={cn(
+                  "rounded-full px-3 py-1 text-[0.78rem] font-medium transition-colors",
+                  dateRange === range
+                    ? "bg-ink text-white"
+                    : "border border-ink/[0.08] text-slate/60 hover:text-ink",
+                )}
+              >
+                {range === "month" ? "This Month" : range === "quarter" ? "This Quarter" : "This Year"}
+              </button>
+            ))}
+          </div>
+
           {/* Sales Volume area chart + Lead Sources */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <Panel className="lg:col-span-2">
@@ -1036,9 +1374,16 @@ export default function DashboardPage() {
                   Source ROI &mdash; this month
                 </h2>
                 <p className="mt-0.5 text-[0.73rem] text-slate/50">
-                  Revenue generated vs. marketing spend per channel
+                  Revenue generated vs. marketing spend per channel — click any row for AI analysis
                 </p>
               </div>
+              <button
+                onClick={() => setMarketingBriefOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 text-[0.74rem] font-semibold text-azure hover:opacity-70"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                AI Marketing Analysis
+              </button>
             </div>
             {SOURCE_ROI.length === 0 ? (
               <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
@@ -1046,88 +1391,34 @@ export default function DashboardPage() {
                 <p className="text-[0.88rem] text-slate">No marketing channel data available yet.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  <thead>
-                    <tr className="border-b border-ink/[0.05]">
-                      <th className="px-5 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        Channel
-                      </th>
-                      <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        Leads
-                      </th>
-                      <th className="px-3 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        Closed
-                      </th>
-                      <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        Revenue
-                      </th>
-                      <th className="px-3 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        Spend
-                      </th>
-                      <th className="px-5 py-3 text-right text-[0.7rem] font-bold uppercase tracking-wider text-slate/50">
-                        ROI
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {SOURCE_ROI.map((row) => {
-                      const isBest = row.source === bestRoiSource;
-                      return (
-                        <tr
-                          key={row.source}
-                          className={[
-                            "border-b border-ink/[0.05] text-sm last:border-0 transition-colors",
-                            isBest ? "bg-emerald-50/50" : "hover:bg-paper/60",
-                          ].join(" ")}
-                        >
-                          <td className="px-5 py-3">
-                            <span className="font-medium text-ink">{row.source}</span>
-                            {isBest && (
-                              <span className="ml-2 inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[0.62rem] font-semibold text-emerald-700">
-                                Best ROI
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            <span className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[0.72rem] font-medium text-ink">
-                              {row.leads}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-center tabular-nums text-slate">
-                            {row.closed}
-                          </td>
-                          <td className="px-3 py-3 text-right tabular-nums font-semibold text-ink">
-                            {compactUsd(row.revenue)}
-                          </td>
-                          <td className="px-3 py-3 text-right tabular-nums text-slate">
-                            {row.spend === 0 ? (
-                              <span className="font-semibold text-emerald-600">Organic</span>
-                            ) : (
-                              usd(row.spend)
-                            )}
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            <span
-                              className={[
-                                "font-display font-semibold tabular-nums",
-                                row.spend === 0
-                                  ? "text-emerald-600"
-                                  : row.revenue / row.spend >= 100
-                                  ? "text-emerald-600"
-                                  : row.revenue / row.spend >= 50
-                                  ? "text-ink"
-                                  : "text-slate",
-                              ].join(" ")}
-                            >
-                              {roiMultiple(row.revenue, row.spend)}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <SourceRoiTable showSpend={true} />
+            )}
+            {/* Marketing AI brief panel */}
+            {marketingBriefOpen && (
+              <div className="border-t border-ink/[0.06]">
+                <div className="flex items-center justify-between px-5 py-3 bg-ink/[0.02]">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-azure" />
+                    <span className="text-[0.85rem] font-semibold text-ink">AI Marketing Analysis</span>
+                  </div>
+                  <button
+                    onClick={() => { setMarketingBriefOpen(false); setMarketingBrief(""); }}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+                    aria-label="Close marketing analysis"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="p-5">
+                  {marketingBrief ? (
+                    <AiMarkdown text={marketingBrief} />
+                  ) : (
+                    <div className="flex items-center gap-2 text-[0.82rem] text-slate/60">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Analyzing marketing ROI…
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -1139,6 +1430,456 @@ export default function DashboardPage() {
         {company.name} &middot; {company.stats.annualVolume} annual volume &middot;{" "}
         {company.stats.agents} agents &middot; {usd(metrics.kpis.pipelineValue)} active pipeline
       </p>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          SLIDE-OVERS
+      ════════════════════════════════════════════════════════════════════ */}
+
+      {/* KPI detail slide-over */}
+      <SlideOver open={kpiSlideOver !== null} onClose={() => setKpiSlideOver(null)}>
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+            <div>
+              <h3 className="font-display text-[1.05rem] font-semibold text-ink">
+                {kpiSlideOver} — Detail
+              </h3>
+              <p className="mt-0.5 text-[0.78rem] text-slate/60">
+                {kpiSlideOver === "MTD Volume" && "Closed transactions this month"}
+                {kpiSlideOver === "Active Leads" && "All active leads in the CRM"}
+                {kpiSlideOver === "Speed to Lead" && "Response time breakdown by agent"}
+              </p>
+            </div>
+            <button
+              onClick={() => setKpiSlideOver(null)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            {kpiSlideOver === "MTD Volume" && (
+              <>
+                <SectionLabel>Closed this month</SectionLabel>
+                <p className="text-[0.85rem] text-slate/60">
+                  Showing closed transaction summary. Connect your transaction data source to see individual records here.
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { address: "8457 NW Lakeshore Dr", agent: "Jordan Matin", date: "Jun 14", price: "$1,150,000" },
+                    { address: "2203 SW Canyon Rd", agent: "Joshua Rose", date: "Jun 11", price: "$875,000" },
+                    { address: "4910 Riverside Ln", agent: "Sarah Chen", date: "Jun 9", price: "$640,000" },
+                    { address: "1820 Oak Hill Terrace", agent: "Jordan Matin", date: "Jun 5", price: "$920,000" },
+                  ].map((t, i) => (
+                    <div key={i} className="rounded-xl border border-ink/[0.07] bg-paper/60 p-3">
+                      <p className="text-[0.85rem] font-medium text-ink">{t.address}</p>
+                      <div className="mt-1 flex items-center justify-between text-[0.75rem] text-slate/60">
+                        <span>{t.agent} · {t.date}</span>
+                        <span className="font-semibold text-ink">{t.price}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/hub/reporting"
+                  className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-azure hover:opacity-70"
+                >
+                  View all in Reports <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+            {kpiSlideOver === "Active Leads" && (
+              <>
+                <SectionLabel>Active leads</SectionLabel>
+                <p className="text-[0.85rem] text-slate/60 mb-3">
+                  47 leads are currently active across all stages. Connect your CRM to see individual records here.
+                </p>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {PIPELINE_STAGES.map((s) => (
+                    <div key={s.label} className="rounded-xl border border-ink/[0.07] bg-paper/60 p-3 text-center">
+                      <p className="font-display text-2xl font-semibold text-ink">{s.count}</p>
+                      <p className="text-[0.72rem] text-slate/60">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/hub/crm"
+                  className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-azure hover:opacity-70"
+                >
+                  View all leads in CRM <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+            {kpiSlideOver === "Speed to Lead" && (
+              <>
+                <SectionLabel>Response time by agent</SectionLabel>
+                <p className="text-[0.85rem] text-slate/60 mb-3">
+                  Team average: <strong>{metrics.speedToLeadMin ?? 4} min</strong>. Benchmark: under 5 minutes.
+                </p>
+                <div className="space-y-2">
+                  {RESPONSE_RANKING.map((agent) => (
+                    <div key={agent.slug} className="flex items-center justify-between rounded-xl border border-ink/[0.07] bg-paper/60 p-3">
+                      <span className="text-[0.85rem] font-medium text-ink">{agent.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "text-[0.82rem] font-semibold tabular-nums",
+                          agent.status === "fast" ? "text-emerald-600" : agent.status === "mid" ? "text-amber-600" : "text-red-600",
+                        )}>
+                          {agent.responseTimeMins} min
+                        </span>
+                        <Pill tone={agent.status === "fast" ? "success" : agent.status === "mid" ? "warn" : "danger"}>
+                          {agent.status}
+                        </Pill>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/hub/reporting"
+                  className="mt-3 inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-azure hover:opacity-70"
+                >
+                  View full report <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </SlideOver>
+
+      {/* Pipeline stage slide-over */}
+      <SlideOver open={pipelineSlideOver !== null} onClose={() => setPipelineSlideOver(null)}>
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+            <div>
+              <h3 className="font-display text-[1.05rem] font-semibold text-ink">
+                {pipelineSlideOver} — {activePipelineStage?.count ?? 0} leads
+              </h3>
+              <p className="mt-0.5 text-[0.78rem] text-slate/60">
+                Active leads in this stage
+              </p>
+            </div>
+            <button
+              onClick={() => setPipelineSlideOver(null)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-5 space-y-3">
+            <SectionLabel>Leads in this stage</SectionLabel>
+            <p className="text-[0.85rem] text-slate/60">
+              Connect your CRM data to see individual lead records here. Each lead will show name, source, last contact date, and assigned agent.
+            </p>
+            <div className="space-y-2">
+              {Array.from({ length: activePipelineStage?.count ?? 0 }, (_, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-ink/[0.07] bg-paper/60 p-3">
+                  <div>
+                    <p className="text-[0.85rem] font-medium text-ink">Lead #{i + 1}</p>
+                    <p className="text-[0.72rem] text-slate/55">Source · Last contacted: 2d ago</p>
+                  </div>
+                  <span className="text-[0.72rem] text-slate/40">Agent</span>
+                </div>
+              ))}
+            </div>
+            <Link
+              href={`/hub/crm?stage=${encodeURIComponent(pipelineSlideOver ?? "")}`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-[0.82rem] font-semibold text-azure hover:opacity-70"
+            >
+              View all in CRM <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      </SlideOver>
+
+      {/* Activity slide-over */}
+      <SlideOver open={activitySlideOver !== null} onClose={() => setActivitySlideOver(null)}>
+        {activeActivity && (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+              <h3 className="font-display text-[1.05rem] font-semibold text-ink">
+                Activity Detail
+              </h3>
+              <button
+                onClick={() => setActivitySlideOver(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <span className={cn("mt-1.5 h-3 w-3 shrink-0 rounded-full", activeActivity.dot)} />
+                <div>
+                  <p className="font-display text-lg text-ink">{activeActivity.text}</p>
+                  <p className="mt-1 text-[0.82rem] text-slate/60">{activeActivity.sub}</p>
+                  <p className="mt-1 text-[0.75rem] text-slate/40">{activeActivity.ago}</p>
+                </div>
+              </div>
+              <div className="rounded-xl border border-ink/[0.07] bg-paper/60 p-4">
+                <SectionLabel className="mb-2">Related record</SectionLabel>
+                <p className="text-[0.85rem] text-slate/60">
+                  {activeActivity.type === "lead" && "This event is linked to a lead record in your CRM."}
+                  {activeActivity.type === "transaction" && "This event is linked to an active transaction."}
+                  {activeActivity.type === "activity" && "This is a general activity logged in the system."}
+                </p>
+              </div>
+              <Link
+                href={activeActivity.link}
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white hover:bg-ink/90 transition-colors"
+              >
+                {activeActivity.type === "transaction" ? "View transaction" : "View in CRM"}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+      </SlideOver>
+
+      {/* Source ROI slide-over */}
+      <SlideOver open={roiSlideOver !== null} onClose={() => setRoiSlideOver(null)}>
+        {activeRoiRow && (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+              <div>
+                <h3 className="font-display text-[1.05rem] font-semibold text-ink">
+                  {activeRoiRow.source}
+                </h3>
+                <p className="mt-0.5 text-[0.78rem] text-slate/60">Channel performance breakdown</p>
+              </div>
+              <button
+                onClick={() => setRoiSlideOver(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+              {/* Stat grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <StatTile
+                  label="Leads"
+                  value={activeRoiRow.leads}
+                  icon={<UserPlus className="h-4 w-4" />}
+                />
+                <StatTile
+                  label="Closed"
+                  value={activeRoiRow.closed}
+                  icon={<Target className="h-4 w-4" />}
+                />
+                <StatTile
+                  label="Revenue"
+                  value={compactUsd(activeRoiRow.revenue)}
+                  icon={<DollarSign className="h-4 w-4" />}
+                />
+                <StatTile
+                  label="ROI Multiple"
+                  value={roiMultiple(activeRoiRow.revenue, activeRoiRow.spend)}
+                  icon={<TrendingUp className="h-4 w-4" />}
+                />
+              </div>
+
+              {/* Cost efficiency */}
+              <div>
+                <SectionLabel className="mb-2">Cost Efficiency</SectionLabel>
+                {activeRoiRow.spend === 0 ? (
+                  <p className="text-[0.85rem] text-emerald-600 font-semibold">
+                    Organic channel — no spend required.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[0.72rem] text-slate/55 uppercase tracking-wider font-bold">Cost / Lead</p>
+                      <p className="font-display text-2xl font-semibold text-ink">
+                        {usd(Math.round(activeRoiRow.spend / activeRoiRow.leads))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[0.72rem] text-slate/55 uppercase tracking-wider font-bold">Cost / Close</p>
+                      <p className="font-display text-2xl font-semibold text-ink">
+                        {usd(Math.round(activeRoiRow.spend / activeRoiRow.closed))}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* AI Recommendation */}
+              <div>
+                <SectionLabel className="mb-3">AI Recommendation</SectionLabel>
+                <button
+                  disabled={roiAnalyzing}
+                  onClick={async () => {
+                    setRoiAnalyzing(true);
+                    setRoiAiOutput("");
+                    await streamAi(
+                      {
+                        tool: "coach",
+                        input: {
+                          context: "source-roi-analysis",
+                          source: activeRoiRow.source,
+                          leads: activeRoiRow.leads,
+                          closed: activeRoiRow.closed,
+                          revenue: activeRoiRow.revenue,
+                          spend: activeRoiRow.spend,
+                          roi: roiMultiple(activeRoiRow.revenue, activeRoiRow.spend),
+                        },
+                      },
+                      (_c, full) => setRoiAiOutput(full),
+                    );
+                    setRoiAnalyzing(false);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50 transition-colors"
+                >
+                  {roiAnalyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing…
+                    </>
+                  ) : roiAiOutput ? (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Refresh analysis
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Analyze this channel
+                    </>
+                  )}
+                </button>
+                {roiAiOutput && (
+                  <div className="mt-4 rounded-xl border border-ink/[0.06] bg-paper/50 p-4">
+                    <AiMarkdown text={roiAiOutput} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </SlideOver>
+
+      {/* Agent slide-over */}
+      <SlideOver open={agentSlideOver !== null} onClose={() => setAgentSlideOver(null)}>
+        {activeAgent && (
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
+                  {"photo" in activeAgent && activeAgent.photo ? (
+                    <Image
+                      src={activeAgent.photo}
+                      alt={activeAgent.name}
+                      fill
+                      sizes="40px"
+                      className="object-cover object-top"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-[0.72rem] font-semibold text-ink/60">
+                      {activeAgent.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-display text-[1.05rem] font-semibold text-ink">
+                    {activeAgent.name}
+                  </h3>
+                  <p className="mt-0.5 text-[0.78rem] text-slate/60">This month&apos;s performance</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAgentSlideOver(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate/50 hover:bg-paper/60 hover:text-ink transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+              {/* Status badge for response ranking agents */}
+              {"status" in activeAgent && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[0.78rem] text-slate/60">Speed to lead:</span>
+                  <Pill tone={activeAgent.status === "fast" ? "success" : activeAgent.status === "mid" ? "warn" : "danger"}>
+                    {activeAgent.status === "fast" ? "Fast (< 5 min)" : activeAgent.status === "mid" ? "Mid (5–15 min)" : "Slow (> 15 min)"}
+                  </Pill>
+                </div>
+              )}
+
+              {/* KPI tiles */}
+              {"closings" in activeAgent && (
+                <div className="grid grid-cols-2 gap-3">
+                  <StatTile label="Closings" value={activeAgent.closings} icon={<Target className="h-4 w-4" />} />
+                  <StatTile label="Volume" value={activeAgent.volume} icon={<DollarSign className="h-4 w-4" />} />
+                  <StatTile label="Avg DOM" value={`${activeAgent.dom}d`} icon={<Calendar className="h-4 w-4" />} />
+                  <StatTile label="Response" value={activeAgent.responseTime} icon={<Zap className="h-4 w-4" />} />
+                </div>
+              )}
+
+              {/* Pipeline summary */}
+              <div>
+                <SectionLabel className="mb-2">Pipeline</SectionLabel>
+                <div className="flex flex-wrap gap-2">
+                  {PIPELINE_STAGES.map((s) => (
+                    <Pill key={s.label} tone="neutral">
+                      {s.label}: {Math.max(0, Math.floor(s.count * 0.3))}
+                    </Pill>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Coaching Brief */}
+              <div>
+                <SectionLabel className="mb-3">AI Coaching Brief</SectionLabel>
+                {"closings" in activeAgent && (
+                  <button
+                    disabled={isCoaching}
+                    onClick={async () => {
+                      setIsCoaching(true);
+                      setCoachOutput("");
+                      await streamAi(
+                        {
+                          tool: "coach",
+                          input: {
+                            context: "coaching-brief",
+                            agentName: activeAgent.name,
+                            closings: activeAgent.closings,
+                            volume: activeAgent.volume,
+                            dom: activeAgent.dom,
+                            responseTime: activeAgent.responseTime,
+                          },
+                        },
+                        (_c, full) => setCoachOutput(full),
+                      );
+                      setIsCoaching(false);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50 transition-colors"
+                  >
+                    {isCoaching ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Generate brief
+                      </>
+                    )}
+                  </button>
+                )}
+                {coachOutput && (
+                  <div className="mt-4 rounded-xl border border-ink/[0.06] bg-paper/50 p-4">
+                    <AiMarkdown text={coachOutput} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </SlideOver>
     </div>
   );
 }

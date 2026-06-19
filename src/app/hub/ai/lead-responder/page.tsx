@@ -4,11 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Check,
+  CheckCircle,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Copy,
   FileText,
   Loader2,
+  MailCheck,
   MessageSquareText,
   RefreshCw,
   Wand2,
@@ -16,7 +19,7 @@ import {
 import { leads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
-import { LiveDot } from "@/components/command/ui";
+import { LiveDot, Pill } from "@/components/command/ui";
 import { cn } from "@/lib/utils";
 
 /* ── helpers ───────────────────────────────────────────────────────────── */
@@ -31,6 +34,16 @@ function deriveTimeline(lead: (typeof leads)[number]) {
   return "Next 60–90 days";
 }
 
+function parseSubject(raw: string): { subject: string; body: string } {
+  const lines = raw.split("\n");
+  const first = lines[0]?.trim() ?? "";
+  const sub = first.match(/^(?:subject|subj):\s*(.+)$/i);
+  if (sub) return { subject: sub[1], body: lines.slice(1).join("\n").trimStart() };
+  const hd = first.match(/^#{1,3}\s+(.+)$/);
+  if (hd) return { subject: hd[1], body: lines.slice(1).join("\n").trimStart() };
+  return { subject: "", body: raw };
+}
+
 /* ── types ─────────────────────────────────────────────────────────────── */
 
 type FormValues = {
@@ -41,6 +54,8 @@ type FormValues = {
   budget: string;
   timeline: string;
   message: string;
+  tone: string;
+  channel: string;
 };
 
 const BLANK: FormValues = {
@@ -51,6 +66,8 @@ const BLANK: FormValues = {
   budget: "",
   timeline: "",
   message: "",
+  tone: "Warm & Personal",
+  channel: "Email (full)",
 };
 
 const SOURCE_OPTIONS = [
@@ -64,6 +81,9 @@ const SOURCE_OPTIONS = [
   "Walk-in",
   "Other",
 ];
+
+const TONE_OPTIONS = ["Warm & Personal", "Professional", "Urgent / Time-sensitive"];
+const CHANNEL_OPTIONS = ["Email (full)", "SMS (under 160 chars)"];
 
 /* ── label component ───────────────────────────────────────────────────── */
 
@@ -94,6 +114,15 @@ export default function LeadResponderPage() {
   const [busy, setBusy] = useState(false);
   const [touched, setTouched] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sentAt, setSentAt] = useState<Date | null>(null);
+  const [mobileOutputOpen, setMobileOutputOpen] = useState(false);
+
+  /* ── derived values ─────────────────────────────────────────────────── */
+
+  const wordCount = output.trim() ? output.trim().split(/\s+/).filter(Boolean).length : 0;
+  const { subject: subjectLine, body: outputBody } = parseSubject(output);
+  const isSms = values.channel === "SMS (under 160 chars)";
+  const loadedLead = crmValue ? leads.find((l) => l.id === crmValue) : null;
 
   /* ── CRM loader ─────────────────────────────────────────────────────── */
 
@@ -105,7 +134,8 @@ export default function LeadResponderPage() {
     }
     const lead = leads.find((l) => l.id === id);
     if (!lead) return;
-    setValues({
+    setValues((prev) => ({
+      ...prev,
       name: lead.name,
       source: lead.source,
       intent: lead.intent,
@@ -113,7 +143,7 @@ export default function LeadResponderPage() {
       budget: formatBudget(lead.budgetMin, lead.budgetMax),
       timeline: deriveTimeline(lead),
       message: lead.aiSummary ?? "",
-    });
+    }));
     setLoadedName(lead.firstName);
     setOutput("");
     setTouched(false);
@@ -132,6 +162,8 @@ export default function LeadResponderPage() {
     setBusy(true);
     setTouched(true);
     setOutput("");
+    setSentAt(null);
+    setMobileOutputOpen(true);
     try {
       await streamAi(
         { tool: "lead-responder", input: values },
@@ -153,13 +185,17 @@ export default function LeadResponderPage() {
       budget: formatBudget(lead.budgetMin, lead.budgetMax),
       timeline: deriveTimeline(lead),
       message: lead.aiSummary ?? "",
+      tone: values.tone,
+      channel: values.channel,
     };
     setCrmValue(lead.id);
     setLoadedName(lead.firstName);
     setValues(filled);
     setOutput("");
+    setSentAt(null);
     setTouched(true);
     setBusy(true);
+    setMobileOutputOpen(true);
     try {
       await streamAi(
         { tool: "lead-responder", input: filled },
@@ -182,6 +218,12 @@ export default function LeadResponderPage() {
     }
   }
 
+  /* ── mark sent ──────────────────────────────────────────────────────── */
+
+  function markSent() {
+    setSentAt(new Date());
+  }
+
   /* ── shared input classes ───────────────────────────────────────────── */
 
   const inputCls =
@@ -189,6 +231,53 @@ export default function LeadResponderPage() {
 
   const selectCls =
     "w-full appearance-none rounded-lg border border-ink/[0.08] bg-white py-2 pl-3 pr-8 text-[0.85rem] text-ink transition-colors focus:border-ink/40 focus:outline-none";
+
+  /* ── output content (shared between desktop and mobile slide-over) ─── */
+
+  function OutputContent() {
+    return isSms ? (
+      <div className="rounded-2xl bg-ink/[0.04] border border-ink/[0.08] p-4">
+        <AiMarkdown text={output} />
+        {busy && (
+          <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />
+        )}
+        {!busy && output && (
+          <p className={cn("mt-2 text-[0.72rem]", output.length > 160 ? "text-red-500" : "text-slate/60")}>
+            {output.length}/160 chars
+          </p>
+        )}
+      </div>
+    ) : (
+      <div className="rounded-xl border border-ink/[0.08] bg-[#f9f8f7] overflow-hidden">
+        {/* email header */}
+        <div className="border-b border-ink/[0.06] bg-white px-5 py-3 space-y-1.5">
+          <div className="flex items-center gap-2 text-[0.8rem]">
+            <span className="w-14 shrink-0 text-slate/60 font-medium">From:</span>
+            <span className="text-ink">Matin Real Estate · (503) 622-9624</span>
+          </div>
+          <div className="flex items-center gap-2 text-[0.8rem]">
+            <span className="w-14 shrink-0 text-slate/60 font-medium">To:</span>
+            <span className="text-ink">{values.name || "Lead"}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[0.8rem]">
+            <span className="w-14 shrink-0 text-slate/60 font-medium">Subject:</span>
+            <span className={cn("text-ink", !subjectLine && "text-slate/40")}>
+              {subjectLine || "—"}
+            </span>
+          </div>
+        </div>
+        {/* email body */}
+        <div className="px-5 py-5">
+          <div className="prose-document text-[0.875rem] leading-relaxed text-ink">
+            <AiMarkdown text={outputBody} />
+            {busy && (
+              <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ── render ─────────────────────────────────────────────────────────── */
 
@@ -217,9 +306,66 @@ export default function LeadResponderPage() {
         </div>
       </div>
 
+      {/* ── Mobile slide-over output panel ── */}
+      {mobileOutputOpen && (
+        <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col rounded-t-2xl border-t border-ink/[0.08] bg-white shadow-2xl lg:hidden">
+          {/* drag handle */}
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="h-1 w-8 rounded-full bg-ink/20" />
+          </div>
+          {/* slide-over header */}
+          <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              {busy ? <LiveDot tone="azure" /> : <FileText className="h-4 w-4 text-ink" />}
+              <span className="text-[0.84rem] font-semibold text-ink">
+                {isSms ? "SMS draft" : "Drafted reply"}
+              </span>
+              {busy && <span className="text-[0.72rem] text-slate/70">streaming live</span>}
+              {sentAt && <Pill tone="success">Sent</Pill>}
+            </div>
+            <button
+              onClick={() => setMobileOutputOpen(false)}
+              className="rounded-lg p-1 text-slate hover:text-ink"
+            >
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          {/* slide-over body */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <OutputContent />
+          </div>
+          {/* slide-over action bar */}
+          <div className="border-t border-ink/[0.08] bg-white px-4 py-3 flex gap-2">
+            <button
+              onClick={copy}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-ink/[0.08] py-2.5 text-[0.84rem] font-medium text-slate hover:text-ink"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              onClick={markSent}
+              disabled={!!sentAt}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.84rem] font-semibold text-white disabled:opacity-50"
+            >
+              {sentAt ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <MailCheck className="h-4 w-4" />
+              )}
+              {sentAt ? "Marked sent" : "Mark Sent"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* ════════════════ INPUT COLUMN ════════════════ */}
-        <div className="rounded-2xl border border-ink/[0.08] bg-white p-5">
+        <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 min-h-[560px]">
           {/* panel header */}
           <div>
             <span className="inline-block rounded-full bg-ink/[0.04] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink/60">
@@ -275,6 +421,25 @@ export default function LeadResponderPage() {
               </span>
             )}
           </div>
+
+          {/* ── Lead score strip ── */}
+          {loadedLead && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap px-1">
+              <span className="font-display text-2xl leading-none text-ink">{loadedLead.score}</span>
+              <Pill tone="neutral">{loadedLead.stage}</Pill>
+              {loadedLead.tags[0] && (
+                <Pill tone={loadedLead.tags.includes("Urgent") ? "danger" : "azure"}>
+                  {loadedLead.tags[0]}
+                </Pill>
+              )}
+              <span className="text-[0.72rem] text-slate/60">
+                Last contact:{" "}
+                {loadedLead.lastContactDaysAgo === 0
+                  ? "today"
+                  : `${loadedLead.lastContactDaysAgo}d ago`}
+              </span>
+            </div>
+          )}
 
           {/* ── form ── */}
           <form
@@ -370,6 +535,46 @@ export default function LeadResponderPage() {
               />
             </div>
 
+            {/* Tone */}
+            <div className="flex flex-col gap-1.5">
+              <FieldLabel htmlFor="f-tone">Tone</FieldLabel>
+              <div className="relative">
+                <select
+                  id="f-tone"
+                  value={values.tone}
+                  onChange={(e) => set("tone", e.target.value)}
+                  className={selectCls}
+                >
+                  {TONE_OPTIONS.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
+              </div>
+            </div>
+
+            {/* Channel */}
+            <div className="flex flex-col gap-1.5">
+              <FieldLabel htmlFor="f-channel">Channel</FieldLabel>
+              <div className="relative">
+                <select
+                  id="f-channel"
+                  value={values.channel}
+                  onChange={(e) => set("channel", e.target.value)}
+                  className={selectCls}
+                >
+                  {CHANNEL_OPTIONS.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
+              </div>
+            </div>
+
             {/* Message */}
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <FieldLabel htmlFor="f-message">
@@ -380,7 +585,7 @@ export default function LeadResponderPage() {
                 value={values.message}
                 onChange={(e) => set("message", e.target.value)}
                 placeholder="What did they say or ask for?"
-                rows={3}
+                rows={4}
                 className={cn(inputCls, "resize-y")}
               />
             </div>
@@ -394,40 +599,68 @@ export default function LeadResponderPage() {
               >
                 {busy ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> AI is
-                    writing…
+                    <Loader2 className="h-4 w-4 animate-spin" /> AI is writing…
                   </>
                 ) : (
                   <>
-                    <Wand2 className="h-4 w-4" /> Draft reply
+                    <Wand2 className="h-4 w-4" />
+                    {isSms ? "Draft SMS" : "Draft reply"}
                   </>
                 )}
               </button>
             </div>
           </form>
+
+          {/* ── Mobile "View draft" banner (visible when output exists and slide-over closed) ── */}
+          {output && !mobileOutputOpen && (
+            <button
+              onClick={() => setMobileOutputOpen(true)}
+              className="lg:hidden mt-4 flex w-full items-center justify-between gap-3 rounded-xl border border-ink/[0.08] bg-white px-4 py-3 text-left"
+            >
+              <div className="min-w-0">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/60 mb-0.5">
+                  Draft ready
+                </p>
+                <p className="truncate text-[0.84rem] text-ink">{output.slice(0, 80)}…</p>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate/50" />
+            </button>
+          )}
         </div>
 
-        {/* ════════════════ OUTPUT COLUMN ════════════════ */}
-        <div className="flex flex-col rounded-2xl border border-ink/[0.08] bg-white">
+        {/* ════════════════ OUTPUT COLUMN (desktop only) ════════════════ */}
+        <div className="hidden lg:flex flex-col rounded-2xl border border-ink/[0.08] bg-white min-h-[560px]">
           {/* output header bar */}
           <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-3.5">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {busy ? (
                 <LiveDot tone="azure" />
               ) : (
                 <FileText className="h-4 w-4 text-ink" />
               )}
               <span className="text-[0.84rem] font-semibold text-ink">
-                Drafted reply
+                {isSms ? "SMS draft" : "Drafted reply"}
               </span>
               {busy && (
-                <span className="text-[0.72rem] text-slate/70">
-                  streaming live
-                </span>
+                <span className="text-[0.72rem] text-slate/70">streaming live</span>
+              )}
+              {sentAt && (
+                <Pill tone="success">
+                  Sent · {sentAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </Pill>
               )}
             </div>
             {output && !busy && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {wordCount > 0 && (
+                  <Pill
+                    tone={
+                      wordCount <= 130 ? "success" : wordCount <= 160 ? "warn" : "danger"
+                    }
+                  >
+                    {wordCount} words
+                  </Pill>
+                )}
                 <button
                   onClick={copy}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
@@ -438,6 +671,23 @@ export default function LeadResponderPage() {
                     <Copy className="h-3.5 w-3.5" />
                   )}
                   {copied ? "Copied" : "Copy"}
+                </button>
+                <button
+                  onClick={markSent}
+                  disabled={!!sentAt}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
+                    sentAt
+                      ? "cursor-not-allowed text-slate/40"
+                      : "text-slate hover:border-ink/20 hover:text-ink",
+                  )}
+                >
+                  {sentAt ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+                  ) : (
+                    <MailCheck className="h-3.5 w-3.5" />
+                  )}
+                  {sentAt ? "Sent" : "Mark Sent"}
                 </button>
                 <button
                   onClick={run}
@@ -462,38 +712,7 @@ export default function LeadResponderPage() {
                 </p>
               </div>
             ) : (
-              /* email preview wrapper */
-              <div className="rounded-xl border border-ink/[0.08] bg-[#f9f8f7] overflow-hidden">
-                {/* email header */}
-                <div className="border-b border-ink/[0.06] bg-white px-5 py-3 space-y-1.5">
-                  <div className="flex items-center gap-2 text-[0.8rem]">
-                    <span className="w-14 shrink-0 text-slate/60 font-medium">
-                      From:
-                    </span>
-                    <span className="text-ink">
-                      Matin Real Estate · (503) 622-9624
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[0.8rem]">
-                    <span className="w-14 shrink-0 text-slate/60 font-medium">
-                      To:
-                    </span>
-                    <span className="text-ink">
-                      {values.name || "Lead"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* email body */}
-                <div className="px-5 py-5">
-                  <div className="prose-document text-[0.875rem] leading-relaxed text-ink">
-                    <AiMarkdown text={output} />
-                    {busy && (
-                      <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-ink align-middle" />
-                    )}
-                  </div>
-                </div>
-              </div>
+              <OutputContent />
             )}
           </div>
         </div>

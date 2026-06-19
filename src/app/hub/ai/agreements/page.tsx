@@ -105,9 +105,9 @@ export default function AgreementsPage() {
             </option>
           ))}
         </select>
-        {selectedId && (
+        {selectedId && activeBuyer && (
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            Buyer loaded
+            {activeBuyer.name} loaded
           </span>
         )}
       </div>

@@ -16,13 +16,9 @@ export default function IntegrationsPage() {
         <p className="mt-1 text-sm text-slate">
           Connect your brokerage stack — leads, transactions, marketing, and analytics.
         </p>
-        {/* Summary strip */}
-        <p className="mt-2 text-[0.78rem] font-medium text-slate">
-          7 connected &middot; 5 available &middot; 4 coming soon
-        </p>
       </div>
 
-      {/* Grid */}
+      {/* Grid (includes stat tiles, filter pills, and slide-over) */}
       <IntegrationsGrid />
     </div>
   );

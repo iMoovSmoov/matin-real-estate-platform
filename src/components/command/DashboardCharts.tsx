@@ -132,7 +132,7 @@ export function LeadsBySourceChart() {
 }
 
 /* ── 3. Pipeline by stage (bars, $ value) ────────────────────────────── */
-export function PipelineByStageChart() {
+export function PipelineByStageChart({ onBarClick }: { onBarClick?: (stage: string) => void }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={metrics.pipelineByStage} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
@@ -143,7 +143,15 @@ export function PipelineByStageChart() {
           cursor={{ fill: "#0000000a" }}
           content={<DarkTooltip fmt={(v, n) => (n === "value" ? compactUsd(v) : num(v))} />}
         />
-        <Bar dataKey="value" name="value" fill={AZURE} radius={[4, 4, 0, 0]} maxBarSize={34}>
+        <Bar
+          dataKey="value"
+          name="value"
+          fill={AZURE}
+          radius={[4, 4, 0, 0]}
+          maxBarSize={34}
+          className={onBarClick ? "cursor-pointer" : undefined}
+          onClick={(data) => onBarClick?.((data as unknown as Record<string, unknown>).stage as string)}
+        >
           {metrics.pipelineByStage.map((s, i) => (
             <Cell key={i} fill={s.stage === "Closed" ? SUCCESS : AZURE} />
           ))}
@@ -227,7 +235,7 @@ const ROI_DATA = [
   { source: "Organic",    revenue: 98000,  spend: 0     },
 ];
 
-export function SourceRoiChart() {
+export function SourceRoiChart({ onBarClick }: { onBarClick?: (source: string) => void }) {
   // Prefer live data from metrics if populated, fall back to hardcoded ROI_DATA
   const raw = metrics.sourceRoi && metrics.sourceRoi.length > 0 ? metrics.sourceRoi : ROI_DATA;
   return (
@@ -239,13 +247,21 @@ export function SourceRoiChart() {
           {...axisProps}
           tickFormatter={(v) => compactUsd(Number(v))}
         />
-        <YAxis type="category" dataKey="source" {...axisProps} width={88} />
+        <YAxis type="category" dataKey="source" {...axisProps} width={120} />
         <Tooltip
           cursor={{ fill: "#0000000a" }}
           content={<DarkTooltip fmt={(v) => compactUsd(v)} />}
         />
         <Bar dataKey="spend"   name="Spend"   fill="#e2e2e5" radius={[0, 3, 3, 0]} maxBarSize={13} />
-        <Bar dataKey="revenue" name="Revenue" fill={AZURE}   radius={[0, 3, 3, 0]} maxBarSize={13} />
+        <Bar
+          dataKey="revenue"
+          name="Revenue"
+          fill={AZURE}
+          radius={[0, 3, 3, 0]}
+          maxBarSize={13}
+          className={onBarClick ? "cursor-pointer" : undefined}
+          onClick={(data) => onBarClick?.((data as unknown as Record<string, unknown>).source as string)}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

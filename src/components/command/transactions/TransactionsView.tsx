@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   X,
@@ -20,6 +20,11 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Sparkles,
+  Search,
+  Bell,
+  Eye,
+  Upload,
 } from "lucide-react";
 import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
@@ -115,10 +120,11 @@ function matchesFilter(t: Transaction, f: StatusFilter) {
 }
 
 /** Progress as a number 0–100: prefer explicit progress, fall back to checklist ratio. */
-function progressOf(t: Transaction) {
-  if (typeof t.progress === "number" && t.progress > 0) return t.progress;
-  if (t.checklist.length === 0) return 0;
-  return Math.round((t.checklist.filter((c) => c.done).length / t.checklist.length) * 100);
+function progressOf(t: Transaction, checklist?: { label: string; done: boolean }[]) {
+  const list = checklist ?? t.checklist;
+  if (typeof t.progress === "number" && t.progress > 0 && !checklist) return t.progress;
+  if (list.length === 0) return 0;
+  return Math.round((list.filter((c) => c.done).length / list.length) * 100);
 }
 
 function progressTone(t: Transaction): "azure" | "success" | "danger" {
@@ -170,9 +176,37 @@ function daysOverdue(itemDate: Date): number {
   return diff > 0 ? diff : 0;
 }
 
+/**
+ * Parse extracted AI deadline markdown into new checklist item labels.
+ * Pulls Field + Value columns from markdown table rows.
+ */
+function parseDeadlines(markdown: string): string[] {
+  return markdown
+    .split("\n")
+    .filter(
+      (line) =>
+        line.startsWith("|") &&
+        !line.startsWith("| Field") &&
+        !line.startsWith("|---") &&
+        !line.includes("---"),
+    )
+    .map((line) => {
+      const cols = line
+        .split("|")
+        .map((c) => c.trim())
+        .filter(Boolean);
+      if (cols.length >= 2 && cols[1] && cols[1] !== "—" && cols[1] !== "-") {
+        return `${cols[0]}: ${cols[1]}`;
+      }
+      return null;
+    })
+    .filter((x): x is string => x !== null && x.length > 3);
+}
+
 export function TransactionsView({ transactions }: { transactions: Transaction[] }) {
   const [filter, setFilter] = useState<StatusFilter>("All");
   const [active, setActive] = useState<Transaction | null>(null);
+  const [search, setSearch] = useState("");
 
   const counts = useMemo(() => {
     const m = new Map<StatusFilter, number>();
@@ -184,12 +218,17 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
     () =>
       transactions
         .filter((t) => matchesFilter(t, filter))
+        .filter((t) => {
+          if (!search.trim()) return true;
+          const q = search.toLowerCase();
+          return t.address.toLowerCase().includes(q) || t.client.toLowerCase().includes(q);
+        })
         // Soonest-to-close first; closed deals sink to the bottom.
         .sort((a, b) => {
           if (isClosed(a) !== isClosed(b)) return isClosed(a) ? 1 : -1;
           return a.closeDateDaysOut - b.closeDateDaysOut;
         }),
-    [transactions, filter],
+    [transactions, filter, search],
   );
 
   return (
@@ -197,6 +236,17 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
       <div className="overflow-x-auto rounded-2xl border border-ink/[0.08] bg-white backdrop-blur-md">
         {/* Filter bar */}
         <div className="flex flex-nowrap overflow-x-auto items-center gap-2 border-b border-ink/[0.08] px-4 py-3.5 pb-3.5 md:px-5">
+          {/* Search input */}
+          <div className="relative mr-1 shrink-0">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search address or client..."
+              className="h-8 w-48 rounded-lg border border-ink/[0.08] bg-[#f4f4f3] pl-8 pr-3 text-[0.78rem] text-ink placeholder:text-slate/40 focus:border-ink/30 focus:outline-none focus:ring-1 focus:ring-ink/20"
+            />
+          </div>
+
           {FILTERS.map((f) => {
             const on = filter === f;
             const isRisk = f === "At-risk";
@@ -248,9 +298,13 @@ export function TransactionsView({ transactions }: { transactions: Transaction[]
           {visible.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
               <ClipboardList className="h-6 w-6 text-slate/40" />
-              <p className="text-[0.86rem] text-slate">No {filter.toLowerCase()} transactions.</p>
+              <p className="text-[0.86rem] text-slate">
+                {search.trim()
+                  ? `No results for "${search}".`
+                  : `No ${filter.toLowerCase()} transactions.`}
+              </p>
               <button
-                onClick={() => setFilter("All")}
+                onClick={() => { setFilter("All"); setSearch(""); }}
                 className="text-[0.78rem] font-semibold text-ink hover:underline"
               >
                 Show all
@@ -379,21 +433,29 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
 function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: () => void }) {
   const open = !!tx;
   const agent = tx ? getAgent(tx.agentSlug) : undefined;
-  const doneCount = tx?.checklist.filter((c) => c.done).length ?? 0;
-  const total = tx?.checklist.length ?? 0;
-  const pct = tx ? progressOf(tx) : 0;
-  const nextItem = tx?.checklist.find((c) => !c.done) ?? null;
   const type = tx ? shortType(tx.type) : null;
   const docs = tx ? buildDocuments(tx) : [];
   const closed = tx ? isClosed(tx) : false;
+
+  // Mutable local checklist state — resets when tx changes.
+  const [localChecklist, setLocalChecklist] = useState<{ label: string; done: boolean }[]>([]);
+  useEffect(() => {
+    if (tx) setLocalChecklist(tx.checklist);
+  }, [tx]);
+
+  // Derived checklist stats from local mutable state.
+  const doneCount = localChecklist.filter((c) => c.done).length;
+  const total = localChecklist.length;
+  const pct = tx ? progressOf(tx, localChecklist) : 0;
+  const nextItem = localChecklist.find((c) => !c.done) ?? null;
 
   // Simulated due dates for checklist items (since Transaction type has no dueDate).
   const dueDates: Date[] = tx ? simulatedDueDates(tx) : [];
 
   // Compute overdue items: incomplete items where simulated date has passed.
   const overdueItems = tx
-    ? tx.checklist
-        .map((c, i) => ({ ...c, overdueBy: !c.done ? daysOverdue(dueDates[i]) : 0 }))
+    ? localChecklist
+        .map((c, i) => ({ ...c, overdueBy: !c.done ? daysOverdue(dueDates[i] ?? new Date()) : 0 }))
         .filter((c) => !c.done && c.overdueBy > 0)
     : [];
 
@@ -402,7 +464,23 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   const [contractText, setContractText] = useState("");
   const [extractOutput, setExtractOutput] = useState("");
   const [extractLoading, setExtractLoading] = useState(false);
-  const [applyToast, setApplyToast] = useState(false);
+  const [applyDone, setApplyDone] = useState(false);
+
+  // Doc action inline feedback
+  const [docFeedback, setDocFeedback] = useState<Record<string, string>>({});
+
+  // Ref to scroll to extractor section
+  const extractorRef = useRef<HTMLDivElement>(null);
+
+  // Reset all state when tx changes.
+  useEffect(() => {
+    setExtractOpen(false);
+    setContractText("");
+    setExtractOutput("");
+    setExtractLoading(false);
+    setApplyDone(false);
+    setDocFeedback({});
+  }, [tx]);
 
   async function handleExtract() {
     if (!contractText.trim()) return;
@@ -416,17 +494,38 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   }
 
   function handleApplyToChecklist() {
-    setApplyToast(true);
-    setTimeout(() => setApplyToast(false), 3500);
+    const newItems = parseDeadlines(extractOutput);
+    if (newItems.length === 0) return;
+    setLocalChecklist((prev) => [
+      ...prev,
+      ...newItems.map((label) => ({ label, done: false })),
+    ]);
+    setApplyDone(true);
+  }
+
+  function handleDocAction(doc: TxDoc, action: "view" | "send" | "remind" | "upload") {
+    const feedback =
+      action === "upload"
+        ? "Upload started"
+        : action === "remind"
+          ? "Reminder sent"
+          : action === "view"
+            ? "Opening..."
+            : "Sent";
+    setDocFeedback((prev) => ({ ...prev, [doc.name]: feedback }));
+    setTimeout(
+      () =>
+        setDocFeedback((prev) => {
+          const n = { ...prev };
+          delete n[doc.name];
+          return n;
+        }),
+      3000,
+    );
   }
 
   // Reset extractor state when a different transaction is opened.
   function handleClose() {
-    setExtractOpen(false);
-    setContractText("");
-    setExtractOutput("");
-    setExtractLoading(false);
-    setApplyToast(false);
     onClose();
   }
 
@@ -454,6 +553,21 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
           <>
             {/* Header */}
             <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 py-5">
+              {/* Quick-access: open contract extractor */}
+              <button
+                onClick={() => {
+                  setExtractOpen(true);
+                  setTimeout(() => {
+                    extractorRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }, 50);
+                }}
+                aria-label="Open contract extractor"
+                title="Extract contract deadlines"
+                className="absolute right-14 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+
               <button
                 onClick={handleClose}
                 aria-label="Close"
@@ -474,7 +588,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 </span>
                 <span className="text-[0.7rem] text-slate/50">{tx.id}</span>
               </div>
-              <h2 className="mt-1 pr-8 font-display text-2xl text-ink">{tx.address}</h2>
+              <h2 className="mt-1 pr-24 font-display text-2xl text-ink">{tx.address}</h2>
 
               {/* Risk banner */}
               {tx.riskFlag && (
@@ -569,44 +683,52 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 )}
 
                 <ul className="space-y-1">
-                  {tx.checklist.map((c, i) => {
+                  {localChecklist.map((c, i) => {
                     const isNext = !c.done && nextItem != null && c.label === nextItem.label;
-                    const overdueByDays = !c.done ? daysOverdue(dueDates[i]) : 0;
+                    const overdueByDays = !c.done ? daysOverdue(dueDates[i] ?? new Date()) : 0;
                     return (
-                      <li
-                        key={i}
-                        className={cn(
-                          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] transition-colors",
-                          c.done
-                            ? "bg-success/[0.04]"
-                            : isNext
-                              ? "bg-white ring-1 ring-inset ring-azure/20"
-                              : "bg-white/[0.02]",
-                        )}
-                      >
-                        {c.done ? (
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
-                        ) : (
-                          <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
-                        )}
-                        <span
+                      <li key={i}>
+                        <button
+                          onClick={() => {
+                            setLocalChecklist((prev) =>
+                              prev.map((item, idx) =>
+                                idx === i ? { ...item, done: !item.done } : item,
+                              ),
+                            );
+                          }}
                           className={cn(
-                            "flex-1 transition-colors",
+                            "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] text-left transition-colors",
                             c.done
-                              ? "text-success/70 line-through decoration-success/30"
+                              ? "bg-success/[0.04]"
                               : isNext
-                                ? "font-medium text-ink"
-                                : "text-slate",
+                                ? "bg-white ring-1 ring-inset ring-azure/20"
+                                : "bg-white/[0.02]",
                           )}
                         >
-                          {c.label}
-                        </span>
-                        {/* Days overdue badge */}
-                        {overdueByDays > 0 && (
-                          <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
-                            {overdueByDays}d overdue
+                          {c.done ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
+                          ) : (
+                            <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
+                          )}
+                          <span
+                            className={cn(
+                              "flex-1 transition-colors",
+                              c.done
+                                ? "text-success/70 line-through decoration-success/30"
+                                : isNext
+                                  ? "font-medium text-ink"
+                                  : "text-slate",
+                            )}
+                          >
+                            {c.label}
                           </span>
-                        )}
+                          {/* Days overdue badge */}
+                          {overdueByDays > 0 && (
+                            <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
+                              {overdueByDays}d overdue
+                            </span>
+                          )}
+                        </button>
                       </li>
                     );
                   })}
@@ -626,17 +748,22 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 </div>
                 <ul className="space-y-1.5">
                   {docs.map((d) => (
-                    <DocRow key={d.name} doc={d} />
+                    <DocRow
+                      key={d.name}
+                      doc={d}
+                      feedback={docFeedback[d.name]}
+                      onAction={handleDocAction}
+                    />
                   ))}
                 </ul>
               </div>
 
               {/* ── AI Contract Extractor ── */}
-              <div className="rounded-xl border border-ink/[0.08] bg-white">
+              <div ref={extractorRef} className="rounded-xl border border-ink/[0.08] bg-white">
                 {/* Section header — always visible */}
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="inline-flex items-center gap-2 text-[0.86rem] font-semibold text-ink">
-                    <FileText className="h-4 w-4 text-ink" />
+                    <Sparkles className="h-4 w-4 text-ink" />
                     Extract Contract Deadlines
                   </span>
                   <button
@@ -645,7 +772,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                     aria-label={extractOpen ? "Collapse contract extractor" : "Expand contract extractor"}
                   >
                     <FileText className="h-3.5 w-3.5" />
-                    Extract Contract Deadlines
+                    Extract
                     {extractOpen ? (
                       <ChevronUp className="h-3.5 w-3.5 text-slate/60" />
                     ) : (
@@ -698,7 +825,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                     {(extractOutput || extractLoading) && (
                       <div className="rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3">
                         {extractLoading && !extractOutput && (
-                          <p className="text-[0.82rem] text-slate animate-pulse">Extracting deadlines...</p>
+                          <p className="animate-pulse text-[0.82rem] text-slate">Extracting deadlines...</p>
                         )}
                         {extractOutput && (
                           <div className="max-h-72 overflow-y-auto">
@@ -709,10 +836,25 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                           <div className="mt-3 border-t border-ink/[0.08] pt-3">
                             <button
                               onClick={handleApplyToChecklist}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-ink/[0.12] px-4 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                              disabled={applyDone}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[0.82rem] font-medium transition-colors",
+                                applyDone
+                                  ? "cursor-default border border-success/30 bg-success/10 text-success"
+                                  : "border border-ink/[0.12] text-ink hover:bg-ink/[0.04]",
+                              )}
                             >
-                              <ArrowRight className="h-3.5 w-3.5" />
-                              Apply to transaction checklist
+                              {applyDone ? (
+                                <>
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  Deadlines added to checklist
+                                </>
+                              ) : (
+                                <>
+                                  <ArrowRight className="h-3.5 w-3.5" />
+                                  Apply to transaction checklist
+                                </>
+                              )}
                             </button>
                           </div>
                         )}
@@ -724,16 +866,6 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
             </div>
           </>
         )}
-
-        {/* Toast notification */}
-        <div
-          className={cn(
-            "pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 rounded-xl border border-ink/[0.08] bg-ink px-4 py-2.5 text-[0.82rem] text-white shadow-lg transition-all duration-300",
-            applyToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
-          )}
-        >
-          Key deadlines applied to this transaction
-        </div>
       </aside>
     </>
   );
@@ -857,7 +989,15 @@ function buildDocuments(t: Transaction): TxDoc[] {
   return docs;
 }
 
-function DocRow({ doc }: { doc: TxDoc }) {
+function DocRow({
+  doc,
+  feedback,
+  onAction,
+}: {
+  doc: TxDoc;
+  feedback?: string;
+  onAction?: (doc: TxDoc, action: "view" | "send" | "remind" | "upload") => void;
+}) {
   const meta = DOC_STATUS_META[doc.status];
   const Icon = meta.icon;
   return (
@@ -870,8 +1010,50 @@ function DocRow({ doc }: { doc: TxDoc }) {
           )}
         />
         <span className="truncate text-[0.82rem] text-ink">{doc.name}</span>
+        {feedback && (
+          <span className="ml-1 shrink-0 text-[0.7rem] font-medium text-success">{feedback}</span>
+        )}
       </div>
-      <Pill tone={meta.tone}>{meta.label}</Pill>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <Pill tone={meta.tone}>{meta.label}</Pill>
+        {/* Inline action buttons based on doc status */}
+        {doc.status === "pending" && onAction && (
+          <button
+            onClick={() => onAction(doc, "upload")}
+            title="Upload document"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-slate/50 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+          >
+            <Upload className="h-3 w-3" />
+          </button>
+        )}
+        {doc.status === "out" && onAction && (
+          <>
+            <button
+              onClick={() => onAction(doc, "remind")}
+              title="Send reminder"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate/50 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            >
+              <Bell className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => onAction(doc, "view")}
+              title="View document"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate/50 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            >
+              <Eye className="h-3 w-3" />
+            </button>
+          </>
+        )}
+        {(doc.status === "signed" || doc.status === "received") && onAction && (
+          <button
+            onClick={() => onAction(doc, "view")}
+            title="View document"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-slate/50 transition-colors hover:bg-ink/[0.06] hover:text-ink"
+          >
+            <Eye className="h-3 w-3" />
+          </button>
+        )}
+      </div>
     </li>
   );
 }

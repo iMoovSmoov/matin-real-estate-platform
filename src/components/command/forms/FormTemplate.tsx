@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   X,
   Wand2,
@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   FilePen,
   ChevronDown,
+  Users,
 } from "lucide-react";
 import type { ReForm, ReFormField } from "@/lib/forms";
 import { listings, leads, company, getAgent } from "@/lib/data";
@@ -25,11 +26,12 @@ import { Pill } from "@/components/command/ui";
    The real form experience (SkySlope / Dotloop-style). A branded, editable
    document: every ReFormField renders as a labeled input (signature → a
    signature line). The toolbar does the real work:
-     • Auto-fill — pick a listing or lead, populate the `autofill` fields
-       (the MLS auto-fill / signature time-saver).
+     • Auto-fill — pick a listing or lead, populate the `autofill` fields.
      • Generate with AI — contract forms → `agreement`, Listing forms →
        `listing-description`, streamed live into a panel.
-     • Save · Send for e-signature (esign only) · Print.
+     • Save — persists draft to localStorage.
+     • Send for e-signature (esign only) — role-assignment modal → POST.
+     • Print — window.print() with slide-over as the only print element.
    ────────────────────────────────────────────────────────────────────────── */
 
 /** Best-effort mapping from a CRM/MLS record onto a form field. */
@@ -117,10 +119,109 @@ export function FormTemplate({ form, onClose }: { form: ReForm | null; onClose: 
   );
 }
 
+// ── Esign role assignment modal ───────────────────────────────────────────────
+
+const ESIGN_ROLES = ["Buyer", "Seller", "Agent", "Co-Agent"] as const;
+type EsignRole = (typeof ESIGN_ROLES)[number];
+
+function EsignModal({
+  form,
+  onSend,
+  onCancel,
+  sending,
+}: {
+  form: ReForm;
+  onSend: (roles: EsignRole[]) => void;
+  onCancel: () => void;
+  sending: boolean;
+}) {
+  const [selected, setSelected] = useState<Set<EsignRole>>(new Set(["Buyer", "Agent"]));
+
+  function toggle(role: EsignRole) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) next.delete(role);
+      else next.add(role);
+      return next;
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 print:hidden">
+      <div className="w-full max-w-sm rounded-2xl border border-ink/[0.08] bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-ink" />
+            <h3 className="text-[0.9rem] font-semibold text-ink">Send for E-Signature</h3>
+          </div>
+          <button
+            onClick={onCancel}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate/60 hover:bg-ink/[0.04] hover:text-ink"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-5 py-4 space-y-3">
+          <p className="text-[0.8rem] text-slate">
+            Select the signing roles for <strong>{form.name}</strong>.
+          </p>
+          <div className="space-y-2">
+            {ESIGN_ROLES.map((role) => (
+              <label
+                key={role}
+                className="flex cursor-pointer items-center gap-3 rounded-lg border border-ink/[0.06] bg-paper/40 px-4 py-3 transition-colors hover:bg-paper"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.has(role)}
+                  onChange={() => toggle(role)}
+                  className="h-4 w-4 rounded border-ink/20 accent-ink"
+                />
+                <span className="text-[0.84rem] font-medium text-ink">{role}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-2 border-t border-ink/[0.06] px-5 py-4">
+          <button
+            onClick={onCancel}
+            className="flex-1 rounded-xl border border-ink/[0.08] py-2 text-[0.82rem] font-medium text-slate transition-colors hover:text-ink"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSend(Array.from(selected) as EsignRole[])}
+            disabled={selected.size === 0 || sending}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-ink py-2 text-[0.82rem] font-semibold text-white transition-colors hover:bg-ink/80 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {sending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            {sending ? "Sending…" : "Send Envelope"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => void }) {
   const records = useMemo(buildRecords, []);
 
-  const [values, setValues] = useState<Record<string, string>>({});
+  // Restore draft from localStorage on mount
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const stored = localStorage.getItem(`form-draft-${form.code}`);
+      return stored ? (JSON.parse(stored) as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  });
   const [signed, setSigned] = useState<Record<string, boolean>>({});
 
   const [recordKey, setRecordKey] = useState<string>("");
@@ -130,13 +231,29 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
   const [aiBusy, setAiBusy] = useState(false);
 
   const [saved, setSaved] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const [showEsignModal, setShowEsignModal] = useState(false);
+  const [esignSending, setEsignSending] = useState(false);
+  const [esignConfirm, setEsignConfirm] = useState<string | null>(null);
 
   const allRecords = [...records.listings, ...records.leads];
   const isListingForm = form.category === "Listing";
   const aiTool: "agreement" | "listing-description" = isListingForm
     ? "listing-description"
     : "agreement";
+
+  // Persist draft to localStorage whenever values change (debounced via useEffect)
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      try {
+        localStorage.setItem(`form-draft-${form.code}`, JSON.stringify(values));
+      } catch {
+        // localStorage may be unavailable
+      }
+    }, 600);
+    return () => clearTimeout(handle);
+  }, [form.code, values]);
 
   function set(name: string, v: string) {
     setValues((p) => ({ ...p, [name]: v }));
@@ -217,13 +334,66 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     }
   }
 
-  function flash(setter: (b: boolean) => void) {
-    setter(true);
-    setTimeout(() => setter(false), 2400);
+  function handleSave() {
+    try {
+      localStorage.setItem(`form-draft-${form.code}`, JSON.stringify(values));
+      setSaved(true);
+      setSaveMessage("Draft saved (local)");
+      setTimeout(() => {
+        setSaved(false);
+        setSaveMessage(null);
+      }, 2400);
+    } catch {
+      setSaveMessage("Could not save — storage unavailable");
+      setTimeout(() => setSaveMessage(null), 2400);
+    }
   }
+
+  async function handleEsignSend(roles: EsignRole[]) {
+    setEsignSending(true);
+    try {
+      const res = await fetch("/api/forms/esign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formCode: form.code,
+          formName: form.name,
+          roles,
+          values,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      setShowEsignModal(false);
+      const roleList = roles.join(", ");
+      setEsignConfirm(
+        data?.id
+          ? `Envelope ${data.id.slice(0, 8)}… sent — recipients: ${roleList}`
+          : `Sent for e-signature (${roleList})`,
+      );
+      setTimeout(() => setEsignConfirm(null), 4000);
+    } catch {
+      setShowEsignModal(false);
+      setEsignConfirm("Error — could not send envelope. Try again.");
+      setTimeout(() => setEsignConfirm(null), 3000);
+    } finally {
+      setEsignSending(false);
+    }
+  }
+
+  const showStrip = !!(filledFrom || saveMessage || esignConfirm);
 
   return (
     <>
+      {/* E-sign role modal */}
+      {showEsignModal && (
+        <EsignModal
+          form={form}
+          onSend={handleEsignSend}
+          onCancel={() => setShowEsignModal(false)}
+          sending={esignSending}
+        />
+      )}
+
       {/* Header / toolbar */}
       <div className="relative shrink-0 border-b border-ink/[0.08] bg-white px-5 py-4 print:hidden">
         <button
@@ -243,8 +413,8 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         </div>
         <h2 className="mt-1 font-display text-xl leading-tight text-ink">{form.name}</h2>
 
-        {/* Toolbar */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* Toolbar — hidden on mobile (replaced by bottom sticky bar) */}
+        <div className="mt-3 hidden flex-wrap items-center gap-2 sm:flex">
           {/* Auto-fill: record picker + button */}
           <div className="flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white p-1">
             <div className="relative">
@@ -271,7 +441,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             <button
               onClick={runAutofill}
               disabled={!recordKey}
-              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-2.5 py-1 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-2.5 py-1 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink/80 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Wand2 className="h-3.5 w-3.5" /> Auto-fill
             </button>
@@ -282,39 +452,71 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             Generate with AI
           </ToolbarButton>
 
-          <ToolbarButton onClick={() => flash(setSaved)}>
+          <ToolbarButton onClick={handleSave}>
             {saved ? <Check className="h-3.5 w-3.5 text-success" /> : <Save className="h-3.5 w-3.5" />}
             {saved ? "Saved" : "Save"}
           </ToolbarButton>
 
-          {form.esign ? (
-            <ToolbarButton onClick={() => flash(setSent)}>
-              {sent ? <Check className="h-3.5 w-3.5 text-success" /> : <Send className="h-3.5 w-3.5" />}
-              {sent ? "Sent" : "Send for e-signature"}
+          {form.esign && (
+            <ToolbarButton onClick={() => setShowEsignModal(true)} disabled={esignSending}>
+              <Send className="h-3.5 w-3.5" />
+              Send for e-signature
             </ToolbarButton>
-          ) : null}
+          )}
 
           <ToolbarButton onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5" /> Print
           </ToolbarButton>
         </div>
 
+        {/* Mobile: auto-fill row only (buttons are in sticky bar) */}
+        <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white p-1 sm:hidden">
+          <div className="relative flex-1 min-w-0">
+            <select
+              value={recordKey}
+              onChange={(e) => setRecordKey(e.target.value)}
+              className="w-full appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-ink focus:outline-none"
+              aria-label="Source record for auto-fill"
+            >
+              <option value="">Pick a listing or lead…</option>
+              <optgroup label="Listings">
+                {records.listings.map((r) => (
+                  <option key={r.key} value={r.key}>{r.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Leads">
+                {records.leads.map((r) => (
+                  <option key={r.key} value={r.key}>{r.label}</option>
+                ))}
+              </optgroup>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/60" />
+          </div>
+          <button
+            onClick={runAutofill}
+            disabled={!recordKey}
+            className="shrink-0 inline-flex items-center gap-1 rounded-md bg-ink px-2 py-1 text-[0.72rem] font-semibold text-white disabled:opacity-40"
+          >
+            <Wand2 className="h-3 w-3" /> Fill
+          </button>
+        </div>
+
         {/* Inline confirmations */}
-        {(filledFrom || saved || sent) && (
+        {showStrip && (
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
             {filledFrom && (
               <span className="inline-flex items-center gap-1.5 font-medium text-ink">
                 <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
               </span>
             )}
-            {saved && (
+            {saveMessage && (
               <span className="inline-flex items-center gap-1.5 font-medium text-success">
-                <Check className="h-3.5 w-3.5" /> Draft saved
+                <Check className="h-3.5 w-3.5" /> {saveMessage}
               </span>
             )}
-            {sent && (
+            {esignConfirm && (
               <span className="inline-flex items-center gap-1.5 font-medium text-success">
-                <Check className="h-3.5 w-3.5" /> Sent for e-signature
+                <Check className="h-3.5 w-3.5" /> {esignConfirm}
               </span>
             )}
           </div>
@@ -322,7 +524,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
       </div>
 
       {/* Scrollable document body */}
-      <div className="flex-1 overflow-y-auto bg-[#1a1a1a] px-5 py-5 print:overflow-visible">
+      <div className="flex-1 overflow-y-auto bg-[#1a1a1a] px-5 py-5 pb-20 print:overflow-visible sm:pb-5">
         {/* The branded paper */}
         <article className="mx-auto max-w-[640px] rounded-2xl border border-ink/[0.08] bg-white text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
           {/* Document letterhead */}
@@ -342,7 +544,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               </div>
               <h3 className="mt-0.5 font-display text-lg leading-tight text-slate-900">{form.name}</h3>
               {form.oref && (
-                <div className="mt-1 inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-ink">
+                <div className="mt-1 inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
                   OREF standard form
                 </div>
               )}
@@ -385,7 +587,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
 
         {/* AI drafted clause / copy panel */}
         {(aiOut || aiBusy) && (
-          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-ink/12 bg-white backdrop-blur-md print:hidden">
+          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-white/10 bg-white backdrop-blur-md print:hidden">
             <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
               <Wand2 className="h-4 w-4 text-ink" />
               <span className="text-[0.82rem] font-semibold text-ink">
@@ -401,6 +603,45 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             </div>
           </div>
         )}
+      </div>
+
+      {/* Mobile bottom sticky toolbar */}
+      <div className="fixed bottom-0 right-0 z-[55] flex w-[min(760px,96vw)] items-center justify-around border-t border-ink/[0.08] bg-white px-4 py-3 sm:hidden print:hidden">
+        <button
+          onClick={generate}
+          disabled={aiBusy}
+          className="flex flex-col items-center gap-0.5 text-[0.64rem] font-medium text-ink disabled:opacity-50"
+          aria-label="Generate with AI"
+        >
+          {aiBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5" />}
+          AI
+        </button>
+        <button
+          onClick={handleSave}
+          className="flex flex-col items-center gap-0.5 text-[0.64rem] font-medium text-ink"
+          aria-label="Save draft"
+        >
+          {saved ? <Check className="h-5 w-5 text-success" /> : <Save className="h-5 w-5" />}
+          Save
+        </button>
+        {form.esign && (
+          <button
+            onClick={() => setShowEsignModal(true)}
+            className="flex flex-col items-center gap-0.5 text-[0.64rem] font-medium text-ink"
+            aria-label="Send for e-signature"
+          >
+            <Send className="h-5 w-5" />
+            Send
+          </button>
+        )}
+        <button
+          onClick={() => window.print()}
+          className="flex flex-col items-center gap-0.5 text-[0.64rem] font-medium text-ink"
+          aria-label="Print"
+        >
+          <Printer className="h-5 w-5" />
+          Print
+        </button>
       </div>
     </>
   );
@@ -419,7 +660,7 @@ function ToolbarButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-ink/12 bg-white px-2.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/15 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] bg-white px-2.5 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/15 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
     >
       {children}
     </button>
@@ -451,7 +692,7 @@ function DocField({
           {field.required && <span className="text-danger">*</span>}
         </label>
         {field.autofill && (
-          <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-ink print:hidden">
+          <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
             <Wand2 className="h-2.5 w-2.5" /> auto
           </span>
         )}
@@ -471,7 +712,7 @@ function DocField({
           <span
             className={cn(
               "font-display text-lg italic",
-              signed ? "text-slate-900" : "text-slate",
+              signed ? "text-slate-900" : "text-slate-400",
             )}
           >
             {signed ? "Matin Real Estate" : "Sign here"}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, PhoneCall } from "lucide-react";
 import { sellerLeads } from "@/lib/data";
 import { AiToolPanel, type Preset } from "@/components/command/AiToolPanel";
+import { StatTile, Pill } from "@/components/command/ui";
 
 // Derive motivation keyword from free-text motivation field
 function motivationKeyword(text: string): string {
@@ -18,6 +19,10 @@ function motivationKeyword(text: string): string {
   return "Other";
 }
 
+// Only show leads in actionable stages (exclude Dead, Converted to Listing, Accepted)
+const ACTIONABLE_STAGES = ["New Request", "Needs Valuation", "Offer Sent", "Offer Pending"];
+const actionableLeads = sellerLeads.filter((s) => ACTIONABLE_STAGES.includes(s.stage));
+
 // One-click demo using first seller lead
 const FIRST_LEAD = sellerLeads[0];
 const TRY_EXAMPLE: Preset = FIRST_LEAD
@@ -27,6 +32,10 @@ const TRY_EXAMPLE: Preset = FIRST_LEAD
         address: FIRST_LEAD.address,
         city: FIRST_LEAD.city,
         estValue: String(FIRST_LEAD.estValue),
+        beds: String(FIRST_LEAD.beds ?? ""),
+        baths: String(FIRST_LEAD.baths ?? ""),
+        sqft: String(FIRST_LEAD.sqft ?? ""),
+        yearBuilt: String(FIRST_LEAD.yearBuilt ?? ""),
         condition: FIRST_LEAD.condition,
         motivation: motivationKeyword(FIRST_LEAD.motivation),
         timeline: FIRST_LEAD.timeline,
@@ -37,6 +46,7 @@ const TRY_EXAMPLE: Preset = FIRST_LEAD
 
 export default function SellerIntelPage() {
   const [selectedId, setSelectedId] = useState<string>("");
+  const [urgencyRating, setUrgencyRating] = useState<string>("");
 
   const activeLead = sellerLeads.find((s) => s.id === selectedId);
 
@@ -45,12 +55,33 @@ export default function SellerIntelPage() {
         address: activeLead.address,
         city: activeLead.city,
         estValue: `$${activeLead.estValue.toLocaleString()}`,
+        beds: String(activeLead.beds ?? ""),
+        baths: String(activeLead.baths ?? ""),
+        sqft: String(activeLead.sqft ?? ""),
+        yearBuilt: String(activeLead.yearBuilt ?? ""),
         condition: activeLead.condition,
         motivation: motivationKeyword(activeLead.motivation),
         timeline: activeLead.timeline,
-        notes: activeLead.notes,
+        notes: activeLead.notes ?? "",
       }
     : {};
+
+  function handleSellerChange(id: string) {
+    setSelectedId(id);
+    setUrgencyRating("");
+  }
+
+  function handleOutputChange(text: string) {
+    const match = text.match(/Rating:\s*(Hot|Warm|Cold)/i);
+    if (match) setUrgencyRating(match[1]);
+  }
+
+  const urgencyTone =
+    urgencyRating.toLowerCase() === "hot"
+      ? "danger"
+      : urgencyRating.toLowerCase() === "warm"
+      ? "warn"
+      : "neutral";
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8 space-y-4 sm:space-y-5">
@@ -99,22 +130,53 @@ export default function SellerIntelPage() {
         </span>
         <select
           value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
+          onChange={(e) => handleSellerChange(e.target.value)}
           className="flex-1 rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-sm text-ink transition-colors focus:border-ink/40 focus:outline-none"
         >
           <option value="">— choose a seller lead to auto-fill —</option>
-          {sellerLeads.map((s) => (
+          {actionableLeads.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.sellerName} — {s.address}, {s.city}
+              {s.sellerName} — {s.address}, {s.city} [{s.stage}]
             </option>
           ))}
         </select>
-        {selectedId && (
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            Seller loaded
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {selectedId && (
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              Seller loaded
+            </span>
+          )}
+          {urgencyRating && (
+            <Pill tone={urgencyTone}>
+              {urgencyRating} Lead
+            </Pill>
+          )}
+        </div>
       </div>
+
+      {/* Stat-tile summary bar — only shown when an active lead is loaded */}
+      {activeLead && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile
+            label="Est. Value"
+            value={`$${activeLead.estValue.toLocaleString()}`}
+          />
+          <StatTile
+            label="Property"
+            value={`${activeLead.beds}bd / ${activeLead.baths}ba`}
+            hint={`${activeLead.sqft.toLocaleString()} sqft · Built ${activeLead.yearBuilt}`}
+          />
+          <StatTile
+            label="Pipeline Stage"
+            value={activeLead.stage}
+            hint={`${activeLead.daysInStage}d in stage`}
+          />
+          <StatTile
+            label="Timeline"
+            value={activeLead.timeline}
+          />
+        </div>
+      )}
 
       {/* Tool panel — re-key on selectedId so AiToolPanel resets when seller changes */}
       <AiToolPanel
@@ -128,10 +190,17 @@ export default function SellerIntelPage() {
         outputTitle="Seller intelligence brief"
         printable
         initial={initial}
+        outputMinHeight={600}
+        mobileOutputFirst
+        onOutputChange={handleOutputChange}
         fields={[
           { name: "address", label: "Property address", placeholder: "4218 SW Terwilliger Blvd", full: true },
           { name: "city", label: "City", placeholder: "Portland, OR" },
           { name: "estValue", label: "Estimated value ($)", placeholder: "$875,000" },
+          { name: "beds", label: "Beds", placeholder: "4", type: "number" },
+          { name: "baths", label: "Baths", placeholder: "3", type: "number" },
+          { name: "sqft", label: "Sq ft", placeholder: "2,480", type: "number" },
+          { name: "yearBuilt", label: "Year built", placeholder: "1988", type: "number", optional: true },
           {
             name: "condition",
             label: "Condition",
