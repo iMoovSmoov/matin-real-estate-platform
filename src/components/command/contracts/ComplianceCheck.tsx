@@ -3,15 +3,15 @@
 import { CheckCircle2, AlertTriangle, ShieldCheck, MinusCircle } from "lucide-react";
 import type { ReForm } from "@/lib/forms";
 import type { Listing, Lead } from "@/lib/types";
-import { Pill, ProgressBar } from "@/components/command/ui";
+import { Pill } from "@/components/command/ui";
 import { cn } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Step-4 compliance engine. Derives a pass / warn / n/a checklist from the
-   chosen OREF form + the auto-fill record (listing or lead), so the wizard
-   can decide whether the contract is "Ready to send" or blocked.
-   Oregon-grounded rules: HB 4058 buyer-rep, agency disclosure, SPDS, and the
+   Compliance check — a clean pass / needs-attention checklist that runs
+   against the chosen OREF form + the auto-fill record (listing or lead).
+   Oregon-grounded rules: agency disclosure, HB 4058 buyer-rep, SPDS, and the
    federal pre-1978 Lead-Based Paint trigger off the listing's yearBuilt.
+   Strict black & white — only success / danger carry status color.
    ────────────────────────────────────────────────────────────────────────── */
 
 export type CheckState = "pass" | "warn" | "na";
@@ -31,7 +31,7 @@ export interface ComplianceResult {
   ready: boolean;
 }
 
-/** Pure, exported so the wizard can read `ready`/`warnings` for its summary. */
+/** Pure, exported so the builder can read `ready`/`warnings` for its summary. */
 export function evaluateCompliance(
   form: ReForm,
   record: { kind: "listing"; data: Listing } | { kind: "lead"; data: Lead } | null,
@@ -42,7 +42,7 @@ export function evaluateCompliance(
 
   // 1 — Agency disclosure (first substantial contact, ORS 696.820)
   rows.push({
-    label: "Initial Agency Disclosure delivered",
+    label: "Agency disclosure delivered",
     state: "pass",
     detail: "Logged to the CRM at first contact with a delivery timestamp.",
     statute: "ORS 696.820",
@@ -56,7 +56,7 @@ export function evaluateCompliance(
     detail: buyerSide
       ? "Exclusive buyer rep (C-565) recorded — mandatory before showing or writing offers."
       : "Not a buyer-side document — N/A.",
-    statute: "Oregon HB 4058 (2025)",
+    statute: "HB 4058",
   });
 
   // 3 — Seller's Property Disclosure (listing & seller-side sale docs)
@@ -94,14 +94,14 @@ export function evaluateCompliance(
       detail: comp.trim()
         ? `Written compensation captured: "${comp}".`
         : "No written compensation term — required since HB 4058. Add before routing.",
-      statute: "Oregon HB 4058 (2025)",
+      statute: "HB 4058",
     });
   }
 
   // 6 — Signature blocks (drives off the form having an e-sign signature field)
   const hasSig = form.fields.some((f) => f.type === "signature");
   rows.push({
-    label: "All signature blocks present",
+    label: "Signature blocks present",
     state: hasSig || form.esign ? "pass" : "warn",
     detail:
       hasSig || form.esign
@@ -130,10 +130,10 @@ export function evaluateCompliance(
 
 const STATE_META: Record<
   CheckState,
-  { icon: typeof CheckCircle2; ring: string; text: string; pillTone: "success" | "warn" | "neutral"; word: string }
+  { icon: typeof CheckCircle2; ring: string; text: string; pillTone: "success" | "danger" | "neutral"; word: string }
 > = {
   pass: { icon: CheckCircle2, ring: "bg-success/12 ring-success/25", text: "text-success", pillTone: "success", word: "Pass" },
-  warn: { icon: AlertTriangle, ring: "bg-warn/15 ring-warn/25", text: "text-warn", pillTone: "warn", word: "Action" },
+  warn: { icon: AlertTriangle, ring: "bg-danger/12 ring-danger/25", text: "text-danger", pillTone: "danger", word: "Needs attention" },
   na: { icon: MinusCircle, ring: "bg-white/[0.05] ring-white/10", text: "text-slate-300/55", pillTone: "neutral", word: "N/A" },
 };
 
@@ -147,45 +147,35 @@ export function ComplianceCheck({
   values: Record<string, string>;
 }) {
   const result = evaluateCompliance(form, record, values);
-  const score = result.applicable === 0 ? 0 : Math.round((result.passes / result.applicable) * 100);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Verdict banner */}
       <div
         className={cn(
-          "flex flex-wrap items-center justify-between gap-4 rounded-xl border px-4 py-3.5",
-          result.ready
-            ? "border-success/25 bg-success/[0.08]"
-            : "border-warn/30 bg-warn/[0.08]",
+          "flex items-center gap-3 rounded-xl border px-4 py-3.5",
+          result.ready ? "border-success/25 bg-success/[0.08]" : "border-danger/30 bg-danger/[0.08]",
         )}
       >
-        <div className="flex items-center gap-3">
-          <span
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl ring-1 ring-inset",
-              result.ready ? "bg-success/15 ring-success/30 text-success" : "bg-warn/15 ring-warn/30 text-warn",
-            )}
-          >
-            {result.ready ? <ShieldCheck className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
-          </span>
-          <div>
-            <p className="text-[0.95rem] font-semibold text-white">
-              {result.ready ? "Ready to send" : `${result.warnings} item${result.warnings === 1 ? "" : "s"} need attention`}
-            </p>
-            <p className="text-[0.78rem] text-slate-300/80">
-              {result.ready
-                ? "All applicable Oregon & federal checks pass — route for e-signature."
-                : "Resolve the flagged items below to unblock routing."}
-            </p>
-          </div>
-        </div>
-        <div className="min-w-[9rem]">
-          <div className="mb-1 flex items-center justify-between text-[0.72rem] text-slate-300">
-            <span>Compliance score</span>
-            <span className="font-semibold tabular-nums text-white">{score}%</span>
-          </div>
-          <ProgressBar value={score} tone={result.ready ? "success" : "warn"} />
+        <span
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset",
+            result.ready ? "bg-success/15 ring-success/30 text-success" : "bg-danger/15 ring-danger/30 text-danger",
+          )}
+        >
+          {result.ready ? <ShieldCheck className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+        </span>
+        <div className="min-w-0">
+          <p className="text-[0.95rem] font-semibold text-white">
+            {result.ready
+              ? "Ready to send"
+              : `${result.warnings} item${result.warnings === 1 ? "" : "s"} need attention`}
+          </p>
+          <p className="text-[0.78rem] text-slate-300/80">
+            {result.ready
+              ? `All ${result.applicable} applicable Oregon & federal checks pass.`
+              : "Resolve the flagged items below to unblock sending."}
+          </p>
         </div>
       </div>
 
@@ -210,7 +200,12 @@ export function ComplianceCheck({
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn("text-[0.86rem] font-semibold", row.state === "na" ? "text-slate-300/70" : "text-white")}>
+                  <span
+                    className={cn(
+                      "text-[0.86rem] font-semibold",
+                      row.state === "na" ? "text-slate-300/70" : "text-white",
+                    )}
+                  >
                     {row.label}
                   </span>
                   <Pill tone={meta.pillTone}>{meta.word}</Pill>

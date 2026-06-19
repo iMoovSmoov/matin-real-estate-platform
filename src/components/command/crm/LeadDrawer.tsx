@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import {
   X,
@@ -11,24 +11,127 @@ import {
   Send,
   Mail,
   Phone,
+  MessageSquare,
   MapPin,
   Wallet,
-  CalendarClock,
+  Tag as TagIcon,
+  ChevronDown,
+  UserPlus,
+  StickyNote,
   Flame,
   RefreshCw,
+  CalendarClock,
 } from "lucide-react";
-import type { Lead } from "@/lib/types";
+import type { Lead, LeadStage } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
-import { cn, usd, initials } from "@/lib/utils";
+import { cn, usd, initials, timeAgo } from "@/lib/utils";
 import { Pill } from "@/components/command/ui";
-import { stageTone, scoreTone } from "@/components/command/crm/leadStyles";
+import { LEAD_STAGES, stageTone, scoreTone, scoreLabel } from "@/components/command/crm/leadStyles";
+
+/* ── Communication timeline ──────────────────────────────────────────────────
+   A realistic history, derived DETERMINISTICALLY from the lead's own fields
+   (no Math.random). Two leads with different data get different timelines, but
+   the same lead is always identical. Newest first; minutes-ago for ordering. */
+
+type TimelineKind = "text" | "email" | "call" | "note" | "registered";
+type TimelineEntry = { id: string; kind: TimelineKind; label: string; minsAgo: number };
+
+const DAY = 60 * 24;
+
+/** Stable small integer from a string — keeps the synthesized history varied
+    but reproducible per-lead. */
+function seedFrom(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function buildTimeline(lead: Lead): TimelineEntry[] {
+  const seed = seedFrom(lead.id + lead.name);
+  const entries: TimelineEntry[] = [];
+  const last = lead.lastContactDaysAgo;
+  const created = lead.createdDaysAgo;
+
+  // The most recent touch — its type varies by stage / score.
+  if (last >= 0) {
+    if (lead.stage === "Showing") {
+      entries.push({ id: "t-show", kind: "call", label: `Confirmed showing time for a ${lead.community} listing`, minsAgo: last * DAY });
+    } else if (lead.stage === "Offer" || lead.stage === "Under Contract") {
+      entries.push({ id: "t-offer", kind: "call", label: "Reviewed offer terms over the phone", minsAgo: last * DAY });
+    } else if (lead.score >= 80) {
+      entries.push({ id: "t-text", kind: "text", label: `Texted — "Are you free to tour this week?"`, minsAgo: last * DAY });
+    } else if (lead.unread > 0) {
+      entries.push({ id: "t-in", kind: "text", label: `Inbound text — ${lead.unread} unread`, minsAgo: last * DAY });
+    } else {
+      entries.push({ id: "t-text2", kind: "text", label: "Texted to check in", minsAgo: last * DAY });
+    }
+  }
+
+  // A property-matches email a little before the last touch.
+  const emailDay = Math.min(created - 1, last + 1 + (seed % 3));
+  if (emailDay > last && emailDay >= 1) {
+    const matches = 2 + (seed % 4); // 2–5
+    entries.push({
+      id: "t-email",
+      kind: "email",
+      label: `Emailed ${matches} ${lead.community} matches in the ${usd(lead.budgetMin)}–${usd(lead.budgetMax)} range`,
+      minsAgo: emailDay * DAY,
+    });
+  }
+
+  // An earlier call — left a voicemail for colder leads, connected for warmer.
+  const callDay = Math.min(created - 1, emailDay + 1 + (seed % 4));
+  if (callDay > emailDay && callDay >= 1) {
+    entries.push({
+      id: "t-call",
+      kind: "call",
+      label: lead.score >= 65 ? "Called — talked through timeline & must-haves" : "Called, left a voicemail",
+      minsAgo: callDay * DAY,
+    });
+  }
+
+  // First-touch email auto-reply, shortly after sign-up.
+  if (created >= 2) {
+    entries.push({
+      id: "t-welcome",
+      kind: "email",
+      label: "Sent intro email with neighborhood guide",
+      minsAgo: (created - 1) * DAY,
+    });
+  }
+
+  // The origin event — registered / came in via the source.
+  entries.push({
+    id: "t-reg",
+    kind: "registered",
+    label: `Registered via ${lead.source}`,
+    minsAgo: created * DAY,
+  });
+
+  // Sort newest-first; de-dup any colliding timestamps deterministically.
+  return entries
+    .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id) === i)
+    .sort((a, b) => a.minsAgo - b.minsAgo);
+}
+
+const KIND_ICON: Record<TimelineKind, typeof MessageSquare> = {
+  text: MessageSquare,
+  email: Mail,
+  call: Phone,
+  note: StickyNote,
+  registered: UserPlus,
+};
 
 export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () => void }) {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [stage, setStage] = useState<LeadStage | null>(null);
+  const [stageOpen, setStageOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const [extra, setExtra] = useState<TimelineEntry[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
 
   // Reset transient state whenever a different lead is opened.
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -36,16 +139,30 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
     setActiveId(lead.id);
     setDraft("");
     setBusy(false);
-    setSent(false);
+    setStage(lead.stage);
+    setStageOpen(false);
+    setNoteText("");
+    setExtra([]);
+    setToast(null);
   }
 
   const agent = lead ? getAgent(lead.assignedAgent) : undefined;
+  const currentStage = stage ?? lead?.stage ?? "New";
+
+  const timeline = useMemo(() => {
+    if (!lead) return [];
+    return [...extra, ...buildTimeline(lead)].sort((a, b) => a.minsAgo - b.minsAgo);
+  }, [lead, extra]);
+
+  function flash(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast((t) => (t === msg ? null : t)), 2200);
+  }
 
   async function generate() {
     if (!lead || busy) return;
     setBusy(true);
     setDraft("");
-    setSent(false);
     try {
       await streamAi(
         {
@@ -54,8 +171,8 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
             name: lead.name,
             intent: lead.intent,
             area: lead.community,
-            budget: `$${Math.round(lead.budgetMin / 1000)}k–$${Math.round(lead.budgetMax / 1000)}k`,
-            timeline: lead.tags.includes("Urgent") ? "ASAP" : "—",
+            budget: `${usd(lead.budgetMin)}–${usd(lead.budgetMax)}`,
+            timeline: lead.tags.includes("Urgent") || lead.tags.includes("Hot") ? "ASAP" : "—",
             source: lead.source,
             message: lead.aiSummary,
           },
@@ -73,8 +190,23 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      /* noop */
+      /* clipboard unavailable */
     }
+  }
+
+  function sendReply() {
+    if (!draft.trim() || !lead) return;
+    setExtra((e) => [{ id: `sent-${Date.now()}`, kind: "text", label: `Texted ${lead.firstName} a reply`, minsAgo: 0 }, ...e]);
+    setDraft("");
+    flash(`Sent to ${lead.firstName}`);
+  }
+
+  function logNote() {
+    const t = noteText.trim();
+    if (!t) return;
+    setExtra((e) => [{ id: `note-${Date.now()}`, kind: "note", label: t, minsAgo: 0 }, ...e]);
+    setNoteText("");
+    flash("Note saved");
   }
 
   const open = !!lead;
@@ -84,7 +216,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Scrim */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/55 backdrop-blur-md transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -94,7 +226,7 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(540px,94vw)] flex-col border-l border-white/10 bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(560px,96vw)] flex-col border-l border-white/10 bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.7)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -102,43 +234,105 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
         {lead && (
           <>
             {/* Header */}
-            <div className="relative shrink-0 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-5">
+            <div className="relative shrink-0 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 pb-4 pt-5">
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="flex items-start gap-3 pr-8">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-base font-bold text-white">
+              <div className="flex items-start gap-3 pr-10">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-base font-bold text-ink">
                   {initials(lead.name)}
                 </span>
                 <div className="min-w-0">
-                  <h2 className="font-display text-2xl text-white">{lead.name}</h2>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className={cn("rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset", stageTone(lead.stage))}>
-                      {lead.stage}
-                    </span>
-                    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.7rem] font-semibold ring-1 ring-inset", scoreTone(lead.score))}>
-                      {lead.score >= 80 && <Flame className="h-3 w-3" />} Score {lead.score}
+                  <h2 className="truncate font-display text-2xl text-white">{lead.name}</h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {/* Stage selector */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setStageOpen((o) => !o)}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.72rem] font-semibold ring-1 ring-inset transition-colors",
+                          stageTone(currentStage),
+                        )}
+                      >
+                        {currentStage}
+                        <ChevronDown className="h-3 w-3 opacity-70" />
+                      </button>
+                      {stageOpen && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setStageOpen(false)} aria-hidden />
+                          <div className="absolute left-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-lg border border-white/12 bg-ink-800 py-1 shadow-xl">
+                            {LEAD_STAGES.map((s) => (
+                              <button
+                                key={s}
+                                onClick={() => {
+                                  setStage(s);
+                                  setStageOpen(false);
+                                  if (s !== currentStage) flash(`Moved to ${s}`);
+                                }}
+                                className={cn(
+                                  "flex w-full items-center justify-between px-3 py-1.5 text-left text-[0.8rem] transition-colors hover:bg-white/[0.06]",
+                                  s === currentStage ? "text-white" : "text-slate-300",
+                                )}
+                              >
+                                {s}
+                                {s === currentStage && <Check className="h-3.5 w-3.5 text-white" />}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[0.72rem] font-semibold ring-1 ring-inset", scoreTone(lead.score))}>
+                      {lead.score >= 80 && <Flame className="h-3 w-3" />}
+                      {scoreLabel(lead.score)} · {lead.score}
                     </span>
                     <Pill tone="neutral">{lead.source}</Pill>
                   </div>
                 </div>
+              </div>
+
+              {/* Quick comms actions */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <a
+                  href={`tel:${lead.phone.replace(/[^\d+]/g, "")}`}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                >
+                  <Phone className="h-3.5 w-3.5" /> Call
+                </a>
+                <button
+                  onClick={() => flash(`Texting ${lead.firstName}…`)}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                >
+                  <MessageSquare className="h-3.5 w-3.5" /> Text
+                </button>
+                <a
+                  href={`mailto:${lead.email}`}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                >
+                  <Mail className="h-3.5 w-3.5" /> Email
+                </a>
               </div>
             </div>
 
             {/* Body */}
             <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
               {/* Contact + facts */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 <Fact icon={<Mail className="h-3.5 w-3.5" />} label="Email" value={lead.email} />
                 <Fact icon={<Phone className="h-3.5 w-3.5" />} label="Phone" value={lead.phone} />
                 <Fact icon={<MapPin className="h-3.5 w-3.5" />} label="Area" value={lead.community} />
                 <Fact icon={<Wallet className="h-3.5 w-3.5" />} label="Budget" value={`${usd(lead.budgetMin)}–${usd(lead.budgetMax)}`} />
-                <Fact icon={<Sparkles className="h-3.5 w-3.5" />} label="Intent" value={lead.intent} />
-                <Fact icon={<CalendarClock className="h-3.5 w-3.5" />} label="Last contact" value={lead.lastContactDaysAgo === 0 ? "today" : `${lead.lastContactDaysAgo}d ago`} />
+                <Fact icon={<TagIcon className="h-3.5 w-3.5" />} label="Intent" value={lead.intent} />
+                <Fact
+                  icon={<CalendarClock className="h-3.5 w-3.5" />}
+                  label="Last contact"
+                  value={lead.lastContactDaysAgo === 0 ? "today" : `${lead.lastContactDaysAgo}d ago`}
+                />
               </div>
 
               {/* Tags */}
@@ -154,40 +348,40 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
 
               {/* Assigned agent */}
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3.5 py-3">
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3">
                   <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10">
                     <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[0.7rem] uppercase tracking-wider text-slate-300/55">Assigned to</p>
+                    <p className="text-[0.66rem] uppercase tracking-wider text-slate-300/55">Assigned to</p>
                     <p className="truncate text-[0.86rem] font-semibold text-white">{agent.name}</p>
                   </div>
                 </div>
               )}
 
               {/* AI summary */}
-              <div className="rounded-xl border border-azure/20 bg-azure/[0.06] px-4 py-3">
+              <div className="rounded-xl border border-white/12 bg-white/[0.04] px-4 py-3">
                 <div className="mb-1.5 flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 text-white" />
-                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-white/80">AI lead summary</span>
+                  <span className="text-[0.66rem] font-semibold uppercase tracking-wider text-white/80">AI lead summary</span>
                 </div>
-                <p className="text-[0.86rem] leading-relaxed text-slate-300">{lead.aiSummary}</p>
+                <p className="text-[0.85rem] leading-relaxed text-slate-300">{lead.aiSummary}</p>
               </div>
 
-              {/* ── AI reply generator — the flagship demo ── */}
+              {/* ── Draft reply ── */}
               <div className="rounded-xl border border-white/10 bg-white/[0.04]">
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2.5">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4 text-white" />
-                    <span className="text-[0.84rem] font-semibold text-white">AI first reply</span>
+                    <span className="text-[0.82rem] font-semibold text-white">Draft reply</span>
                   </div>
                   {draft && !busy && (
                     <div className="flex items-center gap-1.5">
-                      <button onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 hover:text-white">
+                      <button onClick={copy} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
                         {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                         {copied ? "Copied" : "Copy"}
                       </button>
-                      <button onClick={generate} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 hover:text-white">
+                      <button onClick={generate} className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[0.7rem] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
                         <RefreshCw className="h-3 w-3" /> Redo
                       </button>
                     </div>
@@ -200,47 +394,116 @@ export function LeadDrawer({ lead, onClose }: { lead: Lead | null; onClose: () =
                       onClick={generate}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[0.85rem] font-semibold text-ink transition-colors hover:bg-paper-200"
                     >
-                      <Sparkles className="h-4 w-4" /> Draft AI reply
+                      <Sparkles className="h-4 w-4" /> Draft a reply with AI
                     </button>
                   ) : (
                     <>
-                      <div className="min-h-[7rem] whitespace-pre-wrap rounded-lg border border-white/10 bg-ink/60 px-3.5 py-3 text-[0.86rem] leading-relaxed text-slate-200">
-                        {draft}
-                        {busy && <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-white align-middle" />}
-                      </div>
-                      {!busy && (
+                      <textarea
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        readOnly={busy}
+                        rows={6}
+                        placeholder="Your reply…"
+                        className="min-h-[7rem] w-full resize-y rounded-lg border border-white/10 bg-ink/60 px-3.5 py-3 text-[0.85rem] leading-relaxed text-slate-200 placeholder:text-slate-300/40 focus:border-white/30 focus:outline-none"
+                      />
+                      {busy ? (
+                        <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate-300">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> AI is drafting a personalized reply…
+                        </div>
+                      ) : (
                         <div className="mt-2.5 flex items-center gap-2">
                           <button
-                            onClick={() => {
-                              setSent(true);
-                              setTimeout(() => setSent(false), 2400);
-                            }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-success px-3.5 py-2 text-[0.82rem] font-semibold text-white transition-colors hover:brightness-110"
+                            onClick={sendReply}
+                            disabled={!draft.trim()}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:opacity-40"
                           >
                             <Send className="h-3.5 w-3.5" /> Send to {lead.firstName}
                           </button>
-                          {busy ? (
-                            <span className="inline-flex items-center gap-1.5 text-[0.76rem] text-slate-300">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" /> drafting…
-                            </span>
-                          ) : (
-                            sent && (
-                              <span className="inline-flex items-center gap-1.5 text-[0.78rem] font-medium text-success">
-                                <Check className="h-3.5 w-3.5" /> Sent via SMS + email
-                              </span>
-                            )
-                          )}
+                          <button
+                            onClick={copy}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-[0.8rem] font-semibold text-white transition-colors hover:bg-white/[0.08]"
+                          >
+                            {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copied ? "Copied" : "Copy"}
+                          </button>
                         </div>
                       )}
                     </>
                   )}
-                  {busy && !draft && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 text-[0.78rem] text-slate-300">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> AI is drafting a personalized reply…
-                    </div>
-                  )}
                 </div>
               </div>
+
+              {/* ── Communication timeline ── */}
+              <div>
+                <div className="mb-2.5 flex items-center gap-2">
+                  <CalendarClock className="h-4 w-4 text-white" />
+                  <h3 className="text-[0.84rem] font-semibold text-white">Communication history</h3>
+                </div>
+                <ol className="relative space-y-3.5 pl-1">
+                  <span className="absolute bottom-2 left-[10px] top-2 w-px bg-white/10" aria-hidden />
+                  {timeline.map((e) => {
+                    const Icon = KIND_ICON[e.kind];
+                    return (
+                      <li key={e.id} className="relative flex gap-3">
+                        <span className="relative z-10 mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-ink-800 text-white ring-1 ring-inset ring-white/15">
+                          <Icon className="h-3 w-3" />
+                        </span>
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <p className="text-[0.82rem] leading-snug text-slate-200">{e.label}</p>
+                          <p className="mt-0.5 text-[0.7rem] text-slate-300/55">
+                            {e.minsAgo === 0 ? "just now" : timeAgo(e.minsAgo)}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+
+              {/* ── Log a note ── */}
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                <div className="mb-2 flex items-center gap-1.5">
+                  <StickyNote className="h-3.5 w-3.5 text-white" />
+                  <span className="text-[0.78rem] font-semibold text-white">Log a note</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        logNote();
+                      }
+                    }}
+                    rows={2}
+                    placeholder="Add a note about this lead…"
+                    className="min-h-[2.5rem] flex-1 resize-y rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[0.82rem] text-white placeholder:text-slate-300/40 focus:border-white/30 focus:outline-none"
+                  />
+                  <button
+                    onClick={logNote}
+                    disabled={!noteText.trim()}
+                    className="shrink-0 rounded-lg bg-white px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:opacity-40"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Toast */}
+            <div
+              className={cn(
+                "pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 transition-all duration-300",
+                toast ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
+              )}
+              aria-live="polite"
+            >
+              {toast && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-ink-800 px-3.5 py-1.5 text-[0.78rem] font-medium text-white shadow-lg">
+                  <Check className="h-3.5 w-3.5 text-success" /> {toast}
+                </span>
+              )}
             </div>
           </>
         )}
@@ -254,7 +517,7 @@ function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; va
     <div className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2">
       <div className="flex items-center gap-1.5 text-slate-300/55">
         {icon}
-        <span className="text-[0.64rem] font-semibold uppercase tracking-wider">{label}</span>
+        <span className="text-[0.62rem] font-semibold uppercase tracking-wider">{label}</span>
       </div>
       <p className="mt-0.5 truncate text-[0.82rem] font-medium text-white">{value}</p>
     </div>

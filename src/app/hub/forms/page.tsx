@@ -1,67 +1,50 @@
-import { FileText, Workflow, Inbox, TableProperties } from "lucide-react";
-import { reForms, intakeFlows } from "@/lib/forms";
-import { StatTile, SectionLabel, LiveDot } from "@/components/command/ui";
+import { FileText, PenLine, BadgeCheck } from "lucide-react";
+import { reForms } from "@/lib/forms";
+import { StatTile, SectionLabel } from "@/components/command/ui";
 import { FormsLibrary } from "@/components/command/forms/FormsLibrary";
-import { IntakeFlows } from "@/components/command/forms/IntakeFlows";
 
-export const metadata = { title: "Forms & Data Flows" };
+export const metadata = { title: "Forms" };
 
 export default function FormsPage() {
   const formCount = reForms.length;
-  const flowCount = intakeFlows.length;
-  const submissions = intakeFlows.reduce((s, f) => s + f.submissionsThisMonth, 0);
-  // Believable count of legacy spreadsheets/Google Forms retired by this module:
-  // one per intake flow + roughly one tracker per form in the library.
-  const retired = flowCount + reForms.length + 12;
+  const esignCount = reForms.filter((f) => f.esign).length;
+  const orefCount = reForms.filter((f) => f.oref).length;
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
       {/* Header */}
       <div>
-        <div className="mb-1.5 flex items-center gap-2">
-          <LiveDot tone="azure" />
-          <SectionLabel>Forms &amp; Data Flows</SectionLabel>
-        </div>
-        <h1 className="font-display text-3xl text-white">Forms &amp; Data Flows</h1>
+        <SectionLabel className="mb-1.5">Forms</SectionLabel>
+        <h1 className="font-display text-3xl text-white">Forms</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
-          Spreadsheets &amp; Google Forms → structured, branded, AI-assisted data flows. Every form an
-          agent reaches for — fully branded, fully editable, with AI auto-filling fields and drafting
-          the language. The end of duplicate data entry.
+          Every form you need, pre-loaded and ready to fill.
         </p>
       </div>
 
-      {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* Stat row */}
+      <div className="grid grid-cols-3 gap-3">
         <StatTile
-          label="Forms in library"
+          label="Forms available"
           value={formCount}
           icon={<FileText className="h-4 w-4" />}
-          hint="OREF + Matin templates"
+          hint="OREF + Matin library"
         />
         <StatTile
-          label="Intake flows"
-          value={flowCount}
-          icon={<Workflow className="h-4 w-4" />}
-          hint="Structured capture pipelines"
-          accent
+          label="E-sign ready"
+          value={esignCount}
+          icon={<PenLine className="h-4 w-4" />}
+          hint="Send for signature in a click"
         />
         <StatTile
-          label="Submissions / mo"
-          value={submissions.toLocaleString("en-US")}
-          delta={{ value: "live capture", dir: "up" }}
-          icon={<Inbox className="h-4 w-4" />}
-        />
-        <StatTile
-          label="Spreadsheets retired"
-          value={retired}
-          delta={{ value: "no more tabs", dir: "up" }}
-          icon={<TableProperties className="h-4 w-4" />}
+          label="OREF official"
+          value={orefCount}
+          icon={<BadgeCheck className="h-4 w-4" />}
+          hint="Oregon standard forms"
         />
       </div>
 
-      {/* Sections */}
+      {/* Library */}
       <FormsLibrary />
-      <IntakeFlows />
     </div>
   );
 }

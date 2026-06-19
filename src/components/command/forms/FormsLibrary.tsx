@@ -4,24 +4,17 @@ import { useMemo, useState } from "react";
 import {
   Search,
   FileText,
-  Sparkles,
   PenLine,
   ShieldCheck,
   ArrowRight,
-  Database,
+  X,
 } from "lucide-react";
 import { mostUsedForms, FORM_CATEGORIES, type ReForm, type FormCategory } from "@/lib/forms";
 import { cn } from "@/lib/utils";
-import { Panel, PanelHeader, Pill, ProgressBar, SectionLabel } from "@/components/command/ui";
+import { Panel, PanelHeader, Pill } from "@/components/command/ui";
 import { FormTemplate } from "@/components/command/forms/FormTemplate";
 
 type Filter = FormCategory | "All";
-
-const pillarTone: Record<ReForm["pillar"], "azure" | "success" | "warn"> = {
-  "Structured Data": "azure",
-  "Contract Systems": "success",
-  "AI Integration": "warn",
-};
 
 export function FormsLibrary() {
   const [filter, setFilter] = useState<Filter>("All");
@@ -55,8 +48,8 @@ export function FormsLibrary() {
     <section className="space-y-4">
       <Panel>
         <PanelHeader
-          title="Form library"
-          subtitle="Every OREF + Matin form as a branded, editable, AI-assisted template — searchable, sorted by how often agents reach for it."
+          title="Forms library"
+          subtitle="Pick a form — it auto-fills, you fill the rest, then send for signature."
           icon={<FileText className="h-4 w-4" />}
           action={
             <div className="relative">
@@ -65,8 +58,17 @@ export function FormsLibrary() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search forms…"
-                className="w-44 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-8 pr-3 text-[0.8rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/40 focus:bg-white/[0.05] focus:outline-none sm:w-56"
+                className="w-44 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-8 pr-7 text-[0.8rem] text-white placeholder:text-slate-300/40 transition-colors focus:border-white/30 focus:outline-none sm:w-56"
               />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300/50 transition-colors hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           }
         />
@@ -83,7 +85,7 @@ export function FormsLibrary() {
                   "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
                   on
                     ? "border-white/30 bg-white/[0.12] text-white"
-                    : "border-white/10 bg-white/[0.03] text-slate-300 hover:border-white/20 hover:text-white",
+                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/25 hover:bg-white/[0.06] hover:text-white",
                 )}
               >
                 {c}
@@ -100,13 +102,13 @@ export function FormsLibrary() {
           })}
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
+        {/* Form rows */}
+        <div className="divide-y divide-white/[0.06]">
           {visible.map((form) => (
-            <FormCard key={form.code} form={form} onOpen={() => setActive(form)} />
+            <FormRow key={form.code} form={form} onUse={() => setActive(form)} />
           ))}
           {visible.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center gap-2 py-14 text-center">
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
               <Search className="h-6 w-6 text-slate-300/40" />
               <p className="text-[0.86rem] text-slate-300">No forms match “{query}”.</p>
               <button
@@ -128,73 +130,71 @@ export function FormsLibrary() {
   );
 }
 
-function FormCard({ form, onOpen }: { form: ReForm; onOpen: () => void }) {
+function FormRow({ form, onUse }: { form: ReForm; onUse: () => void }) {
   return (
-    <button
-      onClick={onOpen}
-      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-left transition-all hover:border-white/30 hover:bg-white/[0.055] hover:shadow-glow"
-    >
-      {/* Top row: code + tags */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.66rem] font-semibold text-white/80 ring-1 ring-inset ring-white/10">
-            {form.code}
+    <div className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-white/[0.025] sm:flex-row sm:items-center">
+      {/* Code badge */}
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[0.7rem] font-semibold text-white/85 ring-1 ring-inset ring-white/10">
+          {form.code}
+        </span>
+        {form.oref && (
+          <span className="rounded-md bg-white/[0.1] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">
+            OREF
           </span>
-          {form.oref && <Pill tone="azure">OREF</Pill>}
-        </div>
-        
+        )}
       </div>
 
-      {/* Name + category */}
-      <h4 className="mt-2.5 font-sans text-[0.94rem] font-semibold leading-snug text-white">
-        {form.name}
-      </h4>
-      <SectionLabel className="mt-1">{form.category}</SectionLabel>
-
-      {/* Popularity */}
-      <div className="mt-3">
-        <div className="mb-1 flex items-center justify-between text-[0.68rem] text-slate-300/70">
-          <span>Used across deals</span>
-          <span className="font-semibold tabular-nums text-slate-200">{form.popularity}%</span>
-        </div>
-        <ProgressBar value={form.popularity} />
-      </div>
-
-      {/* Replaces — the spreadsheet-killer line */}
-      <div className="mt-3 flex items-start gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2">
-        <Database className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300/50" />
-        <p className="text-[0.74rem] leading-snug text-slate-300/80">
-          Replaces{" "}
-          <span className="text-slate-400 line-through decoration-danger/60 decoration-1">
-            {form.replaces}
+      {/* Name + meta */}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <h4 className="font-sans text-[0.94rem] font-semibold leading-snug text-white">
+            {form.name}
+          </h4>
+          <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-slate-300/60">
+            {form.category}
           </span>
+        </div>
+        <p className="mt-1 truncate text-[0.78rem] text-slate-300/80">
+          Replaces <span className="text-slate-300">{form.replaces}</span>
         </p>
       </div>
 
-      {/* AI assist */}
-      <div className="mt-2 flex items-start gap-1.5">
-        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white" />
-        <p className="text-[0.76rem] leading-snug text-slate-300">{form.aiAssist}</p>
+      {/* Popularity */}
+      <div className="hidden w-32 shrink-0 lg:block">
+        <div className="mb-1 flex items-center justify-between text-[0.66rem] text-slate-300/60">
+          <span>Used</span>
+          <span className="font-semibold tabular-nums text-slate-200">{form.popularity}%</span>
+        </div>
+        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
+          <div
+            className="h-full rounded-full bg-white/70 transition-[width] duration-500"
+            style={{ width: `${Math.max(0, Math.min(100, form.popularity))}%` }}
+          />
+        </div>
       </div>
 
-      {/* Footer pills + CTA */}
-      <div className="mt-auto flex items-center justify-between gap-2 pt-3.5">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {form.esign && (
-            <Pill tone="success">
-              <PenLine className="h-2.5 w-2.5" /> e-sign
-            </Pill>
-          )}
-          {form.compliance && (
-            <Pill tone="neutral">
-              <ShieldCheck className="h-2.5 w-2.5" /> compliance
-            </Pill>
-          )}
-        </div>
-        <span className="inline-flex items-center gap-1 text-[0.74rem] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
-          Open template <ArrowRight className="h-3.5 w-3.5" />
-        </span>
+      {/* Pills */}
+      <div className="flex shrink-0 items-center gap-1.5">
+        {form.esign && (
+          <Pill tone="neutral">
+            <PenLine className="h-2.5 w-2.5" /> e-sign
+          </Pill>
+        )}
+        {form.compliance && (
+          <Pill tone="neutral">
+            <ShieldCheck className="h-2.5 w-2.5" /> compliance
+          </Pill>
+        )}
       </div>
-    </button>
+
+      {/* Use form */}
+      <button
+        onClick={onUse}
+        className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-white px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+      >
+        Use form <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }

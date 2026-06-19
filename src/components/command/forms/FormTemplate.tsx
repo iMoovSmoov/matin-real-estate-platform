@@ -8,16 +8,13 @@ import {
   Save,
   Send,
   Printer,
-  Plus,
-  Trash2,
   Check,
   Loader2,
   ShieldCheck,
-  Stamp,
   FilePen,
   ChevronDown,
 } from "lucide-react";
-import type { ReForm, ReFormField, FieldType } from "@/lib/forms";
+import type { ReForm, ReFormField } from "@/lib/forms";
 import { listings, leads, company, getAgent } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { cn, usd } from "@/lib/utils";
@@ -26,37 +23,23 @@ import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { Pill } from "@/components/command/ui";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   A branded, fully-editable real-estate document template. Every ReFormField
-   renders as a live input; AI auto-fill maps a listing/lead record onto the
-   autofill fields; "Generate with AI" streams drafted clause/listing copy;
-   agents can add or remove custom fields right on the form. This is the
-   "fully branded, fully editable & customizable templates" deliverable.
+   The real form experience (SkySlope / Dotloop-style). A branded, editable
+   document: every ReFormField renders as a labeled input (signature → a
+   signature line). The toolbar does the real work:
+     • Auto-fill — pick a listing or lead, populate the `autofill` fields
+       (the MLS auto-fill / signature time-saver).
+     • Generate with AI — contract forms → `agreement`, Listing forms →
+       `listing-description`, streamed live into a panel.
+     • Save · Send for e-signature (esign only) · Print.
    ────────────────────────────────────────────────────────────────────────── */
 
-type EditableField = ReFormField & { _id: string; custom?: boolean };
-
-let _seq = 0;
-const uid = () => `cf-${Date.now().toString(36)}-${_seq++}`;
-
-const FIELD_TYPES: FieldType[] = [
-  "text",
-  "number",
-  "currency",
-  "date",
-  "select",
-  "textarea",
-  "checkbox",
-  "signature",
-];
-
-/** Best-effort mapping from a CRM/MLS record onto a form field name. */
+/** Best-effort mapping from a CRM/MLS record onto a form field. */
 function autofillValue(field: ReFormField, record: AutofillRecord): string {
   const n = field.name.toLowerCase();
   const label = field.label.toLowerCase();
   const has = (...keys: string[]) => keys.some((k) => n.includes(k) || label.includes(k));
 
-  if (has("buyer") || has("seller") || has("consumer") || has("client") || has("name"))
-    return record.party;
+  if (has("buyer", "seller", "consumer", "client", "name")) return record.party;
   if (has("broker", "agent")) return record.broker;
   if (has("property", "address", "area", "search")) return record.property;
   if (has("price", "amount", "gci", "commission")) return record.price;
@@ -124,7 +107,7 @@ export function FormTemplate({ form, onClose }: { form: ReForm | null; onClose: 
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(760px,96vw)] flex-col border-l border-white/10 bg-ink-900 shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out print:static print:w-full print:border-0 print:shadow-none",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(760px,96vw)] flex-col border-l border-white/10 bg-ink shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out print:static print:w-full print:border-0 print:shadow-none",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -138,9 +121,6 @@ export function FormTemplate({ form, onClose }: { form: ReForm | null; onClose: 
 function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => void }) {
   const records = useMemo(buildRecords, []);
 
-  const [fields, setFields] = useState<EditableField[]>(() =>
-    form.fields.map((f) => ({ ...f, _id: uid() })),
-  );
   const [values, setValues] = useState<Record<string, string>>({});
   const [signed, setSigned] = useState<Record<string, boolean>>({});
 
@@ -154,14 +134,13 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
   const [sent, setSent] = useState(false);
 
   const allRecords = [...records.listings, ...records.leads];
-  const isContract = form.pillar === "Contract Systems";
   const isListingForm = form.category === "Listing";
   const aiTool: "agreement" | "listing-description" = isListingForm
     ? "listing-description"
     : "agreement";
 
-  function set(id: string, v: string) {
-    setValues((p) => ({ ...p, [id]: v }));
+  function set(name: string, v: string) {
+    setValues((p) => ({ ...p, [name]: v }));
   }
 
   /** Map the chosen record onto every autofill field. */
@@ -171,10 +150,10 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     if (!rec) return;
     setValues((prev) => {
       const next = { ...prev };
-      for (const f of fields) {
+      for (const f of form.fields) {
         if (f.autofill) {
           const v = autofillValue(f, rec);
-          if (v) next[f._id] = v;
+          if (v) next[f.name] = v;
         }
       }
       return next;
@@ -187,10 +166,14 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     if (aiBusy) return;
     setAiBusy(true);
     setAiOut("");
-    // pull a few field values to feed the model
-    const byName = (name: string) => {
-      const f = fields.find((x) => x.name === name || x.label.toLowerCase().includes(name));
-      return f ? values[f._id] ?? "" : "";
+    const byName = (...names: string[]) => {
+      for (const name of names) {
+        const f = form.fields.find(
+          (x) => x.name.toLowerCase().includes(name) || x.label.toLowerCase().includes(name),
+        );
+        if (f && values[f.name]) return values[f.name];
+      }
+      return "";
     };
     try {
       if (aiTool === "listing-description") {
@@ -200,7 +183,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           {
             tool: "listing-description",
             input: {
-              address: lst?.address ?? byName("property") ?? byName("address"),
+              address: lst?.address ?? byName("property", "address"),
               city: lst?.city ?? "",
               beds: lst?.beds ?? "",
               baths: lst?.baths ?? "",
@@ -219,12 +202,12 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             tool: "agreement",
             input: {
               docType: form.name,
-              party: byName("buyer") || byName("seller") || byName("name") || byName("party"),
-              property: byName("property") || byName("address") || byName("area"),
-              price: byName("price") || byName("amount") || byName("list"),
-              commission: byName("commission") || byName("split"),
+              party: byName("buyer", "seller", "name", "party", "consumer", "client"),
+              property: byName("property", "address", "area"),
+              price: byName("price", "amount", "list"),
+              commission: byName("commission", "split"),
               term: byName("term"),
-              special: byName("contingen") || byName("change") || byName("note") || "",
+              special: byName("contingen", "change", "note", "issue", "repair", "items"),
             },
           },
           (_c, full) => setAiOut(full),
@@ -235,22 +218,6 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     }
   }
 
-  function addField() {
-    setFields((p) => [
-      ...p,
-      { _id: uid(), name: `custom_${p.length}`, label: "New custom field", type: "text", custom: true },
-    ]);
-  }
-  function removeField(id: string) {
-    setFields((p) => p.filter((f) => f._id !== id));
-  }
-  function renameField(id: string, label: string) {
-    setFields((p) => p.map((f) => (f._id === id ? { ...f, label } : f)));
-  }
-  function retypeField(id: string, type: FieldType) {
-    setFields((p) => p.map((f) => (f._id === id ? { ...f, type } : f)));
-  }
-
   function flash(setter: (b: boolean) => void) {
     setter(true);
     setTimeout(() => setter(false), 2400);
@@ -259,7 +226,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
   return (
     <>
       {/* Header / toolbar */}
-      <div className="relative shrink-0 border-b border-white/10 bg-gradient-to-br from-ink-800 to-ink-900 px-5 py-4 print:hidden">
+      <div className="relative shrink-0 border-b border-white/10 bg-white/[0.03] px-5 py-4 print:hidden">
         <button
           onClick={onClose}
           aria-label="Close"
@@ -271,16 +238,16 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         <div className="flex items-center gap-2 pr-10">
           <FilePen className="h-4 w-4 text-white" />
           <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/80">
-            Editable template · {form.code}
+            {form.code}
           </span>
-          {form.oref && <Pill tone="azure">OREF</Pill>}
+          {form.oref && <Pill tone="neutral">OREF</Pill>}
         </div>
         <h2 className="mt-1 font-display text-xl leading-tight text-white">{form.name}</h2>
 
         {/* Toolbar */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {/* AI auto-fill: record picker + button */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] p-1">
+          {/* Auto-fill: record picker + button */}
+          <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] p-1">
             <div className="relative">
               <select
                 value={recordKey}
@@ -288,19 +255,19 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
                 className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-white focus:outline-none"
                 aria-label="Source record for auto-fill"
               >
-                <option value="" className="bg-white/[0.06]">
-                  Pick a record…
+                <option value="" className="bg-ink text-white">
+                  Pick a listing or lead…
                 </option>
-                <optgroup label="Listings" className="bg-white/[0.06]">
+                <optgroup label="Listings" className="bg-ink text-white">
                   {records.listings.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-white/[0.06]">
+                    <option key={r.key} value={r.key} className="bg-ink text-white">
                       {r.label}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Leads" className="bg-white/[0.06]">
+                <optgroup label="Leads" className="bg-ink text-white">
                   {records.leads.map((r) => (
-                    <option key={r.key} value={r.key} className="bg-white/[0.06]">
+                    <option key={r.key} value={r.key} className="bg-ink text-white">
                       {r.label}
                     </option>
                   ))}
@@ -311,15 +278,15 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             <button
               onClick={runAutofill}
               disabled={!recordKey}
-              className="inline-flex items-center gap-1.5 rounded-md bg-white/[0.12] px-2.5 py-1 text-[0.76rem] font-semibold text-white ring-1 ring-inset ring-white/15 transition-colors hover:bg-azure/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-paper-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Wand2 className="h-3.5 w-3.5" /> AI auto-fill
+              <Wand2 className="h-3.5 w-3.5" /> Auto-fill
             </button>
           </div>
 
-          <ToolbarButton onClick={generate} disabled={aiBusy} accent>
+          <ToolbarButton onClick={generate} disabled={aiBusy}>
             {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            {isListingForm ? "Generate listing copy" : "Generate with AI"}
+            Generate with AI
           </ToolbarButton>
 
           <ToolbarButton onClick={() => flash(setSaved)}>
@@ -335,32 +302,34 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           ) : null}
 
           <ToolbarButton onClick={() => window.print()}>
-            <Printer className="h-3.5 w-3.5" /> Export / Print
+            <Printer className="h-3.5 w-3.5" /> Print
           </ToolbarButton>
         </div>
 
         {/* Inline confirmations */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
-          {filledFrom && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-white">
-              <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
-            </span>
-          )}
-          {saved && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-success">
-              <Check className="h-3.5 w-3.5" /> Draft saved to the transaction record
-            </span>
-          )}
-          {sent && (
-            <span className="inline-flex items-center gap-1.5 font-medium text-success">
-              <Check className="h-3.5 w-3.5" /> E-signature request sent · audit-logged
-            </span>
-          )}
-        </div>
+        {(filledFrom || saved || sent) && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
+            {filledFrom && (
+              <span className="inline-flex items-center gap-1.5 font-medium text-white">
+                <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
+              </span>
+            )}
+            {saved && (
+              <span className="inline-flex items-center gap-1.5 font-medium text-success">
+                <Check className="h-3.5 w-3.5" /> Draft saved
+              </span>
+            )}
+            {sent && (
+              <span className="inline-flex items-center gap-1.5 font-medium text-success">
+                <Check className="h-3.5 w-3.5" /> Sent for e-signature
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Scrollable document body */}
-      <div className="flex-1 overflow-y-auto bg-ink-900 px-5 py-5 print:overflow-visible">
+      <div className="flex-1 overflow-y-auto bg-ink px-5 py-5 print:overflow-visible">
         {/* The branded paper */}
         <article className="mx-auto max-w-[640px] rounded-2xl border border-white/10 bg-white text-slate-900 shadow-[0_24px_70px_rgba(0,0,0,.5)] print:border-0 print:shadow-none">
           {/* Document letterhead */}
@@ -380,7 +349,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               </div>
               <h3 className="mt-0.5 font-display text-lg leading-tight text-slate-900">{form.name}</h3>
               {form.oref && (
-                <div className="mt-1 inline-flex items-center gap-1 rounded bg-white/[0.08] px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
+                <div className="mt-1 inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
                   OREF standard form
                 </div>
               )}
@@ -390,7 +359,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           {/* Compliance strip */}
           {form.compliance && (
             <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-8 py-2.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-white" />
+              <ShieldCheck className="h-3.5 w-3.5 text-slate-700" />
               <span className="text-[0.72rem] text-slate-500">{form.compliance}</span>
             </div>
           )}
@@ -400,45 +369,30 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             <p className="text-[0.78rem] leading-relaxed text-slate-500">{form.description}</p>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {fields.map((f) => (
+              {form.fields.map((f) => (
                 <DocField
-                  key={f._id}
+                  key={f.name}
                   field={f}
-                  value={values[f._id] ?? ""}
-                  signed={!!signed[f._id]}
-                  onChange={(v) => set(f._id, v)}
-                  onSign={() => setSigned((p) => ({ ...p, [f._id]: !p[f._id] }))}
-                  onRemove={() => removeField(f._id)}
-                  onRename={(label) => renameField(f._id, label)}
-                  onRetype={(t) => retypeField(f._id, t)}
+                  value={values[f.name] ?? ""}
+                  signed={!!signed[f.name]}
+                  onChange={(v) => set(f.name, v)}
+                  onSign={() => setSigned((p) => ({ ...p, [f.name]: !p[f.name] }))}
                 />
               ))}
             </div>
-
-            {/* Add custom field — proves "fully customizable" */}
-            <button
-              onClick={addField}
-              className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-[0.76rem] font-semibold text-slate-500 transition-colors hover:border-azure hover:text-white print:hidden"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add custom field
-            </button>
           </div>
 
           {/* Footer */}
           <div className="border-t border-slate-200 px-8 pb-7 pt-4">
-            <div className="flex items-center gap-1.5 text-[0.66rem] text-slate-400">
-              <Stamp className="h-3 w-3" />
-              <span>
-                Generated by the Matin Hub · {company.address.city}, {company.address.state} ·{" "}
-                {company.phone}
-              </span>
+            <div className="text-[0.66rem] text-slate-400">
+              {company.name} · {company.address.city}, {company.address.state} · {company.phone}
             </div>
           </div>
         </article>
 
         {/* AI drafted clause / copy panel */}
         {(aiOut || aiBusy) && (
-          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-azure/25 bg-azure/[0.06] print:hidden">
+          <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-md print:hidden">
             <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
               <Sparkles className="h-4 w-4 text-white" />
               <span className="text-[0.82rem] font-semibold text-white">
@@ -463,23 +417,16 @@ function ToolbarButton({
   children,
   onClick,
   disabled,
-  accent,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
-  accent?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.76rem] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-        accent
-          ? "bg-azure text-ink hover:bg-paper-200"
-          : "border border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30 hover:text-white",
-      )}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1.5 text-[0.76rem] font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {children}
     </button>
@@ -492,70 +439,29 @@ function DocField({
   signed,
   onChange,
   onSign,
-  onRemove,
-  onRename,
-  onRetype,
 }: {
-  field: EditableField;
+  field: ReFormField;
   value: string;
   signed: boolean;
   onChange: (v: string) => void;
   onSign: () => void;
-  onRemove: () => void;
-  onRename: (label: string) => void;
-  onRetype: (t: FieldType) => void;
 }) {
   const full = field.type === "textarea" || field.type === "signature";
   const inputCls =
-    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-300 focus:border-azure focus:outline-none focus:ring-1 focus:ring-white/15";
+    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[0.84rem] text-slate-900 placeholder:text-slate-300 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900/20";
 
   return (
-    <div className={cn("group/field flex flex-col gap-1", full && "sm:col-span-2")}>
+    <div className={cn("flex flex-col gap-1", full && "sm:col-span-2")}>
       <div className="flex items-center justify-between gap-2">
-        {field.custom ? (
-          <input
-            value={field.label}
-            onChange={(e) => onRename(e.target.value)}
-            className="w-full rounded border-b border-dashed border-slate-300 bg-transparent text-[0.66rem] font-semibold uppercase tracking-wider text-slate-500 focus:border-azure focus:outline-none"
-            aria-label="Field label"
-          />
-        ) : (
-          <label className="flex items-center gap-1.5 text-[0.66rem] font-semibold uppercase tracking-wider text-slate-500">
-            {field.label}
-            {field.required && <span className="text-danger">*</span>}
-          </label>
+        <label className="flex items-center gap-1.5 text-[0.66rem] font-semibold uppercase tracking-wider text-slate-500">
+          {field.label}
+          {field.required && <span className="text-danger">*</span>}
+        </label>
+        {field.autofill && (
+          <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
+            <Wand2 className="h-2.5 w-2.5" /> auto
+          </span>
         )}
-
-        <div className="flex items-center gap-1">
-          {field.autofill && (
-            <span className="inline-flex items-center gap-1 rounded bg-white/[0.08] px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
-              <Wand2 className="h-2.5 w-2.5" /> auto
-            </span>
-          )}
-          {field.custom && (
-            <>
-              <select
-                value={field.type}
-                onChange={(e) => onRetype(e.target.value as FieldType)}
-                className="rounded border border-slate-200 bg-white px-1 py-0.5 text-[0.56rem] text-slate-500 focus:outline-none print:hidden"
-                aria-label="Field type"
-              >
-                {FIELD_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={onRemove}
-                aria-label="Remove field"
-                className="text-slate-300 transition-colors hover:text-danger print:hidden"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Control by type */}
@@ -565,14 +471,14 @@ function DocField({
           className={cn(
             "flex h-12 items-end justify-between rounded-md border border-dashed px-3 pb-1.5 text-left transition-colors",
             signed
-              ? "border-azure bg-azure/[0.06]"
-              : "border-slate-300 hover:border-azure/60 hover:bg-slate-50",
+              ? "border-slate-900 bg-slate-50"
+              : "border-slate-300 hover:border-slate-500 hover:bg-slate-50",
           )}
         >
           <span
             className={cn(
               "font-display text-lg italic",
-              signed ? "text-white" : "text-slate-300",
+              signed ? "text-slate-900" : "text-slate-300",
             )}
           >
             {signed ? "Matin Real Estate" : "Sign here"}
@@ -604,7 +510,7 @@ function DocField({
             type="checkbox"
             checked={value === "yes"}
             onChange={(e) => onChange(e.target.checked ? "yes" : "")}
-            className="h-4 w-4 rounded border-slate-300 text-white focus:ring-white/15"
+            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/20"
           />
           Yes
         </label>

@@ -1,16 +1,15 @@
-import { Wallet, DollarSign, CalendarCheck, AlertTriangle } from "lucide-react";
+import { Briefcase, CalendarCheck, AlertTriangle } from "lucide-react";
 import { transactions } from "@/lib/data";
-import { compactUsd } from "@/lib/utils";
 import { StatTile, SectionLabel, LiveDot } from "@/components/command/ui";
-import { TransactionsBoard } from "@/components/command/crm/TransactionsBoard";
+import { TransactionsView } from "@/components/command/transactions/TransactionsView";
 
 export const metadata = { title: "Transactions" };
 
 export default function TransactionsPage() {
-  const open = transactions.filter((t) => t.stage !== "Closed");
-  const totalCommission = transactions.reduce((s, t) => s + t.commission, 0);
-  const pipelineValue = open.reduce((s, t) => s + t.price, 0);
-  const closingThisMonth = transactions.filter((t) => t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 30 && t.stage !== "Closed").length;
+  const active = transactions.filter((t) => t.stage !== "Closed");
+  const closingThisMonth = transactions.filter(
+    (t) => t.stage !== "Closed" && t.closeDateDaysOut <= 30,
+  ).length;
   const atRisk = transactions.filter((t) => t.riskFlag).length;
 
   return (
@@ -18,23 +17,38 @@ export default function TransactionsPage() {
       <div>
         <div className="mb-1.5 flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>Transactions</SectionLabel>
+          <SectionLabel>Transaction management</SectionLabel>
         </div>
         <h1 className="font-display text-3xl text-white">Transactions</h1>
         <p className="mt-1 max-w-2xl text-[0.9rem] text-slate-300">
-          Every active deal on one board, stage by stage — with a live checklist, commission tracking, and
-          automatic risk flags so nothing slips through the cracks.
+          Every deal as a loop — a smart checklist, deadlines, and documents in one place, so nothing
+          slips between contract and close.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="Open pipeline" value={compactUsd(pipelineValue)} icon={<Wallet className="h-4 w-4" />} accent hint={`${open.length} active deals`} />
-        <StatTile label="Total commission" value={compactUsd(totalCommission)} icon={<DollarSign className="h-4 w-4" />} hint="Across all deals" />
-        <StatTile label="Closing ≤ 30 days" value={closingThisMonth} icon={<CalendarCheck className="h-4 w-4" />} delta={{ value: "on track", dir: "up" }} />
-        <StatTile label="At risk" value={atRisk} icon={<AlertTriangle className="h-4 w-4" />} delta={atRisk > 0 ? { value: "needs attention", dir: "down" } : undefined} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatTile
+          label="Active transactions"
+          value={active.length}
+          icon={<Briefcase className="h-4 w-4" />}
+          accent
+          hint="Open deals in progress"
+        />
+        <StatTile
+          label="Closing this month"
+          value={closingThisMonth}
+          icon={<CalendarCheck className="h-4 w-4" />}
+          hint="Closing in ≤ 30 days"
+        />
+        <StatTile
+          label="At risk"
+          value={atRisk}
+          icon={<AlertTriangle className="h-4 w-4" />}
+          delta={atRisk > 0 ? { value: "needs attention", dir: "down" } : { value: "all clear", dir: "up" }}
+        />
       </div>
 
-      <TransactionsBoard transactions={transactions} />
+      <TransactionsView transactions={transactions} />
     </div>
   );
 }

@@ -1,10 +1,8 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Real-estate forms & data-flow catalog (Oregon-grounded).
-   Powers the "Forms & Data Flows" and "Contract Builder" modules — the
-   answer to the job's "replace spreadsheets and Google Forms with structured
-   data + AI-powered contract workflows."
-   Form names reference the real OREF (Oregon Real Estate Forms) standard
-   library + federal disclosures + Matin internal ops forms.
+   Real-estate forms library (Oregon-grounded) — the SkySlope / Dotloop-style
+   forms tool. Pick a form, it auto-fills from MLS/CRM, fill the rest, send for
+   signature. Form names reference the real OREF (Oregon Real Estate Forms)
+   standard library + federal disclosures + Matin internal ops forms.
    ────────────────────────────────────────────────────────────────────────── */
 
 export type FormCategory =
@@ -297,111 +295,6 @@ export const reForms: ReForm[] = [
       { name: "gci", label: "Gross commission", type: "currency", autofill: true },
       { name: "split", label: "Agent split", type: "text" },
       sig,
-    ],
-  },
-];
-
-/* ── Intake flows — the structured data flows that replace Google Forms ── */
-export interface IntakeFlow {
-  code: string;
-  name: string;
-  description: string;
-  replaces: string;
-  fieldsCount: number;
-  routesTo: string;
-  aiStep: string;
-  submissionsThisMonth: number;
-  fields: ReFormField[];
-}
-
-export const intakeFlows: IntakeFlow[] = [
-  {
-    code: "MRE-INTAKE",
-    name: "New Client Intake",
-    description: "First-touch capture for any new buyer or seller lead.",
-    replaces: "A Google Form dumping to a spreadsheet",
-    fieldsCount: 9,
-    routesTo: "CRM → auto-assign to best-fit broker",
-    aiStep: "AI scores the lead, summarizes intent, and drafts the first reply.",
-    submissionsThisMonth: 412,
-    fields: [
-      { name: "name", label: "Full name", type: "text", required: true },
-      { name: "email", label: "Email", type: "text", required: true },
-      { name: "phone", label: "Phone", type: "text" },
-      { name: "intent", label: "Looking to", type: "select", options: ["Buy", "Sell", "Both", "Invest"] },
-      { name: "area", label: "Area of interest", type: "text" },
-      { name: "budget", label: "Budget", type: "currency" },
-      { name: "timeline", label: "Timeline", type: "select", options: ["ASAP", "1–3 months", "3–6 months", "Just browsing"] },
-      { name: "notes", label: "Anything else?", type: "textarea" },
-    ],
-  },
-  {
-    code: "MRE-LISTING-INTAKE",
-    name: "Pre-Listing Questionnaire",
-    description: "Everything needed to launch a listing — collected once.",
-    replaces: "An email thread + a property-details spreadsheet",
-    fieldsCount: 14,
-    routesTo: "Listing record → photographer + MLS draft",
-    aiStep: "AI drafts the MLS description and a launch marketing plan from the answers.",
-    submissionsThisMonth: 38,
-    fields: [
-      { name: "address", label: "Property address", type: "text", required: true },
-      { name: "beds", label: "Bedrooms", type: "number" },
-      { name: "baths", label: "Bathrooms", type: "number" },
-      { name: "sqft", label: "Square feet", type: "number" },
-      { name: "upgrades", label: "Recent upgrades", type: "textarea" },
-      { name: "targetPrice", label: "Hoped-for price", type: "currency" },
-      { name: "timeline", label: "Move timeline", type: "text" },
-    ],
-  },
-  {
-    code: "MRE-SHOWING",
-    name: "Showing Feedback",
-    description: "Capture buyer-agent feedback after every showing.",
-    replaces: "Texts the listing agent has to chase down",
-    fieldsCount: 6,
-    routesTo: "Listing → seller feedback report",
-    aiStep: "AI rolls up sentiment across showings into a weekly seller report.",
-    submissionsThisMonth: 184,
-    fields: [
-      { name: "listing", label: "Listing", type: "text", autofill: true },
-      { name: "rating", label: "Buyer interest", type: "select", options: ["High", "Medium", "Low"] },
-      { name: "priceFeedback", label: "On price", type: "select", options: ["Priced right", "A little high", "Too high"] },
-      { name: "comments", label: "Comments", type: "textarea" },
-    ],
-  },
-  {
-    code: "MRE-VENDOR",
-    name: "Vendor / Referral Onboarding",
-    description: "Onboard lenders, inspectors, contractors & referral partners.",
-    replaces: "A W-9 PDF + a vendor contacts spreadsheet",
-    fieldsCount: 8,
-    routesTo: "Vendor directory + accounting",
-    aiStep: "AI validates the W-9 fields and de-dupes against existing vendors.",
-    submissionsThisMonth: 11,
-    fields: [
-      { name: "company", label: "Company", type: "text", required: true },
-      { name: "type", label: "Vendor type", type: "select", options: ["Lender", "Inspector", "Contractor", "Title/Escrow", "Stager", "Referral partner"] },
-      { name: "contact", label: "Contact name", type: "text" },
-      { name: "email", label: "Email", type: "text" },
-      { name: "ein", label: "EIN / SSN (W-9)", type: "text" },
-    ],
-  },
-  {
-    code: "MRE-OPENHOUSE",
-    name: "Open House Sign-In",
-    description: "Digital sign-in that captures and nurtures every visitor.",
-    replaces: "A paper clipboard with illegible handwriting",
-    fieldsCount: 5,
-    routesTo: "CRM → instant text follow-up",
-    aiStep: "AI sends each visitor a personalized follow-up within 60 seconds.",
-    submissionsThisMonth: 96,
-    fields: [
-      { name: "name", label: "Name", type: "text", required: true },
-      { name: "email", label: "Email", type: "text" },
-      { name: "phone", label: "Phone", type: "text" },
-      { name: "working", label: "Working with an agent?", type: "select", options: ["No", "Yes"] },
-      { name: "interested", label: "Interested in this home?", type: "select", options: ["Yes", "Maybe", "Just looking"] },
     ],
   },
 ];
