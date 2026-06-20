@@ -9,7 +9,6 @@ export const dynamic = "force-dynamic";
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const MODEL = process.env.MATIN_AI_MODEL || "claude-haiku-4-5-20251001";
-const EFFORT = process.env.MATIN_AI_EFFORT || "low";
 
 const MAX_TOKENS: Record<AiTool, number> = {
   "ask-matin": 800,
@@ -89,9 +88,7 @@ export async function POST(req: Request) {
           max_tokens: MAX_TOKENS[tool] ?? 800,
           system,
           messages: messages.map((m) => ({ role: m.role, content: m.content })),
-          output_config: { effort: EFFORT },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any);
+        });
 
         mstream.on("text", (t: string) => controller.enqueue(encoder.encode(t)));
         await mstream.finalMessage();
