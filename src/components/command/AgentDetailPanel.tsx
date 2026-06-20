@@ -31,30 +31,35 @@ export function AgentDetailPanel({
     if (!agent) return;
     setCoachLoading(true);
     setCoachText("");
-    await streamAi(
-      {
-        tool: "report_agent_coach",
-        input: {
-          agentName: agent.name,
-          volume: agent.volume,
-          homesSold: agent.homesSold,
-          activeListings: agent.activeListings,
-          responseTimeMins: agent.responseTimeMins ?? 0,
-          rating: agent.rating,
-          dateRange: "YTD",
-          scorecardWeek: agent.scorecardWeek ?? {
-            calls: 0,
-            texts: 0,
-            appts: 0,
-            agreements: 0,
-            showings: 0,
-            offers: 0,
+    try {
+      await streamAi(
+        {
+          tool: "report_agent_coach",
+          input: {
+            agentName: agent.name,
+            volume: agent.volume,
+            homesSold: agent.homesSold,
+            activeListings: agent.activeListings,
+            responseTimeMins: agent.responseTimeMins ?? 0,
+            rating: agent.rating,
+            dateRange: "YTD",
+            scorecardWeek: agent.scorecardWeek ?? {
+              calls: 0,
+              texts: 0,
+              appts: 0,
+              agreements: 0,
+              showings: 0,
+              offers: 0,
+            },
           },
         },
-      },
-      (_chunk, full) => setCoachText(full),
-    );
-    setCoachLoading(false);
+        (_chunk, full) => setCoachText(full),
+      );
+    } catch {
+      setCoachText("_Sorry — connection error. Please try again._");
+    } finally {
+      setCoachLoading(false);
+    }
   }
 
   /* ── No agent selected ── */

@@ -418,19 +418,24 @@ function IntegrationSlideOver({
       customQuestion ??
       aiQuestion ??
       `Provide a step-by-step setup guide for using ${item.name} in a real estate brokerage, including how to find API credentials, what data syncs, and recommended configuration.`;
-    await streamAi(
-      {
-        tool: "integration_setup_guide",
-        input: {
-          integrationId: item.id,
-          integrationName: item.name,
-          category: item.category,
-          question: q,
+    try {
+      await streamAi(
+        {
+          tool: "integration_setup_guide",
+          input: {
+            integrationId: item.id,
+            integrationName: item.name,
+            category: item.category,
+            question: q,
+          },
         },
-      },
-      (_chunk, full) => setAiOutput(full),
-    );
-    setAiBusy(false);
+        (_chunk, full) => setAiOutput(full),
+      );
+    } catch {
+      setAiOutput("_Sorry — connection error. Please try again._");
+    } finally {
+      setAiBusy(false);
+    }
   };
 
   const handleConnect = async () => {

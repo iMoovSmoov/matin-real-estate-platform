@@ -1625,22 +1625,27 @@ export default function DashboardPage() {
                   onClick={async () => {
                     setRoiAnalyzing(true);
                     setRoiAiOutput("");
-                    await streamAi(
-                      {
-                        tool: "coach",
-                        input: {
-                          context: "source-roi-analysis",
-                          source: activeRoiRow.source,
-                          leads: activeRoiRow.leads,
-                          closed: activeRoiRow.closed,
-                          revenue: activeRoiRow.revenue,
-                          spend: activeRoiRow.spend,
-                          roi: roiMultiple(activeRoiRow.revenue, activeRoiRow.spend),
+                    try {
+                      await streamAi(
+                        {
+                          tool: "coach",
+                          input: {
+                            context: "source-roi-analysis",
+                            source: activeRoiRow.source,
+                            leads: activeRoiRow.leads,
+                            closed: activeRoiRow.closed,
+                            revenue: activeRoiRow.revenue,
+                            spend: activeRoiRow.spend,
+                            roi: roiMultiple(activeRoiRow.revenue, activeRoiRow.spend),
+                          },
                         },
-                      },
-                      (_c, full) => setRoiAiOutput(full),
-                    );
-                    setRoiAnalyzing(false);
+                        (_c, full) => setRoiAiOutput(full),
+                      );
+                    } catch {
+                      setRoiAiOutput("_Sorry — connection error. Please try again._");
+                    } finally {
+                      setRoiAnalyzing(false);
+                    }
                   }}
                   className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50 transition-colors"
                 >
@@ -1750,21 +1755,26 @@ export default function DashboardPage() {
                     onClick={async () => {
                       setIsCoaching(true);
                       setCoachOutput("");
-                      await streamAi(
-                        {
-                          tool: "coach",
-                          input: {
-                            context: "coaching-brief",
-                            agentName: activeAgent.name,
-                            closings: activeAgent.closings,
-                            volume: activeAgent.volume,
-                            dom: activeAgent.dom,
-                            responseTime: activeAgent.responseTime,
+                      try {
+                        await streamAi(
+                          {
+                            tool: "coach",
+                            input: {
+                              context: "coaching-brief",
+                              agentName: activeAgent.name,
+                              closings: activeAgent.closings,
+                              volume: activeAgent.volume,
+                              dom: activeAgent.dom,
+                              responseTime: activeAgent.responseTime,
+                            },
                           },
-                        },
-                        (_c, full) => setCoachOutput(full),
-                      );
-                      setIsCoaching(false);
+                          (_c, full) => setCoachOutput(full),
+                        );
+                      } catch {
+                        setCoachOutput("_Sorry — connection error. Please try again._");
+                      } finally {
+                        setIsCoaching(false);
+                      }
                     }}
                     className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50 transition-colors"
                   >
