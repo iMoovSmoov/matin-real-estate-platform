@@ -221,6 +221,15 @@ export function fillFromRecord(
 
 // ─── HTML Renderer ────────────────────────────────────────────────────────────
 
+function esc(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 /**
  * Generates a clean, Matin-branded HTML document ready for print/PDF.
  * Uses string concatenation for inner field loops to avoid nested template
@@ -241,8 +250,8 @@ export function renderDocHtml(template: DocTemplate, values: DocValues): string 
     .map(
       (f) =>
         '<div class="field">' +
-        '<div class="field-label">' + f.label + "</div>" +
-        '<div class="field-value">' + (values[f.key] ?? "") + "</div>" +
+        '<div class="field-label">' + esc(f.label) + "</div>" +
+        '<div class="field-value">' + esc(values[f.key] ?? "") + "</div>" +
         "</div>",
     )
     .join("\n")
@@ -251,9 +260,9 @@ export function renderDocHtml(template: DocTemplate, values: DocValues): string 
     .map(
       (f) =>
         '<div class="field textarea-field">' +
-        '<div class="field-label">' + f.label + "</div>" +
+        '<div class="field-label">' + esc(f.label) + "</div>" +
         '<div class="field-value" style="min-height:60px; white-space:pre-wrap;">' +
-        (values[f.key] ?? "") +
+        esc(values[f.key] ?? "") +
         "</div>" +
         "</div>",
     )
