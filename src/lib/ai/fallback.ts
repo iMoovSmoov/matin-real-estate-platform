@@ -586,7 +586,46 @@ This is ${why}
 **Quick tip:** Open the form directly in the Forms Library, auto-fill from the matching CRM record, then click "Generate with AI" to draft clause language tailored to the situation.`;
     }
 
+    /* ── Document Generator ─────────────────────────────────────────────── */
+    case "doc-generate": {
+      const tmpl = s(input.templateName, "Document");
+      const fields = input.fields && typeof input.fields === "object"
+        ? Object.entries(input.fields as Record<string, string>)
+            .filter(([, v]) => v)
+            .map(([k, v]) => `- **${k}:** ${v}`)
+            .join("\n")
+        : "";
+      return `## ${tmpl}
+
+**Matin Real Estate | For Review Only**
+
+**§ 1 — Parties and Property**
+This ${tmpl} is entered into by the parties identified herein in connection with the subject property described in the fields above. All parties acknowledge receipt of the Oregon Initial Agency Disclosure Pamphlet (OREF C-530) prior to execution.
+
+**§ 2 — Terms and Conditions**
+The material terms of this agreement are as set forth in the document fields and any attached addenda. All terms are subject to the review and approval of a licensed Oregon real estate principal broker prior to execution.
+
+**§ 3 — Oregon Real Estate Law Compliance**
+This document is prepared in accordance with applicable Oregon real estate statutes, including ORS Chapter 696. Any term that conflicts with Oregon law shall be deemed modified to comply with such law.
+
+**§ 4 — Representations**
+Each party represents that they have the full legal authority to enter into this agreement and that all information provided is accurate and complete to the best of their knowledge.
+
+**§ 5 — Entire Agreement**
+This document, together with any attached addenda, constitutes the entire agreement between the parties with respect to its subject matter and supersedes all prior negotiations, representations, or agreements.
+
+${fields ? `\n**Document Fields Provided:**\n${fields}` : ""}
+
+> *Drafting aid prepared by Matin Real Estate AI. All documents require review by a licensed Oregon real estate broker before execution. This is not legal advice. · ${co} · ${phone}*`;
+    }
+
+    /* ── Document AI Section Complete ──────────────────────────────────── */
+    case "doc-ai-complete": {
+      const section = s(input.section, "terms");
+      return `The ${section} is subject to the terms and conditions agreed upon by the parties and shall be interpreted in accordance with Oregon real estate law and standard industry practice. Any ambiguity shall be resolved in favor of the intent of the parties as evidenced by the surrounding circumstances and the overall purpose of this agreement. All parties should review this section with their licensed broker prior to execution.`;
+    }
+
     default:
-      return `Thanks — connect an ANTHROPIC_API_KEY to enable live AI responses. ${phone}`;
+      return `Thanks — contact Matin Real Estate for assistance. ${phone}`;
   }
 }

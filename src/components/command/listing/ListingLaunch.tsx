@@ -672,6 +672,16 @@ const OPEN_HOUSE_FIELDS: DocFieldDef[] = [
 
 /* ── Document HTML generators ───────────────────────────────────────────────── */
 
+/** Escape user-supplied values before inserting into HTML strings. */
+function esc(s: string): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function buildListingAgreementHtml(fields: Record<string, string>): string {
   const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
   return `
@@ -679,7 +689,7 @@ function buildListingAgreementHtml(fields: Record<string, string>): string {
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Listing Agreement — ${fields.propertyAddress ?? ""}</title>
+<title>Listing Agreement — ${esc(fields.propertyAddress ?? "")}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Georgia, serif; font-size: 11pt; color: #111; background: #fff; }
@@ -727,17 +737,17 @@ function buildListingAgreementHtml(fields: Record<string, string>): string {
     <div class="row">
       <div class="field">
         <div class="field-label">Seller Name(s)</div>
-        <div class="field-value">${fields.sellerName ?? ""}</div>
+        <div class="field-value">${esc(fields.sellerName ?? "")}</div>
       </div>
     </div>
     <div class="row">
       <div class="field">
         <div class="field-label">Phone</div>
-        <div class="field-value">${fields.sellerPhone ?? ""}</div>
+        <div class="field-value">${esc(fields.sellerPhone ?? "")}</div>
       </div>
       <div class="field">
         <div class="field-label">Email</div>
-        <div class="field-value">${fields.sellerEmail ?? ""}</div>
+        <div class="field-value">${esc(fields.sellerEmail ?? "")}</div>
       </div>
     </div>
   </div>
@@ -747,17 +757,17 @@ function buildListingAgreementHtml(fields: Record<string, string>): string {
     <div class="row">
       <div class="field">
         <div class="field-label">Street Address</div>
-        <div class="field-value">${fields.propertyAddress ?? ""}</div>
+        <div class="field-value">${esc(fields.propertyAddress ?? "")}</div>
       </div>
       <div class="field">
         <div class="field-label">City, State, Zip</div>
-        <div class="field-value">${fields.propertyCity ?? ""}</div>
+        <div class="field-value">${esc(fields.propertyCity ?? "")}</div>
       </div>
     </div>
     <div class="row">
       <div class="field">
         <div class="field-label">Legal Description</div>
-        <div class="field-value">${fields.legalDescription ?? ""}</div>
+        <div class="field-value">${esc(fields.legalDescription ?? "")}</div>
       </div>
     </div>
   </div>
@@ -771,21 +781,21 @@ function buildListingAgreementHtml(fields: Record<string, string>): string {
       </div>
       <div class="field">
         <div class="field-label">Commission</div>
-        <div class="field-value">${fields.commission ?? ""}%</div>
+        <div class="field-value">${esc(fields.commission ?? "")}%</div>
       </div>
     </div>
     <div class="row">
       <div class="field">
         <div class="field-label">Effective Date</div>
-        <div class="field-value">${fields.effectiveDate ?? ""}</div>
+        <div class="field-value">${esc(fields.effectiveDate ?? "")}</div>
       </div>
       <div class="field">
         <div class="field-label">Expiration Date</div>
-        <div class="field-value">${fields.expirationDate ?? ""}</div>
+        <div class="field-value">${esc(fields.expirationDate ?? "")}</div>
       </div>
       <div class="field">
         <div class="field-label">Listing Term</div>
-        <div class="field-value">${fields.listingTerm ?? ""} days</div>
+        <div class="field-value">${esc(fields.listingTerm ?? "")} days</div>
       </div>
     </div>
   </div>
@@ -795,18 +805,18 @@ function buildListingAgreementHtml(fields: Record<string, string>): string {
     <div class="row">
       <div class="field">
         <div class="field-label">Listing Agent</div>
-        <div class="field-value">${fields.agentName ?? ""}</div>
+        <div class="field-value">${esc(fields.agentName ?? "")}</div>
       </div>
       <div class="field">
         <div class="field-label">Brokerage</div>
-        <div class="field-value">${fields.brokerageName ?? "Matin Real Estate"}</div>
+        <div class="field-value">${esc(fields.brokerageName ?? "Matin Real Estate")}</div>
       </div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">5. Special Terms &amp; Conditions</div>
-    <div class="terms-box">${fields.specialTerms ?? "None."}</div>
+    <div class="terms-box">${esc(fields.specialTerms ?? "None.")}</div>
   </div>
 
   <div class="section">
@@ -891,13 +901,13 @@ function buildOpenHouseHtml(fields: Record<string, string>): string {
   <div class="doc-title">OPEN HOUSE SIGN-IN SHEET</div>
 
   <div class="property-card">
-    <div class="prop-address">${fields.propertyAddress ?? ""}${fields.propertyCity ? ", " + fields.propertyCity : ""}</div>
-    <div class="prop-meta">${fields.beds ? fields.beds + " bed" : ""}${fields.baths ? " / " + fields.baths + " bath" : ""}${fields.sqft ? " · " + Number(fields.sqft).toLocaleString() + " sqft" : ""}${fields.yearBuilt ? " · Built " + fields.yearBuilt : ""}${fields.listPrice ? " · $" + Number(fields.listPrice).toLocaleString() : ""}</div>
-    <div class="prop-event">${fields.eventDate ?? ""} · ${fields.startTime ?? ""}${fields.endTime ? " – " + fields.endTime : ""}</div>
-    <div class="agent-line">Hosted by: ${fields.agentName ?? ""}${fields.agentPhone ? " · " + fields.agentPhone : ""}</div>
+    <div class="prop-address">${esc(fields.propertyAddress ?? "")}${fields.propertyCity ? ", " + esc(fields.propertyCity) : ""}</div>
+    <div class="prop-meta">${fields.beds ? esc(fields.beds) + " bed" : ""}${fields.baths ? " / " + esc(fields.baths) + " bath" : ""}${fields.sqft ? " · " + Number(fields.sqft).toLocaleString() + " sqft" : ""}${fields.yearBuilt ? " · Built " + esc(fields.yearBuilt) : ""}${fields.listPrice ? " · $" + Number(fields.listPrice).toLocaleString() : ""}</div>
+    <div class="prop-event">${esc(fields.eventDate ?? "")} · ${esc(fields.startTime ?? "")}${fields.endTime ? " – " + esc(fields.endTime) : ""}</div>
+    <div class="agent-line">Hosted by: ${esc(fields.agentName ?? "")}${fields.agentPhone ? " · " + esc(fields.agentPhone) : ""}</div>
   </div>
 
-  ${fields.welcomeNote ? `<div class="welcome">${fields.welcomeNote}</div>` : ""}
+  ${fields.welcomeNote ? `<div class="welcome">${esc(fields.welcomeNote)}</div>` : ""}
 
   <div class="table-wrap">
     <table>
