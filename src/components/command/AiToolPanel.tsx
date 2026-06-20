@@ -225,6 +225,7 @@ export function AiToolPanel({
           setActiveDraft(next.length - 1);
           return next;
         });
+        try { localStorage.setItem(`matin_ai_last_${tool}`, finalOutput.slice(0, 600)); } catch { /* private mode */ }
       }
     } finally {
       setBusy(false);
@@ -260,6 +261,7 @@ export function AiToolPanel({
           setActiveDraft(next.length - 1);
           return next;
         });
+        try { localStorage.setItem(`matin_ai_last_${tool}`, finalOutput.slice(0, 600)); } catch { /* private mode */ }
       }
     } finally {
       setBusy(false);
@@ -507,7 +509,7 @@ export function AiToolPanel({
                 {copied ? "Copied!" : "Copy all"}
               </button>
               <button
-                onClick={() => { if (confirm("Regenerate? The current draft will be replaced.")) run(); }}
+                onClick={() => run()}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Regenerate
@@ -705,7 +707,7 @@ export function AiToolPanel({
                     {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
                     {copied ? "Copied!" : "Copy"}
                   </button>
-                  <button onClick={() => { if (confirm("Regenerate? The current draft will be replaced.")) run(); }} className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink">
+                  <button onClick={() => run()} className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink">
                     <RefreshCw className="h-3.5 w-3.5" /> Redo
                   </button>
                 </>
