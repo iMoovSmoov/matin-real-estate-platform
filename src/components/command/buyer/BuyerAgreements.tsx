@@ -373,7 +373,7 @@ function SlideOver({
     setAiSummary("");
     await streamAi(
       {
-        tool: "buyer_agreement_summary",
+        tool: "buyer-agreement-summary",
         input: {
           buyerName: buyer.name,
           agentName: buyer.agentName,

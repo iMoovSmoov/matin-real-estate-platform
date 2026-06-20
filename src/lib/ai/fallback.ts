@@ -625,6 +625,22 @@ ${fields ? `\n**Document Fields Provided:**\n${fields}` : ""}
       return `The ${section} is subject to the terms and conditions agreed upon by the parties and shall be interpreted in accordance with Oregon real estate law and standard industry practice. Any ambiguity shall be resolved in favor of the intent of the parties as evidenced by the surrounding circumstances and the overall purpose of this agreement. All parties should review this section with their licensed broker prior to execution.`;
     }
 
+    /* ── Buyer Agreement Summary ────────────────────────────────────────── */
+    case "buyer-agreement-summary": {
+      const buyer = s(input.buyerName, "the buyer");
+      const agent = s(input.agentName, "your agent");
+      const showings = s(input.showingCount, "several");
+      const timeline = s(input.timeline, "flexible");
+      return `**Client Overview**
+${buyer} is a qualified buyer working with ${agent}. Their search is focused on the target area with a clear budget in mind and preapproval in hand.
+
+**Progress Summary**
+${buyer} has completed ${showings} showings and the search is progressing well. Their agreement is signed and their timeline is ${timeline}.
+
+**Recommended Next Step**
+Follow up to share any new listings that match their criteria and confirm their current search status.`;
+    }
+
     default:
       return `Thanks — contact Matin Real Estate for assistance. ${phone}`;
   }

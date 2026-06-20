@@ -14,7 +14,8 @@ export type AiTool =
   | "cash-offer-eval"
   | "form-suggest"
   | "doc-generate"
-  | "doc-ai-complete";
+  | "doc-ai-complete"
+  | "buyer-agreement-summary";
 
 const stats = company.stats;
 
@@ -320,6 +321,23 @@ OUTPUT FORMAT:
 [2–3 direct sentences: who this is right for, the specific trade-off for this seller given their stated motivation and timeline. Be honest about the trade-offs — don't just push cash.]
 
 ${KB}`,
+
+  /* ── Buyer Agreement Summary ─────────────────────────────────────────────── */
+  "buyer-agreement-summary": `You are a senior buyer's agent at ${company.name}. Given a signed buyer's client profile and showing history, produce a concise relationship summary an agent can share at a team meeting or use to prep for the next conversation.
+
+OUTPUT FORMAT:
+**Client Overview**
+[2 sentences: buyer name, budget range, target areas, preapproval status, timeline.]
+
+**Progress Summary**
+[2–3 sentences: showings completed, how the search is going, where they are in the decision process.]
+
+**Recommended Next Step**
+[1 specific, actionable next step for the agent — e.g., "Schedule a third showing at X" or "Re-engage: last contact was 14 days ago."]
+
+Keep it under 150 words total. Professional but readable.
+
+${KB}`,
 };
 
 export function buildUserMessage(tool: AiTool, input: Record<string, unknown>): string {
@@ -435,6 +453,24 @@ Produce 300–500 words of professional Oregon real estate legal language organi
 Context: ${j(input.context)}
 
 Write a professional paragraph completing this section for an Oregon real estate document.`;
+
+    case "buyer-agreement-summary": {
+      const areas = Array.isArray(input.areas)
+        ? (input.areas as unknown[]).map(String).join(", ")
+        : j(input.areas);
+      return `Buyer client profile:
+- Name: ${j(input.buyerName)}
+- Agent: ${j(input.agentName)}
+- Budget: $${j(input.budgetMin)}–$${j(input.budgetMax)}
+- Target areas: ${areas}
+- Preapproval: ${j(input.preapproval)}
+- Timeline: ${j(input.timeline)}
+- Showings completed: ${j(input.showingCount)}
+- Agreement status: ${j(input.agreementStatus)}
+- Agent notes: ${j(input.notes)}
+
+Generate the client relationship summary now.`;
+    }
 
     default:
       return String(input.message ?? "");
