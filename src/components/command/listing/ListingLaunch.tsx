@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   Search,
   Wand2,
@@ -1630,11 +1630,13 @@ export function ListingLaunch({ listings }: { listings: ListingPipeline[] }) {
     openPrintWindow(html);
   };
 
-  // Init fields for first listing on mount
-  if (selectedListing) {
+  // Init fields whenever selected listing changes (must be in effect, never during render)
+  useEffect(() => {
+    if (!selectedListing) return;
     if (!kitFields[selectedListing.id]) initKitFields(selectedListing);
     if (!docFields[selectedListing.id]) initDocFields(selectedListing);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedListing?.id]);
 
   const sharedDetailProps = (listing: ListingPipeline): ListingDetailProps => ({
     listing,
