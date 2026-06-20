@@ -227,6 +227,8 @@ export function AiToolPanel({
         });
         try { localStorage.setItem(`matin_ai_last_${tool}`, finalOutput.slice(0, 600)); } catch { /* private mode */ }
       }
+    } catch {
+      handleOutputUpdate("_Sorry — connection error. Please try again._");
     } finally {
       setBusy(false);
     }
@@ -263,6 +265,8 @@ export function AiToolPanel({
         });
         try { localStorage.setItem(`matin_ai_last_${tool}`, finalOutput.slice(0, 600)); } catch { /* private mode */ }
       }
+    } catch {
+      handleOutputUpdate("_Sorry — connection error. Please try again._");
     } finally {
       setBusy(false);
     }
