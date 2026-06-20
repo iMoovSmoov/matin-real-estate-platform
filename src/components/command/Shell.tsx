@@ -9,20 +9,11 @@ import {
   Users,
   DollarSign,
   FileText,
-  ClipboardList,
-  FilePlus2,
   Rocket,
   GraduationCap,
   BarChart2,
-  PlugZap,
   BrainCircuit,
-  MessageSquareText,
-  PenLine,
-  Calculator,
   FileSignature,
-  MessageCircle,
-  Megaphone,
-  PhoneCall,
   Search,
   Bell,
   Menu,
@@ -42,9 +33,9 @@ type NavGroup = { label: string; items: NavItem[] };
 /** Bottom-tab items shown on mobile — the 4 most-used destinations + More */
 const BOTTOM_TABS = [
   { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
-  { label: "Workspace", href: "/hub/agent", icon: BrainCircuit },
   { label: "CRM", href: "/hub/crm", icon: Users },
   { label: "Deals", href: "/hub/transactions", icon: FileText },
+  { label: "Listings", href: "/hub/listing-launch", icon: Rocket },
 ] satisfies { label: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
 
 const NAV: NavGroup[] = [
@@ -70,34 +61,16 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    label: "TOOLS",
+    label: "LISTINGS",
     items: [
-      { label: "Forms", href: "/hub/forms", icon: ClipboardList },
-      { label: "Contract Builder", href: "/hub/contracts", icon: FilePlus2 },
       { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
       { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
-    ],
-  },
-  {
-    label: "AI STUDIO",
-    items: [
-      { label: "AI Studio", href: "/hub/ai", icon: BrainCircuit },
-      { label: "Lead Responder", href: "/hub/ai/lead-responder", icon: MessageSquareText },
-      { label: "Listing Writer", href: "/hub/ai/listing-writer", icon: PenLine },
-      { label: "Marketing Kit", href: "/hub/ai/marketing-kit", icon: Megaphone },
-      { label: "CMA Generator", href: "/hub/ai/cma", icon: Calculator },
-      { label: "Agreements", href: "/hub/ai/agreements", icon: FileSignature },
-      { label: "Seller Intel", href: "/hub/ai/seller-intel", icon: PhoneCall },
-      { label: "Cash Offer Eval", href: "/hub/ai/cash-offer", icon: DollarSign },
-      { label: "Agent Coach", href: "/hub/ai/coach", icon: GraduationCap },
-      { label: "Ask Matin", href: "/hub/ai/ask", icon: MessageCircle },
     ],
   },
   {
     label: "ANALYTICS",
     items: [
       { label: "Reporting", href: "/hub/reporting", icon: BarChart2 },
-      { label: "Integrations", href: "/hub/integrations", icon: PlugZap },
     ],
   },
 ];

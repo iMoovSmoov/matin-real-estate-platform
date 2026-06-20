@@ -25,9 +25,14 @@ import {
   Bell,
   Eye,
   Upload,
+  RefreshCw,
+  ClipboardCheck,
+  Copy,
+  Printer,
+  ChevronRight,
 } from "lucide-react";
 import type { Transaction } from "@/lib/types";
-import { getAgent } from "@/lib/data";
+import { getAgent, agents } from "@/lib/data";
 import { cn, usd, daysLabel, initials } from "@/lib/utils";
 import { ProgressBar, Pill } from "@/components/command/ui";
 import { streamAi } from "@/lib/ai/client";
@@ -202,6 +207,223 @@ function parseDeadlines(markdown: string): string[] {
     })
     .filter((x): x is string => x !== null && x.length > 3);
 }
+
+/* ── Document generation constants ──────────────────────────────────────── */
+
+const MATIN_BRAND = {
+  name: "Matin Real Estate",
+  address: "4 Centerpointe Dr, Lake Oswego, OR 97035",
+  phone: "(503) 622-9624",
+};
+
+type TxDocField = {
+  id: string;
+  label: string;
+  type: "text" | "date" | "number" | "textarea";
+  autoFill?: keyof Transaction | "agentName" | "closingDateCalc";
+  placeholder?: string;
+};
+
+type TxDocTemplate = {
+  id: string;
+  name: string;
+  icon: "FileText" | "RefreshCw" | "ClipboardCheck" | "X";
+  description: string;
+  fields: TxDocField[];
+};
+
+const TX_DOCS: TxDocTemplate[] = [
+  {
+    id: "purchase-offer",
+    name: "Purchase Offer",
+    icon: "FileText",
+    description: "Pre-filled purchase offer with buyer, seller, and price details.",
+    fields: [
+      { id: "buyerName",        label: "Buyer Name",        type: "text",   autoFill: "client" },
+      { id: "sellerName",       label: "Seller Name",       type: "text",   placeholder: "Enter seller name" },
+      { id: "propertyAddress",  label: "Property Address",  type: "text",   autoFill: "address" },
+      { id: "offerPrice",       label: "Offer Price ($)",   type: "number", autoFill: "price" },
+      { id: "earnestMoney",     label: "Earnest Money ($)", type: "number", placeholder: "e.g. 5000" },
+      { id: "closingDate",      label: "Closing Date",      type: "date",   autoFill: "closingDateCalc" },
+      { id: "agentName",        label: "Agent",             type: "text",   autoFill: "agentName" },
+      { id: "additionalTerms",  label: "Additional Terms",  type: "textarea", placeholder: "Any additional terms or contingencies..." },
+    ],
+  },
+  {
+    id: "counteroffer",
+    name: "Counteroffer",
+    icon: "RefreshCw",
+    description: "Counter with revised price and terms pre-filled from transaction.",
+    fields: [
+      { id: "buyerName",        label: "Buyer Name",         type: "text",   autoFill: "client" },
+      { id: "sellerName",       label: "Seller Name",        type: "text",   placeholder: "Enter seller name" },
+      { id: "propertyAddress",  label: "Property Address",   type: "text",   autoFill: "address" },
+      { id: "counterPrice",     label: "Counter Price ($)",  type: "number", autoFill: "price" },
+      { id: "closingDate",      label: "Closing Date",       type: "date",   autoFill: "closingDateCalc" },
+      { id: "agentName",        label: "Agent",              type: "text",   autoFill: "agentName" },
+      { id: "counterTerms",     label: "Counter Terms",      type: "textarea", placeholder: "Changes from original offer..." },
+    ],
+  },
+  {
+    id: "inspection-notice",
+    name: "Inspection Notice",
+    icon: "ClipboardCheck",
+    description: "Inspection request notice with property and agent details.",
+    fields: [
+      { id: "buyerName",        label: "Buyer Name",        type: "text",   autoFill: "client" },
+      { id: "propertyAddress",  label: "Property Address",  type: "text",   autoFill: "address" },
+      { id: "inspectionDate",   label: "Inspection Date",   type: "date",   placeholder: "" },
+      { id: "inspectionTime",   label: "Inspection Time",   type: "text",   placeholder: "e.g. 10:00 AM" },
+      { id: "inspectorName",    label: "Inspector Name",    type: "text",   placeholder: "Inspector's name" },
+      { id: "agentName",        label: "Agent",             type: "text",   autoFill: "agentName" },
+      { id: "notes",            label: "Notes",             type: "textarea", placeholder: "Inspection scope or access instructions..." },
+    ],
+  },
+  {
+    id: "termination",
+    name: "Termination Agreement",
+    icon: "X",
+    description: "Mutual termination notice with earnest money disposition.",
+    fields: [
+      { id: "buyerName",        label: "Buyer Name",        type: "text",   autoFill: "client" },
+      { id: "sellerName",       label: "Seller Name",       type: "text",   placeholder: "Enter seller name" },
+      { id: "propertyAddress",  label: "Property Address",  type: "text",   autoFill: "address" },
+      { id: "terminationDate",  label: "Termination Date",  type: "date",   placeholder: "" },
+      { id: "earnestDisposition", label: "Earnest Money Disposition", type: "text", placeholder: "e.g. Return to buyer" },
+      { id: "agentName",        label: "Agent",             type: "text",   autoFill: "agentName" },
+      { id: "reason",           label: "Reason for Termination", type: "textarea", placeholder: "State the reason for termination..." },
+    ],
+  },
+];
+
+/** Compute the initial field values from a transaction */
+function autoFillValues(
+  tx: Transaction,
+  fields: TxDocField[],
+  agentName: string,
+): Record<string, string> {
+  const today = new Date();
+  const closeDate = new Date(today);
+  closeDate.setDate(today.getDate() + tx.closeDateDaysOut);
+  const closeDateStr = closeDate.toISOString().split("T")[0];
+
+  const result: Record<string, string> = {};
+  for (const f of fields) {
+    if (f.autoFill === "agentName") {
+      result[f.id] = agentName;
+    } else if (f.autoFill === "closingDateCalc") {
+      result[f.id] = closeDateStr;
+    } else if (f.autoFill) {
+      const raw = tx[f.autoFill as keyof Transaction];
+      result[f.id] = raw != null ? String(raw) : "";
+    } else {
+      result[f.id] = "";
+    }
+  }
+  return result;
+}
+
+/** Render a document preview as an HTML string */
+function renderDocPreview(
+  template: TxDocTemplate,
+  values: Record<string, string>,
+): string {
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const fieldRows = template.fields
+    .filter((f) => f.id !== "additionalTerms" && f.id !== "counterTerms" && f.id !== "notes" && f.id !== "reason")
+    .map(
+      (f) =>
+        `<tr>
+          <td style="padding:6px 12px 6px 0;font-size:13px;color:#666;white-space:nowrap;vertical-align:top;">${f.label}</td>
+          <td style="padding:6px 0;font-size:13px;color:#1a1a1a;font-weight:500;">${
+            f.type === "number" && values[f.id]
+              ? Number(values[f.id]).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+              : values[f.id] || "<span style='color:#aaa;font-style:italic'>—</span>"
+          }</td>
+        </tr>`,
+    )
+    .join("");
+
+  const narrativeFields = template.fields.filter(
+    (f) => f.id === "additionalTerms" || f.id === "counterTerms" || f.id === "notes" || f.id === "reason",
+  );
+
+  const narrativeHtml = narrativeFields
+    .map(
+      (f) =>
+        values[f.id]
+          ? `<div style="margin-top:16px;">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#888;margin-bottom:6px;">${f.label}</div>
+              <div style="font-size:13px;color:#1a1a1a;line-height:1.6;white-space:pre-wrap;">${values[f.id]}</div>
+            </div>`
+          : "",
+    )
+    .join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${template.name} — ${MATIN_BRAND.name}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 48px; max-width: 760px; margin: 0 auto; }
+    @media print { body { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div style="border-bottom: 2px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">${MATIN_BRAND.name}</div>
+      <div style="font-size: 12px; color: #666; margin-top: 4px;">${MATIN_BRAND.address}</div>
+      <div style="font-size: 12px; color: #666;">${MATIN_BRAND.phone}</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #888;">Date</div>
+      <div style="font-size: 13px; font-weight: 500;">${today}</div>
+    </div>
+  </div>
+
+  <!-- Document title -->
+  <h1 style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px;">${template.name}</h1>
+  <p style="font-size: 13px; color: #666; margin-bottom: 24px;">${template.description}</p>
+
+  <!-- Fields table -->
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+    ${fieldRows}
+  </table>
+
+  ${narrativeHtml}
+
+  <!-- Signature block -->
+  <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e5e5; display: flex; gap: 48px;">
+    <div style="flex: 1;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 32px;">Client Signature</div>
+      <div style="border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; margin-bottom: 6px;"></div>
+      <div style="font-size: 11px; color: #888;">Signature &amp; Date</div>
+    </div>
+    <div style="flex: 1;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 32px;">Agent Signature</div>
+      <div style="border-bottom: 1px solid #1a1a1a; padding-bottom: 2px; margin-bottom: 6px;"></div>
+      <div style="font-size: 11px; color: #888;">Signature &amp; Date</div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+const DOC_ICONS: Record<TxDocTemplate["icon"], typeof FileText> = {
+  FileText:      FileText,
+  RefreshCw:     RefreshCw,
+  ClipboardCheck: ClipboardCheck,
+  X:             X,
+};
 
 export function TransactionsView({ transactions }: { transactions: Transaction[] }) {
   const [filter, setFilter] = useState<StatusFilter>("All");
@@ -430,12 +652,17 @@ function TransactionRow({ t, onOpen }: { t: Transaction; onOpen: () => void }) {
 
 /* ── Detail slide-over ─────────────────────────────────────────────────── */
 
+type DetailTab = "checklist" | "documents" | "ai-extract";
+
 function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: () => void }) {
   const open = !!tx;
   const agent = tx ? getAgent(tx.agentSlug) : undefined;
   const type = tx ? shortType(tx.type) : null;
-  const docs = tx ? buildDocuments(tx) : [];
+  const statusDocs = tx ? buildStatusDocuments(tx) : [];
   const closed = tx ? isClosed(tx) : false;
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<DetailTab>("checklist");
 
   // Mutable local checklist state — resets when tx changes.
   const [localChecklist, setLocalChecklist] = useState<{ label: string; done: boolean }[]>([]);
@@ -466,10 +693,20 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
   const [extractLoading, setExtractLoading] = useState(false);
   const [applyDone, setApplyDone] = useState(false);
 
-  // Doc action inline feedback
+  // Doc action inline feedback (status docs)
   const [docFeedback, setDocFeedback] = useState<Record<string, string>>({});
 
-  // Ref to scroll to extractor section
+  // Doc generation state
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [docFieldValues, setDocFieldValues] = useState<Record<string, string>>({});
+  // Blob URL for the iframe preview — avoids srcDoc / document.write XSS vectors.
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [docAiWriting, setDocAiWriting] = useState(false);
+  const [docAiText, setDocAiText] = useState("");
+  const [selectedAgentSlug, setSelectedAgentSlug] = useState("jordan-matin");
+  const [docCopied, setDocCopied] = useState(false);
+
+  const docFormRef = useRef<HTMLDivElement>(null);
   const extractorRef = useRef<HTMLDivElement>(null);
 
   // Reset all state when tx changes.
@@ -480,7 +717,32 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     setExtractLoading(false);
     setApplyDone(false);
     setDocFeedback({});
+    setSelectedDocId(null);
+    setDocFieldValues({});
+    if (docPreviewUrl) URL.revokeObjectURL(docPreviewUrl);
+    setDocPreviewUrl(null);
+    setDocAiWriting(false);
+    setDocAiText("");
+    setActiveTab("checklist");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tx]);
+
+  // When a doc is selected, auto-fill its fields from the transaction.
+  useEffect(() => {
+    if (!tx || !selectedDocId) return;
+    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+    if (!template) return;
+    const ag = getAgent(selectedAgentSlug) ?? agents.find((a) => a.slug === selectedAgentSlug);
+    const agentName = ag?.name ?? "Jordan Matin";
+    setDocFieldValues(autoFillValues(tx, template.fields, agentName));
+    setDocPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    setDocAiText("");
+    setDocCopied(false);
+    // Scroll form into view
+    setTimeout(() => {
+      docFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }, [selectedDocId, tx, selectedAgentSlug]);
 
   async function handleExtract() {
     if (!contractText.trim()) return;
@@ -503,7 +765,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     setApplyDone(true);
   }
 
-  function handleDocAction(doc: TxDoc, action: "view" | "send" | "remind" | "upload") {
+  function handleDocStatusAction(doc: TxDoc, action: "view" | "send" | "remind" | "upload") {
     const feedback =
       action === "upload"
         ? "Upload started"
@@ -524,10 +786,92 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
     );
   }
 
+  function handleSelectDoc(docId: string) {
+    setSelectedDocId((prev) => (prev === docId ? null : docId));
+    setDocPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    setDocAiText("");
+  }
+
+  function handleFieldChange(fieldId: string, value: string) {
+    setDocFieldValues((prev) => ({ ...prev, [fieldId]: value }));
+    setDocPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+  }
+
+  function handlePreviewDoc() {
+    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+    if (!template) return;
+    const html = renderDocPreview(template, docFieldValues);
+    const blob = new Blob([html], { type: "text/html" });
+    setDocPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(blob);
+    });
+  }
+
+  async function handleAiWriteBody() {
+    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+    if (!template || !tx) return;
+    setDocAiWriting(true);
+    setDocAiText("");
+    const prompt = `Write a professional, concise body paragraph for a real estate ${template.name} document. Property: ${docFieldValues.propertyAddress ?? tx.address}. Price: $${docFieldValues.offerPrice ?? docFieldValues.counterPrice ?? tx.price}. Buyer: ${docFieldValues.buyerName ?? tx.client}. Agent: ${docFieldValues.agentName ?? "Jordan Matin"}, ${MATIN_BRAND.name}. Keep it formal, 2-3 sentences.`;
+    await streamAi(
+      { tool: "general", messages: [{ role: "user", content: prompt }] },
+      (_chunk: string, full: string) => setDocAiText(full),
+    );
+    setDocAiWriting(false);
+  }
+
+  function handleCopyDoc() {
+    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+    if (!template) return;
+    // Copy plain-text version
+    const lines = template.fields
+      .map((f) => `${f.label}: ${docFieldValues[f.id] || "—"}`)
+      .join("\n");
+    const text = `${template.name}\n${MATIN_BRAND.name} | ${MATIN_BRAND.phone}\n\n${lines}${docAiText ? `\n\n${docAiText}` : ""}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setDocCopied(true);
+      setTimeout(() => setDocCopied(false), 2500);
+    });
+  }
+
+  function handlePrintDoc() {
+    // Build HTML from current fields (or re-use existing preview).
+    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+    if (!template) return;
+    const html = renderDocPreview(template, docFieldValues);
+    // Use a Blob URL + hidden iframe to avoid document.write / window.open XSS risks.
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;width:0;height:0;border:0;opacity:0;";
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow?.print();
+      } finally {
+        // Clean up after the print dialog closes (best-effort; some browsers fire onafterprint).
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      }
+    };
+    document.body.appendChild(iframe);
+  }
+
   // Reset extractor state when a different transaction is opened.
   function handleClose() {
     onClose();
   }
+
+  const salesAgentsList = agents.filter((a) => !a.support);
+
+  const TABS: { id: DetailTab; label: string }[] = [
+    { id: "checklist", label: "Checklist" },
+    { id: "documents", label: "Documents" },
+    { id: "ai-extract", label: "AI Extract" },
+  ];
 
   return (
     <>
@@ -544,7 +888,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
       {/* Slide-over */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out sm:max-w-[480px]",
+          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink/[0.08] bg-white shadow-[0_0_80px_rgba(0,0,0,.6)] transition-transform duration-300 ease-out sm:max-w-[520px]",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
@@ -553,21 +897,6 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
           <>
             {/* Header */}
             <div className="relative shrink-0 border-b border-ink/[0.08] bg-gradient-to-br from-paper to-white px-5 py-5">
-              {/* Quick-access: open contract extractor */}
-              <button
-                onClick={() => {
-                  setExtractOpen(true);
-                  setTimeout(() => {
-                    extractorRef.current?.scrollIntoView({ behavior: "smooth" });
-                  }, 50);
-                }}
-                aria-label="Open contract extractor"
-                title="Extract contract deadlines"
-                className="absolute right-14 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-ink/[0.06] hover:text-ink"
-              >
-                <Sparkles className="h-4 w-4" />
-              </button>
-
               <button
                 onClick={handleClose}
                 aria-label="Close"
@@ -588,7 +917,7 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
                 </span>
                 <span className="text-[0.7rem] text-slate/50">{tx.id}</span>
               </div>
-              <h2 className="mt-1 pr-24 font-display text-2xl text-ink">{tx.address}</h2>
+              <h2 className="mt-1 pr-12 font-display text-2xl text-ink">{tx.address}</h2>
 
               {/* Risk banner */}
               {tx.riskFlag && (
@@ -604,8 +933,8 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
               )}
             </div>
 
-            <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-              {/* Key facts */}
+            {/* Key facts */}
+            <div className="shrink-0 border-b border-ink/[0.08] px-5 py-4">
               <div className="grid grid-cols-2 gap-2.5">
                 <Fact icon={<User className="h-3.5 w-3.5" />} label="Client" value={tx.client} />
                 <Fact
@@ -631,238 +960,462 @@ function TransactionDetail({ tx, onClose }: { tx: Transaction | null; onClose: (
 
               {/* Lead agent */}
               {agent && (
-                <div className="flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-3.5 py-3">
-                  <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.74rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
+                <div className="mt-2.5 flex items-center gap-3 rounded-xl border border-ink/[0.08] bg-white px-3.5 py-2.5">
+                  <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-paper text-[0.7rem] font-semibold text-ink ring-1 ring-inset ring-ink/[0.06]">
                     {agent.photo ? (
-                      <Image src={agent.photo} alt={agent.name} fill sizes="36px" className="object-cover" />
+                      <Image src={agent.photo} alt={agent.name} fill sizes="32px" className="object-cover" />
                     ) : (
                       initials(agent.name)
                     )}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[0.7rem] uppercase tracking-wider text-slate/55">Lead agent</p>
-                    <p className="truncate text-[0.86rem] font-semibold text-ink">{agent.name}</p>
+                    <p className="text-[0.68rem] uppercase tracking-wider text-slate/55">Lead agent</p>
+                    <p className="truncate text-[0.84rem] font-semibold text-ink">{agent.name}</p>
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* ── Overdue items alert ── */}
-              {overdueItems.length > 0 && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-600" />
-                    <span className="text-[0.82rem] font-semibold text-red-700">
-                      {overdueItems.length} overdue {overdueItems.length === 1 ? "item" : "items"} —{" "}
-                      {overdueItems.map((c) => c.label).join(", ")}
-                    </span>
-                  </div>
-                </div>
-              )}
+            {/* Tabs */}
+            <div className="shrink-0 flex items-center gap-0.5 border-b border-ink/[0.08] px-5">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "relative px-3 py-3 text-[0.8rem] font-medium transition-colors",
+                    activeTab === tab.id
+                      ? "text-ink after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-ink after:rounded-t-full"
+                      : "text-slate/60 hover:text-ink",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-              {/* Smart checklist */}
-              <div>
-                <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
-                    <ClipboardList className="h-4 w-4 text-ink" /> Smart checklist
-                  </span>
-                  <span className="text-[0.74rem] text-slate/70 tabular-nums">
-                    {doneCount}/{total} complete
-                  </span>
-                </div>
-                <ProgressBar value={pct} tone={progressTone(tx)} className="mb-3 h-2" />
+            {/* Tab content */}
+            <div className="flex-1 overflow-y-auto">
 
-                {/* Next outstanding item */}
-                {nextItem && (
-                  <div className="mb-2.5 flex items-center gap-2.5 rounded-lg border border-ink/15 bg-paper px-3 py-2">
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ink" />
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">
-                      Next:
-                    </span>
-                    <span className="truncate text-[0.82rem] font-medium text-ink">{nextItem.label}</span>
-                  </div>
-                )}
-
-                <ul className="space-y-1">
-                  {localChecklist.map((c, i) => {
-                    const isNext = !c.done && nextItem != null && c.label === nextItem.label;
-                    const overdueByDays = !c.done ? daysOverdue(dueDates[i] ?? new Date()) : 0;
-                    return (
-                      <li key={i}>
-                        <button
-                          onClick={() => {
-                            setLocalChecklist((prev) =>
-                              prev.map((item, idx) =>
-                                idx === i ? { ...item, done: !item.done } : item,
-                              ),
-                            );
-                          }}
-                          className={cn(
-                            "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] text-left transition-colors",
-                            c.done
-                              ? "bg-success/[0.04]"
-                              : isNext
-                                ? "bg-white ring-1 ring-inset ring-azure/20"
-                                : "bg-white/[0.02]",
-                          )}
-                        >
-                          {c.done ? (
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
-                          ) : (
-                            <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
-                          )}
-                          <span
-                            className={cn(
-                              "flex-1 transition-colors",
-                              c.done
-                                ? "text-success/70 line-through decoration-success/30"
-                                : isNext
-                                  ? "font-medium text-ink"
-                                  : "text-slate",
-                            )}
-                          >
-                            {c.label}
-                          </span>
-                          {/* Days overdue badge */}
-                          {overdueByDays > 0 && (
-                            <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
-                              {overdueByDays}d overdue
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              {/* Documents */}
-              <div>
-                <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
-                    <FileText className="h-4 w-4 text-ink" /> Documents
-                  </span>
-                  <span className="text-[0.74rem] text-slate/70 tabular-nums">
-                    {docs.filter((d) => d.status === "signed" || d.status === "received").length}/
-                    {docs.length} in
-                  </span>
-                </div>
-                <ul className="space-y-1.5">
-                  {docs.map((d) => (
-                    <DocRow
-                      key={d.name}
-                      doc={d}
-                      feedback={docFeedback[d.name]}
-                      onAction={handleDocAction}
-                    />
-                  ))}
-                </ul>
-              </div>
-
-              {/* ── AI Contract Extractor ── */}
-              <div ref={extractorRef} className="rounded-xl border border-ink/[0.08] bg-white">
-                {/* Section header — always visible */}
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="inline-flex items-center gap-2 text-[0.86rem] font-semibold text-ink">
-                    <Sparkles className="h-4 w-4 text-ink" />
-                    Extract Contract Deadlines
-                  </span>
-                  <button
-                    onClick={() => setExtractOpen((v) => !v)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-1.5 text-[0.78rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
-                    aria-label={extractOpen ? "Collapse contract extractor" : "Expand contract extractor"}
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    Extract
-                    {extractOpen ? (
-                      <ChevronUp className="h-3.5 w-3.5 text-slate/60" />
-                    ) : (
-                      <ChevronDown className="h-3.5 w-3.5 text-slate/60" />
-                    )}
-                  </button>
-                </div>
-
-                {extractOpen && (
-                  <div className="border-t border-ink/[0.08] px-4 pb-4 pt-3 space-y-3">
-                    <p className="text-[0.82rem] text-slate">
-                      Paste your purchase agreement text below. The AI will extract all key deadlines, contingency dates, and parties.
-                    </p>
-                    <textarea
-                      value={contractText}
-                      onChange={(e) => setContractText(e.target.value)}
-                      placeholder="Paste your purchase agreement text here..."
-                      rows={6}
-                      className="w-full rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3 text-[0.82rem] text-ink resize-none focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
-                    />
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleExtract}
-                        disabled={extractLoading || !contractText.trim()}
-                        className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {extractLoading ? (
-                          <>
-                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            Extracting deadlines...
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="h-3.5 w-3.5" />
-                            Extract Deadlines
-                          </>
-                        )}
-                      </button>
-                      {contractText.trim() && !extractLoading && (
-                        <button
-                          onClick={() => { setContractText(""); setExtractOutput(""); }}
-                          className="rounded-xl border border-ink/[0.08] px-3 py-2 text-[0.82rem] text-slate transition-colors hover:bg-ink/[0.04] hover:text-ink"
-                        >
-                          Clear
-                        </button>
-                      )}
+              {/* ── CHECKLIST TAB ─────────────────────────────────────────── */}
+              {activeTab === "checklist" && (
+                <div className="space-y-4 px-5 py-5">
+                  {/* Overdue items alert */}
+                  {overdueItems.length > 0 && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+                      <div className="mb-1.5 flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-600" />
+                        <span className="text-[0.82rem] font-semibold text-red-700">
+                          {overdueItems.length} overdue {overdueItems.length === 1 ? "item" : "items"} —{" "}
+                          {overdueItems.map((c) => c.label).join(", ")}
+                        </span>
+                      </div>
                     </div>
+                  )}
 
-                    {/* Streaming output */}
-                    {(extractOutput || extractLoading) && (
-                      <div className="rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3">
-                        {extractLoading && !extractOutput && (
-                          <p className="animate-pulse text-[0.82rem] text-slate">Extracting deadlines...</p>
-                        )}
-                        {extractOutput && (
-                          <div className="max-h-72 overflow-y-auto">
-                            <AiMarkdown text={extractOutput} />
-                          </div>
-                        )}
-                        {extractOutput && !extractLoading && (
-                          <div className="mt-3 border-t border-ink/[0.08] pt-3">
+                  {/* Smart checklist */}
+                  <div>
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
+                        <ClipboardList className="h-4 w-4 text-ink" /> Smart checklist
+                      </span>
+                      <span className="text-[0.74rem] text-slate/70 tabular-nums">
+                        {doneCount}/{total} complete
+                      </span>
+                    </div>
+                    <ProgressBar value={pct} tone={progressTone(tx)} className="mb-3 h-2" />
+
+                    {/* Next outstanding item */}
+                    {nextItem && (
+                      <div className="mb-2.5 flex items-center gap-2.5 rounded-lg border border-ink/15 bg-paper px-3 py-2">
+                        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ink" />
+                        <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-ink/70">
+                          Next:
+                        </span>
+                        <span className="truncate text-[0.82rem] font-medium text-ink">{nextItem.label}</span>
+                      </div>
+                    )}
+
+                    <ul className="space-y-1">
+                      {localChecklist.map((c, i) => {
+                        const isNext = !c.done && nextItem != null && c.label === nextItem.label;
+                        const overdueByDays = !c.done ? daysOverdue(dueDates[i] ?? new Date()) : 0;
+                        return (
+                          <li key={i}>
                             <button
-                              onClick={handleApplyToChecklist}
-                              disabled={applyDone}
+                              onClick={() => {
+                                setLocalChecklist((prev) =>
+                                  prev.map((item, idx) =>
+                                    idx === i ? { ...item, done: !item.done } : item,
+                                  ),
+                                );
+                              }}
                               className={cn(
-                                "inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[0.82rem] font-medium transition-colors",
-                                applyDone
-                                  ? "cursor-default border border-success/30 bg-success/10 text-success"
-                                  : "border border-ink/[0.12] text-ink hover:bg-ink/[0.04]",
+                                "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[0.82rem] text-left transition-colors",
+                                c.done
+                                  ? "bg-success/[0.04]"
+                                  : isNext
+                                    ? "bg-white ring-1 ring-inset ring-azure/20"
+                                    : "bg-white/[0.02]",
                               )}
                             >
-                              {applyDone ? (
+                              {c.done ? (
+                                <CheckCircle2 className="h-4 w-4 shrink-0 text-success transition-colors" />
+                              ) : (
+                                <Circle className={cn("h-4 w-4 shrink-0 transition-colors", isNext ? "text-azure/50" : "text-slate/40")} />
+                              )}
+                              <span
+                                className={cn(
+                                  "flex-1 transition-colors",
+                                  c.done
+                                    ? "text-success/70 line-through decoration-success/30"
+                                    : isNext
+                                      ? "font-medium text-ink"
+                                      : "text-slate",
+                                )}
+                              >
+                                {c.label}
+                              </span>
+                              {overdueByDays > 0 && (
+                                <span className="ml-auto shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
+                                  {overdueByDays}d overdue
+                                </span>
+                              )}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* ── DOCUMENTS TAB ─────────────────────────────────────────── */}
+              {activeTab === "documents" && (
+                <div className="space-y-5 px-5 py-5">
+                  {/* Agent selector */}
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[0.82rem] font-semibold text-ink">Generate Documents</span>
+                    <div className="relative">
+                      <select
+                        value={selectedAgentSlug}
+                        onChange={(e) => setSelectedAgentSlug(e.target.value)}
+                        className="appearance-none rounded-lg border border-ink/[0.12] bg-white py-1.5 pl-3 pr-7 text-[0.76rem] text-ink focus:border-ink/30 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                      >
+                        {salesAgentsList.map((a) => (
+                          <option key={a.slug} value={a.slug}>
+                            {a.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate/50" />
+                    </div>
+                  </div>
+
+                  {/* Doc cards grid */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {TX_DOCS.map((doc) => {
+                      const Icon = DOC_ICONS[doc.icon];
+                      const isSelected = selectedDocId === doc.id;
+                      return (
+                        <button
+                          key={doc.id}
+                          onClick={() => handleSelectDoc(doc.id)}
+                          className={cn(
+                            "flex flex-col items-start gap-2 rounded-xl border p-3.5 text-left transition-all",
+                            isSelected
+                              ? "border-ink/25 bg-ink/[0.04] ring-1 ring-inset ring-ink/10"
+                              : "border-ink/[0.08] bg-white hover:border-ink/20 hover:bg-[#f9f9f8]",
+                          )}
+                        >
+                          <div className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-lg",
+                            isSelected ? "bg-ink text-white" : "bg-[#f4f4f3] text-ink/70",
+                          )}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="text-[0.82rem] font-semibold text-ink leading-snug">{doc.name}</p>
+                            <p className="mt-0.5 text-[0.7rem] text-slate/60 leading-snug">{doc.description}</p>
+                          </div>
+                          <div className={cn(
+                            "mt-auto inline-flex items-center gap-1 text-[0.72rem] font-semibold transition-colors",
+                            isSelected ? "text-ink" : "text-azure",
+                          )}>
+                            {isSelected ? "Close" : "Generate"}
+                            <ChevronRight className="h-3 w-3" />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Inline form for selected doc */}
+                  {selectedDocId && (() => {
+                    const template = TX_DOCS.find((d) => d.id === selectedDocId);
+                    if (!template) return null;
+                    return (
+                      <div ref={docFormRef} className="rounded-xl border border-ink/[0.10] bg-[#f9f9f8]">
+                        <div className="flex items-center justify-between border-b border-ink/[0.08] px-4 py-3">
+                          <span className="text-[0.84rem] font-semibold text-ink">{template.name}</span>
+                          <button
+                            onClick={() => { setSelectedDocId(null); setDocPreviewUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; }); }}
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-slate/50 hover:bg-ink/[0.06] hover:text-ink transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-3 px-4 py-4">
+                          {template.fields.map((field) => (
+                            <div key={field.id}>
+                              <label className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-wider text-slate/60">
+                                {field.label}
+                              </label>
+                              {field.type === "textarea" ? (
+                                <textarea
+                                  value={docFieldValues[field.id] ?? ""}
+                                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                  placeholder={field.placeholder}
+                                  rows={3}
+                                  className="w-full rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink resize-none focus:border-ink/30 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                                />
+                              ) : (
+                                <input
+                                  type={field.type}
+                                  value={docFieldValues[field.id] ?? ""}
+                                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                                  placeholder={field.placeholder}
+                                  className="w-full rounded-lg border border-ink/[0.08] bg-white px-3 py-2 text-[0.82rem] text-ink focus:border-ink/30 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                                />
+                              )}
+                            </div>
+                          ))}
+
+                          {/* Action buttons */}
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <button
+                              onClick={handlePreviewDoc}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-white transition-opacity hover:opacity-90"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              Preview
+                            </button>
+                            <button
+                              onClick={handleAiWriteBody}
+                              disabled={docAiWriting}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3.5 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:bg-ink/[0.04] disabled:opacity-50"
+                            >
+                              {docAiWriting ? (
                                 <>
-                                  <CheckCircle2 className="h-3.5 w-3.5" />
-                                  Deadlines added to checklist
+                                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-ink/20 border-t-ink" />
+                                  Writing...
                                 </>
                               ) : (
                                 <>
-                                  <ArrowRight className="h-3.5 w-3.5" />
-                                  Apply to transaction checklist
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                  AI Write Body
                                 </>
                               )}
                             </button>
+                            <button
+                              onClick={handleCopyDoc}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3.5 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                              {docCopied ? "Copied!" : "Copy"}
+                            </button>
+                            <button
+                              onClick={handlePrintDoc}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3.5 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                            >
+                              <Printer className="h-3.5 w-3.5" />
+                              Print
+                            </button>
+                          </div>
+
+                          {/* AI body output */}
+                          {(docAiText || docAiWriting) && (
+                            <div className="rounded-lg border border-azure/20 bg-azure/[0.04] p-3">
+                              <p className="mb-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-azure/70">AI Generated Body</p>
+                              {docAiWriting && !docAiText && (
+                                <p className="animate-pulse text-[0.82rem] text-slate">Writing...</p>
+                              )}
+                              {docAiText && (
+                                <p className="text-[0.82rem] text-ink leading-relaxed">{docAiText}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Preview frame */}
+                          {docPreviewUrl && (
+                            <div className="overflow-hidden rounded-xl border border-ink/[0.08]">
+                              <div className="flex items-center justify-between border-b border-ink/[0.08] bg-white px-3 py-2">
+                                <span className="text-[0.72rem] font-semibold text-slate/60 uppercase tracking-wider">Document Preview</span>
+                                <button
+                                  onClick={handlePrintDoc}
+                                  className="inline-flex items-center gap-1 text-[0.72rem] text-azure hover:underline"
+                                >
+                                  <Printer className="h-3 w-3" /> Print
+                                </button>
+                              </div>
+                              <iframe
+                                src={docPreviewUrl ?? undefined}
+                                className="h-[520px] w-full bg-white"
+                                title={`${template.name} Preview`}
+                                sandbox="allow-same-origin"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Status documents (existing doc tracker) */}
+                  <div>
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-ink">
+                        <FileText className="h-4 w-4 text-ink" /> Transaction Files
+                      </span>
+                      <span className="text-[0.74rem] text-slate/70 tabular-nums">
+                        {statusDocs.filter((d) => d.status === "signed" || d.status === "received").length}/
+                        {statusDocs.length} in
+                      </span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {statusDocs.map((d) => (
+                        <DocRow
+                          key={d.name}
+                          doc={d}
+                          feedback={docFeedback[d.name]}
+                          onAction={handleDocStatusAction}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* ── AI EXTRACT TAB ────────────────────────────────────────── */}
+              {activeTab === "ai-extract" && (
+                <div className="space-y-4 px-5 py-5">
+                  <div className="rounded-xl border border-ink/[0.08] bg-white">
+                    {/* Section header — always visible */}
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <span className="inline-flex items-center gap-2 text-[0.86rem] font-semibold text-ink">
+                        <Sparkles className="h-4 w-4 text-ink" />
+                        Extract Contract Deadlines
+                      </span>
+                      <button
+                        onClick={() => setExtractOpen((v) => !v)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.12] px-3 py-1.5 text-[0.78rem] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
+                        aria-label={extractOpen ? "Collapse contract extractor" : "Expand contract extractor"}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        Extract
+                        {extractOpen ? (
+                          <ChevronUp className="h-3.5 w-3.5 text-slate/60" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5 text-slate/60" />
+                        )}
+                      </button>
+                    </div>
+
+                    {extractOpen && (
+                      <div className="border-t border-ink/[0.08] px-4 pb-4 pt-3 space-y-3">
+                        <p className="text-[0.82rem] text-slate">
+                          Paste your purchase agreement text below. The AI will extract all key deadlines, contingency dates, and parties.
+                        </p>
+                        <textarea
+                          value={contractText}
+                          onChange={(e) => setContractText(e.target.value)}
+                          placeholder="Paste your purchase agreement text here..."
+                          rows={6}
+                          className="w-full rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3 text-[0.82rem] text-ink resize-none focus:border-ink/40 focus:outline-none focus:ring-1 focus:ring-ink/20"
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleExtract}
+                            disabled={extractLoading || !contractText.trim()}
+                            className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-[0.85rem] font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {extractLoading ? (
+                              <>
+                                <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                Extracting deadlines...
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="h-3.5 w-3.5" />
+                                Extract Deadlines
+                              </>
+                            )}
+                          </button>
+                          {contractText.trim() && !extractLoading && (
+                            <button
+                              onClick={() => { setContractText(""); setExtractOutput(""); }}
+                              className="rounded-xl border border-ink/[0.08] px-3 py-2 text-[0.82rem] text-slate transition-colors hover:bg-ink/[0.04] hover:text-ink"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Streaming output */}
+                        {(extractOutput || extractLoading) && (
+                          <div className="rounded-xl border border-ink/[0.08] bg-[#f4f4f3] p-3">
+                            {extractLoading && !extractOutput && (
+                              <p className="animate-pulse text-[0.82rem] text-slate">Extracting deadlines...</p>
+                            )}
+                            {extractOutput && (
+                              <div className="max-h-72 overflow-y-auto">
+                                <AiMarkdown text={extractOutput} />
+                              </div>
+                            )}
+                            {extractOutput && !extractLoading && (
+                              <div className="mt-3 border-t border-ink/[0.08] pt-3">
+                                <button
+                                  onClick={handleApplyToChecklist}
+                                  disabled={applyDone}
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[0.82rem] font-medium transition-colors",
+                                    applyDone
+                                      ? "cursor-default border border-success/30 bg-success/10 text-success"
+                                      : "border border-ink/[0.12] text-ink hover:bg-ink/[0.04]",
+                                  )}
+                                >
+                                  {applyDone ? (
+                                    <>
+                                      <CheckCircle2 className="h-3.5 w-3.5" />
+                                      Deadlines added to checklist
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ArrowRight className="h-3.5 w-3.5" />
+                                      Apply to transaction checklist
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
+
+                  {/* Tip */}
+                  {!extractOpen && (
+                    <div className="rounded-xl border border-azure/20 bg-azure/[0.04] px-4 py-3">
+                      <p className="text-[0.82rem] text-ink/80">
+                        Click <span className="font-semibold">Extract</span> to paste a purchase agreement and let AI pull out all key deadlines and dates — then apply them directly to this transaction&apos;s checklist.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
           </>
         )}
@@ -903,7 +1456,7 @@ function Fact({
   );
 }
 
-/* ── Documents (deterministic — synthesized from checklist + stage) ──────── */
+/* ── Status Documents (deterministic — synthesized from checklist + stage) ── */
 
 type DocStatus = "signed" | "received" | "out" | "pending";
 type TxDoc = { name: string; status: DocStatus };
@@ -925,15 +1478,13 @@ const DOC_STATUS_META: Record<
  * "not started" otherwise. No Math.random — the same deal always renders the
  * same docs in the same states.
  */
-function buildDocuments(t: Transaction): TxDoc[] {
+function buildStatusDocuments(t: Transaction): TxDoc[] {
   const sale = shortType(t.type).label === "Sale";
   const done = (label: string) =>
     t.checklist.some((c) => c.label.toLowerCase().includes(label) && c.done);
   const nextLabel = t.checklist.find((c) => !c.done)?.label.toLowerCase() ?? "";
   const isNext = (label: string) => nextLabel.includes(label);
 
-  // milestone → doc status. "signed"/"received" if the milestone is done,
-  // "out for signature" when it's the immediate next step, else "not started".
   const fromMilestone = (label: string, received: DocStatus = "signed"): DocStatus => {
     if (done(label)) return received;
     if (isNext(label)) return "out";
@@ -942,25 +1493,19 @@ function buildDocuments(t: Transaction): TxDoc[] {
 
   const docs: TxDoc[] = [];
 
-  // Agency agreement — listing vs buyer representation.
   docs.push({
     name: sale ? "Listing Agreement" : "Buyer Representation Agreement",
     status: fromMilestone("listing agreement"),
   });
 
-  // Disclosures go out with the listing/representation.
   docs.push({
     name: "Agency Disclosure",
     status: done("listing agreement") ? "signed" : isNext("listing agreement") ? "out" : "pending",
   });
 
-  // Purchase & Sale agreement at offer acceptance.
   docs.push({ name: "Purchase & Sale Agreement", status: fromMilestone("offer accepted") });
-
-  // Earnest money receipt.
   docs.push({ name: "Earnest Money Receipt", status: fromMilestone("earnest money", "received") });
 
-  // Seller's Property Disclosure on the sell side.
   if (sale) {
     docs.push({
       name: "Seller's Property Disclosure",
@@ -968,19 +1513,10 @@ function buildDocuments(t: Transaction): TxDoc[] {
     });
   }
 
-  // Inspection report.
   docs.push({ name: "Inspection Report", status: fromMilestone("inspection", "received") });
-
-  // Repair addendum.
   docs.push({ name: "Repair Addendum", status: fromMilestone("repairs", "signed") });
-
-  // Appraisal report.
   docs.push({ name: "Appraisal Report", status: fromMilestone("appraisal", "received") });
-
-  // Loan approval / commitment letter.
   docs.push({ name: "Loan Commitment Letter", status: fromMilestone("loan approved", "received") });
-
-  // Closing Disclosure ahead of disbursal.
   docs.push({
     name: "Closing Disclosure",
     status: fromMilestone("closing disbursed", "received"),
@@ -1016,7 +1552,6 @@ function DocRow({
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <Pill tone={meta.tone}>{meta.label}</Pill>
-        {/* Inline action buttons based on doc status */}
         {doc.status === "pending" && onAction && (
           <button
             onClick={() => onAction(doc, "upload")}
