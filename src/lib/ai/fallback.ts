@@ -641,6 +641,31 @@ ${buyer} has completed ${showings} showings and the search is progressing well. 
 Follow up to share any new listings that match their criteria and confirm their current search status.`;
     }
 
+    /* ── Agent Workspace tools ──────────────────────────────────────────── */
+    case "task_coach":
+      return `**Today's Priority:** Follow up with your three hottest leads before noon — response rate drops 40% after 12pm. Then block 30 minutes to update pipeline stages in CRM so your reporting is accurate for the team meeting. First call: whoever you last touched 3+ days ago.`;
+
+    case "sms_draft":
+      return `Hey [Name], just thinking of you — still looking in [area]? Found 2 new listings that fit your criteria. Worth a quick look? — [Agent]`;
+
+    case "lead_reply":
+      return `Hi [Name] — great to hear from you! [Area] is moving fast right now. I've got a few properties in mind that could be a perfect fit. Quick call Thursday or Friday?`;
+
+    case "deal_brief":
+      return `• **Buyer:** Pending — confirm names\n• **Property:** TBD — pull from CRM\n• **Price:** Per accepted offer\n• **Inspection deadline:** Verify in transaction file\n• **Close:** Per contract timeline\n• **Risk flag:** Confirm all contingencies in writing`;
+
+    case "appt_prep":
+      return `**Likely objection:** "We're just looking — not sure about timing."\n**Opening question:** "What's changed in the last 6 months that has you thinking about this now?"\n**Key talking points:** (1) Current market inventory and why waiting costs them, (2) Our track record in their target area.\n**Close move:** Offer to pull 3 properties right now and schedule showings before leaving.`;
+
+    case "general":
+      return `I'm the Matin Hub assistant. I can help with transaction questions, market data, document review, and brokerage operations. What do you need?`;
+
+    case "report_agent_coach":
+      return `**Going well:** Consistent lead follow-up cadence this week.\n**Needs work:** Appointment-set rate is below team average — calls aren't converting to meetings. Focus on asking for a specific time in the first 30 seconds.\n**This week's drill:** Role-play the appointment-set close 3x with a partner before Friday's prospecting block.`;
+
+    case "integration_setup_guide":
+      return `For ${co} integrations, start with your MLS data feed (RMLS), then connect your CRM, then e-signature (DocuSign or SkySlope). Most setup questions come down to API key location and webhook URLs. What specific integration are you working on? I can give you step-by-step instructions.`;
+
     default:
       return `Thanks — contact Matin Real Estate for assistance. ${phone}`;
   }

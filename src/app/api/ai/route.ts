@@ -28,6 +28,14 @@ const MAX_TOKENS: Record<AiTool, number> = {
   "doc-generate": 800,
   "doc-ai-complete": 300,
   "buyer-agreement-summary": 400,
+  task_coach: 200,
+  sms_draft: 80,
+  lead_reply: 150,
+  deal_brief: 200,
+  appt_prep: 250,
+  general: 600,
+  report_agent_coach: 200,
+  integration_setup_guide: 400,
 };
 
 function textStream(text: string) {
