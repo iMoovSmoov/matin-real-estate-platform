@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { salesAgents, metrics } from "@/lib/data";
 import type { Agent } from "@/lib/types";
-import { Panel, PanelHeader, StatTile, SectionLabel, LiveDot, Pill } from "@/components/command/ui";
+import { Panel, PanelHeader, StatTile, SectionLabel, Pill } from "@/components/command/ui";
 import { cn, compactUsd } from "@/lib/utils";
 import {
   VolumeBarsChart,
@@ -105,22 +105,13 @@ export default function ReportingPage() {
     : 0;
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
       {/* ── Page header ── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="mb-1.5 flex items-center gap-2">
-            <LiveDot tone="azure" />
-            <SectionLabel>Reporting</SectionLabel>
-          </div>
-          <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Reporting</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate">
-            Brokerage-wide performance &middot; {range}
-          </p>
-        </div>
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
+        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Reporting</h1>
 
         {/* Date range chip bar */}
-        <div className="flex flex-col items-start gap-2 sm:items-end">
+        <div className="flex flex-col items-end gap-2">
           <div className="inline-flex shrink-0 items-center gap-1 overflow-x-auto rounded-xl border border-ink/[0.08] bg-white p-1 shadow-sm">
             <CalendarDays className="ml-1.5 h-3.5 w-3.5 shrink-0 text-slate/50" />
             {RANGES.map((r) => (

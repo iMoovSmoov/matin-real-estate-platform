@@ -34,23 +34,13 @@ export default function ContractsPage() {
   const recent = transactions.slice(0, 6);
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-paper text-ink ring-1 ring-inset ring-ink/[0.06]">
-            <FileSignature className="h-6 w-6" />
-          </span>
-          <div>
-            <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Contract Builder</h1>
-            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate">
-              Pick a contract, auto-fill it, and send it for signature in minutes.
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
+        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Contract Builder</h1>
       </div>
 
-      {/* Tight stat row */}
+      {/* Stat row */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         <StatTile
           label="Contracts available"

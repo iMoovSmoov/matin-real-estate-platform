@@ -300,52 +300,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "analytics",  label: "Analytics" },
 ];
 
-/* ── Onboarding banner ───────────────────────────────────────────────────── */
-
-const ONBOARDING_LINKS = [
-  { label: "Add your first lead", href: "/hub/crm?new=1" },
-  { label: "Start a transaction", href: "/hub/transactions?new=1" },
-  { label: "Launch a listing", href: "/hub/listing-launch?new=1" },
-  { label: "Explore AI tools", href: "/hub/ai/lead-responder" },
-];
-
-function OnboardingBanner({ onDismiss }: { onDismiss: () => void }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-ink to-ink/90 text-cloud p-6 mb-6">
-      <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/[0.04] blur-2xl" />
-      <button
-        onClick={onDismiss}
-        aria-label="Dismiss onboarding"
-        className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-      >
-        <X className="h-4 w-4" />
-      </button>
-      <div className="relative">
-        <div className="mb-2 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-white/70" />
-          <span className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/60">
-            Getting started
-          </span>
-        </div>
-        <h2 className="font-display text-xl text-white">
-          Welcome to Command Center — here&apos;s what you can do:
-        </h2>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {ONBOARDING_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-[0.82rem] font-medium text-white transition-colors hover:border-white/40 hover:bg-white/20"
-            >
-              {link.label}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+/* ── Onboarding banner — removed (no longer needed) ─────────────────────── */
 
 /* ── SlideOver shell ─────────────────────────────────────────────────────── */
 
@@ -382,7 +337,6 @@ function SlideOver({
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   /* slide-over state */
   const [kpiSlideOver, setKpiSlideOver] = useState<string | null>(null);
@@ -405,12 +359,6 @@ export default function DashboardPage() {
 
   /* date range for analytics tab */
   const [dateRange, setDateRange] = useState<"month" | "quarter" | "year">("month");
-
-  useEffect(() => {
-    if (!localStorage.getItem("hub_onboarded")) {
-      setShowOnboarding(true);
-    }
-  }, []);
 
   /* Speed-to-Lead AI brief — fires when panel opens and output is empty */
   useEffect(() => {
@@ -493,14 +441,9 @@ export default function DashboardPage() {
     setIsCoaching(false);
   }, [agentSlideOver]);
 
-  function dismissOnboarding() {
-    localStorage.setItem("hub_onboarded", "1");
-    setShowOnboarding(false);
-  }
-
   const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
+    weekday: "short",
+    month: "short",
     day: "numeric",
   });
 
@@ -608,58 +551,122 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] flex flex-col px-4 md:px-6">
 
-      {/* ── Onboarding banner ────────────────────────────────────────────── */}
-      {showOnboarding && <OnboardingBanner onDismiss={dismissOnboarding} />}
-
-      {/* ── Header (always visible) ───────────────────────────────────────── */}
-      <div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="font-display text-xl text-ink sm:text-2xl md:text-3xl">
-              Good morning, Jordan.
-            </h1>
-            <p className="mt-0.5 text-[0.85rem] text-slate/60">{today}</p>
-          </div>
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[0.78rem] font-semibold text-amber-700 sm:self-auto">
-            <TriangleAlert className="h-3.5 w-3.5" />
-            8 leads need follow-up today
+      {/* ── Compact page header ───────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-1 pt-3 pb-2">
+        <div className="flex items-center gap-3">
+          <h1 className="font-display text-lg font-semibold text-ink">Command Center</h1>
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-amber-700">
+            <TriangleAlert className="h-3 w-3" />
+            8 need follow-up
           </span>
         </div>
+        <span className="text-[0.75rem] text-slate/50">{today}</span>
+      </div>
 
-        {/* Needs-attention chips */}
-        <div className="-mx-4 mt-4 flex overflow-x-auto px-4 gap-2 pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
-          {ALERTS.map((a) => {
-            const Icon = a.icon;
+      {/* ── Needs-attention chips ─────────────────────────────────────────── */}
+      <div className="-mx-1 flex overflow-x-auto gap-1.5 pb-1 scrollbar-hide">
+        {ALERTS.map((a) => {
+          const Icon = a.icon;
+          return (
+            <Link
+              key={a.href}
+              href={a.href}
+              className={cn(
+                "shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[0.7rem] font-medium transition-opacity hover:opacity-80",
+                alertChipClass(a.tone),
+              )}
+            >
+              <Icon className="h-2.5 w-2.5 shrink-0" />
+              {a.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* ── KPI tiles (2×2 grid, always visible above fold) ──────────────── */}
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {KPIS.map((kpi) => {
+          const tileContent = (
+            <div
+              className={cn(
+                "flex flex-col rounded-xl border border-ink/[0.08] bg-white px-4 py-3 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-all h-full",
+                "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer",
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[0.65rem] font-bold uppercase tracking-widest text-slate/50">
+                  {kpi.label}
+                </span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ink/[0.05] text-slate/50">
+                  {kpi.icon}
+                </span>
+              </div>
+              <span className="mt-2 font-display text-2xl font-semibold text-ink">
+                {kpi.value}
+              </span>
+              {kpi.delta ? (
+                <span
+                  className={cn(
+                    "mt-1.5 inline-flex items-center gap-1 self-start rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold",
+                    kpi.delta.dir === "up"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-700",
+                  )}
+                >
+                  <TrendingUp className="h-2.5 w-2.5" />
+                  {kpi.delta.value}
+                </span>
+              ) : kpi.chip ? (
+                <span
+                  className={cn(
+                    "mt-1.5 inline-flex items-center gap-1 self-start rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold",
+                    kpi.chip.tone === "green"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : kpi.chip.tone === "amber"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-slate-100 text-slate-600",
+                  )}
+                >
+                  {kpi.chip.label}
+                </span>
+              ) : null}
+            </div>
+          );
+
+          if (kpi.href) {
             return (
-              <Link
-                key={a.href}
-                href={a.href}
-                className={cn(
-                  "shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-opacity hover:opacity-80",
-                  alertChipClass(a.tone),
-                )}
-              >
-                <Icon className="h-3 w-3 shrink-0" />
-                {a.label}
+              <Link key={kpi.label} href={kpi.href} className="block">
+                {tileContent}
               </Link>
             );
-          })}
-        </div>
+          }
+          return (
+            <div
+              key={kpi.label}
+              role="button"
+              tabIndex={0}
+              onClick={() => setKpiSlideOver(kpi.label)}
+              onKeyDown={(e) => e.key === "Enter" && setKpiSlideOver(kpi.label)}
+            >
+              {tileContent}
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-px border-b border-ink/[0.08] mb-6">
+      <div className="mt-3 flex gap-0.5 overflow-x-auto scrollbar-hide border-b border-ink/[0.08]">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={cn(
-              "shrink-0 whitespace-nowrap px-4 py-2.5 text-[0.88rem] font-medium rounded-t-lg transition-colors",
+              "shrink-0 whitespace-nowrap px-4 py-2 text-[0.82rem] font-medium rounded-t-lg transition-colors",
               tab === id
                 ? "text-ink border-b-2 border-ink -mb-px"
-                : "text-slate/60 hover:text-ink",
+                : "text-slate/55 hover:text-ink",
             )}
           >
             {label}
@@ -667,111 +674,37 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* ── Tab content (scrollable if needed) ───────────────────────────── */}
+      <div className="flex-1 overflow-y-auto pb-4">
+
       {/* ── Tab: Overview ────────────────────────────────────────────────── */}
       {tab === "overview" && (
-        <div className="space-y-6">
-          {/* KPI tiles (2x2 → 4x1) */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {KPIS.map((kpi) => {
-              const tileContent = (
-                <div
-                  className={cn(
-                    "flex flex-col rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)] transition-all h-full",
-                    !kpi.href ? "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer" : "hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-lift cursor-pointer",
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate/60">
-                      {kpi.label}
-                    </span>
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink/[0.05] text-slate/60">
-                      {kpi.icon}
-                    </span>
-                  </div>
-                  <span className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl">
-                    {kpi.value}
-                  </span>
-                  {kpi.delta ? (
-                    <span
-                      className={cn(
-                        "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
-                        kpi.delta.dir === "up"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-red-50 text-red-700",
-                      )}
-                    >
-                      <TrendingUp className="h-3 w-3" />
-                      {kpi.delta.value}
-                    </span>
-                  ) : kpi.chip ? (
-                    <span
-                      className={cn(
-                        "mt-3 inline-flex items-center gap-1 self-start rounded-full px-2 py-0.5 text-xs font-semibold",
-                        kpi.chip.tone === "green"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : kpi.chip.tone === "amber"
-                          ? "bg-amber-50 text-amber-700"
-                          : "bg-slate-100 text-slate-600",
-                      )}
-                    >
-                      {kpi.chip.label}
-                    </span>
-                  ) : null}
-                </div>
-              );
-
-              if (kpi.href) {
-                return (
-                  <Link key={kpi.label} href={kpi.href} className="block">
-                    {tileContent}
-                  </Link>
-                );
-              }
-              return (
-                <div
-                  key={kpi.label}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setKpiSlideOver(kpi.label)}
-                  onKeyDown={(e) => e.key === "Enter" && setKpiSlideOver(kpi.label)}
-                >
-                  {tileContent}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Speed-to-Lead panel + Stale Leads alert — 2-col */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {/* Speed-to-Lead */}
-            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
-                    <Zap className="h-4 w-4 text-slate/40" />
-                    Speed to Lead
-                  </h2>
-                  <p className="mt-0.5 text-[0.73rem] text-slate/50">
-                    Industry benchmark: &lt;5 minutes
-                  </p>
+        <div className="space-y-3 mt-3">
+          {/* Speed-to-Lead + Stale Leads — collapsible secondary row */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {/* Speed-to-Lead (compact) */}
+            <div className="rounded-xl border border-ink/[0.08] bg-white px-4 py-3 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-3.5 w-3.5 text-slate/40" />
+                  <span className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">Speed to Lead</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSpeedBriefOpen((prev) => !prev)}
-                    className="flex items-center gap-1 text-[0.74rem] font-semibold text-azure hover:opacity-70"
+                    className="flex items-center gap-1 text-[0.72rem] font-semibold text-azure hover:opacity-70"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
+                    <Sparkles className="h-3 w-3" />
                     AI Brief
                   </button>
-                  <Link href="/hub/reporting" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
-                    Full report
+                  <Link href="/hub/reporting" className="text-[0.72rem] font-semibold text-azure hover:opacity-70">
+                    Report
                   </Link>
                 </div>
               </div>
-              {/* Big number */}
-              <div className="mb-4 flex items-end gap-3">
+              <div className="flex items-center gap-2">
                 <span className={cn(
-                  "font-display text-5xl font-bold tabular-nums",
+                  "font-display text-2xl font-bold tabular-nums",
                   (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) < 5
                     ? "text-emerald-600"
                     : (metrics.speedToLeadMin ?? k.avgResponseMins ?? 4) <= 10
@@ -780,42 +713,22 @@ export default function DashboardPage() {
                 )}>
                   {metrics.speedToLeadMin ?? k.avgResponseMins ?? 4} min
                 </span>
-                <span className="mb-2 flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.72rem] font-semibold text-emerald-700">
-                  Team avg
-                  <LiveDot tone="success" className="ml-0.5" />
+                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[0.65rem] font-semibold text-emerald-700">
+                  Team avg <LiveDot tone="success" className="ml-0.5" />
                 </span>
               </div>
-              {/* Mini leaderboard — top 3 by response time */}
-              <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-wider text-slate/40">
-                Top responders
-              </p>
-              <div className="space-y-2.5">
+              <div className="mt-2 space-y-1.5">
                 {RESPONSE_RANKING.slice(0, 3).map((agent, i) => (
-                  <div key={agent.slug} className="flex items-center gap-3">
+                  <div key={agent.slug} className="flex items-center gap-2">
                     <span className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.68rem] font-bold",
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[0.6rem] font-bold",
                       i === 0 ? "bg-amber-100 text-amber-700" : "bg-ink/[0.05] text-slate/60",
                     )}>
                       {i + 1}
                     </span>
-                    <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-ink/[0.06]">
-                      {agent.photo ? (
-                        <Image
-                          src={agent.photo}
-                          alt={agent.name}
-                          fill
-                          sizes="28px"
-                          className="object-cover object-top"
-                        />
-                      ) : (
-                        <span className="flex h-full w-full items-center justify-center text-[0.62rem] font-semibold text-ink/60">
-                          {agent.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </span>
-                      )}
-                    </div>
-                    <span className="flex-1 text-[0.83rem] font-medium text-ink">{agent.name}</span>
+                    <span className="flex-1 text-[0.78rem] font-medium text-ink truncate">{agent.name}</span>
                     <span className={cn(
-                      "text-[0.78rem] font-semibold tabular-nums",
+                      "text-[0.72rem] font-semibold tabular-nums",
                       (agent.responseTimeMins ?? 99) < 5 ? "text-emerald-600" : (agent.responseTimeMins ?? 99) <= 15 ? "text-amber-600" : "text-red-600",
                     )}>
                       {agent.responseTimeMins ?? "—"} min
@@ -823,14 +736,13 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-              {/* AI Brief collapsible */}
               <div
                 className={cn(
                   "overflow-hidden transition-all duration-300",
-                  speedBriefOpen ? "max-h-96 mt-4" : "max-h-0",
+                  speedBriefOpen ? "max-h-96 mt-3" : "max-h-0",
                 )}
               >
-                <div className="pt-4 border-t border-ink/[0.06]">
+                <div className="pt-3 border-t border-ink/[0.06]">
                   {aiSpeedOutput ? (
                     <AiMarkdown text={aiSpeedOutput} />
                   ) : (
@@ -843,48 +755,46 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Stale Leads alert panel */}
-            <div className="rounded-2xl border border-red-200 bg-red-50/40 p-5 shadow-[0_1px_4px_rgb(0,0,0,0.04)]">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
-                  <Timer className="h-4 w-4 text-red-500" />
-                  Stale Leads
-                </h2>
+            {/* Stale Leads alert panel (compact) */}
+            <div className="rounded-xl border border-red-200 bg-red-50/40 px-4 py-3 shadow-[0_1px_4px_rgb(0,0,0,0.04)]">
+              <div className="flex items-center gap-2 mb-2">
+                <Timer className="h-3.5 w-3.5 text-red-500" />
+                <span className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">Stale Leads</span>
               </div>
-              <div className="mb-4 flex items-center gap-3">
-                <span className="font-display text-5xl font-bold tabular-nums text-red-600">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-display text-2xl font-bold tabular-nums text-red-600">
                   {metrics.staleLeadsCount ?? 0}
                 </span>
-                <span className="rounded-full border border-red-200 bg-red-100 px-2.5 py-0.5 text-[0.75rem] font-semibold text-red-700">
+                <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
                   need attention
                 </span>
               </div>
-              <p className="mb-4 text-[0.82rem] text-slate/60">
-                Leads with no contact for more than 7 days. Each day without contact reduces close probability.
+              <p className="mb-3 text-[0.75rem] text-slate/60 leading-snug">
+                No contact in 7+ days. Each day without follow-up reduces close probability.
               </p>
               <Link
                 href="/hub/crm?filter=stale"
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-[0.82rem] font-semibold text-red-700 transition-colors hover:bg-red-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[0.75rem] font-semibold text-red-700 transition-colors hover:bg-red-50"
               >
                 <AlertCircle className="h-3.5 w-3.5" />
                 View stale leads
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
           </div>
 
           {/* Source ROI panel */}
-          <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+            <div className="flex items-center justify-between border-b border-ink/[0.06] px-4 py-3">
               <div>
-                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                <h2 className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
                   Source ROI
                 </h2>
-                <p className="mt-0.5 text-[0.73rem] text-slate/50">
-                  Leads, closings, revenue, and ROI by channel — click any row for detail
+                <p className="mt-0.5 text-[0.72rem] text-slate/50">
+                  Click any row for detail
                 </p>
               </div>
-              <Link href="/hub/analytics?tab=marketing" className="text-[0.74rem] font-semibold text-azure hover:opacity-70">
+              <Link href="/hub/analytics?tab=marketing" className="text-[0.72rem] font-semibold text-azure hover:opacity-70">
                 Full breakdown
               </Link>
             </div>
@@ -893,9 +803,9 @@ export default function DashboardPage() {
 
           {/* Quick Tools */}
           <div>
-            <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="font-display text-xl text-ink">Quick Tools</h2>
-              <span className="text-[0.78rem] text-slate/60">Open a tool, get a result.</span>
+            <div className="mb-2 flex items-baseline justify-between">
+              <span className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">Quick Tools</span>
+              <span className="text-[0.72rem] text-slate/50">Open a tool, get a result.</span>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {TOOLS.map((t) => {
@@ -922,12 +832,12 @@ export default function DashboardPage() {
           </div>
 
           {/* Activity feed + Lead pipeline */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {/* Recent activity */}
-            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 font-display text-[1.05rem] font-semibold text-ink">
-                  <Activity className="h-4 w-4 text-slate/50" />
+            <div className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
+                  <Activity className="h-3 w-3" />
                   Recent activity
                 </h2>
                 <Link
@@ -961,13 +871,13 @@ export default function DashboardPage() {
             </div>
 
             {/* Lead pipeline */}
-            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-              <div className="mb-4">
-                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+            <div className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+              <div className="mb-3">
+                <h2 className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
                   Lead pipeline
                 </h2>
-                <p className="mt-0.5 text-[0.75rem] text-slate/50">
-                  Active leads by stage — click any stage to see details
+                <p className="mt-0.5 text-[0.72rem] text-slate/50">
+                  Click any stage to see details
                 </p>
               </div>
               <div className="space-y-4">
@@ -1008,7 +918,7 @@ export default function DashboardPage() {
 
       {/* ── Tab: Team ────────────────────────────────────────────────────── */}
       {tab === "team" && (
-        <div className="space-y-6">
+        <div className="space-y-3 mt-3">
           {/* Team AI brief button + panel */}
           <div>
             <div className="flex justify-end mb-2">
@@ -1052,13 +962,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Team leaderboard */}
-          <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-3">
               <div>
-                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                <h2 className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
                   Team leaderboard &mdash; this month
                 </h2>
-                <p className="mt-0.5 text-[0.73rem] text-slate/50">
+                <p className="mt-0.5 text-[0.72rem] text-slate/50">
                   Top producers by closed volume — click any agent for coaching brief
                 </p>
               </div>
@@ -1174,13 +1084,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Agent Response Time Ranking */}
-          <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-3">
               <div>
-                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                <h2 className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
                   Response time ranking
                 </h2>
-                <p className="mt-0.5 text-[0.73rem] text-slate/50">
+                <p className="mt-0.5 text-[0.72rem] text-slate/50">
                   Top 6 agents by speed-to-lead &mdash; goal: under 5 minutes
                 </p>
               </div>
@@ -1281,7 +1191,7 @@ export default function DashboardPage() {
 
       {/* ── Tab: Analytics ───────────────────────────────────────────────── */}
       {tab === "analytics" && (
-        <div className="space-y-6">
+        <div className="space-y-3 mt-3">
           {/* Date range selector */}
           <div className="flex items-center gap-2">
             <span className="text-[0.78rem] text-slate/60 mr-1">Period:</span>
@@ -1367,14 +1277,14 @@ export default function DashboardPage() {
           </Panel>
 
           {/* Source ROI table */}
-          <div className="rounded-2xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
-            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-4">
+          <div className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_4px_rgb(0,0,0,0.05)]">
+            <div className="flex items-center justify-between border-b border-ink/[0.06] px-5 py-3">
               <div>
-                <h2 className="font-display text-[1.05rem] font-semibold text-ink">
+                <h2 className="text-[0.7rem] font-semibold uppercase tracking-widest text-slate/50">
                   Source ROI &mdash; this month
                 </h2>
-                <p className="mt-0.5 text-[0.73rem] text-slate/50">
-                  Revenue generated vs. marketing spend per channel — click any row for AI analysis
+                <p className="mt-0.5 text-[0.72rem] text-slate/50">
+                  Revenue vs. spend per channel — click any row for AI analysis
                 </p>
               </div>
               <button
@@ -1425,11 +1335,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Footer (always visible) ───────────────────────────────────────── */}
-      <p className="pb-2 text-center text-[0.72rem] text-slate/45">
-        {company.name} &middot; {company.stats.annualVolume} annual volume &middot;{" "}
-        {company.stats.agents} agents &middot; {usd(metrics.kpis.pipelineValue)} active pipeline
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <p className="py-2 text-center text-[0.65rem] text-slate/40">
+        {company.name} &middot; {company.stats.annualVolume} volume &middot;{" "}
+        {company.stats.agents} agents &middot; {usd(metrics.kpis.pipelineValue)} pipeline
       </p>
+      </div> {/* end flex-1 overflow-y-auto */}
 
       {/* ════════════════════════════════════════════════════════════════════
           SLIDE-OVERS

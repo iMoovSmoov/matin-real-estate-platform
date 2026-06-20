@@ -112,7 +112,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
   return (
     <div>
       {/* ── Top bar: search + add lead button ─────────────────────────────────── */}
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-2 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate/55" />
           <input
@@ -153,7 +153,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
       </div>
 
       {/* ── Smart lists (desktop always visible; mobile collapsible) ──────────── */}
-      <div className={cn("mb-3", !filtersOpen && "hidden sm:block")}>
+      <div className={cn("mb-2", !filtersOpen && "hidden sm:block")}>
         <div className="relative overflow-hidden">
           <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 sm:[mask-image:none] [mask-image:linear-gradient(to_right,black_80%,transparent_100%)]">
           {SMART_LISTS.map((sl) => {
@@ -227,7 +227,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadCard key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            <div className="px-4 py-14 text-center">
+            <div className="px-4 py-8 text-center">
               <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
               <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
             </div>
@@ -240,7 +240,7 @@ export function CrmWorkspace({ leads }: { leads: Lead[] }) {
             <LeadRow key={l.id} lead={l} onOpen={() => setActive(l)} />
           ))}
           {filtered.length === 0 && (
-            <li className="px-4 py-14 text-center">
+            <li className="px-4 py-8 text-center">
               <p className="text-[0.86rem] text-slate/70">No leads in this list.</p>
               <p className="mt-1 text-[0.76rem] text-slate/45">Try another smart list or clear your search.</p>
             </li>
@@ -308,14 +308,14 @@ function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
       className="group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-paper/60"
     >
       {/* Unread rail */}
-      <span className={cn("mt-1 h-9 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
+      <span className={cn("mt-1 h-7 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
 
       {/* Avatar */}
-      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-bold text-white">
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-[0.66rem] font-bold text-white">
         {initials(lead.name)}
         {hot && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
-            <Flame className="h-2.5 w-2.5 text-success" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
+            <Flame className="h-2 w-2 text-success" />
           </span>
         )}
       </span>
@@ -381,17 +381,17 @@ function LeadRow({ lead, onOpen }: { lead: Lead; onOpen: () => void }) {
     <li>
       <button
         onClick={onOpen}
-        className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white"
+        className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white"
       >
         {/* unread rail */}
-        <span className={cn("h-9 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
+        <span className={cn("h-7 w-1 shrink-0 rounded-full", lead.unread > 0 ? "bg-ink" : "bg-transparent")} aria-hidden />
 
         {/* avatar */}
-        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-[0.72rem] font-bold text-white">
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-[0.66rem] font-bold text-white">
           {initials(lead.name)}
           {hot && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
-              <Flame className="h-2.5 w-2.5 text-success" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white ring-1 ring-ink/[0.08]">
+              <Flame className="h-2 w-2 text-success" />
             </span>
           )}
         </span>

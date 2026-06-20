@@ -1,7 +1,8 @@
 import { Inbox, Clock, Flame, MailQuestion } from "lucide-react";
 import { leads } from "@/lib/data";
-import { StatTile, SectionLabel, LiveDot } from "@/components/command/ui";
+import { LiveDot } from "@/components/command/ui";
 import { CrmWorkspace } from "@/components/command/crm/CrmWorkspace";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "CRM & Leads" };
 
@@ -14,49 +15,74 @@ export default function CrmPage() {
   const hot = leads.filter((l) => l.score >= 80).length;
   const unread = leads.reduce((s, l) => s + l.unread, 0);
 
+  const stats = [
+    {
+      label: "New leads",
+      value: newStage,
+      hint: newToday > 0 ? `${newToday} today` : undefined,
+      icon: Inbox,
+      badgeClass: "bg-azure/10 text-azure",
+    },
+    {
+      label: "Follow-up",
+      value: needsFollowUp,
+      hint: "7d+ no contact",
+      icon: Clock,
+      badgeClass: needsFollowUp > 0 ? "bg-warn/10 text-warn" : "bg-ink/[0.06] text-slate",
+    },
+    {
+      label: "Hot",
+      value: hot,
+      hint: "score ≥ 80",
+      icon: Flame,
+      badgeClass: "bg-success/10 text-success",
+    },
+    {
+      label: "Unread",
+      value: unread,
+      hint: "awaiting reply",
+      icon: MailQuestion,
+      badgeClass: unread > 0 ? "bg-ink text-white" : "bg-ink/[0.06] text-slate",
+    },
+  ];
+
   return (
-    <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
-      <div>
-        <div className="mb-1.5 flex items-center gap-2">
+    <div className="flex flex-col">
+      {/* ── Compact inline header ────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-ink/[0.06]">
+        <div className="flex items-center gap-2">
           <LiveDot tone="azure" />
-          <SectionLabel>CRM &amp; Leads</SectionLabel>
+          <h1 className="font-display text-[1.05rem] font-semibold text-ink">CRM &amp; Leads</h1>
         </div>
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">CRM &amp; Leads</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
-          Your lead inbox. Work the smart lists top to bottom, open a lead to see every call, text, and
-          email in one timeline, then reply in seconds with AI.
-        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile
-          label="New leads"
-          value={newStage}
-          hint={newToday > 0 ? `${newToday} came in today` : "in the New list"}
-          icon={<Inbox className="h-4 w-4" />}
-        />
-        <StatTile
-          label="Needs follow-up"
-          value={needsFollowUp}
-          delta={{ value: "7d+ no contact", dir: "flat" }}
-          icon={<Clock className="h-4 w-4" />}
-          accent
-        />
-        <StatTile
-          label="Hot leads"
-          value={hot}
-          delta={{ value: "score ≥ 80", dir: "flat" }}
-          icon={<Flame className="h-4 w-4" />}
-        />
-        <StatTile
-          label="Unread"
-          value={unread}
-          hint="waiting on a reply"
-          icon={<MailQuestion className="h-4 w-4" />}
-        />
+      {/* ── Compact stat strip ───────────────────────────────────────────────── */}
+      <div className="grid grid-cols-4 gap-2 px-4 py-2 border-b border-ink/[0.06]">
+        {stats.map(({ label, value, hint, icon: Icon, badgeClass }) => (
+          <div
+            key={label}
+            className="flex items-center justify-between rounded-lg border border-ink/[0.06] bg-white px-3 py-1.5"
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Icon className="h-3.5 w-3.5 shrink-0 text-slate/50" />
+              <span className="text-[0.75rem] font-medium text-slate truncate">{label}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+              {hint && (
+                <span className="hidden lg:inline text-[0.66rem] text-slate/45 tabular-nums">{hint}</span>
+              )}
+              <span className={cn("rounded-md px-1.5 py-0.5 text-[0.72rem] font-bold tabular-nums", badgeClass)}>
+                {value}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <CrmWorkspace leads={leads} />
+      {/* ── Lead workspace ───────────────────────────────────────────────────── */}
+      <div className="px-4 py-2">
+        <CrmWorkspace leads={leads} />
+      </div>
     </div>
   );
 }

@@ -29,6 +29,8 @@ import {
   X,
   ArrowLeft,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Building2,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
@@ -168,7 +170,15 @@ function AgentPhoto({ size = "sm" }: { size?: "sm" | "md" }) {
   );
 }
 
-function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function SidebarContent({
+  pathname,
+  onNavigate,
+  collapsed = false,
+}: {
+  pathname: string;
+  onNavigate?: () => void;
+  collapsed?: boolean;
+}) {
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(NAV.map((g) => [g.label, g.items.length <= 3 || groupHasActive(pathname, g)])),
   );
@@ -176,31 +186,39 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
   return (
     <div className="flex h-full flex-col">
       {/* Brand header */}
-      <div className="flex items-center gap-3 border-b-2 border-azure/20 bg-white px-5 py-[1.15rem] shadow-[0_1px_0_0_rgb(0,0,0,0.04)]">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-white ring-1 ring-inset ring-ink/[0.12] shadow-sm">
+      <div
+        className={cn(
+          "flex items-center border-b-2 border-azure/20 bg-white shadow-[0_1px_0_0_rgb(0,0,0,0.04)]",
+          collapsed ? "justify-center px-0 py-[1.15rem]" : "gap-3 px-5 py-[1.15rem]",
+        )}
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white ring-1 ring-inset ring-ink/[0.12] shadow-sm">
           <MatinMark className="h-4 text-white" />
         </span>
-        <div className="min-w-0 leading-tight">
-          <div className="flex items-center gap-1.5">
-            <Building2 className="h-3.5 w-3.5 shrink-0 text-ink/40" />
-            <span className="block truncate font-display text-[1.05rem] font-semibold text-ink">
-              Matin
+        {!collapsed && (
+          <div className="min-w-0 leading-tight">
+            <div className="flex items-center gap-1.5">
+              <Building2 className="h-3.5 w-3.5 shrink-0 text-ink/40" />
+              <span className="block truncate font-display text-[1.05rem] font-semibold text-ink">
+                Matin
+              </span>
+            </div>
+            <span className="block text-[0.65rem] font-semibold uppercase tracking-widest text-azure/60">
+              Matin Hub
             </span>
           </div>
-          <span className="block text-[0.65rem] font-semibold uppercase tracking-widest text-azure/60">
-            Matin Hub
-          </span>
-        </div>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+      <nav className={cn("flex-1 space-y-0.5 overflow-y-auto py-4", collapsed ? "px-1.5" : "px-3")}>
         {NAV.map((group) => {
           const isOpen = open[group.label];
           const single = group.items.length === 1;
           return (
             <div key={group.label} className="pb-1">
-              {single ? null : (
+              {/* Group label — hidden when collapsed */}
+              {!collapsed && !single && (
                 <button
                   onClick={() => setOpen((s) => ({ ...s, [group.label]: !s[group.label] }))}
                   className="mb-1 flex w-full items-center justify-between rounded-lg px-3 py-1 text-[0.6rem] font-bold uppercase tracking-widest text-slate/40 transition-colors hover:text-slate/70"
@@ -214,31 +232,53 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
                   />
                 </button>
               )}
-              {(single || isOpen) && (
+              {/* Collapsed: always show all items as icon-only */}
+              {(collapsed || single || isOpen) && (
                 <ul className="mt-0.5 space-y-0.5">
                   {group.items.map((item) => {
                     const active = isActive(pathname, item.href);
                     const Icon = item.icon;
                     return (
                       <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          onClick={onNavigate}
-                          className={cn(
-                            "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-all duration-100",
-                            active
-                              ? "border-l-[3px] border-azure bg-azure/[0.07] pl-[0.625rem] text-ink shadow-[inset_0_0_0_1px_rgb(0,0,0,0.04)]"
-                              : "text-slate/70 hover:bg-ink/[0.04] hover:text-ink",
-                          )}
-                        >
-                          <Icon
+                        {collapsed ? (
+                          /* Icon-only with tooltip */
+                          <Link
+                            href={item.href}
+                            onClick={onNavigate}
+                            title={item.label}
                             className={cn(
-                              "h-4 w-4 shrink-0 transition-colors",
-                              active ? "text-azure" : "text-slate/50 group-hover:text-ink",
+                              "group relative flex items-center justify-center rounded-lg py-2 transition-all duration-100",
+                              active
+                                ? "bg-azure/[0.10] text-azure shadow-[inset_0_0_0_1px_rgb(0,0,0,0.04)]"
+                                : "text-slate/50 hover:bg-ink/[0.04] hover:text-ink",
                             )}
-                          />
-                          <span className="truncate">{item.label}</span>
-                        </Link>
+                          >
+                            <Icon className="h-4 w-4 shrink-0" />
+                            {/* Tooltip */}
+                            <span className="pointer-events-none absolute left-full ml-2 z-50 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[0.72rem] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                              {item.label}
+                            </span>
+                          </Link>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            onClick={onNavigate}
+                            className={cn(
+                              "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-all duration-100",
+                              active
+                                ? "border-l-[3px] border-azure bg-azure/[0.07] pl-[0.625rem] text-ink shadow-[inset_0_0_0_1px_rgb(0,0,0,0.04)]"
+                                : "text-slate/70 hover:bg-ink/[0.04] hover:text-ink",
+                            )}
+                          >
+                            <Icon
+                              className={cn(
+                                "h-4 w-4 shrink-0 transition-colors",
+                                active ? "text-azure" : "text-slate/50 group-hover:text-ink",
+                              )}
+                            />
+                            <span className="truncate">{item.label}</span>
+                          </Link>
+                        )}
                       </li>
                     );
                   })}
@@ -250,22 +290,29 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
       </nav>
 
       {/* Footer — user + phone */}
-      <div className="border-t border-ink/[0.08] p-3">
-        <div className="flex items-center gap-2.5 rounded-xl border border-ink/[0.06] bg-paper/60 px-3 py-2.5">
-          <AgentPhoto size="sm" />
-          <div className="min-w-0 leading-tight">
-            <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-              <span className="truncate text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
-            </div>
-            <a
-              href="tel:+15037615616"
-              className="block text-[0.64rem] text-slate/55 transition-colors hover:text-ink"
-            >
-              (503) 761-5616
-            </a>
+      <div className={cn("border-t border-ink/[0.08]", collapsed ? "p-2" : "p-3")}>
+        {collapsed ? (
+          /* Collapsed: avatar only, centred */
+          <div className="flex justify-center py-1">
+            <AgentPhoto size="sm" />
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2.5 rounded-xl border border-ink/[0.06] bg-paper/60 px-3 py-2.5">
+            <AgentPhoto size="sm" />
+            <div className="min-w-0 leading-tight">
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <span className="truncate text-[0.78rem] font-semibold text-ink">Jordan Matin</span>
+              </div>
+              <a
+                href="tel:+15037615616"
+                className="block text-[0.64rem] text-slate/55 transition-colors hover:text-ink"
+              >
+                (503) 761-5616
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -275,12 +322,30 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-full">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-ink/[0.08] bg-white lg:flex">
-        <SidebarContent pathname={pathname} />
+      <aside
+        className={cn(
+          "relative hidden h-full shrink-0 flex-col border-r border-ink/[0.08] bg-white transition-all duration-200 lg:flex",
+          sidebarCollapsed ? "w-14" : "w-64",
+        )}
+      >
+        {/* Collapse toggle button */}
+        <button
+          onClick={() => setSidebarCollapsed((c) => !c)}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3 top-[1.35rem] z-20 flex h-6 w-6 items-center justify-center rounded-full border border-ink/[0.12] bg-white shadow-sm text-slate/60 transition-colors hover:bg-paper hover:text-ink"
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronLeft className="h-3.5 w-3.5" />
+          )}
+        </button>
+        <SidebarContent pathname={pathname} collapsed={sidebarCollapsed} />
       </aside>
 
       {/* Mobile drawer */}
@@ -308,9 +373,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-ink/[0.08] bg-paper/90 px-4 backdrop-blur-md sm:h-16 md:px-6">
+        <header className="shrink-0 z-30 flex h-14 items-center gap-3 border-b border-ink/[0.08] bg-white px-4 sm:h-16 md:px-6">
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(true)}
@@ -412,7 +477,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Back-to-site strip */}
-        <div className="flex items-center overflow-x-hidden border-b border-ink/[0.06] bg-white px-4 py-1.5 md:px-6">
+        <div className="shrink-0 flex items-center overflow-x-hidden border-b border-ink/[0.06] bg-white px-4 py-1.5 md:px-6">
           <Link
             href="/"
             className="group inline-flex shrink-0 items-center gap-1.5 text-[0.72rem] font-medium text-slate/70 transition-colors hover:text-ink"
@@ -422,7 +487,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        <main className="flex-1 overflow-x-hidden pb-16 lg:pb-0">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0">{children}</main>
       </div>
 
       {/* ── Mobile bottom tab bar ─────────────────────────────────────────── */}

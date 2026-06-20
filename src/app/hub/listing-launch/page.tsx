@@ -1,6 +1,5 @@
 import { Rocket, ListChecks, ClipboardList } from "lucide-react";
 import { listingPipeline } from "@/lib/data";
-import { StatTile, SectionLabel, LiveDot } from "@/components/command/ui";
 import { ListingLaunch } from "@/components/command/listing/ListingLaunch";
 
 export const metadata = { title: "Listing Launch Wizard" };
@@ -17,42 +16,41 @@ export default function ListingLaunchPage() {
   ).length;
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
-      <div>
-        <div className="mb-1.5 flex items-center gap-2">
-          <LiveDot tone="azure" />
-          <SectionLabel>Listing management</SectionLabel>
+    <div className="flex flex-col">
+      {/* Compact inline header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-ink/[0.06]">
+        <h1 className="font-semibold text-[1.05rem] text-ink">Listing Launch</h1>
+      </div>
+
+      {/* Compact stat strip */}
+      <div className="grid grid-cols-3 gap-2 px-4 py-2.5 border-b border-ink/[0.06]">
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <Rocket className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">Active</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">{active}</p>
+          </div>
         </div>
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">Listing Launch Wizard</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
-          Orchestrate every listing from intake to MLS-live — checklists, marketing kit generation,
-          and broker approval in one place.
-        </p>
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <ListChecks className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">Ready</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">{readyToLaunch}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <ClipboardList className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">In Prep</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">{inPrep}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile
-          label="Active Listings"
-          value={active}
-          icon={<Rocket className="h-4 w-4" />}
-          accent
-          hint="Active + Under Offer"
-        />
-        <StatTile
-          label="Ready to Launch"
-          value={readyToLaunch}
-          icon={<ListChecks className="h-4 w-4" />}
-          hint="MLS Draft or Broker Review"
-        />
-        <StatTile
-          label="In Prep"
-          value={inPrep}
-          icon={<ClipboardList className="h-4 w-4" />}
-          hint="Intake or Photos Scheduled"
-        />
+      {/* Primary content */}
+      <div className="px-4 py-3">
+        <ListingLaunch listings={listingPipeline} />
       </div>
-
-      <ListingLaunch listings={listingPipeline} />
     </div>
   );
 }

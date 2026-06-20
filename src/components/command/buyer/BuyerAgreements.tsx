@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { buyerAgreements } from "@/lib/data";
 import type { BuyerAgreement, BuyerAgreementStatus } from "@/lib/types";
-import { Panel, PanelHeader, StatTile, Pill, SectionLabel } from "@/components/command/ui";
+import { Panel, PanelHeader, Pill, SectionLabel } from "@/components/command/ui";
 import { EmptyState } from "@/components/command/ui/EmptyState";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { streamAi } from "@/lib/ai/client";
@@ -782,39 +782,39 @@ export default function BuyerAgreements() {
 
   return (
     <>
-      <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
-        {/* Page heading */}
-        <div>
-          <h1 className="font-display text-2xl text-ink sm:text-3xl">
-            Buyer Agreement Workspace
-          </h1>
-          <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
-            Track every buyer&apos;s representation agreement from intake through
-            signature. Send via DocuSign and keep every agent compliant.
-          </p>
+      <div className="flex flex-col">
+        {/* Compact inline header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-ink/[0.06]">
+          <h1 className="font-semibold text-[1.05rem] text-ink">Buyer Agreements</h1>
         </div>
 
-        {/* Stat tiles */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <StatTile
-            label="Missing Agreements"
-            value={missingCount}
-            icon={<AlertCircle className="h-4 w-4 text-red-500" />}
-            hint={missingCount > 0 ? "Needs action" : "All covered"}
-          />
-          <StatTile
-            label="Sent — Pending Signature"
-            value={sentCount}
-            icon={<Clock className="h-4 w-4 text-amber-500" />}
-            hint="Awaiting buyer signature"
-          />
-          <StatTile
-            label="Signed This Month"
-            value={signedThisMonth}
-            icon={<CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-            hint="Last 30 days"
-          />
+        {/* Compact stat strip */}
+        <div className="grid grid-cols-3 gap-2 px-4 py-2.5 border-b border-ink/[0.06]">
+          <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-400" />
+            <div className="min-w-0">
+              <p className="text-[0.68rem] text-red-400/80 leading-none">Missing</p>
+              <p className="text-[0.95rem] font-semibold text-red-600 tabular-nums">{missingCount}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2">
+            <Clock className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+            <div className="min-w-0">
+              <p className="text-[0.68rem] text-amber-500/80 leading-none">Pending</p>
+              <p className="text-[0.95rem] font-semibold text-amber-700 tabular-nums">{sentCount}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+            <div className="min-w-0">
+              <p className="text-[0.68rem] text-emerald-500/80 leading-none">Signed</p>
+              <p className="text-[0.95rem] font-semibold text-emerald-700 tabular-nums">{signedThisMonth}</p>
+            </div>
+          </div>
         </div>
+
+        {/* Primary content — table panel */}
+        <div className="px-4 py-3">
 
         {/* Table panel */}
         <Panel>
@@ -1018,7 +1018,8 @@ export default function BuyerAgreements() {
             </table>
           </div>
         </Panel>
-      </div>
+        </div>{/* end px-4 py-3 */}
+      </div>{/* end flex flex-col */}
 
       {/* Slide-over */}
       {selected !== null && (

@@ -1,6 +1,6 @@
 import { FileText, PenLine, BadgeCheck } from "lucide-react";
 import { reForms } from "@/lib/forms";
-import { StatTile, SectionLabel } from "@/components/command/ui";
+import { StatTile } from "@/components/command/ui";
 import { FormsLibrary } from "@/components/command/forms/FormsLibrary";
 
 export const metadata = { title: "Forms" };
@@ -11,14 +11,10 @@ export default function FormsPage() {
   const orefCount = reForms.filter((f) => f.oref).length;
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
       {/* Header */}
-      <div>
-        <SectionLabel className="mb-1.5">Forms</SectionLabel>
-        <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Forms</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate">
-          Every form you need, pre-loaded and ready to fill.
-        </p>
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
+        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Forms</h1>
       </div>
 
       {/* Stat row */}

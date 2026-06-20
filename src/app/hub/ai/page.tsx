@@ -150,20 +150,12 @@ const STATS = [
 
 export default function AiStudioPage() {
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 pb-2">
-        <div>
-          <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.3rem]">
-            AI Studio
-          </h1>
-          <p className="mt-2 text-[0.95rem] leading-relaxed text-slate">
-            Nine purpose-built tools — each connected to your CRM, listings, and pipeline.
-            Pick a tool, load your data, and generate in one click.
-          </p>
-        </div>
-        <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
+        <h1 className="font-display text-[1.05rem] font-semibold text-ink">AI Studio</h1>
+        <div className="flex items-center gap-1.5">
           <LiveDot tone="success" />
           <SectionLabel>9 tools active</SectionLabel>
         </div>

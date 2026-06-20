@@ -21,7 +21,7 @@ import {
 import { sellerLeads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
-import { StatTile, Pill, SectionLabel, LiveDot } from "@/components/command/ui";
+import { Pill } from "@/components/command/ui";
 import { cn, initials } from "@/lib/utils";
 import type { SellerLead, SellerLeadStage, PropertyCondition } from "@/lib/types";
 
@@ -577,21 +577,12 @@ export default function CashOfferPipeline() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 md:px-6 md:py-8">
-      {/* Page header */}
-      <div>
-        <div className="mb-1.5 flex items-center gap-2">
-          <LiveDot tone="azure" />
-          <SectionLabel>Cash Is King Home Buyers — active seller pipeline</SectionLabel>
-        </div>
-        <h1 className="font-display text-2xl text-ink sm:text-3xl">Cash Offer Pipeline</h1>
-        <p className="mt-1 max-w-2xl text-[0.9rem] text-slate">
-          Track every seller request from initial inquiry through cash offer acceptance and listing
-          conversion.
-        </p>
-
-        {/* STEP 9 — Agent filter (desktop only) */}
-        <div className="hidden md:flex items-center gap-2 mt-3">
+    <div className="flex flex-col">
+      {/* Compact inline header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-ink/[0.06]">
+        <h1 className="font-semibold text-[1.05rem] text-ink">Cash Offer Pipeline</h1>
+        {/* Agent filter (desktop only) */}
+        <div className="hidden md:flex items-center gap-2">
           <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-slate/70">
             Agent:
           </label>
@@ -610,32 +601,35 @@ export default function CashOfferPipeline() {
         </div>
       </div>
 
-      {/* KPI tiles */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile
-          label="Active Deals"
-          value={activeCount}
-          icon={<DollarSign className="h-4 w-4" />}
-          accent
-          hint="Leads not yet dead, accepted, or converted"
-        />
-        <StatTile
-          label="Est. Portfolio Value"
-          value={"$" + (portfolioValue / 1_000_000).toFixed(1) + "M"}
-          icon={<Send className="h-4 w-4" />}
-          hint="Active deal pipeline"
-        />
-        <StatTile
-          label="Accepted"
-          value={acceptedCount}
-          icon={<ArrowRightLeft className="h-4 w-4" />}
-          delta={
-            acceptedCount > 0
-              ? { value: `${acceptedCount} deal${acceptedCount !== 1 ? "s" : ""}`, dir: "up" }
-              : { value: "none yet", dir: "flat" }
-          }
-        />
+      {/* Compact stat strip */}
+      <div className="grid grid-cols-3 gap-2 px-4 py-2.5 border-b border-ink/[0.06]">
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <DollarSign className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">Active</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">{activeCount}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <Send className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">Pipeline</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">
+              {"$" + (portfolioValue / 1_000_000).toFixed(1) + "M"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg bg-ink/[0.03] px-3 py-2">
+          <ArrowRightLeft className="h-3.5 w-3.5 shrink-0 text-ink/50" />
+          <div className="min-w-0">
+            <p className="text-[0.68rem] text-slate/60 leading-none">Accepted</p>
+            <p className="text-[0.95rem] font-semibold text-ink tabular-nums">{acceptedCount}</p>
+          </div>
+        </div>
       </div>
+
+      {/* Primary content */}
+      <div className="px-4 py-3">
 
       {/* STEP 8 — Mobile: stage chip strip + single-column view */}
       <div className="md:hidden">
@@ -729,6 +723,8 @@ export default function CashOfferPipeline() {
           })}
         </div>
       </div>
+
+      </div>{/* end px-4 py-3 */}
 
       {/* Slide-over */}
       <SlideOver

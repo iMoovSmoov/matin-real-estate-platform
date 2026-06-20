@@ -24,6 +24,8 @@ const MAX_TOKENS: Record<AiTool, number> = {
   "contract-extractor": 1400,
   "cash-offer-eval": 900,
   "form-suggest": 400,
+  "doc-generate": 800,
+  "doc-ai-complete": 300,
 };
 
 function textStream(text: string) {

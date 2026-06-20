@@ -13,12 +13,8 @@ export default function HubLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-[#f4f4f3] text-ink antialiased">
-      {/* subtle warm-white depth so white cards read crisply */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(0,0,0,0.025),transparent_60%)]" />
-      <div className="relative">
-        <Shell>{children}</Shell>
-      </div>
+    <div className="h-screen overflow-hidden bg-[#f4f4f3] text-ink antialiased">
+      <Shell>{children}</Shell>
     </div>
   );
 }

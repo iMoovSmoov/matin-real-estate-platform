@@ -12,7 +12,9 @@ export type AiTool =
   | "seller-intel"
   | "contract-extractor"
   | "cash-offer-eval"
-  | "form-suggest";
+  | "form-suggest"
+  | "doc-generate"
+  | "doc-ai-complete";
 
 const stats = company.stats;
 
@@ -275,6 +277,12 @@ OUTPUT FORMAT:
 
 Be specific. Reference Oregon law when relevant. Keep total response under 120 words.`,
 
+  /* ── Document Generator ─────────────────────────────────────────────────── */
+  "doc-generate": `You are a licensed Oregon real estate document assistant for ${company.name}. Generate professional, legally-sound document body text for real estate transactions. Be specific, use proper real estate terminology, reference Oregon real estate law where applicable. Format with clear numbered sections. Never use generic placeholders — fill in all provided data.`,
+
+  /* ── Document AI Section Completer ──────────────────────────────────────── */
+  "doc-ai-complete": `Complete this specific section of an Oregon real estate document professionally and concisely.`,
+
   /* ── Cash Offer Evaluation ───────────────────────────────────────────────── */
   "cash-offer-eval": `You are a cash offer analyst at Cash Is King Home Buyers, ${company.name}'s sister company for guaranteed cash purchases. Evaluate the property and seller's situation.
 
@@ -399,6 +407,34 @@ Generate cash offer evaluation.`;
 
     case "form-suggest":
       return `Agent situation: ${j(input.situation)}\n\nRecommend the right form(s) now.`;
+
+    case "doc-generate": {
+      const fields = input.fields && typeof input.fields === "object"
+        ? Object.entries(input.fields as Record<string, string>)
+            .map(([k, v]) => `- ${k}: ${j(v)}`)
+            .join("\n")
+        : "—";
+      const brokerage = input.brokerage && typeof input.brokerage === "object"
+        ? Object.entries(input.brokerage as Record<string, string>)
+            .map(([k, v]) => `${k}: ${j(v)}`)
+            .join(", ")
+        : j(input.brokerage);
+      return `Generate the complete document body for: ${j(input.templateName)}
+
+Brokerage: ${brokerage}
+
+Document fields:
+${fields}
+
+Produce 300–500 words of professional Oregon real estate legal language organized in clearly numbered sections. Fill in all provided data — no placeholders.`;
+    }
+
+    case "doc-ai-complete":
+      return `Section to complete: ${j(input.section)}
+
+Context: ${j(input.context)}
+
+Write a professional paragraph completing this section for an Oregon real estate document.`;
 
     default:
       return String(input.message ?? "");

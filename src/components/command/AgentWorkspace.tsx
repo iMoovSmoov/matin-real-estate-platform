@@ -1260,41 +1260,24 @@ export default function AgentWorkspace() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
 
-      {/* ── 1. Greeting header ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* ── 1. Compact header ──────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
         <div>
-          <p className="mb-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate/50">
-            {todayLabel()}
-          </p>
-          <h1 className="font-display text-2xl text-ink sm:text-3xl">
-            Good morning, Jordan.
-          </h1>
-          <p className="mt-1.5 text-[0.9rem] text-slate">
-            You have{" "}
+          <h1 className="font-display text-[1.05rem] font-semibold text-ink">My Workspace</h1>
+          <p className="text-[0.72rem] text-slate/60">
+            {todayLabel()} &middot;{" "}
             <span className="font-semibold text-danger">
               {HOT_LEADS.length} hot lead{HOT_LEADS.length !== 1 ? "s" : ""}
             </span>
-            {" "}and{" "}
-            <span className="font-semibold text-ink">
-              {pendingCount} task{pendingCount !== 1 ? "s" : ""}
-            </span>
-            {" "}due today.
+            {" "}· {pendingCount} task{pendingCount !== 1 ? "s" : ""} due
           </p>
         </div>
-
-        {/* Response time badges — vertical stack on mobile, row on sm+ */}
-        <div className="flex shrink-0 flex-col gap-1.5 sm:items-end">
-          <p className="text-[0.64rem] font-semibold uppercase tracking-wider text-slate/50">
-            Response time
-          </p>
-          <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-[0.76rem] font-semibold text-success ring-1 ring-inset ring-success/20">
-            <Clock className="h-3.5 w-3.5" />
-            You: 4 min avg
-          </span>
-          <span className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.76rem] font-medium text-slate ring-1 ring-inset ring-ink/[0.08]">
-            Team: 18 min avg
+        <div className="hidden items-center gap-2 sm:flex">
+          <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-[0.72rem] font-semibold text-success ring-1 ring-inset ring-success/20">
+            <Clock className="h-3 w-3" />
+            4 min avg
           </span>
         </div>
       </div>

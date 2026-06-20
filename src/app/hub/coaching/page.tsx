@@ -2,12 +2,10 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import {
-  GraduationCap,
   Trophy,
   Drama,
   Target,
   Flame,
-  Award,
   MessageSquareText,
   BarChart2,
   ChevronRight,
@@ -16,7 +14,7 @@ import {
   DollarSign,
   X,
 } from "lucide-react";
-import { agents, salesAgents, company } from "@/lib/data";
+import { agents, salesAgents } from "@/lib/data";
 import { cn, initials, num } from "@/lib/utils";
 import {
   Panel,
@@ -370,36 +368,10 @@ export default function CoachingPage() {
   const [pendingScenario, setPendingScenario] = useState<string | null>(null);
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8">
-      {/* Header / hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-ink/[0.08] bg-gradient-to-br from-ink/[0.04] via-ink/[0.02] to-ink/[0.03] px-6 py-7">
-        <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-ink/[0.08] blur-3xl" />
-        <div className="grid-tech pointer-events-none absolute inset-0 opacity-[0.5]" />
-        <div className="relative">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-ink/70">
-              <GraduationCap className="h-3.5 w-3.5" /> Coaching Academy
-            </span>
-            <LiveDot tone="success" />
-          </div>
-          <h1 className="font-display text-2xl text-ink sm:text-3xl md:text-[2.4rem]">Coaching Academy</h1>
-          <p className="mt-1.5 max-w-2xl text-[0.92rem] leading-relaxed text-slate">
-            AI scenario training &amp; contract-writing coaching for every broker. Drill live
-            role-plays against a tireless AI client, sharpen your agreement language, and climb the
-            board — built for {company.name}.
-          </p>
-          <div className="mt-3.5 flex flex-wrap gap-2">
-            <Pill tone="azure">
-              <Drama className="h-3 w-3" /> {scenarios.length} role-play scenarios
-            </Pill>
-            <Pill tone="success">
-              <GraduationCap className="h-3 w-3" /> AI coach
-            </Pill>
-            <Pill tone="neutral">
-              <Award className="h-3 w-3" /> Gamified leaderboard
-            </Pill>
-          </div>
-        </div>
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
+      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
+        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Coaching Academy</h1>
+        <LiveDot tone="success" />
       </div>
 
       {/* Weekly Scorecards */}
