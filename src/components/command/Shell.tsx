@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -23,9 +23,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
+  Wand2,
+  ClipboardList,
+  ScrollText,
+  Settings,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
+import {
+  CommandPalette,
+  CommandPaletteProvider,
+  useCommandPalette,
+} from "@/components/command/CommandPalette";
 
 type NavItem = { label: string; href: string; icon: React.ComponentType<{ className?: string }> };
 type NavGroup = { label: string; items: NavItem[] };
@@ -43,6 +52,7 @@ const NAV: NavGroup[] = [
     label: "OVERVIEW",
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
+      { label: "AI Studio", href: "/hub/ai", icon: Wand2 },
     ],
   },
   {
@@ -68,9 +78,22 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    label: "TOOLS",
+    items: [
+      { label: "Forms Library", href: "/hub/forms", icon: ClipboardList },
+      { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
+    ],
+  },
+  {
     label: "ANALYTICS",
     items: [
       { label: "Reporting", href: "/hub/reporting", icon: BarChart2 },
+    ],
+  },
+  {
+    label: "SYSTEM",
+    items: [
+      { label: "Settings", href: "/hub/settings", icon: Settings },
     ],
   },
 ];
@@ -115,7 +138,6 @@ const NOTIFICATIONS = [
 
 function isActive(pathname: string, href: string) {
   if (href === "/hub") return pathname === "/hub";
-  if (href === "/hub/ai") return pathname === "/hub/ai";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -291,11 +313,25 @@ function SidebarContent({
   );
 }
 
-export function Shell({ children }: { children: React.ReactNode }) {
+function ShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { setOpen: setPaletteOpen } = useCommandPalette();
+
+  const openPalette = useCallback(() => setPaletteOpen(true), [setPaletteOpen]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setPaletteOpen]);
 
   return (
     <div className="flex h-full">
@@ -358,18 +394,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Search */}
-          <div className="relative hidden max-w-sm flex-1 items-center sm:flex">
+          {/* Search — opens command palette */}
+          <button
+            onClick={openPalette}
+            className="relative hidden max-w-sm flex-1 items-center sm:flex"
+            aria-label="Open command palette"
+          >
             <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate/50" />
-            <input
-              type="text"
-              placeholder="Search leads, listings, agents…"
-              className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-[0.85rem] text-ink placeholder:text-slate/40 transition-all focus:border-azure/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-azure/10"
-            />
+            <span className="h-9 w-full rounded-lg border border-ink/[0.08] bg-white pl-9 pr-16 text-left text-[0.85rem] text-slate/40 transition-all hover:border-azure/30 hover:bg-white flex items-center">
+              Search leads, listings, agents…
+            </span>
             <kbd className="pointer-events-none absolute right-2.5 rounded border border-ink/[0.08] bg-paper px-1.5 py-0.5 text-[0.6rem] font-medium text-slate/50">
               ⌘K
             </kbd>
-          </div>
+          </button>
 
           <div className="ml-auto flex items-center gap-2 md:gap-3">
             {/* Notifications */}
@@ -502,6 +540,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
           More
         </button>
       </nav>
+
+      {/* Command palette — mounted once, toggled via context */}
+      <CommandPalette />
     </div>
+  );
+}
+
+export function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <CommandPaletteProvider>
+      <ShellInner>{children}</ShellInner>
+    </CommandPaletteProvider>
   );
 }
