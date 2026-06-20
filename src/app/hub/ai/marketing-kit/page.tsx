@@ -267,7 +267,7 @@ export default function MarketingKitPage() {
     }
 
     try {
-      await streamAi(
+      const finalOutput = await streamAi(
         { tool: "marketing-kit", input: values },
         (_chunk, full) => {
           setSections(parseSections(full));
@@ -276,6 +276,9 @@ export default function MarketingKitPage() {
       setDocDate(
         new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
       );
+      try { localStorage.setItem("matin_ai_last_marketing-kit", finalOutput.slice(0, 600)); } catch { /* private mode */ }
+    } catch {
+      setSections((prev) => ({ ...prev, mls: "_Sorry — connection error. Please try again._" }));
     } finally {
       setBusy(false);
     }

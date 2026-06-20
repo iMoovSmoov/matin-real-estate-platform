@@ -165,10 +165,13 @@ export default function LeadResponderPage() {
     setSentAt(null);
     setMobileOutputOpen(true);
     try {
-      await streamAi(
+      const finalOutput = await streamAi(
         { tool: "lead-responder", input: values },
         (_chunk, full) => setOutput(full),
       );
+      try { localStorage.setItem("matin_ai_last_lead-responder", finalOutput.slice(0, 600)); } catch { /* private mode */ }
+    } catch {
+      setOutput("_Sorry — connection error. Please try again._");
     } finally {
       setBusy(false);
     }
@@ -197,10 +200,13 @@ export default function LeadResponderPage() {
     setBusy(true);
     setMobileOutputOpen(true);
     try {
-      await streamAi(
+      const finalOutput = await streamAi(
         { tool: "lead-responder", input: filled },
         (_chunk, full) => setOutput(full),
       );
+      try { localStorage.setItem("matin_ai_last_lead-responder", finalOutput.slice(0, 600)); } catch { /* private mode */ }
+    } catch {
+      setOutput("_Sorry — connection error. Please try again._");
     } finally {
       setBusy(false);
     }
