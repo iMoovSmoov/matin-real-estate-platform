@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { SYSTEMS, buildUserMessage, type AiTool } from "@/lib/ai/prompts";
 import { fallbackFor } from "@/lib/ai/fallback";
 
@@ -8,7 +9,8 @@ export const dynamic = "force-dynamic";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-const MODEL = process.env.MATIN_AI_MODEL || "claude-haiku-4-5-20251001";
+const ANTHROPIC_MODEL = process.env.MATIN_AI_MODEL || "claude-haiku-4-5-20251001";
+const GROQ_MODEL = process.env.MATIN_GROQ_MODEL || "llama-3.3-70b-versatile";
 
 const MAX_TOKENS: Record<AiTool, number> = {
   "ask-matin": 800,
@@ -71,37 +73,66 @@ export async function POST(req: Request) {
     "X-Accel-Buffering": "no",
   };
 
-  // No key configured → graceful canned fallback (demo never breaks)
-  if (!process.env.ANTHROPIC_API_KEY) {
-    const text = fallbackFor(tool, input, lastUser);
-    return new Response(textStream(text), { headers: { ...headers, "X-Matin-Ai": "fallback" } });
-  }
-
-  const client = new Anthropic();
   const encoder = new TextEncoder();
 
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      try {
-        const mstream = client.messages.stream({
-          model: MODEL,
-          max_tokens: MAX_TOKENS[tool] ?? 800,
-          system,
-          messages: messages.map((m) => ({ role: m.role, content: m.content })),
-        });
+  // ── Groq (free tier — preferred when GROQ_API_KEY set) ─────────────────────
+  if (process.env.GROQ_API_KEY) {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          const completion = await groq.chat.completions.create({
+            model: GROQ_MODEL,
+            max_tokens: MAX_TOKENS[tool] ?? 800,
+            messages: [
+              { role: "system", content: system },
+              ...messages.map((m) => ({ role: m.role, content: m.content })),
+            ],
+            stream: true,
+          });
+          for await (const chunk of completion) {
+            const text = chunk.choices[0]?.delta?.content ?? "";
+            if (text) controller.enqueue(encoder.encode(text));
+          }
+          controller.close();
+        } catch (err) {
+          console.error("[ai/groq] falling back:", err);
+          const text = fallbackFor(tool, input, lastUser);
+          for (const chunk of text.split(/(\s+)/)) controller.enqueue(encoder.encode(chunk));
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, { headers: { ...headers, "X-Matin-Ai": "groq" } });
+  }
 
-        mstream.on("text", (t: string) => controller.enqueue(encoder.encode(t)));
-        await mstream.finalMessage();
-        controller.close();
-      } catch (err) {
-        // API failure (bad key, rate limit, refusal) → stream the canned fallback
-        console.error("[ai] falling back:", err);
-        const text = fallbackFor(tool, input, lastUser);
-        for (const chunk of text.split(/(\s+)/)) controller.enqueue(encoder.encode(chunk));
-        controller.close();
-      }
-    },
-  });
+  // ── Anthropic (when ANTHROPIC_API_KEY set) ──────────────────────────────────
+  if (process.env.ANTHROPIC_API_KEY) {
+    const client = new Anthropic();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          const mstream = client.messages.stream({
+            model: ANTHROPIC_MODEL,
+            max_tokens: MAX_TOKENS[tool] ?? 800,
+            system,
+            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+          });
+          mstream.on("text", (t: string) => controller.enqueue(encoder.encode(t)));
+          await mstream.finalMessage();
+          controller.close();
+        } catch (err) {
+          console.error("[ai/anthropic] falling back:", err);
+          const text = fallbackFor(tool, input, lastUser);
+          for (const chunk of text.split(/(\s+)/)) controller.enqueue(encoder.encode(chunk));
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, { headers: { ...headers, "X-Matin-Ai": "claude" } });
+  }
 
-  return new Response(stream, { headers: { ...headers, "X-Matin-Ai": "claude" } });
+  // ── No key configured → canned fallback (demo never breaks) ────────────────
+  const text = fallbackFor(tool, input, lastUser);
+  return new Response(textStream(text), { headers: { ...headers, "X-Matin-Ai": "fallback" } });
 }
