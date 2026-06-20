@@ -82,8 +82,8 @@
     { "slug": "joshua-rose", "name": "Joshua Rose", "responseTimeMins": 2, "leadsThisMonth": 18, "apptRate": 0.44 },
     { "slug": "alicia-smith", "name": "Alicia Smith", "responseTimeMins": 3, "leadsThisMonth": 14, "apptRate": 0.36 },
     { "slug": "amanda-conlon", "name": "Amanda Conlon", "responseTimeMins": 8, "leadsThisMonth": 11, "apptRate": 0.27 },
-    { "slug": "james-wright", "name": "James Wright", "responseTimeMins": 12, "leadsThisMonth": 9, "apptRate": 0.22 },
-    { "slug": "sarah-chen", "name": "Sarah Chen", "responseTimeMins": 22, "leadsThisMonth": 7, "apptRate": 0.14 },
-    { "slug": "michael-torres", "name": "Michael Torres", "responseTimeMins": 34, "leadsThisMonth": 5, "apptRate": 0.10 }
+    { "slug": "andy-wilcox", "name": "Andy Wilcox", "responseTimeMins": 22, "leadsThisMonth": 9, "apptRate": 0.22 },
+    { "slug": "christopher-young", "name": "Christopher Young", "responseTimeMins": 35, "leadsThisMonth": 7, "apptRate": 0.14 },
+    { "slug": "benjamin-fabian", "name": "Ben Fabian", "responseTimeMins": 42, "leadsThisMonth": 5, "apptRate": 0.10 }
   ]
 }

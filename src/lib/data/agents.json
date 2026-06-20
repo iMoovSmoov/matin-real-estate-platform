@@ -153,7 +153,7 @@
     "licenses": ["OR", "WA"],
     "leadership": false,
     "support": false,
-    "yearsExperience": 1,
+    "yearsExperience": 9,
     "homesSold": 209,
     "volume": 129789000,
     "activeListings": 6,
@@ -545,7 +545,7 @@
     "licenses": ["OR"],
     "leadership": false,
     "support": false,
-    "yearsExperience": 1,
+    "yearsExperience": 7,
     "homesSold": 196,
     "volume": 145628000,
     "activeListings": 0,
@@ -669,7 +669,7 @@
     "bio": "Leona Mullen is an Oregon & Washington Licensed Broker with Matin Real Estate. Known for relentless market knowledge and a calm hand under pressure, Leona helps investors win in one of the country's most competitive markets. Leona serves the greater Portland metro and SW Washington and treats every client like the only client.",
     "scorecardWeek": { "calls": 18, "texts": 29, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
     "responseTimeMins": 24,
-    "rank": 18
+    "rank": 19
   },
   {
     "id": "lexa-brice",
@@ -1083,7 +1083,7 @@
     "bio": "William Carrell is an Oregon Licensed Broker with Matin Real Estate. Known for sharp negotiation and a calm hand under pressure, William helps buyers win in one of the country's most competitive markets. William serves the greater Portland metro and SW Washington and treats every client like the only client.",
     "scorecardWeek": { "calls": 17, "texts": 28, "appts": 4, "agreements": 2, "showings": 7, "offers": 1 },
     "responseTimeMins": 17,
-    "rank": 19
+    "rank": 18
   },
   {
     "id": "zach-hosford",
