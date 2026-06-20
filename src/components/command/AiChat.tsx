@@ -172,6 +172,15 @@ export function AiChat({
             return copy;
           });
         });
+      } catch {
+        setMessages((m) => {
+          const copy = [...m];
+          copy[copy.length - 1] = {
+            role: "assistant",
+            content: "Sorry, I had trouble connecting. Please try again.",
+          };
+          return copy;
+        });
       } finally {
         setBusy(false);
       }
