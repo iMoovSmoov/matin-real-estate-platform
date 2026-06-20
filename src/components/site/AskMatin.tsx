@@ -43,6 +43,15 @@ export function AskMatin() {
           return copy;
         });
       });
+    } catch {
+      setMessages((m) => {
+        const copy = [...m];
+        copy[copy.length - 1] = {
+          role: "assistant",
+          content: "Sorry, I had trouble connecting. Give us a call at (503) 622-9624 and we'll help you right away.",
+        };
+        return copy;
+      });
     } finally {
       setBusy(false);
     }
