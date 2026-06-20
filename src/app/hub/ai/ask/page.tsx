@@ -4,8 +4,7 @@ import { useState } from "react";
 import { AiChat } from "@/components/command/AiChat";
 import { AskSidebar } from "./AskSidebar";
 
-// TODO: replace with session.user.name from auth context
-const USER_LABEL = "Alicia Kelly-Smith";
+const USER_LABEL = "Jordan Matin";
 
 export default function AskPage() {
   const [externalInput, setExternalInput] = useState<string>("");

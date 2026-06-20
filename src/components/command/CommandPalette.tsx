@@ -14,7 +14,10 @@ import {
   Sparkles,
   Dumbbell,
   BarChart3,
+  BarChart2,
   ClipboardList,
+  ScrollText,
+  Settings,
   Search,
   X,
 } from "lucide-react";
@@ -70,8 +73,11 @@ const PAGES: Omit<ResultItem, "id" | "group">[] = [
   { label: "Listing Launch",   href: "/hub/listing-launch",    icon: Rocket },
   { label: "AI Studio",        href: "/hub/ai",                icon: Sparkles },
   { label: "Coaching",         href: "/hub/coaching",          icon: Dumbbell },
-  { label: "Analytics",        href: "/hub/analytics",         icon: BarChart3 },
-  { label: "Forms",            href: "/hub/forms",             icon: ClipboardList },
+  { label: "Analytics",         href: "/hub/analytics",         icon: BarChart3 },
+  { label: "Reporting",         href: "/hub/reporting",         icon: BarChart2 },
+  { label: "Forms",             href: "/hub/forms",             icon: ClipboardList },
+  { label: "Contract Builder",  href: "/hub/contracts",         icon: ScrollText },
+  { label: "Settings",          href: "/hub/settings",          icon: Settings },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
