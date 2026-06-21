@@ -64,7 +64,7 @@ export function AskMatin() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close concierge" : "Open Matin concierge"}
         className={cn(
-          "fixed bottom-[calc(56px+1.25rem)] right-5 z-50 relative h-14 w-14 rounded-full sm:bottom-5 sm:right-7",
+          "fixed bottom-[calc(56px+1.25rem)] right-5 z-50 h-14 w-14 rounded-full sm:bottom-5 sm:right-7",
           "bg-ink text-white",
           "shadow-[0_4px_20px_rgba(6,6,6,.45),0_1px_4px_rgba(6,6,6,.25)]",
           "ring-[1.5px] ring-white/20",
