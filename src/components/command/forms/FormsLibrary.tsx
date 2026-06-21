@@ -351,7 +351,7 @@ export function FormsLibrary() {
 
             {/* Form rows or table */}
             {viewMode === "grid" ? (
-              <div className="divide-y divide-ink/[0.04] px-2 py-1">
+              <div className="max-h-[calc(100vh-20rem)] overflow-y-auto divide-y divide-ink/[0.04] px-2 py-1">
                 {visible.map((form) => (
                   <FormRow key={form.code} form={form} onOpen={() => openForm(form)} />
                 ))}
@@ -376,7 +376,7 @@ export function FormsLibrary() {
               </div>
             ) : (
               /* Table view (desktop power-user mode) */
-              <div className="overflow-x-auto">
+              <div className="max-h-[calc(100vh-20rem)] overflow-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-ink/[0.06] bg-paper/40">
