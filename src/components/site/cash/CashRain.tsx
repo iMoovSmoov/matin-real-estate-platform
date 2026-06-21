@@ -27,8 +27,8 @@ function Bill({ i }: { i: number }) {
       }}
     >
       <div
-        className="h-[64px] w-[150px] rounded-[5px] shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20 bg-[#1a2b1a]"
-        style={{ backgroundImage: `url('${src}')`, backgroundSize: "contain", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
+        className="h-[64px] w-[150px] rounded-[5px] shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20"
+        style={{ backgroundImage: `url('${src}')`, backgroundSize: "cover", backgroundPosition: "center center" }}
       />
     </div>
   );
