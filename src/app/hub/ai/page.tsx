@@ -12,7 +12,7 @@ import {
   PhoneCall,
   ArrowRight,
 } from "lucide-react";
-import { Pill, SectionLabel } from "@/components/command/ui";
+import { SectionLabel } from "@/components/command/ui";
 
 /* ── Tool metadata ──────────────────────────────────────────────────────── */
 
@@ -20,7 +20,6 @@ type ToolMeta = {
   href: string;
   name: string;
   icon: LucideIcon;
-  category: string;
   desc: string;
 };
 
@@ -37,14 +36,12 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/lead-responder",
         name: "Lead Responder",
         icon: MessageSquareText,
-        category: "Lead Conversion",
         desc: "Drafts a warm, personalized first reply to any inbound lead in seconds — referencing their area, budget, and intent.",
       },
       {
         href: "/hub/ai/seller-intel",
         name: "Seller Intel",
         icon: PhoneCall,
-        category: "Lead Conversion",
         desc: "Pre-call intelligence brief — cash offer range, cash vs. list table, phone script opener, and urgency signals.",
       },
     ],
@@ -56,14 +53,12 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/listing-writer",
         name: "Listing Writer",
         icon: PenLine,
-        category: "Listings & Marketing",
         desc: "Turns raw property facts into vivid, MLS-ready, fair-housing-compliant listing copy.",
       },
       {
         href: "/hub/ai/marketing-kit",
         name: "Marketing Kit",
         icon: Megaphone,
-        category: "Listings & Marketing",
         desc: "One click generates five assets: MLS description, Instagram caption, Facebook post, email blast, and open house invite.",
       },
     ],
@@ -75,14 +70,12 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/cma",
         name: "CMA Generator",
         icon: BarChart2,
-        category: "Pricing & Valuation",
         desc: "Produces a decisive comparative market analysis with a list-price range, comps talking points, and a one-line recommendation.",
       },
       {
         href: "/hub/ai/cash-offer",
         name: "Cash Offer Evaluator",
         icon: DollarSign,
-        category: "Pricing & Valuation",
         desc: "Estimates ARV, deductions, and net-to-seller range for any property. Full breakdown table ready to share with sellers.",
       },
     ],
@@ -94,7 +87,6 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/agreements",
         name: "Agreements",
         icon: FileSignature,
-        category: "Contracts & Compliance",
         desc: "Generates clear listing & buyer-representation agreement clause language with broker-review flags.",
       },
     ],
@@ -106,7 +98,6 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/coach",
         name: "Agent Coach",
         icon: GraduationCap,
-        category: "Training",
         desc: "Live scenario role-play and tactical feedback — objection handling, listing presentations, buyer consults, and more.",
       },
     ],
@@ -118,7 +109,6 @@ const TOOL_GROUPS: ToolGroup[] = [
         href: "/hub/ai/ask",
         name: "Ask Matin",
         icon: MessageCircle,
-        category: "Team Assistant",
         desc: "The internal company copilot — policies, market knowledge, referrals, and quick email drafts for the whole team.",
       },
     ],
@@ -175,9 +165,8 @@ export default function AiToolsPage() {
                       </p>
                     </div>
 
-                    {/* Category badge + open link */}
+                    {/* Open link */}
                     <div className="flex shrink-0 items-center gap-3">
-                      <Pill tone="neutral">{tool.category}</Pill>
                       <Link
                         href={tool.href}
                         className="inline-flex items-center gap-1 text-[0.8rem] font-medium text-ink/70 transition-colors hover:text-ink"

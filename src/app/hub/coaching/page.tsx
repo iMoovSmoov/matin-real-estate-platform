@@ -6,7 +6,6 @@ import {
   Drama,
   Target,
   Flame,
-  MessageSquareText,
   BarChart2,
   ChevronRight,
   Clock,
@@ -59,8 +58,6 @@ const avgScore = Math.round(
   leaderboard.reduce((sum, s) => sum + s.score, 0) / (leaderboard.length || 1),
 );
 
-const rolePlaysThisWeek = salesAgents.length * 9 + 47;
-const practicing = Math.min(salesAgents.length, Math.round(salesAgents.length * 0.72));
 
 const MEDALS: Record<number, { ring: string; bg: string; text: string }> = {
   0: { ring: "ring-amber-300/40", bg: "bg-amber-300/15", text: "text-amber-300" },
@@ -483,7 +480,7 @@ export default function CoachingPage() {
       </section>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-2">
         <StatTile
           label="Scenarios Available"
           value={num(scenarios.length)}
@@ -492,24 +489,10 @@ export default function CoachingPage() {
           accent
         />
         <StatTile
-          label="Role-plays This Week"
-          value={num(rolePlaysThisWeek)}
-          delta={{ value: "18%", dir: "up" }}
-          icon={<MessageSquareText className="h-4 w-4" />}
-          hint="Brokerage-wide reps"
-        />
-        <StatTile
           label="Avg Score"
           value={`${avgScore}`}
-          delta={{ value: "4 pts", dir: "up" }}
           icon={<Target className="h-4 w-4" />}
           hint="Top-8 trailing average"
-        />
-        <StatTile
-          label="Agents Practicing"
-          value={`${practicing}/${salesAgents.length}`}
-          icon={<Flame className="h-4 w-4" />}
-          hint="Active this week"
         />
       </div>
 

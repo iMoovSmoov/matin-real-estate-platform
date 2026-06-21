@@ -26,7 +26,7 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { metrics, agentLeaderboard, salesAgents, company } from "@/lib/data";
+import { metrics, agentLeaderboard, salesAgents, company, activities, leads, buyerAgreements } from "@/lib/data";
 import { usd, compactUsd, cn } from "@/lib/utils";
 import {
   Panel,
@@ -50,7 +50,8 @@ import {
 
 const k = metrics.kpis;
 
-const staleCount = metrics.staleLeadsCount ?? 0;
+const staleCount = leads.filter((l) => l.lastContactDaysAgo >= 7 && l.stage !== "Closed").length;
+const missingAgreementsCount = buyerAgreements.filter((b) => b.agreementStatus !== "Signed").length;
 const ALERTS = [
   {
     label: `${staleCount} stale leads`,
@@ -59,7 +60,7 @@ const ALERTS = [
     tone: "red" as const,
   },
   {
-    label: "8 missing buyer agreements",
+    label: `${missingAgreementsCount} missing buyer agreements`,
     href: "/hub/buyer-agreements",
     icon: AlertCircle,
     tone: "red" as const,
@@ -86,8 +87,11 @@ const KPIS = [
   },
   {
     label: "Active Leads",
-    value: "47",
-    delta: { value: "8 new today", dir: "up" as const },
+    value: String(leads.filter((l) => l.stage !== "Closed").length),
+    delta: {
+      value: `${leads.filter((l) => l.createdDaysAgo <= 1).length} new today`,
+      dir: "up" as const,
+    },
     icon: <Users className="h-4 w-4" />,
     href: null,
     chip: null,
@@ -107,7 +111,7 @@ const KPIS = [
   },
   {
     label: "Stale Leads",
-    value: String(metrics.staleLeadsCount ?? 0),
+    value: String(staleCount),
     delta: null,
     icon: <Timer className="h-4 w-4" />,
     accent: false,
@@ -118,117 +122,62 @@ const KPIS = [
   },
 ];
 
-const ACTIVITY = [
-  {
-    text: "New lead from Zillow — Sarah M.",
-    sub: "Lake Oswego · buyer inquiry",
-    ago: "2m ago",
-    dot: "bg-azure",
-    type: "lead",
-    link: "/hub/crm",
-  },
-  {
-    text: "Offer accepted on 8457 NW Lakeshore",
-    sub: "Listed at $1.15M",
-    ago: "18m ago",
-    dot: "bg-emerald-500",
-    type: "transaction",
-    link: "/hub/transactions",
-  },
-  {
-    text: "CMA opened by Kim Tran",
-    sub: "Lake Oswego lead · viewed 3 pages",
-    ago: "2h ago",
-    dot: "bg-azure",
-    type: "lead",
-    link: "/hub/crm",
-  },
-  {
-    text: "Inspection scheduled for TX-4003",
-    sub: "Thursday 9 AM · 2 days away",
-    ago: "3h ago",
-    dot: "bg-amber-400",
-    type: "transaction",
-    link: "/hub/transactions",
-  },
-  {
-    text: "Buyer agreement signed — Reyes family",
-    sub: "Showing confirmed for Saturday",
-    ago: "5h ago",
-    dot: "bg-emerald-500",
-    type: "lead",
-    link: "/hub/crm",
-  },
-  {
-    text: "5-star review from the Harrisons",
-    sub: "West Linn · posted on Google",
-    ago: "7h ago",
-    dot: "bg-emerald-500",
-    type: "activity",
-    link: "/hub/crm",
-  },
+/* Derive activity feed from real activities.json data */
+function formatMinsAgo(minsAgo: number): string {
+  if (minsAgo < 60) return `${minsAgo}m ago`;
+  const hrs = Math.floor(minsAgo / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function activityDot(text: string): string {
+  if (text.includes("closed") || text.includes("accepted offer") || text.includes("Clear to Close")) return "bg-emerald-500";
+  if (text.includes("showing") || text.includes("Inspection") || text.includes("Financing")) return "bg-amber-400";
+  return "bg-azure";
+}
+
+function activityType(text: string): "lead" | "transaction" | "activity" {
+  if (text.includes("showing") || text.includes("offer") || text.includes("deal") || text.includes("CMA") || text.includes("listed")) return "transaction";
+  return "activity";
+}
+
+const ACTIVITY = activities.slice(0, 6).map((a) => ({
+  text: `${a.agent} ${a.text}`,
+  sub: `${a.agent}`,
+  ago: formatMinsAgo(a.minsAgo),
+  dot: activityDot(a.text),
+  type: activityType(a.text),
+  link: activityType(a.text) === "transaction" ? "/hub/transactions" : "/hub/crm",
+}));
+
+/* Derive pipeline stage counts from real leads data */
+const STAGE_CONFIG: { label: string; match: string[]; color: string }[] = [
+  { label: "New",            match: ["New"],              color: "bg-azure" },
+  { label: "Contacted",      match: ["Active"],           color: "bg-azure/70" },
+  { label: "Showing",        match: ["Showing"],          color: "bg-azure/50" },
+  { label: "Under Contract", match: ["Under Contract", "Pending", "Closed"], color: "bg-emerald-500" },
 ];
 
-const PIPELINE_STAGES = [
-  { label: "New", count: 18, color: "bg-azure" },
-  { label: "Contacted", count: 12, color: "bg-azure/70" },
-  { label: "Showing", count: 7, color: "bg-azure/50" },
-  { label: "Under Contract", count: 4, color: "bg-emerald-500" },
-];
-const PIPELINE_MAX = 18;
+const PIPELINE_STAGES = STAGE_CONFIG.map(({ label, match, color }) => ({
+  label,
+  count: leads.filter((l) => match.includes(l.stage)).length,
+  color,
+}));
+const PIPELINE_MAX = Math.max(...PIPELINE_STAGES.map((s) => s.count), 1);
 
-const LEADERBOARD = [
-  {
-    name: "Jordan Matin",
-    initials: "JM",
-    photo: "/matin/agents/jordan-matin.jpg",
-    closings: 6,
-    volume: "$4.2M",
-    dom: 22,
-    responseTime: "1.8 min",
-    highlight: true,
-  },
-  {
-    name: "Joshua Rose",
-    initials: "JR",
-    photo: null,
-    closings: 5,
-    volume: "$3.1M",
-    dom: 27,
-    responseTime: "2.1 min",
-    highlight: false,
-  },
-  {
-    name: "Sarah Chen",
-    initials: "SC",
-    photo: null,
-    closings: 4,
-    volume: "$2.8M",
-    dom: 31,
-    responseTime: "4.7 min",
-    highlight: false,
-  },
-  {
-    name: "Marcus Webb",
-    initials: "MW",
-    photo: null,
-    closings: 3,
-    volume: "$1.9M",
-    dom: 35,
-    responseTime: "6.3 min",
-    highlight: false,
-  },
-  {
-    name: "Keanu Makoa",
-    initials: "KM",
-    photo: null,
-    closings: 2,
-    volume: "$1.1M",
-    dom: 44,
-    responseTime: "11.2 min",
-    highlight: false,
-  },
-];
+/* Derive leaderboard from real agentLeaderboard data */
+const LEADERBOARD = agentLeaderboard.slice(0, 5).map((a, i) => ({
+  name: a.name,
+  initials: a.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2),
+  photo: a.photo ?? null,
+  closings: a.homesSold,
+  volume: a.volume >= 1_000_000
+    ? `$${(a.volume / 1_000_000).toFixed(1)}M`
+    : `$${(a.volume / 1_000).toFixed(0)}K`,
+  dom: 0,
+  responseTime: a.responseTimeMins != null ? `${a.responseTimeMins} min` : "—",
+  highlight: i === 0,
+}));
 
 const TOOLS = [
   { label: "Draft a reply",   href: "/hub/ai/lead-responder", icon: MessageSquareText },
@@ -559,7 +508,7 @@ export default function DashboardPage() {
           <h1 className="font-display text-lg font-semibold text-ink">Command Center</h1>
           <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[0.72rem] font-semibold text-amber-700">
             <TriangleAlert className="h-3 w-3" />
-            8 need follow-up
+            {leads.filter((l) => l.lastContactDaysAgo >= 7 && l.stage !== "Closed").length} need follow-up
           </span>
         </div>
         <span className="text-[0.75rem] text-slate/50">{today}</span>
@@ -763,7 +712,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-display text-2xl font-bold tabular-nums text-red-600">
-                  {metrics.staleLeadsCount ?? 0}
+                  {staleCount}
                 </span>
                 <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[0.65rem] font-semibold text-red-700">
                   need attention
@@ -1403,7 +1352,7 @@ export default function DashboardPage() {
               <>
                 <SectionLabel>Active leads</SectionLabel>
                 <p className="text-[0.85rem] text-slate/60 mb-3">
-                  47 leads are currently active across all stages. Connect your CRM to see individual records here.
+                  {leads.filter((l) => l.stage !== "Closed").length} leads are currently active across all stages. Connect your CRM to see individual records here.
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   {PIPELINE_STAGES.map((s) => (
