@@ -35,10 +35,10 @@ import {
   UserPlus,
   FileSearch,
   CheckCircle2,
-  Sparkles,
   ChevronRight,
   CalendarClock,
 } from "lucide-react";
+import { MatinMark } from "@/components/brand/Logo";
 import {
   KpiStrip,
   KpiCard,
@@ -779,7 +779,7 @@ function ListingRecordCard({
         <div className="rounded-xl border border-mist bg-paper px-4 py-3.5">
           <div className="flex items-center justify-between gap-2">
             <div className="inline-flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               <p className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-slate">
                 Auto-generated seller update
               </p>
@@ -796,7 +796,7 @@ function ListingRecordCard({
               onClick={onOpenAi}
               className="inline-flex items-center gap-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:text-ink"
             >
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               Refine with AI
             </button>
             <button
@@ -887,7 +887,7 @@ function ActionDrawerCard({
       {/* Header */}
       <div className="flex items-start gap-3 border-b border-ink-700 px-5 py-4">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold ring-1 ring-inset ring-gold/30">
-          <Sparkles className="h-4 w-4" />
+          <MatinMark theme="white" className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.16em] text-slate-300/70">
@@ -906,7 +906,7 @@ function ActionDrawerCard({
           {track.aiExplanation}
         </p>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-soft px-2.5 py-1 text-[0.74rem] font-medium leading-none text-gold-ink ring-1 ring-inset ring-gold/25">
-          <Sparkles className="h-3.5 w-3.5" />
+          <MatinMark theme="dark" className="h-3.5 w-3.5" />
           {track.insight}
         </span>
 
@@ -924,7 +924,7 @@ function ActionDrawerCard({
                   : "hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
               )}
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               {kitLoading
                 ? "Generating marketing kit…"
                 : kitGenerated
@@ -973,7 +973,7 @@ function ActionDrawerCard({
                 Marketing kit · live draft
               </p>
               <span className="inline-flex items-center gap-1 text-[0.7rem] text-gold">
-                <Sparkles className="h-3 w-3" />
+                <MatinMark theme="white" className="h-3 w-3" />
                 {kitLoading ? "Streaming" : "Draft ready"}
               </span>
             </div>
