@@ -1,23 +1,19 @@
 "use client";
 
-/**
- * Falling REAL cash — each bill is a crop of an actual $100-bill photo,
- * so it reads as real money (no coins, no stylized rectangles).
- * Positions/timings are deterministic (index-based) → no hydration drift.
- */
-const CASH = "/matin/cash/cash-09.jpg";
+const CASH_IMAGES = Array.from({ length: 15 }, (_, n) =>
+  `/matin/cash/cash-${String(n).padStart(2, "0")}.jpg`
+);
 
 function Bill({ i }: { i: number }) {
+  const src = CASH_IMAGES[i % CASH_IMAGES.length];
   const left = (i * 129 + i * i * 7) % 100;
-  const dur = 10 + (i % 6) * 1.9;          // 10–19s
-  const delay = -((i * 1.9) % 15);         // already mid-flight, staggered
-  const depth = i % 3;                      // 0 near → 2 far
+  const dur = 10 + (i % 6) * 1.9;
+  const delay = -((i * 1.9) % 15);
+  const depth = i % 3;
   const scale = [1.05, 0.82, 0.64][depth];
   const blur = [0, 0.6, 1.7][depth];
   const opacity = [0.98, 0.86, 0.6][depth];
   const rz = ((i * 47) % 44) - 22;
-  const bx = 30 + ((i * 37) % 25);   // stays 30–55%, always near bill center
-  const by = 25 + ((i * 61) % 25);   // stays 25–50%, always near bill center
   return (
     <div
       className="absolute top-0 will-change-transform"
@@ -31,8 +27,8 @@ function Bill({ i }: { i: number }) {
       }}
     >
       <div
-        className="h-[64px] w-[150px] rounded-[5px] bg-cover shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20 [transform-style:preserve-3d]"
-        style={{ backgroundImage: `url('${CASH}')`, backgroundSize: "165%", backgroundPosition: `${bx}% ${by}%` }}
+        className="h-[64px] w-[150px] rounded-[5px] shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20"
+        style={{ backgroundImage: `url('${src}')`, backgroundSize: "cover", backgroundPosition: "center" }}
       />
     </div>
   );
