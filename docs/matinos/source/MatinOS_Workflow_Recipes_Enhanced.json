@@ -1,0 +1,115 @@
+{
+  "recipes": [
+    {
+      "name": "New IDX Lead Intake",
+      "trigger": "webhook.lead.created",
+      "steps": [
+        "verify webhook",
+        "normalize fields",
+        "dedupe contact",
+        "create/update contact",
+        "score buyer/seller intent",
+        "route by rules",
+        "create first-call task",
+        "draft intro message",
+        "notify assigned agent",
+        "write activity events"
+      ],
+      "human_approval": "Required before any message is sent.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Seller Intent Signal",
+      "trigger": "lead_event.home_value_request OR cash_offer_request.created",
+      "steps": [
+        "link contact/property",
+        "calculate seller score",
+        "create seller opportunity",
+        "assign owner",
+        "create call task",
+        "draft seller outreach",
+        "add Today queue alert"
+      ],
+      "human_approval": "Required before outreach is sent.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Listing Won Launch Automation",
+      "trigger": "seller_opportunity.stage = listing_won",
+      "steps": [
+        "create listing",
+        "copy seller/property data",
+        "select checklist template",
+        "create checklist items",
+        "assign coordinator",
+        "draft seller kickoff email",
+        "create marketing kit shell",
+        "notify agent/coordinator"
+      ],
+      "human_approval": "Required before seller kickoff email.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Photo Upload Marketing Kit",
+      "trigger": "listing_assets.uploaded where asset_type=photo",
+      "steps": [
+        "tag images",
+        "extract room/features",
+        "draft MLS remarks",
+        "draft social captions",
+        "draft email blast",
+        "draft flyer copy",
+        "create approval tasks",
+        "update listing readiness"
+      ],
+      "human_approval": "Required for marketing approvals and client-facing copy.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Buyer Agreement Packet",
+      "trigger": "buyer_agreement.ready_for_packet",
+      "steps": [
+        "prefill contact/agent fields",
+        "validate terms",
+        "generate document packet",
+        "highlight missing fields",
+        "run broker rules",
+        "create e-sign envelope draft",
+        "write CRM timeline event"
+      ],
+      "human_approval": "Required before sending e-sign envelope.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Contract Deadline Extraction",
+      "trigger": "transaction.contract_uploaded",
+      "steps": [
+        "store document",
+        "AI extract parties/dates/contingencies",
+        "create proposed milestones",
+        "TC review queue",
+        "upon approval create reminders",
+        "calculate initial risk",
+        "write transaction timeline events"
+      ],
+      "human_approval": "Required before extracted deadlines are committed.",
+      "systems_health_receipt": true
+    },
+    {
+      "name": "Daily Leadership Snapshot",
+      "trigger": "cron.daily.5am",
+      "steps": [
+        "aggregate leads",
+        "aggregate source ROI",
+        "aggregate agent activity",
+        "aggregate listing pipeline",
+        "aggregate transaction risk",
+        "aggregate workflow failures",
+        "generate AI leadership memo",
+        "store report snapshot"
+      ],
+      "human_approval": "Not required for internal report generation.",
+      "systems_health_receipt": true
+    }
+  ]
+}

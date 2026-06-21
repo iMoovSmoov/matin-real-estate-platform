@@ -1,0 +1,104 @@
+{
+  "users": [
+    {
+      "full_name": "Jordan Matin",
+      "role": "leadership",
+      "team": "Leadership"
+    },
+    {
+      "full_name": "Ava Brooks",
+      "role": "agent",
+      "team": "Portland Metro"
+    },
+    {
+      "full_name": "Marcus Lee",
+      "role": "listing_coordinator",
+      "team": "Operations"
+    },
+    {
+      "full_name": "Nina Patel",
+      "role": "marketing",
+      "team": "Marketing"
+    },
+    {
+      "full_name": "Evan Carter",
+      "role": "transaction_coordinator",
+      "team": "Operations"
+    }
+  ],
+  "contacts": [
+    {
+      "full_name": "Sarah Mitchell",
+      "intent": "seller",
+      "source": "Home Value Page",
+      "seller_score": 91,
+      "recent_activity": [
+        "Requested home value",
+        "Opened market report twice",
+        "Clicked cash offer page"
+      ]
+    },
+    {
+      "full_name": "Daniel Cho",
+      "intent": "buyer",
+      "source": "IDX Search",
+      "lead_score": 84,
+      "recent_activity": [
+        "Viewed 7 Beaverton homes",
+        "Saved 3 searches",
+        "Asked about showing availability"
+      ]
+    },
+    {
+      "full_name": "Melissa Grant",
+      "intent": "seller",
+      "source": "Past Client Campaign",
+      "seller_score": 76,
+      "recent_activity": [
+        "Opened seller report",
+        "Owns home 8 years"
+      ]
+    }
+  ],
+  "listings": [
+    {
+      "address": "1248 NW Cedar Hills Dr, Beaverton, OR",
+      "status": "pre_launch",
+      "readiness_score": 78,
+      "blockers": [
+        "Seller disclosure missing initials",
+        "Photos pending broker approval"
+      ]
+    }
+  ],
+  "transactions": [
+    {
+      "address": "8912 SE Hawthorne Blvd, Portland, OR",
+      "status": "under_contract",
+      "risk_level": "high",
+      "risk_reasons": [
+        "Inspection deadline tomorrow",
+        "Repair addendum unsigned"
+      ]
+    }
+  ],
+  "workflow_runs": [
+    {
+      "name": "New IDX Lead Intake",
+      "status": "waiting_for_approval",
+      "subject": "Daniel Cho",
+      "failed_step": null
+    },
+    {
+      "name": "Listing Won Launch Automation",
+      "status": "succeeded",
+      "subject": "1248 NW Cedar Hills Dr"
+    },
+    {
+      "name": "CRM Sync",
+      "status": "failed",
+      "subject": "Follow Up Boss",
+      "failed_step": "Map external field preferred_area"
+    }
+  ]
+}
