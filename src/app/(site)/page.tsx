@@ -85,10 +85,10 @@ export default function HomePage() {
               fill
               priority
               sizes="100vw"
-              className="object-cover object-[center_20%]"
+              className="object-cover object-[center_40%]"
             />
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-overlay"

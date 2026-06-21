@@ -22,7 +22,6 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
   const pathname = usePathname();
-  const onDark = pathname === "/" && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 36);
@@ -36,22 +35,22 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-40 transition-all duration-500",
-        onDark
-          ? "bg-transparent py-4"
-          : "border-b border-ink/10 bg-cloud/95 shadow-soft backdrop-blur-xl py-2.5",
+        "fixed inset-x-0 top-0 z-40 transition-all duration-500 bg-[#0d0d0e]",
+        scrolled
+          ? "py-2.5 shadow-[0_1px_0_rgba(255,255,255,0.06)]"
+          : "py-4",
       )}
     >
       {/* Skip to main content — visible on focus, hidden otherwise */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-azure focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink focus:outline-none"
       >
         Skip to content
       </a>
 
       <div className="container-x flex items-center justify-between gap-6">
-        <Link href="/" className="text-ink transition-colors">
+        <Link href="/" className="text-white transition-colors">
           <Logo className="h-9" />
         </Link>
 
@@ -63,10 +62,8 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  "link-underline text-[0.92rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2 rounded-sm",
-                  onDark
-                    ? active ? "text-white" : "text-white/75 hover:text-white"
-                    : active ? "text-ink" : "text-ink/60 hover:text-ink",
+                  "link-underline text-[0.92rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0e] rounded-sm",
+                  active ? "text-white" : "text-white/65 hover:text-white",
                   active && "!bg-[100%_1px]",
                 )}
               >
@@ -79,36 +76,25 @@ export function SiteHeader() {
         <div className="flex items-center gap-3">
           <a
             href="tel:+15036229624"
-            className={cn(
-              "hidden items-center gap-2 text-sm font-medium md:flex",
-              onDark ? "text-white/90" : "text-ink/80",
-            )}
+            className="hidden items-center gap-2 text-sm font-medium md:flex text-white/75 hover:text-white transition-colors"
           >
             <Phone className="h-4 w-4" /> (503) 622-9624
           </a>
           <Link
             href="/hub"
-            className={cn(
-              "hidden items-center gap-1.5 rounded-full px-4 py-2 text-[0.82rem] font-semibold transition sm:inline-flex",
-              onDark
-                ? "bg-white text-ink shadow-[0_8px_24px_rgba(6,6,6,.25)] hover:bg-paper"
-                : "bg-azure text-white shadow-[0_8px_24px_rgba(6,6,6,.25)] hover:bg-azure-deep",
-            )}
+            className="hidden items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[0.82rem] font-semibold text-ink shadow-[0_4px_16px_rgba(0,0,0,.4)] transition hover:bg-paper sm:inline-flex"
           >
             Matin Hub <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <a
             href="tel:+15036229624"
             aria-label="Call Matin Real Estate"
-            className={cn(
-              "flex items-center sm:hidden",
-              onDark ? "text-white/90" : "text-ink/80",
-            )}
+            className="flex items-center sm:hidden text-white/80"
           >
             <Phone className="h-5 w-5" />
           </a>
           <button
-            className={cn("lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2 rounded-sm", onDark ? "text-white" : "text-ink")}
+            className="lg:hidden text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0e] rounded-sm"
             onClick={() => setMenu((m) => !m)}
             aria-label={menu ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={menu}
@@ -123,8 +109,8 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         className={cn(
-          "overflow-hidden bg-cloud lg:hidden transition-all duration-300",
-          menu ? "max-h-[28rem] border-t border-ink/10" : "max-h-0",
+          "overflow-hidden bg-[#0d0d0e] lg:hidden transition-all duration-300",
+          menu ? "max-h-[32rem] border-t border-white/10" : "max-h-0",
         )}
         aria-hidden={!menu}
       >
@@ -136,20 +122,20 @@ export function SiteHeader() {
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure focus-visible:ring-offset-2",
-                  active ? "bg-ink/[0.05] font-medium text-ink" : "text-ink/70 hover:bg-ink/5 hover:text-ink",
+                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2",
+                  active ? "bg-white/10 font-medium text-white" : "text-white/65 hover:bg-white/[0.07] hover:text-white",
                 )}
               >
                 {n.label}
               </Link>
             );
           })}
-          <Link href="/contact" className="flex w-full items-center rounded-lg px-3 min-h-[44px] text-ink/70 text-[0.95rem] hover:bg-ink/5 hover:text-ink">
+          <Link href="/contact" className="flex w-full items-center rounded-lg px-3 min-h-[44px] text-white/65 text-[0.95rem] hover:bg-white/[0.07] hover:text-white">
             Contact
           </Link>
           <Link
             href="/hub"
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-azure px-4 min-h-[44px] font-semibold text-white"
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-4 min-h-[44px] font-semibold text-ink"
           >
             Matin Hub <ArrowRight className="h-4 w-4" />
           </Link>
