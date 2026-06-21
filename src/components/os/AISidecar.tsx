@@ -6,11 +6,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import { Sparkles, X, ArrowUp } from "lucide-react";
+import { X, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
+import { streamAi } from "@/lib/ai/client";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — AISidecar  (ref §1.8)
@@ -89,20 +92,49 @@ export function AiSidecarProvider({
 
 /* ── The dark docked panel ───────────────────────────────────────────────── */
 
-type Turn = { role: "ai" | "user"; text: ReactNode };
+type Turn = { role: "ai" | "user"; text: string; error?: boolean };
 
-const PRIMER: Turn[] = [
-  {
-    role: "ai",
-    text:
-      "I'm bound to whatever you're looking at — a lead, a listing, a deal. Ask me to summarize, draft a reply, or surface risk, and I'll propose actions you approve before anything runs.",
-  },
-];
+/** Strip the leading `Context:` label so we can speak about the subject. */
+function subjectOf(context: string): string {
+  return context.replace(/^\s*context\s*:\s*/i, "").trim();
+}
+
+/** A short greeting bound to whatever record the sidecar is docked to. */
+function greetingFor(context: string): string {
+  const subject = subjectOf(context);
+  if (!subject || /matin brokerage os/i.test(subject)) {
+    return "I'm Matin AI. Ask me to summarize a lead, draft a reply, or surface risk on any record — I'll propose actions you approve before anything runs.";
+  }
+  return `I'm bound to ${subject}. Ask me to summarize it, draft a reply, or surface risk, and I'll propose actions you approve before anything runs.`;
+}
 
 export function AISidecar() {
   const { open, context, closeAi } = useAiSidecar();
-  const [turns] = useState<Turn[]>(PRIMER);
+  const [turns, setTurns] = useState<Turn[]>([
+    { role: "ai", text: greetingFor(context) },
+  ]);
   const [draft, setDraft] = useState("");
+  const [streaming, setStreaming] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const seededContext = useRef(context);
+
+  // Re-seed the greeting when the sidecar is (re)opened against a new record,
+  // but never wipe an in-progress conversation.
+  useEffect(() => {
+    if (!open) return;
+    if (seededContext.current === context) return;
+    seededContext.current = context;
+    setTurns((prev) =>
+      prev.length <= 1 ? [{ role: "ai", text: greetingFor(context) }] : prev,
+    );
+  }, [open, context]);
+
+  // Keep the newest message in view as it streams.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [turns, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -117,6 +149,61 @@ export function AISidecar() {
       document.body.style.overflow = prev;
     };
   }, [open, closeAi]);
+
+  const send = useCallback(async () => {
+    const text = draft.trim();
+    if (!text || streaming) return;
+
+    // Build the transcript streamAi expects (user/assistant content strings),
+    // dropping prior error lines. The transcript MUST start with a user turn
+    // (Anthropic rejects a leading assistant message), so strip the local
+    // greeting + any leading assistant turns.
+    const history = turns
+      .filter((t) => !t.error)
+      .map((t) => ({
+        role: (t.role === "ai" ? "assistant" : "user") as "assistant" | "user",
+        content: t.text,
+      }));
+    while (history.length && history[0].role === "assistant") history.shift();
+    const messages = [
+      ...history,
+      {
+        role: "user" as const,
+        content: `[${context}]\n${text}`,
+      },
+    ];
+
+    setDraft("");
+    setStreaming(true);
+    // Push the user turn + an empty AI turn we stream into.
+    setTurns((prev) => [
+      ...prev,
+      { role: "user", text },
+      { role: "ai", text: "" },
+    ]);
+
+    try {
+      await streamAi({ tool: "concierge", messages }, (_chunk, full) => {
+        setTurns((prev) => {
+          const next = [...prev];
+          next[next.length - 1] = { role: "ai", text: full };
+          return next;
+        });
+      });
+    } catch {
+      setTurns((prev) => {
+        const next = [...prev];
+        next[next.length - 1] = {
+          role: "ai",
+          text: "Matin AI is unavailable right now. Please try again in a moment.",
+          error: true,
+        };
+        return next;
+      });
+    } finally {
+      setStreaming(false);
+    }
+  }, [draft, streaming, turns, context]);
 
   if (!open) return null;
 
@@ -141,8 +228,8 @@ export function AISidecar() {
         <div className="flex items-start justify-between gap-3 border-b border-ink-700 px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold ring-1 ring-inset ring-gold/30">
-                <Sparkles className="h-3.5 w-3.5" />
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
               </span>
               <h2 className="font-sans text-[0.95rem] font-semibold text-cloud">Matin AI</h2>
             </div>
@@ -161,24 +248,42 @@ export function AISidecar() {
         </div>
 
         {/* Chat scroll */}
-        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-          {turns.map((t, i) =>
-            t.role === "ai" ? (
+        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+          {turns.map((t, i) => {
+            const isLast = i === turns.length - 1;
+            if (t.role === "ai") {
+              // The streaming AI turn may still be empty — show a "thinking" cue.
+              const showThinking = streaming && isLast && !t.text;
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    "whitespace-pre-wrap break-words rounded-xl rounded-tl-sm px-3.5 py-2.5 text-[0.82rem] leading-relaxed ring-1 ring-inset",
+                    t.error
+                      ? "bg-danger/10 text-danger ring-danger/25"
+                      : "bg-ink-800 text-slate-300 ring-ink-700",
+                  )}
+                >
+                  {showThinking ? (
+                    <span className="inline-flex items-center gap-2 text-slate-300/70">
+                      <MatinMark theme="white" className="h-3.5 w-3.5" />
+                      <span>Matin AI is thinking<span className="animate-pulse">…</span></span>
+                    </span>
+                  ) : (
+                    t.text
+                  )}
+                </div>
+              );
+            }
+            return (
               <div
                 key={i}
-                className="rounded-xl rounded-tl-sm bg-ink-800 px-3.5 py-2.5 text-[0.82rem] leading-relaxed text-slate-300 ring-1 ring-inset ring-ink-700"
+                className="ml-8 whitespace-pre-wrap break-words rounded-xl rounded-tr-sm bg-ink-700 px-3.5 py-2.5 text-[0.82rem] leading-relaxed text-cloud"
               >
                 {t.text}
               </div>
-            ) : (
-              <div
-                key={i}
-                className="ml-8 rounded-xl rounded-tr-sm bg-ink-700 px-3.5 py-2.5 text-[0.82rem] leading-relaxed text-cloud"
-              >
-                {t.text}
-              </div>
-            ),
-          )}
+            );
+          })}
 
           {/* Proposed-actions affordance — pages dock real AIActionCards here */}
           <div className="rounded-xl border border-dashed border-ink-700 px-3.5 py-3">
@@ -196,7 +301,7 @@ export function AISidecar() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            setDraft("");
+            void send();
           }}
           className="shrink-0 border-t border-ink-700 px-4 py-3"
         >
@@ -205,13 +310,20 @@ export function AISidecar() {
               rows={1}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Ask about this record…"
-              className="max-h-28 flex-1 resize-none bg-transparent text-[0.84rem] leading-relaxed text-cloud outline-none placeholder:text-slate-300/45"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              disabled={streaming}
+              placeholder={streaming ? "Matin AI is replying…" : "Ask about this record…"}
+              className="max-h-28 flex-1 resize-none bg-transparent text-[0.84rem] leading-relaxed text-cloud outline-none placeholder:text-slate-300/45 disabled:opacity-60"
             />
             <button
               type="submit"
               aria-label="Send"
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || streaming}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold text-ink transition-opacity hover:bg-gold-bright disabled:opacity-40"
             >
               <ArrowUp className="h-4 w-4" />

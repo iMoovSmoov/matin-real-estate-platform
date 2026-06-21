@@ -15,6 +15,10 @@ export type { NavItem } from "./SidebarNav";
 export { TopCommandBar } from "./TopCommandBar";
 export { AISidecar, useAiSidecar, AiSidecarProvider } from "./AISidecar";
 
+// Real-asset primitives ----------------------------------------------------
+export { Avatar } from "./Avatar";
+export { PropertyThumb } from "./PropertyThumb";
+
 // KPIs ---------------------------------------------------------------------
 export { KpiCard, KpiStrip, SegmentedKpis } from "./KpiCard";
 export type { DeltaTone, ValueTone, SegmentItem } from "./KpiCard";

@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — AIInsightChip   (ref §1.8)
 
-   Pale-gold pill (gold-soft / gold-ink) with a leading icon (default Sparkles)
-   for plain-English AI-derived facts — Fello "Has 6.5% ARM, expires 2yr" style.
+   Pale-gold pill (gold-soft / gold-ink) with a leading glyph — defaults to the
+   real Matin "M" mark (dark theme, since the chip is a LIGHT/gold surface) —
+   for plain-English AI-derived facts (Fello "Has 6.5% ARM, expires 2yr" style).
    Gold is sanctioned here because the chip IS an AI affordance. Server-safe.
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -27,7 +28,7 @@ export function AIInsightChip({
       )}
     >
       <span className="shrink-0 text-gold-ink/80" aria-hidden>
-        {icon ?? <Sparkles className="h-3.5 w-3.5" />}
+        {icon ?? <MatinMark theme="dark" className="h-3.5 w-3.5" />}
       </span>
       {children}
     </span>

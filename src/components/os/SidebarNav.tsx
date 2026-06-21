@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import {
-  Sun,
+  LayoutDashboard,
   Users,
   HandCoins,
-  Rocket,
+  Building2,
   FileSignature,
+  Handshake,
   FileText,
-  ClipboardList,
   Megaphone,
   GraduationCap,
   BarChart3,
   Activity,
-  Settings,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,26 +44,26 @@ export type NavItem = {
 // EXISTING /hub paths — relabeled. marketing + systems-health are linked now
 // and built next phase.
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Today", href: "/hub", icon: Sun },
+  { label: "Today", href: "/hub", icon: LayoutDashboard },
   { label: "CRM & Leads", href: "/hub/crm", icon: Users },
   { label: "Seller / Cash Offers", href: "/hub/cash-offer", icon: HandCoins },
-  { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
+  { label: "Listing Launch", href: "/hub/listing-launch", icon: Building2 },
   { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
-  { label: "Transactions", href: "/hub/transactions", icon: FileText },
-  { label: "Forms & Docs", href: "/hub/forms", icon: ClipboardList },
+  { label: "Transactions", href: "/hub/transactions", icon: Handshake },
+  { label: "Forms & Docs", href: "/hub/forms", icon: FileText },
   { label: "Marketing Studio", href: "/hub/marketing", icon: Megaphone },
   { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
   { label: "Reports", href: "/hub/reporting", icon: BarChart3 },
   { label: "Systems Health", href: "/hub/systems-health", icon: Activity },
-  { label: "Admin", href: "/hub/settings", icon: Settings, admin: true },
+  { label: "Admin", href: "/hub/settings", icon: SlidersHorizontal, admin: true },
 ];
 
 /** Mobile bottom-tab destinations + a "More" trigger handled by the shell. */
 export const BOTTOM_TABS: NavItem[] = [
-  { label: "Today", href: "/hub", icon: Sun },
+  { label: "Today", href: "/hub", icon: LayoutDashboard },
   { label: "CRM", href: "/hub/crm", icon: Users },
-  { label: "Deals", href: "/hub/transactions", icon: FileText },
-  { label: "Listings", href: "/hub/listing-launch", icon: Rocket },
+  { label: "Deals", href: "/hub/transactions", icon: Handshake },
+  { label: "Listings", href: "/hub/listing-launch", icon: Building2 },
 ];
 
 export function isActive(pathname: string, href: string) {
@@ -85,16 +85,15 @@ export function SidebarNav({
 
   return (
     <div className="flex h-full flex-col bg-ink-900 text-slate-300">
-      {/* Brand block — quiet wordmark */}
+      {/* Brand block — quiet wordmark. Right padding leaves room for the
+          collapse toggle that floats on the rail's edge (never overlaps). */}
       <div
         className={cn(
-          "flex items-center border-b border-ink-700",
-          collapsed ? "justify-center px-0 py-4" : "gap-2.5 px-5 py-[1.15rem]",
+          "flex h-16 items-center border-b border-ink-700",
+          collapsed ? "justify-center px-0" : "gap-2.5 pl-5 pr-9",
         )}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-800 ring-1 ring-inset ring-ink-700">
-          <MatinMark className="h-4" theme="white" />
-        </span>
+        <MatinMark className="h-5 w-5 shrink-0" theme="white" />
         {!collapsed ? (
           <div className="min-w-0 leading-tight">
             <span className="block truncate font-sans text-[0.92rem] font-bold uppercase tracking-[0.14em] text-cloud">

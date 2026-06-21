@@ -2,8 +2,9 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Search, Plus, Sparkles, Bell, Menu } from "lucide-react";
+import { Search, Plus, Bell, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 import { NAV_ITEMS } from "./SidebarNav";
 import { useAiSidecar } from "./AISidecar";
 
@@ -118,7 +119,8 @@ export function TopCommandBar({
           onClick={() => openAi("Context: Matin Brokerage OS")}
           className="inline-flex items-center gap-1.5 rounded-full bg-gold py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
         >
-          <Sparkles className="h-4 w-4" />
+          {/* Gold surface = LIGHT → dark "M" mark */}
+          <MatinMark theme="dark" className="h-4 w-4" />
           <span className="hidden sm:inline">Ask AI</span>
         </button>
 

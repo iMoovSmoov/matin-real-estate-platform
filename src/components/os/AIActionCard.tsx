@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Pencil, X, Sparkles } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — AIActionCard   (ref §1.8)
@@ -71,6 +72,8 @@ export function AIActionCard({
   onEdit,
   onReject,
   runLabel = "Run",
+  running = false,
+  result,
   className,
 }: {
   title: string;
@@ -81,6 +84,12 @@ export function AIActionCard({
   onEdit?: () => void;
   onReject?: () => void;
   runLabel?: string;
+  /** When true, the card shows an inline "Matin AI is drafting…" state and
+   *  locks the action buttons so the same draft can't be fired twice. */
+  running?: boolean;
+  /** Streamed / generated output rendered in a readable block beneath the
+   *  card — a consumer can stream tokens straight into this slot. */
+  result?: ReactNode;
   className?: string;
 }) {
   return (
@@ -124,7 +133,8 @@ export function AIActionCard({
           <button
             type="button"
             onClick={onEdit}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            disabled={running}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud disabled:pointer-events-none disabled:opacity-40"
           >
             <Pencil className="h-3.5 w-3.5" aria-hidden />
             Edit
@@ -132,7 +142,8 @@ export function AIActionCard({
           <button
             type="button"
             onClick={onReject}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            disabled={running}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud disabled:pointer-events-none disabled:opacity-40"
           >
             <X className="h-3.5 w-3.5" aria-hidden />
             Reject
@@ -141,12 +152,35 @@ export function AIActionCard({
         <button
           type="button"
           onClick={onRun}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+          disabled={running}
+          aria-busy={running}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 disabled:cursor-default disabled:bg-gold/70"
         >
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          {runLabel}
+          {running ? "Drafting…" : runLabel}
         </button>
       </div>
+
+      {/* Inline drafting cue — shown while running until the first tokens
+          arrive (then the streamed result takes over below). */}
+      {running && result == null ? (
+        <div className="mt-3 flex items-center gap-2 border-t border-ink-700 pt-3 text-[0.74rem] text-slate-300/80">
+          <span className="flex shrink-0 items-center justify-center" aria-hidden>
+            <MatinMark theme="white" className="h-3.5 w-3.5" />
+          </span>
+          <span>
+            Matin AI is drafting
+            <span className="animate-pulse">…</span>
+          </span>
+        </div>
+      ) : null}
+
+      {/* Streamed / generated result — a consumer can stream partial text into
+          `result` while `running` stays true, then flip running off when done. */}
+      {result != null ? (
+        <div className="mt-3 whitespace-pre-wrap break-words border-t border-ink-700 pt-3 text-[0.8rem] leading-relaxed text-slate-300">
+          {result}
+        </div>
+      ) : null}
     </div>
   );
 }

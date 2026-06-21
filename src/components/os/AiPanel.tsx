@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 import { AIActionCard, type AIAction } from "./AIActionCard";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -26,10 +26,15 @@ export type AiMessage = {
   citations?: string[];
 };
 
+/** Live per-action state a page drives while streaming a Run result. Keyed by
+ *  the action's `id` (falling back to its index, e.g. `"0"`). */
+export type AiActionState = { running?: boolean; result?: ReactNode };
+
 export function AiPanel({
   context,
   messages,
   actions,
+  actionState,
   onRunAction,
   onEditAction,
   onRejectAction,
@@ -39,6 +44,8 @@ export function AiPanel({
   context: string;
   messages?: AiMessage[];
   actions?: AIAction[];
+  /** Map of action key → { running, result } so Run can stream into its card. */
+  actionState?: Record<string, AiActionState>;
   onRunAction?: (action: AIAction) => void;
   onEditAction?: (action: AIAction) => void;
   onRejectAction?: (action: AIAction) => void;
@@ -61,8 +68,8 @@ export function AiPanel({
       {/* Header */}
       <div className="border-b border-ink-700 px-5 py-4 pl-6">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold ring-1 ring-inset ring-gold/30">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
+            <MatinMark theme="white" className="h-3.5 w-3.5" />
           </span>
           <h2 className="font-display text-[1.05rem] font-normal leading-none text-cloud">
             Matin AI
@@ -110,23 +117,31 @@ export function AiPanel({
           <div className="space-y-2.5">
             <p className="eyebrow text-slate-300/60">Proposed actions</p>
             <div className="space-y-2.5">
-              {actions!.map((action, i) => (
-                <AIActionCard
-                  key={action.id ?? i}
-                  title={action.title}
-                  riskTag={action.riskTag}
-                  evidence={action.evidence}
-                  confidence={action.confidence}
-                  runLabel={
-                    action.riskTag === "Approval required" ? "Approve" : "Run"
-                  }
-                  onRun={onRunAction ? () => onRunAction(action) : undefined}
-                  onEdit={onEditAction ? () => onEditAction(action) : undefined}
-                  onReject={
-                    onRejectAction ? () => onRejectAction(action) : undefined
-                  }
-                />
-              ))}
+              {actions!.map((action, i) => {
+                const key = action.id ?? String(i);
+                const state = actionState?.[key];
+                return (
+                  <AIActionCard
+                    key={key}
+                    title={action.title}
+                    riskTag={action.riskTag}
+                    evidence={action.evidence}
+                    confidence={action.confidence}
+                    runLabel={
+                      action.riskTag === "Approval required" ? "Approve" : "Run"
+                    }
+                    running={state?.running}
+                    result={state?.result}
+                    onRun={onRunAction ? () => onRunAction(action) : undefined}
+                    onEdit={
+                      onEditAction ? () => onEditAction(action) : undefined
+                    }
+                    onReject={
+                      onRejectAction ? () => onRejectAction(action) : undefined
+                    }
+                  />
+                );
+              })}
             </div>
           </div>
         ) : null}

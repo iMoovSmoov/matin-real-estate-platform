@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Sparkles, AlertTriangle, Activity } from "lucide-react";
+import { TriangleAlert, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — CalloutCard   (ref §1.8)
@@ -9,29 +10,31 @@ import { cn } from "@/lib/utils";
    commentary that lives beside the light workspace — "AI overnight summary",
    "AI Risk Note", system notices. Light cards = data; dark cards = AI/system.
 
-   tone leading icon:
-     ai     — Sparkles (gold)         e.g. "AI overnight summary"
-     risk   — AlertTriangle (danger)  e.g. "AI Risk Note"
-     system — Activity (info/slate)   e.g. "Automation notice"
+   tone leading glyph:
+     ai     — Matin "M" mark (white on dark badge)  e.g. "AI overnight summary"
+     risk   — TriangleAlert (danger)                e.g. "AI Risk Note"
+     system — Activity (info/slate)                 e.g. "Automation notice"
 
-   Title in font-display (light). Body text-slate-300. Optional action slot at
-   the bottom-right (a suggested action — every callout should end with one).
+   AI brand presence is the real Matin mark, not a cheesy icon. Title in
+   font-display (light). Body text-slate-300. Optional action slot at the
+   bottom-right (a suggested action — every callout should end with one).
    Server-safe.
    ────────────────────────────────────────────────────────────────────────── */
 
 export type CalloutTone = "ai" | "risk" | "system";
-
-const ICON: Record<CalloutTone, typeof Sparkles> = {
-  ai: Sparkles,
-  risk: AlertTriangle,
-  system: Activity,
-};
 
 const ICON_TONE: Record<CalloutTone, string> = {
   ai: "bg-gold/15 text-gold ring-gold/30",
   risk: "bg-danger/15 text-danger ring-danger/30",
   system: "bg-ink-700 text-slate-300 ring-ink-600",
 };
+
+/** The leading glyph per tone. AI = the real Matin mark on its dark badge. */
+function CalloutGlyph({ tone }: { tone: CalloutTone }) {
+  if (tone === "ai") return <MatinMark theme="white" className="h-4 w-4" />;
+  if (tone === "risk") return <TriangleAlert className="h-4 w-4" aria-hidden />;
+  return <Activity className="h-4 w-4" aria-hidden />;
+}
 
 export function CalloutCard({
   tone = "ai",
@@ -46,7 +49,6 @@ export function CalloutCard({
   action?: ReactNode;
   className?: string;
 }) {
-  const Icon = ICON[tone];
   return (
     <div
       className={cn(
@@ -61,7 +63,7 @@ export function CalloutCard({
             ICON_TONE[tone],
           )}
         >
-          <Icon className="h-4 w-4" aria-hidden />
+          <CalloutGlyph tone={tone} />
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-[1.02rem] font-normal leading-tight text-cloud">

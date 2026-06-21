@@ -61,12 +61,15 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           collapsed ? "w-16" : "w-[280px]",
         )}
       >
-        {/* Collapse toggle */}
+        {/* Collapse toggle — pinned to the brand-block hairline at the rail's
+            right edge (centered on the 64px brand-block divider), so it never
+            overlaps the MATIN / Brokerage OS wordmark at any width. */}
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute -right-3 top-[1.4rem] z-20 flex h-6 w-6 items-center justify-center rounded-full border border-mist bg-cloud text-slate shadow-soft transition-colors hover:text-ink"
+          aria-expanded={!collapsed}
+          className="absolute -right-3 top-8 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-mist bg-cloud text-slate shadow-soft transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25"
         >
           {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
         </button>
