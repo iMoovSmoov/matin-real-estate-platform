@@ -1,0 +1,44 @@
+[
+  {
+    "id": "DQ-001",
+    "issue": "Missing address on imported contacts",
+    "source": "Meta Ads",
+    "count": 42,
+    "severity": "med"
+  },
+  {
+    "id": "DQ-002",
+    "issue": "Duplicate contacts (same email)",
+    "source": "Follow Up Boss",
+    "count": 18,
+    "severity": "high"
+  },
+  {
+    "id": "DQ-003",
+    "issue": "Unmapped field preferred_area on sync",
+    "source": "Follow Up Boss",
+    "count": 38,
+    "severity": "high"
+  },
+  {
+    "id": "DQ-004",
+    "issue": "Invalid phone format",
+    "source": "Sierra Interactive IDX",
+    "count": 11,
+    "severity": "low"
+  },
+  {
+    "id": "DQ-005",
+    "issue": "Stale lead source attribution (no source)",
+    "source": "Zillow",
+    "count": 7,
+    "severity": "med"
+  },
+  {
+    "id": "DQ-006",
+    "issue": "Listing missing list price",
+    "source": "RMLS / NWMLS",
+    "count": 3,
+    "severity": "low"
+  }
+]

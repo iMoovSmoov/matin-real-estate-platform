@@ -1,0 +1,134 @@
+[
+  {
+    "id": "AI-001",
+    "title": "Send first reply to Daniel Cho with 3 matched homes",
+    "context": "CRM & Leads / Daniel Cho",
+    "evidence": "Lead viewed 7 Beaverton homes and saved 3 searches (saved_searches), then asked about showing availability (activity_events). Matched 3 active Beaverton listings inside his $720k–$865k budget.",
+    "confidence": "High",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "lead",
+    "sourceId": "LD-1999"
+  },
+  {
+    "id": "AI-002",
+    "title": "Generate MLS remarks for 7428 SW Maple Ave",
+    "context": "Listing Launch / 7428 SW Maple",
+    "evidence": "Listing record has photos delivered and disclosures signed (listings, document_packets). Wrote 1,200-char MLS remarks from property facts: 4BR/3BA, 3,120 sqft, walk to Lake Oswego village, $895,000 target.",
+    "confidence": "High",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "listing",
+    "sourceId": "LP-000B"
+  },
+  {
+    "id": "AI-003",
+    "title": "Flag inspection risk on 8912 SE Hawthorne Blvd",
+    "context": "Transactions / 8912 SE Hawthorne Blvd",
+    "evidence": "Email thread mentions a roof concern but no repair addendum exists in the loop (document_packets). Inspection contingency deadline is tomorrow (transactions.closeDate). Suggest drafting an inspection response addendum now.",
+    "confidence": "High",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "transaction",
+    "sourceId": "TX-3998"
+  },
+  {
+    "id": "AI-004",
+    "title": "Draft cash-offer outreach to Sarah Mitchell",
+    "context": "Seller / Cash Offers / Sarah Mitchell",
+    "evidence": "Seller-intent score 91. Requested home value, opened the market report twice, and clicked the cash offer page (ownership_signals). High-equity Beaverton owner — propose a CMA + cash-offer comparison.",
+    "confidence": "High",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "seller-lead",
+    "sourceId": "SL-000"
+  },
+  {
+    "id": "AI-005",
+    "title": "Send AI-built CMA to Melissa Grant",
+    "context": "Seller / Cash Offers / Melissa Grant",
+    "evidence": "Re-activated past client opened the seller report (activity_events) and has owned the home 8 years, implying strong equity. Built a neighborhood CMA from RMLS comps; ready as a branded touch.",
+    "confidence": "Medium",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "seller-lead",
+    "sourceId": "SL-000B"
+  },
+  {
+    "id": "AI-006",
+    "title": "Schedule Spring Seller Nurture email blast",
+    "context": "Marketing Studio / Spring Seller Nurture",
+    "evidence": "Audience = 1,286 likely sellers (seller_campaigns). Copy passed brand + compliance rules. Prior send hit 38.4% open rate; recommend Tuesday 9am window for best engagement.",
+    "confidence": "Medium",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "campaign",
+    "sourceId": "CMP-002"
+  },
+  {
+    "id": "AI-007",
+    "title": "Draft buyer agreement for Daniel Cho",
+    "context": "Buyer Agreements / Daniel Cho",
+    "evidence": "Pre-approved buyer (contacts.preapproval) with budget $720k–$865k and Beaverton focus. Pre-filled OREF C-565 from the contact record; missing buyer initials on page 4 — agent to review before send.",
+    "confidence": "Medium",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "lead",
+    "sourceId": "LD-1999"
+  },
+  {
+    "id": "AI-008",
+    "title": "Re-rank offers on 4218 SW Terwilliger Blvd",
+    "context": "Seller / Cash Offers / Patricia Nguyen",
+    "evidence": "Compared 3 offers across price, financing, and close date (cash_offer_requests). Flagged the highest-price offer's financing contingency as weak; the cash offer nets within 1.2% and closes 14 days sooner.",
+    "confidence": "High",
+    "riskTag": "Ready",
+    "status": "pending",
+    "sourceType": "seller-lead",
+    "sourceId": "SL-001"
+  },
+  {
+    "id": "AI-009",
+    "title": "Summarize overnight brokerage activity",
+    "context": "Today / Overnight summary",
+    "evidence": "Grouped 181 lead events into 22 priorities, drafted 14 replies, flagged 3 transactions at risk and 3 failed automations (activity_events, workflow_runs). No client-facing send performed.",
+    "confidence": "High",
+    "riskTag": "Auto-safe",
+    "status": "approved",
+    "sourceType": "summary",
+    "sourceId": "today-overnight"
+  },
+  {
+    "id": "AI-010",
+    "title": "Suggest mapping fix for CRM Sync failure",
+    "context": "Systems Health / CRM Sync",
+    "evidence": "Run WR-003 failed mapping external field preferred_area. Closest internal field is contacts.community (92% name+value match). Propose adding preferred_area → community to the field map.",
+    "confidence": "High",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "workflow-run",
+    "sourceId": "WR-003"
+  },
+  {
+    "id": "AI-011",
+    "title": "Auto-create coaching plan for Amanda Conlon",
+    "context": "Coaching / Amanda Conlon",
+    "evidence": "Pricing skill scored 62 and response time slipped to 14 min (agent KPIs). Converts to two CRM tasks: 'Run a pricing drill' and 'Call 2 active sellers today' assigned to Amanda.",
+    "confidence": "Medium",
+    "riskTag": "Ready",
+    "status": "pending",
+    "sourceType": "agent",
+    "sourceId": "amanda-conlon"
+  },
+  {
+    "id": "AI-012",
+    "title": "Recommend budget shift from Zillow to Referral",
+    "context": "Reports / Source ROI",
+    "evidence": "Zillow ROI is 6,400% at $42k spend vs Referral at infinite ROI / $0 spend and Organic at 122,400% (sourceRoi). Suggest reallocating $15k from Zillow into referral incentives and SEO.",
+    "confidence": "Low",
+    "riskTag": "Approval required",
+    "status": "pending",
+    "sourceType": "report",
+    "sourceId": "source-roi"
+  }
+]

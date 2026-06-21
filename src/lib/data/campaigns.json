@@ -1,0 +1,90 @@
+[
+  {
+    "id": "CMP-001",
+    "name": "1248 NW Cedar Hills Launch",
+    "channel": "Multi-channel",
+    "status": "scheduled",
+    "audience": "Beaverton buyer list + matched IDX searches",
+    "sent": 0,
+    "openRate": 0,
+    "replyRate": 0,
+    "attributedPipeline": 0
+  },
+  {
+    "id": "CMP-002",
+    "name": "Spring Seller Nurture",
+    "channel": "Email",
+    "status": "live",
+    "audience": "1,286 likely sellers",
+    "sent": 4120,
+    "openRate": 38.4,
+    "replyRate": 4.6,
+    "attributedPipeline": 6850000
+  },
+  {
+    "id": "CMP-003",
+    "name": "Cash Offer Funnel",
+    "channel": "Paid Social + Email",
+    "status": "live",
+    "audience": "High-equity owners, 8+ years",
+    "sent": 9800,
+    "openRate": 31.2,
+    "replyRate": 3.1,
+    "attributedPipeline": 4200000
+  },
+  {
+    "id": "CMP-004",
+    "name": "Just Sold — Lake Oswego",
+    "channel": "Social",
+    "status": "live",
+    "audience": "Lake Oswego + West Linn sphere",
+    "sent": 2600,
+    "openRate": 42.7,
+    "replyRate": 2.4,
+    "attributedPipeline": 1950000
+  },
+  {
+    "id": "CMP-005",
+    "name": "Open House Weekend",
+    "channel": "Email + Flyer",
+    "status": "scheduled",
+    "audience": "Active buyers within 10 miles",
+    "sent": 0,
+    "openRate": 0,
+    "replyRate": 0,
+    "attributedPipeline": 0
+  },
+  {
+    "id": "CMP-006",
+    "name": "Price Reduction Alert",
+    "channel": "Email",
+    "status": "draft",
+    "audience": "Saved-search matches on stale listings",
+    "sent": 0,
+    "openRate": 0,
+    "replyRate": 0,
+    "attributedPipeline": 0
+  },
+  {
+    "id": "CMP-007",
+    "name": "Past Client Reactivation",
+    "channel": "Email + SMS",
+    "status": "live",
+    "audience": "Past clients, 6-month silence",
+    "sent": 5400,
+    "openRate": 34.1,
+    "replyRate": 5.8,
+    "attributedPipeline": 3100000
+  },
+  {
+    "id": "CMP-008",
+    "name": "Agent Recruiting — Top Producers",
+    "channel": "Ad + Web",
+    "status": "paused",
+    "audience": "OR/WA agents, 20+ deals/yr",
+    "sent": 1200,
+    "openRate": 27.5,
+    "replyRate": 1.9,
+    "attributedPipeline": 0
+  }
+]

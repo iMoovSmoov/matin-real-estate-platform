@@ -1,0 +1,143 @@
+[
+  {
+    "id": "WR-001",
+    "name": "New IDX Lead Intake",
+    "status": "waiting_for_approval",
+    "subject": "Daniel Cho",
+    "startedLabel": "6 min ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Capture IDX lead", "status": "succeeded", "detail": "Pulled from MatinRealEstate.com IDX search" },
+      { "name": "Enrich + de-dupe in CRM", "status": "succeeded", "detail": "Matched to existing contact, merged 3 saved searches" },
+      { "name": "Score lead", "status": "succeeded", "detail": "Intent score 84 — viewed 7 Beaverton homes" },
+      { "name": "Assign best-fit agent", "status": "succeeded", "detail": "Routed to Ava Brooks (Portland Metro)" },
+      { "name": "AI draft first reply", "status": "succeeded", "detail": "Drafted reply with 3 matched homes" },
+      { "name": "Send SMS + email", "status": "waiting", "detail": "Held for human approval before send" }
+    ]
+  },
+  {
+    "id": "WR-002",
+    "name": "Listing Won Launch Automation",
+    "status": "succeeded",
+    "subject": "1248 NW Cedar Hills Dr",
+    "startedLabel": "2 hr ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Create listing record", "status": "succeeded", "detail": "Listing LP-000 opened, assigned to Ava Brooks" },
+      { "name": "Generate MLS description", "status": "succeeded", "detail": "AI drafted remarks from property facts" },
+      { "name": "Build social + email creative", "status": "succeeded", "detail": "6 assets generated to draft" },
+      { "name": "Schedule photographer", "status": "succeeded", "detail": "Booked; photos delivered" },
+      { "name": "Open launch checklist", "status": "succeeded", "detail": "5 workstreams created, broker review queued" }
+    ]
+  },
+  {
+    "id": "WR-003",
+    "name": "CRM Sync",
+    "status": "failed",
+    "subject": "Follow Up Boss",
+    "startedLabel": "12 min ago",
+    "failedStep": "Map external field preferred_area",
+    "steps": [
+      { "name": "Pull changed contacts", "status": "succeeded", "detail": "38 contacts changed since last sync" },
+      { "name": "Normalize phone + email", "status": "succeeded", "detail": "All records normalized" },
+      { "name": "Map external field preferred_area", "status": "failed", "detail": "No mapping for external field preferred_area → community" },
+      { "name": "Upsert into CRM", "status": "waiting", "detail": "Blocked by mapping failure" }
+    ]
+  },
+  {
+    "id": "WR-004",
+    "name": "Under-Contract Concierge",
+    "status": "running",
+    "subject": "8912 SE Hawthorne Blvd",
+    "startedLabel": "3 min ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Spin up transaction checklist", "status": "succeeded", "detail": "11-step checklist created" },
+      { "name": "Calendar all deadlines", "status": "succeeded", "detail": "Inspection deadline set to tomorrow" },
+      { "name": "Daily AI risk scan", "status": "running", "detail": "Scanning email thread for unsigned addenda" },
+      { "name": "Notify lender + title + client", "status": "waiting", "detail": "Queued after risk scan" }
+    ]
+  },
+  {
+    "id": "WR-005",
+    "name": "Speed-to-Lead Responder",
+    "status": "succeeded",
+    "subject": "Priya Reyes",
+    "startedLabel": "27 min ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Capture lead", "status": "succeeded", "detail": "Call-in lead captured" },
+      { "name": "Enrich + de-dupe", "status": "succeeded", "detail": "No duplicate found" },
+      { "name": "AI draft first reply", "status": "succeeded", "detail": "Drafted reply for cash buyer" },
+      { "name": "Send SMS + email", "status": "succeeded", "detail": "Sent in 41s" },
+      { "name": "Create follow-up task", "status": "succeeded", "detail": "Task assigned to Jason Veith" }
+    ]
+  },
+  {
+    "id": "WR-006",
+    "name": "Database Reactivation",
+    "status": "succeeded",
+    "subject": "Melissa Grant",
+    "startedLabel": "1 hr ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Pull equity + market delta", "status": "succeeded", "detail": "8 years owned, est. equity strong" },
+      { "name": "AI writes home value touch", "status": "succeeded", "detail": "Drafted CMA email" },
+      { "name": "Send + log", "status": "succeeded", "detail": "Sent, opened seller report" },
+      { "name": "Notify agent if reply", "status": "succeeded", "detail": "Flagged to Ava Brooks as warm" }
+    ]
+  },
+  {
+    "id": "WR-007",
+    "name": "Seller CMA Nurture",
+    "status": "failed",
+    "subject": "Make scenario — branded PDF",
+    "startedLabel": "41 min ago",
+    "failedStep": "Render branded PDF",
+    "steps": [
+      { "name": "Build neighborhood CMA", "status": "succeeded", "detail": "Comps pulled for 4 sellers" },
+      { "name": "Render branded PDF", "status": "failed", "detail": "Make module timed out calling PDF service" },
+      { "name": "Email seller + log", "status": "waiting", "detail": "Blocked by render failure" },
+      { "name": "Notify agent if opened", "status": "waiting", "detail": "Blocked by render failure" }
+    ]
+  },
+  {
+    "id": "WR-008",
+    "name": "Review & Referral Loop",
+    "status": "succeeded",
+    "subject": "1274 NW Everett St",
+    "startedLabel": "4 hr ago",
+    "failedStep": null,
+    "steps": [
+      { "name": "Send thank-you + survey", "status": "succeeded", "detail": "Sent to Melissa Grant" },
+      { "name": "Request Google review", "status": "succeeded", "detail": "Review link delivered" },
+      { "name": "Schedule day-30 referral ask", "status": "succeeded", "detail": "Task scheduled" }
+    ]
+  },
+  {
+    "id": "WR-009",
+    "name": "Agent Coaching Digest",
+    "status": "succeeded",
+    "subject": "Monday team digest",
+    "startedLabel": "Yesterday 7:00 AM",
+    "failedStep": null,
+    "steps": [
+      { "name": "Pull each agent's KPIs", "status": "succeeded", "detail": "40 agents rolled up" },
+      { "name": "AI writes coaching notes", "status": "succeeded", "detail": "Personalized note per agent" },
+      { "name": "Flag deals needing attention", "status": "succeeded", "detail": "3 at-risk deals flagged" }
+    ]
+  },
+  {
+    "id": "WR-010",
+    "name": "Showing Feedback Collector",
+    "status": "failed",
+    "subject": "n8n pipeline",
+    "startedLabel": "1 hr ago",
+    "failedStep": "Summarize sentiment (AI)",
+    "steps": [
+      { "name": "Text buyer's agent for feedback", "status": "succeeded", "detail": "Sent to 6 agents" },
+      { "name": "Summarize sentiment (AI)", "status": "failed", "detail": "n8n node lost AI model credential" },
+      { "name": "Roll up to seller report", "status": "waiting", "detail": "Blocked by summarize failure" }
+    ]
+  }
+]

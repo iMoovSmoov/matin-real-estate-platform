@@ -1,0 +1,38 @@
+[
+  {
+    "id": "CS-001",
+    "title": "Seller wants too high price",
+    "category": "Pricing",
+    "prompt": "The seller insists on listing 12% above your CMA because a neighbor 'got that number.' Walk them down to a defensible list price using comps and days-on-market without losing the listing."
+  },
+  {
+    "id": "CS-002",
+    "title": "Buyer refuses agreement",
+    "category": "Representation",
+    "prompt": "A motivated buyer won't sign the OREF buyer representation agreement before you show homes. Explain why it protects them and is now required, and earn the signature."
+  },
+  {
+    "id": "CS-003",
+    "title": "Inspection objection",
+    "category": "Negotiation",
+    "prompt": "Your buyer's inspection found a roof issue. The listing agent is resistant to repairs. Negotiate a repair credit or addendum that keeps the deal alive before the contingency expires."
+  },
+  {
+    "id": "CS-004",
+    "title": "Commission objection",
+    "category": "Objection Handling",
+    "prompt": "A seller asks you to cut your commission to match a discount brokerage. Defend your value with marketing, negotiation, and net-proceeds math — without getting defensive."
+  },
+  {
+    "id": "CS-005",
+    "title": "Cash offer explanation",
+    "category": "Seller Education",
+    "prompt": "A homeowner is tempted by an instant cash offer. Walk them through the net-sheet comparison vs a traditional sale so they choose with clear eyes."
+  },
+  {
+    "id": "CS-006",
+    "title": "Multiple-offer strategy",
+    "category": "Negotiation",
+    "prompt": "Your listing has 4 offers. Coach the seller through escalation clauses, financing strength, and close-date trade-offs to pick the best — not just the highest — offer."
+  }
+]

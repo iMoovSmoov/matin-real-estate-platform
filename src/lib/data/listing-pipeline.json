@@ -1,5 +1,99 @@
 [
   {
+    "id": "LP-000",
+    "address": "1248 NW Cedar Hills Dr",
+    "city": "Beaverton",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 2580,
+    "price": 845000,
+    "yearBuilt": 2004,
+    "features": ["Open great room", "Quartz kitchen", "Primary on main", "3-car garage", "Backs to greenspace"],
+    "agentSlug": "ava-brooks",
+    "agentName": "Ava Brooks",
+    "stage": "Broker Review",
+    "daysInStage": 2,
+    "readiness": 78,
+    "blockers": ["Seller disclosure missing initials", "Photos pending broker approval"],
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": false }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": false }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": true },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": false },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
+    "id": "LP-000B",
+    "address": "7428 SW Maple Ave",
+    "city": "Lake Oswego",
+    "beds": 4,
+    "baths": 3,
+    "sqft": 3120,
+    "price": 895000,
+    "yearBuilt": 2008,
+    "features": ["Walk to Lake Oswego village", "Chef's kitchen", "Vaulted great room", "Private deck", "2-car garage"],
+    "agentSlug": "ava-brooks",
+    "agentName": "Ava Brooks",
+    "stage": "MLS Draft",
+    "daysInStage": 1,
+    "readiness": 64,
+    "blockers": ["MLS remarks awaiting agent approval", "Open house flyer not generated"],
+    "checklist": {
+      "prep": [
+        { "label": "Pre-listing inspection ordered", "done": true },
+        { "label": "Repairs completed", "done": true },
+        { "label": "Staging consultation done", "done": true },
+        { "label": "Seller disclosure signed", "done": true }
+      ],
+      "photos": [
+        { "label": "Photographer scheduled", "done": true },
+        { "label": "Photos delivered", "done": true },
+        { "label": "Virtual tour created", "done": true }
+      ],
+      "mls": [
+        { "label": "MLS draft written", "done": true },
+        { "label": "MLS input form completed", "done": false },
+        { "label": "MLS listing live", "done": false }
+      ],
+      "marketing": [
+        { "label": "Social media posts published", "done": false },
+        { "label": "Email blast to buyers list", "done": false },
+        { "label": "Open house scheduled", "done": true },
+        { "label": "Flyers printed", "done": false }
+      ],
+      "launch": [
+        { "label": "Sign installed", "done": false },
+        { "label": "Lockbox placed", "done": false },
+        { "label": "Showings enabled", "done": false }
+      ]
+    },
+    "brokerApproved": false
+  },
+  {
     "id": "LP-001",
     "address": "14720 SW Osprey Dr",
     "city": "Beaverton",

@@ -1,0 +1,178 @@
+[
+  {
+    "id": "WQ-001",
+    "category": "Call",
+    "subject": "Daniel Cho",
+    "why": "Viewed 7 Beaverton homes and asked about showing availability — speed-to-lead window closing.",
+    "dueLabel": "Due now",
+    "tab": "My Work",
+    "sourceType": "lead",
+    "sourceId": "LD-1999",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-002",
+    "category": "Call",
+    "subject": "Sarah Mitchell",
+    "why": "Seller-intent score 91 — requested home value, opened market report twice, clicked cash offer page.",
+    "dueLabel": "Due now",
+    "tab": "My Work",
+    "sourceType": "seller-lead",
+    "sourceId": "SL-000",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-003",
+    "category": "Review",
+    "subject": "8912 SE Hawthorne Blvd",
+    "why": "Inspection deadline tomorrow and repair addendum still unsigned — deal at risk.",
+    "dueLabel": "Today",
+    "tab": "High Risk",
+    "sourceType": "transaction",
+    "sourceId": "TX-3998",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-004",
+    "category": "Approve",
+    "subject": "1248 NW Cedar Hills Dr",
+    "why": "Launch blocked: seller disclosure missing initials and photos pending broker approval.",
+    "dueLabel": "Today",
+    "tab": "My Work",
+    "sourceType": "listing",
+    "sourceId": "LP-000",
+    "agent": "marcus-lee"
+  },
+  {
+    "id": "WQ-005",
+    "category": "Approve",
+    "subject": "Daniel Cho — IDX intake reply",
+    "why": "AI drafted a personalized first reply with 3 matched Beaverton homes; needs approval to send.",
+    "dueLabel": "Waiting on you",
+    "tab": "AI Drafts",
+    "sourceType": "ai-action",
+    "sourceId": "AI-001",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-006",
+    "category": "Approve",
+    "subject": "7428 SW Maple Ave — MLS remarks",
+    "why": "AI generated MLS remarks from the listing record; review before MLS input form is completed.",
+    "dueLabel": "Waiting on you",
+    "tab": "AI Drafts",
+    "sourceType": "ai-action",
+    "sourceId": "AI-002",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-007",
+    "category": "Send",
+    "subject": "Melissa Grant",
+    "why": "Re-activated past client opened seller report; AI drafted a CMA touch ready to send.",
+    "dueLabel": "Today",
+    "tab": "AI Drafts",
+    "sourceType": "seller-lead",
+    "sourceId": "SL-000B",
+    "agent": "ava-brooks"
+  },
+  {
+    "id": "WQ-008",
+    "category": "Review",
+    "subject": "CRM Sync — Follow Up Boss",
+    "why": "Sync failed mapping external field preferred_area; 38 contacts not updated.",
+    "dueLabel": "Failed 12 min ago",
+    "tab": "Failed Automations",
+    "sourceType": "workflow-run",
+    "sourceId": "WR-003",
+    "agent": "evan-carter"
+  },
+  {
+    "id": "WQ-009",
+    "category": "Review",
+    "subject": "Seller CMA Nurture — Make scenario",
+    "why": "Automation errored rendering branded PDF; 4 seller touches did not send.",
+    "dueLabel": "Failed 41 min ago",
+    "tab": "Failed Automations",
+    "sourceType": "workflow-run",
+    "sourceId": "WR-007",
+    "agent": "nina-patel"
+  },
+  {
+    "id": "WQ-010",
+    "category": "Coach",
+    "subject": "Amanda Conlon",
+    "why": "Response time slipped to 14 min and 5 hot leads went 3+ days without contact this week.",
+    "dueLabel": "This week",
+    "tab": "Team",
+    "sourceType": "agent",
+    "sourceId": "amanda-conlon",
+    "agent": "jordan-matin"
+  },
+  {
+    "id": "WQ-011",
+    "category": "Coach",
+    "subject": "Ben Fabian",
+    "why": "Behind pace: 5 leads this month, 10% appt rate, 42-min average response — needs a pricing drill.",
+    "dueLabel": "This week",
+    "tab": "Team",
+    "sourceType": "agent",
+    "sourceId": "benjamin-fabian",
+    "agent": "jordan-matin"
+  },
+  {
+    "id": "WQ-012",
+    "category": "Call",
+    "subject": "Daniel Okafor",
+    "why": "Offer stage but 20 days since last contact — risk of losing the deal to a competing offer.",
+    "dueLabel": "Today",
+    "tab": "High Risk",
+    "sourceType": "lead",
+    "sourceId": "LD-2028",
+    "agent": "nancy-alhayek"
+  },
+  {
+    "id": "WQ-013",
+    "category": "Review",
+    "subject": "4887 SW Oregon St, Sherwood",
+    "why": "Financing delay flagged on a $2.7M deal closing in 13 days — confirm lender timeline.",
+    "dueLabel": "Today",
+    "tab": "High Risk",
+    "sourceType": "transaction",
+    "sourceId": "TX-4015",
+    "agent": "joe-bothe"
+  },
+  {
+    "id": "WQ-014",
+    "category": "Send",
+    "subject": "Logan Castillo",
+    "why": "Closed 20 days ago — send referral request and closing gift while the win is fresh.",
+    "dueLabel": "Today",
+    "tab": "Team",
+    "sourceType": "lead",
+    "sourceId": "LD-2034",
+    "agent": "zach-hosford"
+  },
+  {
+    "id": "WQ-015",
+    "category": "Approve",
+    "subject": "Spring Seller Nurture — email blast",
+    "why": "AI drafted the next seller-nurture send to 1,286 likely sellers; review copy before scheduling.",
+    "dueLabel": "Waiting on you",
+    "tab": "AI Drafts",
+    "sourceType": "ai-action",
+    "sourceId": "AI-006",
+    "agent": "nina-patel"
+  },
+  {
+    "id": "WQ-016",
+    "category": "Call",
+    "subject": "Priya Reyes",
+    "why": "New cash buyer, 3 unread messages, 3 days unresponded — respond before she cools.",
+    "dueLabel": "Today",
+    "tab": "Team",
+    "sourceType": "lead",
+    "sourceId": "LD-2004",
+    "agent": "jason-veith"
+  }
+]

@@ -54,7 +54,20 @@ export interface Automation {
   status: "active" | "paused"; runsThisMonth: number; lastRunMins: number; steps: string[];
 }
 
-export interface Integration { name: string; category: string; status: "connected" | "available"; description: string; records: number | null; }
+export type IntegrationHealth = "Healthy" | "Needs auth" | "Failing";
+export interface Integration {
+  name: string;
+  category: string;
+  status: IntegrationHealth;
+  description: string;
+  records: number | null;
+  /** Enriched Systems Health fields (additive) */
+  provider?: string;
+  legacyStatus?: "connected" | "available";
+  lastSync?: string;
+  recordsSynced?: number | null;
+  errors?: number;
+}
 
 export interface Company {
   name: string; founder: string; tagline: string; phone: string; phoneRaw: string; email: string;
@@ -107,6 +120,10 @@ export interface SellerLead {
   assignedAgent: string;
   daysInStage: number;
   notes: string;
+  /** Canonical seller-intent signals (additive) */
+  source?: string;
+  sellerScore?: number;
+  signals?: string[];
 }
 
 export type ListingPipelineStage =
@@ -144,6 +161,176 @@ export interface ListingPipeline {
     launch: ChecklistItem[];
   };
   brokerApproved: boolean;
+  /** Canonical launch-readiness fields (additive) */
+  readiness?: number;
+  blockers?: string[];
+}
+
+// ---------------------------------------------------------------------------
+// MatinOS module data layer (additive — Today, Systems Health, Marketing,
+// Reports, Coaching). All names exported from data.ts.
+// ---------------------------------------------------------------------------
+
+export type WorkQueueCategory = "Call" | "Review" | "Approve" | "Coach" | "Send";
+export type WorkQueueTab = "My Work" | "Team" | "High Risk" | "AI Drafts" | "Failed Automations";
+export interface WorkQueueItem {
+  id: string;
+  category: WorkQueueCategory;
+  subject: string;
+  why: string;
+  dueLabel: string;
+  tab: WorkQueueTab;
+  sourceType: string;
+  sourceId: string;
+  agent: string;
+}
+
+export type WorkflowRunStatus = "succeeded" | "failed" | "waiting_for_approval" | "running";
+export type WorkflowStepStatus = "succeeded" | "failed" | "waiting" | "running";
+export interface WorkflowStep {
+  name: string;
+  status: WorkflowStepStatus;
+  detail: string;
+}
+export interface WorkflowRun {
+  id: string;
+  name: string;
+  status: WorkflowRunStatus;
+  subject: string;
+  startedLabel: string;
+  failedStep: string | null;
+  steps: WorkflowStep[];
+}
+
+export type AIConfidence = "High" | "Medium" | "Low";
+export type AIRiskTag = "Approval required" | "Ready" | "Auto-safe";
+export type AIActionStatus = "pending" | "approved" | "rejected";
+export interface AIAction {
+  id: string;
+  title: string;
+  context: string;
+  evidence: string;
+  confidence: AIConfidence;
+  riskTag: AIRiskTag;
+  status: AIActionStatus;
+  sourceType: string;
+  sourceId: string;
+}
+
+export type CampaignStatus = "live" | "draft" | "scheduled" | "paused";
+export interface Campaign {
+  id: string;
+  name: string;
+  channel: string;
+  status: CampaignStatus;
+  audience: string;
+  sent: number;
+  openRate: number;
+  replyRate: number;
+  attributedPipeline: number;
+}
+
+export type MarketingAssetType = "Email" | "Social" | "Flyer" | "Ad" | "Web";
+export type MarketingAssetStatus = "draft" | "approved" | "scheduled";
+export interface MarketingAsset {
+  id: string;
+  campaignId: string;
+  type: MarketingAssetType;
+  title: string;
+  status: MarketingAssetStatus;
+  version: number;
+  body: string;
+}
+
+export type DataQualitySeverity = "high" | "med" | "low";
+export interface DataQualityIssue {
+  id: string;
+  issue: string;
+  source: string;
+  count: number;
+  severity: DataQualitySeverity;
+}
+
+export interface AuditLog {
+  id: string;
+  actor: string;
+  action: string;
+  target: string;
+  timeLabel: string;
+}
+
+export interface CoachingScenario {
+  id: string;
+  title: string;
+  category: string;
+  prompt: string;
+}
+
+export interface ReportSourceRoi {
+  source: string;
+  leads: number;
+  closed: number;
+  revenue: number;
+  spend: number;
+  roi: number | null;
+  cpl: number;
+}
+export interface ReportAgentLeaderboardRow {
+  agent: string;
+  slug: string;
+  leads: number;
+  appts: number;
+  signed: number;
+  gci: number;
+}
+export interface ReportFunnelStage {
+  stage: string;
+  count: number;
+}
+export interface ReportPipelineStage {
+  stage: string;
+  value: number;
+  deals: number;
+}
+export interface ReportMarketingRow {
+  campaign: string;
+  channel: string;
+  sent: number;
+  openRate: number;
+  replyRate: number;
+  attributedPipeline: number;
+}
+export interface CompanyScorecard {
+  annualVolume: number;
+  activeListings: number;
+  propertiesSold: number;
+  growthPct: number;
+  gci: number;
+  avgSalePrice: number;
+  goalPacing: {
+    volumeGoal: number;
+    volumeActual: number;
+    volumePacePct: number;
+    soldGoal: number;
+    soldActual: number;
+    soldPacePct: number;
+    forecastVolume: number;
+    statusHeadline: string;
+  };
+}
+export interface ReportMetrics {
+  companyScorecard: CompanyScorecard;
+  sourceRoi: ReportSourceRoi[];
+  agentLeaderboard: ReportAgentLeaderboardRow[];
+  funnel: ReportFunnelStage[];
+  pipeline: ReportPipelineStage[];
+  marketingPerformance: ReportMarketingRow[];
+  automationImpact: {
+    hoursSavedThisMonth: number;
+    tasksAutomated: number;
+    aiDraftsApproved: number;
+    speedToLeadMin: number;
+  };
 }
 
 export type BuyerAgreementStatus = "Not Signed" | "Sent" | "Signed";

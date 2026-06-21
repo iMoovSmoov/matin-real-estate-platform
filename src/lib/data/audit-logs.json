@@ -1,0 +1,86 @@
+[
+  {
+    "id": "AL-001",
+    "actor": "Ava Brooks",
+    "action": "Approved AI draft",
+    "target": "First reply to Daniel Cho (AI-001)",
+    "timeLabel": "4 min ago"
+  },
+  {
+    "id": "AL-002",
+    "actor": "Jordan Matin",
+    "action": "Edited lead routing rule",
+    "target": "IDX Search → Round Robin (Portland Metro)",
+    "timeLabel": "22 min ago"
+  },
+  {
+    "id": "AL-003",
+    "actor": "Marcus Lee",
+    "action": "Rejected listing for launch",
+    "target": "1248 NW Cedar Hills Dr — disclosure missing initials",
+    "timeLabel": "38 min ago"
+  },
+  {
+    "id": "AL-004",
+    "actor": "System",
+    "action": "Workflow failed",
+    "target": "CRM Sync — Map external field preferred_area (WR-003)",
+    "timeLabel": "12 min ago"
+  },
+  {
+    "id": "AL-005",
+    "actor": "Evan Carter",
+    "action": "Retried workflow",
+    "target": "Under-Contract Concierge — 8912 SE Hawthorne Blvd",
+    "timeLabel": "1 hr ago"
+  },
+  {
+    "id": "AL-006",
+    "actor": "Nina Patel",
+    "action": "Scheduled campaign",
+    "target": "Spring Seller Nurture (CMP-002)",
+    "timeLabel": "2 hr ago"
+  },
+  {
+    "id": "AL-007",
+    "actor": "Jordan Matin",
+    "action": "Changed user role",
+    "target": "Evan Carter → Transaction Coordinator",
+    "timeLabel": "3 hr ago"
+  },
+  {
+    "id": "AL-008",
+    "actor": "Ava Brooks",
+    "action": "Sent for signature",
+    "target": "Buyer agreement — Daniel Cho (OREF C-565)",
+    "timeLabel": "3 hr ago"
+  },
+  {
+    "id": "AL-009",
+    "actor": "System",
+    "action": "Integration token expired",
+    "target": "SkySlope — reauthorization required",
+    "timeLabel": "2 days ago"
+  },
+  {
+    "id": "AL-010",
+    "actor": "Marcus Lee",
+    "action": "Approved AI asset",
+    "target": "Cedar Hills open house flyer (MA-003)",
+    "timeLabel": "4 hr ago"
+  },
+  {
+    "id": "AL-011",
+    "actor": "Evan Carter",
+    "action": "Resolved data quality issue",
+    "target": "Duplicate contacts merged (DQ-002, 6 of 18)",
+    "timeLabel": "5 hr ago"
+  },
+  {
+    "id": "AL-012",
+    "actor": "Jordan Matin",
+    "action": "Exported audit log",
+    "target": "Compliance report — May 2026",
+    "timeLabel": "Yesterday"
+  }
+]

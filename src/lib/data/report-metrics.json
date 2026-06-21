@@ -1,0 +1,69 @@
+{
+  "companyScorecard": {
+    "annualVolume": 130000000,
+    "activeListings": 112,
+    "propertiesSold": 305,
+    "growthPct": 35,
+    "gci": 3250000,
+    "avgSalePrice": 426000,
+    "goalPacing": {
+      "volumeGoal": 150000000,
+      "volumeActual": 130000000,
+      "volumePacePct": 87,
+      "soldGoal": 340,
+      "soldActual": 305,
+      "soldPacePct": 90,
+      "forecastVolume": 148500000,
+      "statusHeadline": "On pace to hit 99% of the volume goal; sold-units pacing slightly behind at 90%."
+    }
+  },
+  "sourceRoi": [
+    { "source": "Referral", "leads": 193, "closed": 31, "revenue": 10850000, "spend": 0, "roi": null, "cpl": 0 },
+    { "source": "Organic / Website", "leads": 306, "closed": 28, "revenue": 9800000, "spend": 8000, "roi": 122400, "cpl": 26 },
+    { "source": "Instagram", "leads": 310, "closed": 22, "revenue": 7700000, "spend": 18000, "roi": 42678, "cpl": 58 },
+    { "source": "Google Ads", "leads": 189, "closed": 14, "revenue": 4900000, "spend": 52000, "roi": 9323, "cpl": 275 },
+    { "source": "Cash Offer Funnel", "leads": 47, "closed": 12, "revenue": 4200000, "spend": 6000, "roi": 69900, "cpl": 128 },
+    { "source": "Zillow", "leads": 98, "closed": 9, "revenue": 3150000, "spend": 42000, "roi": 7400, "cpl": 429 },
+    { "source": "Facebook Ads", "leads": 88, "closed": 8, "revenue": 2800000, "spend": 28000, "roi": 9900, "cpl": 318 }
+  ],
+  "agentLeaderboard": [
+    { "agent": "Lexa Brice", "slug": "lexa-brice", "leads": 33, "appts": 14, "signed": 7, "gci": 412000 },
+    { "agent": "Ava Brooks", "slug": "ava-brooks", "leads": 31, "appts": 13, "signed": 6, "gci": 287000 },
+    { "agent": "Joshua Rose", "slug": "joshua-rose", "leads": 28, "appts": 12, "signed": 6, "gci": 261000 },
+    { "agent": "Russell Xay", "slug": "russell-xay", "leads": 27, "appts": 11, "signed": 5, "gci": 248000 },
+    { "agent": "Karen Tse", "slug": "karen-tse", "leads": 25, "appts": 10, "signed": 5, "gci": 233000 },
+    { "agent": "Jose Lettenmaier", "slug": "jose-lettenmaier", "leads": 24, "appts": 10, "signed": 4, "gci": 219000 },
+    { "agent": "Ocean Chau", "slug": "ocean-chau", "leads": 22, "appts": 9, "signed": 4, "gci": 201000 },
+    { "agent": "Boston Bate", "slug": "boston-bate", "leads": 20, "appts": 8, "signed": 3, "gci": 178000 }
+  ],
+  "funnel": [
+    { "stage": "Leads", "count": 2840 },
+    { "stage": "Engaged", "count": 1190 },
+    { "stage": "Appointments", "count": 410 },
+    { "stage": "Active Clients", "count": 188 },
+    { "stage": "Under Contract", "count": 96 },
+    { "stage": "Closed", "count": 71 }
+  ],
+  "pipeline": [
+    { "stage": "Pre-Listing", "value": 8000000, "deals": 15 },
+    { "stage": "Active", "value": 9400000, "deals": 6 },
+    { "stage": "Pending", "value": 6200000, "deals": 5 },
+    { "stage": "Inspection", "value": 4100000, "deals": 4 },
+    { "stage": "Appraisal", "value": 6300000, "deals": 8 },
+    { "stage": "Financing", "value": 12800000, "deals": 9 },
+    { "stage": "Clear to Close", "value": 5400000, "deals": 4 },
+    { "stage": "Closed", "value": 5100000, "deals": 16 }
+  ],
+  "marketingPerformance": [
+    { "campaign": "Spring Seller Nurture", "channel": "Email", "sent": 4120, "openRate": 38.4, "replyRate": 4.6, "attributedPipeline": 6850000 },
+    { "campaign": "Cash Offer Funnel", "channel": "Paid Social + Email", "sent": 9800, "openRate": 31.2, "replyRate": 3.1, "attributedPipeline": 4200000 },
+    { "campaign": "Past Client Reactivation", "channel": "Email + SMS", "sent": 5400, "openRate": 34.1, "replyRate": 5.8, "attributedPipeline": 3100000 },
+    { "campaign": "Just Sold — Lake Oswego", "channel": "Social", "sent": 2600, "openRate": 42.7, "replyRate": 2.4, "attributedPipeline": 1950000 }
+  ],
+  "automationImpact": {
+    "hoursSavedThisMonth": 612,
+    "tasksAutomated": 1880,
+    "aiDraftsApproved": 244,
+    "speedToLeadMin": 4
+  }
+}

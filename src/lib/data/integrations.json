@@ -2,85 +2,241 @@
   {
     "name": "Follow Up Boss",
     "category": "CRM",
-    "status": "connected",
+    "provider": "Follow Up Boss",
+    "status": "Healthy",
+    "legacyStatus": "connected",
     "description": "Two-way sync of contacts, deals & calls.",
-    "records": 14820
+    "records": 14820,
+    "lastSync": "4 min ago",
+    "recordsSynced": 14820,
+    "errors": 0
   },
   {
-    "name": "Sierra Interactive",
-    "category": "Website / IDX",
-    "status": "connected",
-    "description": "Lead capture + MLS search feed.",
-    "records": 9631
+    "name": "Lofty (Chime)",
+    "category": "CRM",
+    "provider": "Lofty",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Backup CRM + smart plans sync.",
+    "records": 9120,
+    "lastSync": "11 min ago",
+    "recordsSynced": 9120,
+    "errors": 0
+  },
+  {
+    "name": "MatinRealEstate.com IDX",
+    "category": "IDX Website",
+    "provider": "Sierra Interactive",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Lead capture + MLS search feed on the brokerage site.",
+    "records": 9631,
+    "lastSync": "2 min ago",
+    "recordsSynced": 9631,
+    "errors": 0
   },
   {
     "name": "RMLS / NWMLS",
     "category": "MLS Data",
-    "status": "connected",
+    "provider": "RMLS + NWMLS",
+    "status": "Healthy",
+    "legacyStatus": "connected",
     "description": "Live listing & comp data for OR + WA.",
-    "records": 41200
+    "records": 41200,
+    "lastSync": "6 min ago",
+    "recordsSynced": 41200,
+    "errors": 0
+  },
+  {
+    "name": "SkySlope",
+    "category": "Transaction Management",
+    "provider": "SkySlope",
+    "status": "Needs auth",
+    "legacyStatus": "available",
+    "description": "Transaction rooms, compliance checklists & broker review.",
+    "records": 1240,
+    "lastSync": "Token expired 2 days ago",
+    "recordsSynced": 1240,
+    "errors": 1
+  },
+  {
+    "name": "Dotloop",
+    "category": "Transaction Management",
+    "provider": "Dotloop",
+    "status": "Needs auth",
+    "legacyStatus": "connected",
+    "description": "Backup transaction rooms & e-sign packets.",
+    "records": 642,
+    "lastSync": "Reauthorize required",
+    "recordsSynced": 642,
+    "errors": 1
   },
   {
     "name": "DocuSign",
     "category": "E-Signature",
-    "status": "connected",
+    "provider": "DocuSign",
+    "status": "Healthy",
+    "legacyStatus": "connected",
     "description": "Listing & buyer agreements, fully paperless.",
-    "records": 1860
-  },
-  {
-    "name": "Dotloop",
-    "category": "Transactions",
-    "status": "connected",
-    "description": "Transaction rooms & compliance.",
-    "records": 642
-  },
-  {
-    "name": "Twilio",
-    "category": "SMS / Voice",
-    "status": "connected",
-    "description": "Speed-to-lead texting & call tracking.",
-    "records": 38400
-  },
-  {
-    "name": "SendGrid",
-    "category": "Email",
-    "status": "connected",
-    "description": "Drip campaigns & transactional mail.",
-    "records": 96200
-  },
-  {
-    "name": "Google Workspace",
-    "category": "Productivity",
-    "status": "connected",
-    "description": "Calendar, Drive & Gmail sync.",
-    "records": 5200
-  },
-  {
-    "name": "QuickBooks",
-    "category": "Accounting",
-    "status": "connected",
-    "description": "Commission & expense reconciliation.",
-    "records": 1240
+    "records": 1860,
+    "lastSync": "9 min ago",
+    "recordsSynced": 1860,
+    "errors": 0
   },
   {
     "name": "Meta Ads",
     "category": "Marketing",
-    "status": "available",
-    "description": "Auto-import ad leads + spend.",
-    "records": 0
+    "provider": "Meta",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Auto-import ad leads + spend from Facebook & Instagram.",
+    "records": 3120,
+    "lastSync": "18 min ago",
+    "recordsSynced": 3120,
+    "errors": 0
   },
   {
-    "name": "Zapier / Make",
+    "name": "Google Ads",
+    "category": "Marketing",
+    "provider": "Google",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Search & PMax lead + spend sync.",
+    "records": 2480,
+    "lastSync": "22 min ago",
+    "recordsSynced": 2480,
+    "errors": 0
+  },
+  {
+    "name": "SendGrid Email",
+    "category": "Marketing",
+    "provider": "SendGrid",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Drip campaigns & transactional mail.",
+    "records": 96200,
+    "lastSync": "3 min ago",
+    "recordsSynced": 96200,
+    "errors": 0
+  },
+  {
+    "name": "OpenAI GPT",
+    "category": "AI Models",
+    "provider": "OpenAI",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Drafting, summaries & content generation.",
+    "records": null,
+    "lastSync": "Live",
+    "recordsSynced": null,
+    "errors": 0
+  },
+  {
+    "name": "Anthropic Claude",
+    "category": "AI Models",
+    "provider": "Anthropic",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Reasoning, risk analysis & compliance checks.",
+    "records": null,
+    "lastSync": "Live",
+    "recordsSynced": null,
+    "errors": 0
+  },
+  {
+    "name": "Google Gemini",
+    "category": "AI Models",
+    "provider": "Google",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Vision + long-context document review.",
+    "records": null,
+    "lastSync": "Live",
+    "recordsSynced": null,
+    "errors": 0
+  },
+  {
+    "name": "Make",
     "category": "Automation",
-    "status": "connected",
-    "description": "Glue for 6,000+ apps & internal flows.",
-    "records": null
+    "provider": "Make",
+    "status": "Failing",
+    "legacyStatus": "connected",
+    "description": "Visual workflow builder for internal flows.",
+    "records": null,
+    "lastSync": "Last run failed 41 min ago",
+    "recordsSynced": null,
+    "errors": 3
   },
   {
-    "name": "AI Engine",
-    "category": "AI",
-    "status": "connected",
-    "description": "Powers Ask Matin, coaching & content.",
-    "records": null
+    "name": "n8n",
+    "category": "Automation",
+    "provider": "n8n",
+    "status": "Failing",
+    "legacyStatus": "connected",
+    "description": "Self-hosted workflow engine for AI pipelines.",
+    "records": null,
+    "lastSync": "Last run failed 1 hr ago",
+    "recordsSynced": null,
+    "errors": 2
+  },
+  {
+    "name": "Zapier",
+    "category": "Automation",
+    "provider": "Zapier",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Glue for 6,000+ apps & lightweight syncs.",
+    "records": null,
+    "lastSync": "7 min ago",
+    "recordsSynced": null,
+    "errors": 0
+  },
+  {
+    "name": "Postgres",
+    "category": "Database",
+    "provider": "Supabase Postgres",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Primary system of record for all MatinOS data.",
+    "records": 184300,
+    "lastSync": "Live",
+    "recordsSynced": 184300,
+    "errors": 0
+  },
+  {
+    "name": "Airtable",
+    "category": "Database",
+    "provider": "Airtable",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Ops bases for recruiting & vendor tracking.",
+    "records": 4210,
+    "lastSync": "31 min ago",
+    "recordsSynced": 4210,
+    "errors": 0
+  },
+  {
+    "name": "Twilio",
+    "category": "SMS / Voice",
+    "provider": "Twilio",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Speed-to-lead texting & call tracking.",
+    "records": 38400,
+    "lastSync": "1 min ago",
+    "recordsSynced": 38400,
+    "errors": 0
+  },
+  {
+    "name": "QuickBooks",
+    "category": "Accounting",
+    "provider": "QuickBooks",
+    "status": "Healthy",
+    "legacyStatus": "connected",
+    "description": "Commission & expense reconciliation.",
+    "records": 1240,
+    "lastSync": "2 hr ago",
+    "recordsSynced": 1240,
+    "errors": 0
   }
 ]

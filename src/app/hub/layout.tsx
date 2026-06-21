@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Shell } from "@/components/command/Shell";
+import { AppShell } from "@/components/os";
 
 export const metadata: Metadata = {
-  title: "Matin Hub",
+  title: "Matin Brokerage OS",
   description:
     "Matin Real Estate's internal AI & operations platform — CRM, automation, live reporting, and AI wired into every workflow.",
 };
@@ -13,8 +13,8 @@ export default function HubLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen overflow-hidden bg-[#f4f4f3] text-ink antialiased">
-      <Shell>{children}</Shell>
+    <div className="h-screen overflow-hidden bg-paper text-ink antialiased">
+      <AppShell>{children}</AppShell>
     </div>
   );
 }

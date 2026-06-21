@@ -39,6 +39,17 @@
   --color-warn: #c1934a;
   --color-info: #7b818a;
 
+  /* ── MatinOS app accent (gold) ──────────────────────────────────────────
+     DEFINITION ONLY. These vars exist so Tailwind v4 generates bg-gold /
+     text-gold / border-gold utilities for the operator workspace.
+     Gold is rationed STRICTLY to AI affordances + active states inside the
+     /hub route group. It is NEVER used anywhere on the monochrome marketing
+     site. Usage discipline lives in the hub components, not here. */
+  --color-gold: #b8924a;        /* THE accent: Ask AI, Run/Approve, active nav, AI Assist pill */
+  --color-gold-bright: #d2a050; /* gold hover / score-ring fill */
+  --color-gold-soft: #f0e6d2;   /* pale gold chip fill (AI-handled tag, score chip bg) */
+  --color-gold-ink: #5c4a24;    /* text on pale-gold chips */
+
   /* Type */
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -122,6 +133,9 @@
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
+  /* MatinOS operator-workspace helper: tight, aligned numerals for all
+     KPIs / money / table metrics (ref §1.2, §1.4, §1.11). */
+  .tabular-nums { font-variant-numeric: tabular-nums; }
   .animate-rise { animation: rise .8s var(--ease-out-soft) both; }
   .animate-fade { animation: fade 1s ease both; }
   .ken-burns { animation: ken-burns 20s ease-out infinite alternate; }

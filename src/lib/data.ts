@@ -11,10 +11,21 @@ import companyJson from "./data/company.json";
 import sellerLeadsJson from "./data/seller-leads.json";
 import listingPipelineJson from "./data/listing-pipeline.json";
 import buyerAgreementsJson from "./data/buyer-agreements.json";
+import workQueueJson from "./data/work-queue.json";
+import workflowRunsJson from "./data/workflow-runs.json";
+import aiActionsJson from "./data/ai-actions.json";
+import campaignsJson from "./data/campaigns.json";
+import marketingAssetsJson from "./data/marketing-assets.json";
+import dataQualityJson from "./data/data-quality.json";
+import auditLogsJson from "./data/audit-logs.json";
+import coachingScenariosJson from "./data/coaching-scenarios.json";
+import reportMetricsJson from "./data/report-metrics.json";
 import type {
   Agent, Community, Listing, Lead, Transaction, Activity,
   Metrics, Automation, Integration, Company,
   SellerLead, ListingPipeline, BuyerAgreement,
+  WorkQueueItem, WorkflowRun, AIAction, Campaign, MarketingAsset,
+  DataQualityIssue, AuditLog, CoachingScenario, ReportMetrics,
 } from "./types";
 
 export const company = companyJson as Company;
@@ -30,6 +41,17 @@ export const integrations = integrationsJson as Integration[];
 export const sellerLeads = sellerLeadsJson as SellerLead[];
 export const listingPipeline = listingPipelineJson as ListingPipeline[];
 export const buyerAgreements = buyerAgreementsJson as BuyerAgreement[];
+
+// ---- MatinOS module data layer (Today, Systems Health, Marketing, Reports, Coaching) ----
+export const workQueue = workQueueJson as WorkQueueItem[];
+export const workflowRuns = workflowRunsJson as WorkflowRun[];
+export const aiActions = aiActionsJson as AIAction[];
+export const campaigns = campaignsJson as Campaign[];
+export const marketingAssets = marketingAssetsJson as MarketingAsset[];
+export const dataQualityIssues = dataQualityJson as DataQualityIssue[];
+export const auditLogs = auditLogsJson as AuditLog[];
+export const coachingScenarios = coachingScenariosJson as CoachingScenario[];
+export const reportMetrics = reportMetricsJson as ReportMetrics;
 
 // ---- accessors ----
 export const getAgent = (slug: string) => agents.find((a) => a.slug === slug);
@@ -51,3 +73,13 @@ export const listingsByAgent = (slug: string) => listings.filter((l) => l.agentS
 export const agentLeaderboard = [...salesAgents]
   .sort((a, b) => b.volume - a.volume)
   .slice(0, 8);
+
+// ---- MatinOS module accessors ----
+export const workQueueByTab = (tab: WorkQueueItem["tab"]) =>
+  workQueue.filter((w) => w.tab === tab);
+export const failedWorkflowRuns = workflowRuns.filter((r) => r.status === "failed");
+export const pendingAIActions = aiActions.filter((a) => a.status === "pending");
+export const liveCampaigns = campaigns.filter((c) => c.status === "live");
+export const assetsForCampaign = (campaignId: string) =>
+  marketingAssets.filter((a) => a.campaignId === campaignId);
+export const failingIntegrations = integrations.filter((i) => i.status !== "Healthy");

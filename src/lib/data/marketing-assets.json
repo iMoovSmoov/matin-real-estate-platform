@@ -1,0 +1,128 @@
+[
+  {
+    "id": "MA-001",
+    "campaignId": "CMP-001",
+    "type": "Email",
+    "title": "Cedar Hills — Coming Soon teaser",
+    "status": "draft",
+    "version": 2,
+    "body": "Coming soon in Beaverton: a light-filled 4-bed on Cedar Hills Dr with a primary on main and greenspace out back. Be first in line — reply for a private preview before it hits the market."
+  },
+  {
+    "id": "MA-002",
+    "campaignId": "CMP-001",
+    "type": "Social",
+    "title": "Cedar Hills — Instagram carousel",
+    "status": "draft",
+    "version": 1,
+    "body": "Just listed energy ✨ 1248 NW Cedar Hills Dr | 4BR · 3BA · 2,580 sqft | Beaverton. Swipe for the kitchen. Private tours opening this week — DM us."
+  },
+  {
+    "id": "MA-003",
+    "campaignId": "CMP-001",
+    "type": "Flyer",
+    "title": "Cedar Hills — Open house flyer",
+    "status": "draft",
+    "version": 1,
+    "body": "OPEN HOUSE · 1248 NW Cedar Hills Dr, Beaverton · $845,000 · 4 bed / 3 bath / 2,580 sqft · Primary on main, 3-car garage, backs to greenspace. Hosted by Ava Brooks, Matin Real Estate."
+  },
+  {
+    "id": "MA-004",
+    "campaignId": "CMP-001",
+    "type": "Web",
+    "title": "Cedar Hills — Single property page",
+    "status": "draft",
+    "version": 1,
+    "body": "A calm, modern Beaverton home where everyday life flows easily — open great room, quartz kitchen, and a primary suite on the main level. Full gallery, map, and tour request inside."
+  },
+  {
+    "id": "MA-005",
+    "campaignId": "CMP-002",
+    "type": "Email",
+    "title": "Spring Seller — What's your home worth?",
+    "status": "approved",
+    "version": 3,
+    "body": "Homes near you are moving fast this spring. Curious what yours could fetch today? Get a no-pressure home value and a same-week market report — it takes 30 seconds."
+  },
+  {
+    "id": "MA-006",
+    "campaignId": "CMP-002",
+    "type": "Social",
+    "title": "Spring Seller — Market update reel",
+    "status": "scheduled",
+    "version": 2,
+    "body": "Portland metro sellers: inventory is tight and days-on-market is down to 17. If you've thought about listing, this is the window. Tap to see your home's number."
+  },
+  {
+    "id": "MA-007",
+    "campaignId": "CMP-003",
+    "type": "Ad",
+    "title": "Cash Offer — Meta lead ad",
+    "status": "approved",
+    "version": 2,
+    "body": "Skip the showings. Get a competitive cash offer on your Portland-area home in 48 hours — and compare it side-by-side with what a traditional sale could net you."
+  },
+  {
+    "id": "MA-008",
+    "campaignId": "CMP-003",
+    "type": "Email",
+    "title": "Cash Offer — Net sheet explainer",
+    "status": "approved",
+    "version": 1,
+    "body": "Here's exactly what a cash offer looks like next to a market sale: price, fees, timeline, and your estimated net — no guesswork, no obligation."
+  },
+  {
+    "id": "MA-009",
+    "campaignId": "CMP-004",
+    "type": "Social",
+    "title": "Just Sold — Lake Oswego post",
+    "status": "approved",
+    "version": 1,
+    "body": "SOLD in Lake Oswego 🔑 Another happy seller, another smooth close. Thinking about your move? We'd love to do the same for you."
+  },
+  {
+    "id": "MA-010",
+    "campaignId": "CMP-004",
+    "type": "Flyer",
+    "title": "Just Sold — Neighborhood mailer",
+    "status": "scheduled",
+    "version": 1,
+    "body": "We just sold a home on your street. Want to know what that means for your value? Scan the code for an instant estimate from Matin Real Estate."
+  },
+  {
+    "id": "MA-011",
+    "campaignId": "CMP-005",
+    "type": "Email",
+    "title": "Open House Weekend — Buyer invite",
+    "status": "draft",
+    "version": 1,
+    "body": "Three open houses this weekend matched to your saved searches. Bring your questions (and your pre-approval) — we'll have the coffee ready."
+  },
+  {
+    "id": "MA-012",
+    "campaignId": "CMP-006",
+    "type": "Email",
+    "title": "Price Reduction — Saved search alert",
+    "status": "draft",
+    "version": 1,
+    "body": "Good news on a home you saved: the price just dropped. It now fits your budget — want to see it before the weekend rush?"
+  },
+  {
+    "id": "MA-013",
+    "campaignId": "CMP-007",
+    "type": "Email",
+    "title": "Past Client — Anniversary touch",
+    "status": "approved",
+    "version": 2,
+    "body": "It's been a while since we handed you the keys — and your equity has likely grown. Here's a quick snapshot of your home's value today, just because."
+  },
+  {
+    "id": "MA-014",
+    "campaignId": "CMP-008",
+    "type": "Web",
+    "title": "Recruiting — Careers landing page",
+    "status": "draft",
+    "version": 1,
+    "body": "Top producers run on MatinOS: AI speed-to-lead, automated listing launches, and a coordinator team that handles the paperwork. Keep more of your deals. See how we work."
+  }
+]
