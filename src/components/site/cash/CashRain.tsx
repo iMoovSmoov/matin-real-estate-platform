@@ -1,11 +1,11 @@
 "use client";
 
-const CASH_IMAGES = Array.from({ length: 15 }, (_, n) =>
-  `/matin/cash/cash-${String(n).padStart(2, "0")}.jpg`
-);
+// cash-09 is the clean stacked-bills shot; use contain so the full image
+// is always visible with no random cropping
+const CASH = "/matin/cash/cash-09.jpg";
 
 function Bill({ i }: { i: number }) {
-  const src = CASH_IMAGES[i % CASH_IMAGES.length];
+  const src = CASH;
   const left = (i * 129 + i * i * 7) % 100;
   const dur = 10 + (i % 6) * 1.9;
   const delay = -((i * 1.9) % 15);
@@ -27,8 +27,8 @@ function Bill({ i }: { i: number }) {
       }}
     >
       <div
-        className="h-[64px] w-[150px] rounded-[5px] shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20"
-        style={{ backgroundImage: `url('${src}')`, backgroundSize: "cover", backgroundPosition: "center" }}
+        className="h-[64px] w-[150px] rounded-[5px] shadow-[0_10px_26px_rgba(0,0,0,.5)] ring-1 ring-black/20 bg-[#1a2b1a]"
+        style={{ backgroundImage: `url('${src}')`, backgroundSize: "contain", backgroundPosition: "center", backgroundRepeat: "no-repeat" }}
       />
     </div>
   );
