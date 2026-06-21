@@ -455,15 +455,17 @@ function AppearanceTab() {
           {/* Dark — locked */}
           <button
             disabled
-            className="relative flex w-32 cursor-not-allowed flex-col items-start gap-2 rounded-xl border-2 border-ink/[0.1] bg-paper p-4 opacity-60 transition-all"
+            className="relative flex w-32 cursor-not-allowed flex-col items-start gap-2 overflow-hidden rounded-xl border-2 border-ink/[0.1] bg-paper p-4 opacity-60 transition-all"
           >
             <div className="h-10 w-full rounded-lg border border-ink/20 bg-ink/80">
               <div className="m-1.5 h-1.5 w-8 rounded-full bg-white/20" />
               <div className="mx-1.5 mt-1 h-1 w-5 rounded-full bg-white/10" />
             </div>
             <span className="text-[0.82rem] font-medium text-ink">Dark</span>
-            <span className="absolute right-2 top-2 rounded-full bg-slate/10 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-slate/60">
-              Coming soon
+            <span className="absolute inset-x-0 top-2 flex justify-center">
+              <span className="whitespace-nowrap rounded-full bg-ink/10 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink/50">
+                Coming soon
+              </span>
             </span>
           </button>
         </div>
