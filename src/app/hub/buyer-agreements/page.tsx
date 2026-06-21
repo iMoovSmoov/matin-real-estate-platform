@@ -1,2 +1,5 @@
-import BuyerAgreements from "@/components/command/buyer/BuyerAgreements"
-export default function BuyerAgreementsPage() { return <BuyerAgreements /> }
+import BuyerAgreementBuilder from "@/components/command/buyer/BuyerAgreementBuilder";
+
+export default function BuyerAgreementsPage() {
+  return <BuyerAgreementBuilder />;
+}

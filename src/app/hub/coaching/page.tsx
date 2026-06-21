@@ -1,607 +1,457 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useMemo, useState } from "react";
 import {
-  Trophy,
+  Dumbbell,
+  Gauge,
+  TrendingDown,
+  ClipboardCheck,
   Drama,
-  Target,
-  Flame,
-  BarChart2,
-  ChevronRight,
-  Clock,
-  Users,
-  DollarSign,
-  X,
+  Sparkles,
 } from "lucide-react";
-import { agents, salesAgents } from "@/lib/data";
-import { cn, initials, num } from "@/lib/utils";
+import { salesAgents, coachingScenarios } from "@/lib/data";
+import { useAiSidecar } from "@/components/os";
 import {
-  Panel,
-  PanelHeader,
-  StatTile,
-  ProgressBar,
-  Pill,
-  LiveDot,
-  SectionLabel,
-} from "@/components/command/ui";
-import { ScenarioTrainer } from "@/components/command/coaching/ScenarioTrainer";
-import { ContractCoach } from "@/components/command/coaching/ContractCoach";
-import { scenarios } from "@/components/command/coaching/scenarios";
+  KpiStrip,
+  KpiCard,
+  PaceBar,
+  ProgressTrack,
+  DataTable,
+  TwoLineCell,
+  InitialsToken,
+  ScoreChip,
+  StatusChip,
+  RecordDrawer,
+  CalloutCard,
+  MilestoneTimeline,
+  type Column,
+} from "@/components/os";
+import { CoachingWorkbench } from "@/components/command/coaching/CoachingWorkbench";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Deterministic leaderboard — derived purely from each agent's stable stats
+   MatinOS — Coaching  (ref §2.9)
+
+   AI Coaching + Scenario Training. The page renders inside AppShell, so the
+   TopCommandBar already shows the "Coaching" section name — no page <h1> here,
+   only a muted subtitle. Composes @/components/os primitives + the
+   CoachingWorkbench three-pane surface.
    ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Deterministic per-agent coaching standing, derived from real agent stats ── */
 interface Standing {
   slug: string;
   name: string;
-  streak: number;
-  completed: number;
-  score: number;
+  title: string;
+  scenariosRun: number;
+  avgScore: number;
+  goal: number; // target practice sessions this quarter
+  done: number; // completed this quarter
+  pace: number; // % of pace expected by now
+  behind: boolean;
+  weakest: string;
 }
 
-function buildLeaderboard(): Standing[] {
+const SKILLS = ["Empathy", "Pricing explanation", "Next-step close", "CRM hygiene", "Speed to lead"];
+
+function buildStandings(): Standing[] {
   return [...salesAgents]
-    .map((a): Standing => {
-      const streak = 3 + ((a.homesSold + a.yearsExperience) % 26);
-      const completed = 12 + ((a.homesSold * 2 + a.reviews) % 121);
-      const score = Math.min(99, 72 + Math.round((a.rating - 4.5) * 50) + (a.homesSold % 9));
-      return { slug: a.slug, name: a.name, streak, completed, score };
-    })
-    .sort((x, y) => y.score - x.score || y.completed - x.completed)
-    .slice(0, 8);
-}
-
-const leaderboard = buildLeaderboard();
-const topCompleted = Math.max(...leaderboard.map((s) => s.completed), 1);
-
-const avgScore = Math.round(
-  leaderboard.reduce((sum, s) => sum + s.score, 0) / (leaderboard.length || 1),
-);
-
-
-const MEDALS: Record<number, { ring: string; bg: string; text: string }> = {
-  0: { ring: "ring-amber-300/40", bg: "bg-amber-300/15", text: "text-amber-300" },
-  1: { ring: "ring-slate-200/40", bg: "bg-slate-200/12", text: "text-slate-200" },
-  2: { ring: "ring-orange-400/40", bg: "bg-orange-400/12", text: "text-orange-300" },
-};
-
-function scoreTone(score: number): "success" | "warn" | "azure" {
-  if (score >= 90) return "success";
-  if (score >= 80) return "azure";
-  return "warn";
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
-   Weekly Scorecard
-   ────────────────────────────────────────────────────────────────────────── */
-interface ScorecardRow {
-  id: string;
-  name: string;
-  calls: number;
-  texts: number;
-  appts: number;
-  agreements: number;
-  showings: number;
-  offers: number;
-  score: number;
-}
-
-function computeScorecardRows(): ScorecardRow[] {
-  return [...agents]
-    .filter((a) => !a.leadership && !a.support)
+    .filter((a) => !a.leadership && a.scorecardWeek)
     .slice(0, 8)
-    .map((a): ScorecardRow => {
-      const sw = a.scorecardWeek ?? { calls: 0, texts: 0, appts: 0, agreements: 0, showings: 0, offers: 0 };
-      const raw =
-        sw.calls * 2 +
-        sw.texts * 1 +
-        sw.appts * 8 +
-        sw.agreements * 15 +
-        sw.showings * 3 +
-        sw.offers * 20;
+    .map((a): Standing => {
+      const scenariosRun = 6 + ((a.homesSold + a.reviews) % 22);
+      const avgScore = Math.min(98, 58 + Math.round((a.rating - 4.5) * 40) + (a.homesSold % 12));
+      const goal = 12;
+      const done = 3 + ((a.homesSold * 3 + a.reviews) % 11);
+      const expected = 9; // pace marker — should be ~9 of 12 by now
+      const pace = Math.round((done / goal) * 100);
+      const behind = done < expected;
+      const weakest = SKILLS[(a.homesSold + a.reviews) % SKILLS.length];
       return {
-        id: a.id,
+        slug: a.slug,
         name: a.name,
-        calls: sw.calls,
-        texts: sw.texts,
-        appts: sw.appts,
-        agreements: sw.agreements,
-        showings: sw.showings,
-        offers: sw.offers,
-        score: Math.min(100, raw),
+        title: a.title,
+        scenariosRun,
+        avgScore,
+        goal,
+        done,
+        pace,
+        behind,
+        weakest,
       };
     })
-    .sort((x, y) => y.score - x.score);
+    .sort((x, y) => y.avgScore - x.avgScore || y.scenariosRun - x.scenariosRun);
 }
 
-const scorecardRows = computeScorecardRows();
-
-function scorecardScoreTone(score: number): string {
-  if (score >= 80) return "text-success";
-  if (score >= 50) return "text-warn";
+function scoreValueTone(score: number): string {
+  if (score >= 85) return "text-success";
+  if (score >= 70) return "text-warn";
   return "text-danger";
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   ScorecardSlideOver — agent drill-down panel
-   ────────────────────────────────────────────────────────────────────────── */
-function ScorecardSlideOver({
-  agent,
-  onClose,
-}: {
-  agent: ScorecardRow | null;
-  onClose: () => void;
-}) {
-  const [note, setNote] = useState("");
-  const [saved, setSaved] = useState(false);
-  const noteRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (!agent) return;
-    const stored = typeof window !== "undefined"
-      ? localStorage.getItem(`coaching_note_${agent.id}`) ?? ""
-      : "";
-    setNote(stored);
-    setSaved(false);
-  }, [agent?.id]);
-
-  if (!agent) return null;
-
-  function saveNote() {
-    if (!agent) return;
-    localStorage.setItem(`coaching_note_${agent.id}`, note);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  }
-
-  const scorePb: "success" | "warn" | "danger" =
-    agent.score >= 80 ? "success" : agent.score >= 50 ? "warn" : "danger";
-
-  return (
-    <>
-      {/* Scrim */}
-      <div
-        className="fixed inset-0 z-40 bg-ink/[0.15]"
-        onClick={onClose}
-      />
-      {/* Panel */}
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl sm:max-w-[480px] sm:border-l sm:border-ink/[0.08]">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] px-5 py-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.7rem] font-bold text-ink ring-1 ring-inset ring-ink/[0.06]">
-              {initials(agent.name)}
-            </span>
-            <div className="leading-tight">
-              <p className="font-semibold text-ink">{agent.name}</p>
-              <p className="text-[0.72rem] text-slate/60">Weekly Drill-Down</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink/[0.08] text-slate transition-colors hover:border-ink/20 hover:text-ink"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 space-y-5 overflow-y-auto p-5">
-          {/* Score */}
-          <div>
-            <div className="mb-1 flex items-baseline justify-between gap-2">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/60">
-                Weekly Score
-              </p>
-              <span className={cn("font-display text-2xl tabular-nums", scorecardScoreTone(agent.score))}>
-                {agent.score}
-              </span>
-            </div>
-            <ProgressBar value={agent.score} tone={scorePb} />
-          </div>
-
-          {/* Activity breakdown */}
-          <div>
-            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/60">
-              Activity This Week
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "Calls", value: agent.calls },
-                { label: "Texts", value: agent.texts },
-                { label: "Appts", value: agent.appts },
-                { label: "Agreements", value: agent.agreements },
-                { label: "Showings", value: agent.showings },
-                { label: "Offers", value: agent.offers },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center rounded-xl border border-ink/[0.08] bg-ink/[0.02] py-2"
-                >
-                  <span className="font-display text-xl tabular-nums text-ink">{item.value}</span>
-                  <span className="text-[0.65rem] font-medium text-slate/60">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Coaching Notes */}
-          <div>
-            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/60">
-              Coaching Notes
-            </p>
-            <textarea
-              ref={noteRef}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={4}
-              placeholder="Add a note from your 1:1 with this agent…"
-              className="w-full resize-none rounded-xl border border-ink/10 bg-white px-3 py-2 text-[0.86rem] text-ink placeholder:text-slate/35 focus:border-ink/30 focus:outline-none"
-            />
-            <div className="mt-2 flex items-center gap-3">
-              <button
-                onClick={saveNote}
-                className="rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ink-700"
-              >
-                Save note
-              </button>
-              {saved && (
-                <span className="text-sm font-medium text-success">Saved</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
-   LeaderboardPanel — extracted for sticky sidebar + metric selector
-   ────────────────────────────────────────────────────────────────────────── */
-type LbMetric = "score" | "streak" | "drills";
-
-function LeaderboardPanel() {
-  const [lbMetric, setLbMetric] = useState<LbMetric>("score");
-
-  const sorted = useMemo(() => {
-    return [...leaderboard].sort((a, b) => {
-      if (lbMetric === "score") return b.score - a.score || b.completed - a.completed;
-      if (lbMetric === "streak") return b.streak - a.streak || b.score - a.score;
-      return b.completed - a.completed || b.score - a.score;
-    });
-  }, [lbMetric]);
-
-  return (
-    <Panel>
-      <PanelHeader
-        title="Top Trainees"
-        subtitle="Ranked by avg score · practice streaks & drills completed"
-        icon={<Trophy className="h-4 w-4" />}
-        action={
-          <div className="flex items-center gap-1 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1">
-            {(["score", "streak", "drills"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setLbMetric(m)}
-                className={cn(
-                  "rounded-lg px-2.5 py-1 text-[0.72rem] font-semibold capitalize transition-colors",
-                  lbMetric === m ? "bg-ink text-white" : "text-slate hover:text-ink",
-                )}
-              >
-                {m === "score" ? "Score" : m === "streak" ? "Streak" : "Drills"}
-              </button>
-            ))}
-          </div>
-        }
-      />
-      <ul className="divide-y divide-ink/[0.06]">
-        {sorted.map((s, i) => {
-          const origRank = leaderboard.findIndex((x) => x.slug === s.slug);
-          const medal = MEDALS[origRank];
-          return (
-            <li key={s.slug} className="flex items-center gap-3 px-5 py-3 transition-all duration-200">
-              {/* Rank / medal */}
-              <span
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-display text-[0.92rem] tabular-nums ring-1 ring-inset",
-                  medal
-                    ? `${medal.bg} ${medal.text} ${medal.ring}`
-                    : "bg-white text-slate/70 ring-ink/[0.06]",
-                )}
-              >
-                {origRank < 3 ? <Trophy className="h-4 w-4" /> : origRank + 1}
-              </span>
-
-              {/* Avatar initials */}
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.7rem] font-bold text-ink ring-1 ring-inset ring-ink/[0.06]">
-                {initials(s.name)}
-              </span>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-[0.86rem] font-semibold text-ink">{s.name}</p>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Pill tone="warn">
-                      <Flame className="h-3 w-3" /> {s.streak}d
-                    </Pill>
-                    <span className="font-display text-[0.95rem] text-ink tabular-nums">
-                      {lbMetric === "score" ? s.score : lbMetric === "streak" ? `${s.streak}d` : num(s.completed)}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-1.5 flex items-center gap-2.5">
-                  <ProgressBar
-                    value={(s.completed / topCompleted) * 100}
-                    tone={scoreTone(s.score)}
-                    className="flex-1"
-                  />
-                  <span className="shrink-0 text-[0.7rem] text-slate/70 tabular-nums">
-                    {num(s.completed)} drills
-                  </span>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="flex items-center justify-between gap-3 border-t border-ink/[0.08] px-5 py-3">
-        <p className="text-[0.72rem] text-slate/55">
-          Scores blend conversation grades, completion, and streak consistency.
-        </p>
-        <span className="inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-ink">
-          <LiveDot tone="azure" /> Updates as agents drill
-        </span>
-      </div>
-    </Panel>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
-   Main page
-   ────────────────────────────────────────────────────────────────────────── */
 export default function CoachingPage() {
-  const [selectedAgent, setSelectedAgent] = useState<ScorecardRow | null>(null);
-  const [pendingScenario, setPendingScenario] = useState<string | null>(null);
+  const { openAi } = useAiSidecar();
+  const standings = useMemo(buildStandings, []);
+  const [selected, setSelected] = useState<Standing | null>(null);
+
+  // KPI roll-ups reconcile to the standings rows below them.
+  const totalScenariosRun = standings.reduce((s, r) => s + r.scenariosRun, 0);
+  const practiceSessions = standings.reduce((s, r) => s + r.done, 0);
+  const avgScorecard = Math.round(
+    standings.reduce((s, r) => s + r.avgScore, 0) / (standings.length || 1),
+  );
+  const agentsBehind = standings.filter((r) => r.behind).length;
+  const reviewsDue = standings.filter((r) => r.avgScore < 75).length + 2;
+
+  // Leadership goal pacing — team practice-session completion vs. quarter target.
+  const teamGoal = standings.reduce((s, r) => s + r.goal, 0);
+  const teamDone = practiceSessions;
+  const teamPace = Math.round((teamDone / teamGoal) * 100);
+  const teamExpected = 75; // dashed Pace marker
+  const teamForecast = Math.min(100, Math.round(teamPace * (12 / 9))); // straight-line forecast
+
+  const columns: Column<Standing>[] = [
+    {
+      key: "name",
+      header: "Agent",
+      render: (r) => (
+        <div className="flex items-center gap-2.5">
+          <InitialsToken name={r.name} />
+          <TwoLineCell title={r.name} sub={r.title} />
+        </div>
+      ),
+    },
+    {
+      key: "scenariosRun",
+      header: "Drills",
+      align: "right",
+      sortable: true,
+      render: (r) => <span className="tabular-nums text-ink">{r.scenariosRun}</span>,
+    },
+    {
+      key: "weakest",
+      header: "Weakest skill",
+      render: (r) => (
+        <StatusChip tone="warn" variant="soft">
+          {r.weakest}
+        </StatusChip>
+      ),
+    },
+    {
+      key: "done",
+      header: "Goal pace",
+      width: "150px",
+      render: (r) => (
+        <ProgressTrack
+          label=""
+          value={r.pace}
+          tone={r.behind ? "danger" : "success"}
+          valueRight={
+            <span className="tabular-nums">
+              {r.done}/{r.goal}
+            </span>
+          }
+        />
+      ),
+    },
+    {
+      key: "avgScore",
+      header: "Avg score",
+      align: "right",
+      sortable: true,
+      render: (r) => <ScoreChip score={r.avgScore} suffix="" />,
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
-      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
-        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Coaching Academy</h1>
-        <LiveDot tone="success" />
-      </div>
-
-      {/* Weekly Scorecards */}
-      <section>
-        <div className="mb-2.5 flex items-center gap-2">
-          <SectionLabel>Weekly Agent Scorecards</SectionLabel>
-          <span className="h-px flex-1 bg-ink/[0.06]" />
-        </div>
-        <Panel>
-          <PanelHeader
-            title="Weekly Agent Scorecards"
-            subtitle="Activity this week · click a row to drill down"
-            icon={<BarChart2 className="h-4 w-4" />}
-          />
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px] text-[0.85rem]">
-              <thead>
-                <tr className="border-b border-ink/[0.08] bg-ink/[0.02]">
-                  <th className="sticky left-0 z-10 bg-ink/[0.02] px-5 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Agent
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Calls
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Texts
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Appts
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Agreements
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Showings
-                  </th>
-                  <th className="px-3 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Offers
-                  </th>
-                  <th className="px-5 py-2.5 text-right text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate/70">
-                    Score
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-ink/[0.06]">
-                {scorecardRows.map((row, i) => {
-                  const isTop = i === 0;
-                  return (
-                    <tr
-                      key={row.id}
-                      onClick={() => setSelectedAgent(row)}
-                      className={cn(
-                        "cursor-pointer transition-colors hover:bg-ink/[0.02]",
-                        isTop && "bg-emerald-50/40",
-                      )}
-                    >
-                      <td
-                        className={cn(
-                          "sticky left-0 z-10 px-5 py-3 text-ink",
-                          isTop ? "bg-emerald-50/40 font-semibold" : "bg-white font-normal",
-                        )}
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-azure/20 to-azure-deep/30 text-[0.62rem] font-bold text-ink ring-1 ring-inset ring-ink/[0.06]">
-                            {initials(row.name)}
-                          </span>
-                          {row.name}
-                        </span>
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.calls}
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.texts}
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.appts}
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.agreements}
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.showings}
-                      </td>
-                      <td className={cn("px-3 py-3 text-right tabular-nums text-ink", isTop && "font-semibold")}>
-                        {row.offers}
-                      </td>
-                      <td
-                        className={cn(
-                          "px-5 py-3 text-right font-display tabular-nums",
-                          isTop && "font-semibold",
-                          scorecardScoreTone(row.score),
-                        )}
-                      >
-                        {row.score}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="border-t border-ink/[0.08] px-5 py-3">
-            <p className="text-[0.72rem] text-slate/55">
-              Score = calls×2 + texts×1 + appts×8 + agreements×15 + showings×3 + offers×20 · max 100 · click any row for drill-down
-            </p>
-          </div>
-        </Panel>
-      </section>
+    <div className="mx-auto max-w-[1500px] space-y-5 px-4 py-4 md:px-6">
+      {/* Subtitle / eyebrow (no h1 — TopCommandBar owns the section title) */}
+      <p className="text-[0.8rem] leading-snug text-slate">
+        Coach agents and brokers with scorecards, roleplay, and real CRM outcomes.
+      </p>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-2">
-        <StatTile
-          label="Scenarios Available"
-          value={num(scenarios.length)}
-          icon={<Drama className="h-4 w-4" />}
-          hint="Across 6 skill categories"
-          accent
+      <KpiStrip className="xl:grid-cols-5">
+        <KpiCard
+          label="Practice sessions"
+          value={practiceSessions}
+          icon={<Dumbbell className="h-4 w-4" aria-hidden />}
+          delta="this quarter"
+          deltaTone="up"
+          hint="Completed roleplay drills across the team"
+          onDrill={() => openAi("Context: Coaching / Practice sessions this quarter")}
         />
-        <StatTile
-          label="Avg Score"
-          value={`${avgScore}`}
-          icon={<Target className="h-4 w-4" />}
-          hint="Top-8 trailing average"
+        <KpiCard
+          label="Avg scorecard"
+          value={avgScorecard}
+          icon={<Gauge className="h-4 w-4" aria-hidden />}
+          valueTone={avgScorecard >= 80 ? "success" : "ink"}
+          delta="rubric-weighted"
+          deltaTone="flat"
+          hint="Mean across all scored attempts"
+          onDrill={() => openAi("Context: Coaching / Average scorecard")}
         />
+        <KpiCard
+          label="Agents behind pace"
+          value={agentsBehind}
+          icon={<TrendingDown className="h-4 w-4" aria-hidden />}
+          valueTone={agentsBehind > 0 ? "danger" : "success"}
+          delta={`of ${standings.length} active`}
+          deltaTone="down"
+          hint="Below the quarter practice goal"
+          onDrill={() => openAi("Context: Coaching / Agents behind pace")}
+        />
+        <KpiCard
+          label="Reviews due"
+          value={reviewsDue}
+          icon={<ClipboardCheck className="h-4 w-4" aria-hidden />}
+          valueTone="ink"
+          delta="manager review"
+          deltaTone="flat"
+          hint="Attempts awaiting manager sign-off"
+          onDrill={() => openAi("Context: Coaching / Manager reviews due")}
+        />
+        <KpiCard
+          label="Scenarios run"
+          value={totalScenariosRun}
+          icon={<Drama className="h-4 w-4" aria-hidden />}
+          delta="all-time"
+          deltaTone="up"
+          hint={`Across ${coachingScenarios.length + 1} broker-approved drills`}
+          onDrill={() => openAi("Context: Coaching / Scenarios run")}
+        />
+      </KpiStrip>
+
+      {/* Three-pane coaching workbench */}
+      <CoachingWorkbench scenarios={coachingScenarios} onOpenAi={openAi} />
+
+      {/* Leadership goal-pacing + leaderboard */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        {/* Goal pacing (leadership view) */}
+        <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="font-display text-[1rem] font-normal text-ink">
+              Team practice goal
+            </h2>
+            <StatusChip tone={teamPace >= teamExpected ? "success" : "danger"} variant="soft">
+              {teamPace >= teamExpected ? "On pace" : "Behind pace"}
+            </StatusChip>
+          </div>
+          <PaceBar
+            value={teamPace}
+            pace={teamExpected}
+            forecast={teamForecast}
+            headline={
+              <>
+                Team completed{" "}
+                <span className="font-semibold tabular-nums text-ink">{teamDone}</span> of{" "}
+                <span className="font-semibold tabular-nums text-ink">{teamGoal}</span> quarter
+                practice sessions —{" "}
+                {teamPace >= teamExpected ? (
+                  <span className="font-semibold text-success">ahead of pace</span>
+                ) : (
+                  <span className="font-semibold text-danger">
+                    {teamExpected - teamPace} pts behind pace
+                  </span>
+                )}
+                .
+              </>
+            }
+          />
+          <div className="mt-4 border-t border-mist pt-3">
+            <CalloutCard
+              tone="ai"
+              title="Coaching focus this week"
+              action={
+                <button
+                  type="button"
+                  onClick={() => openAi("Context: Coaching / Team pacing & focus")}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                >
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                  Assign drills
+                </button>
+              }
+            >
+              {agentsBehind} agents are behind on practice and the lowest team rubric is{" "}
+              <span className="text-cloud">Next-step close</span>. Recommend assigning the{" "}
+              <span className="text-cloud">&ldquo;Buyer refuses agreement&rdquo;</span> and{" "}
+              <span className="text-cloud">&ldquo;Cash offer explanation&rdquo;</span> drills, each
+              tied to a CRM task in Today.
+            </CalloutCard>
+          </div>
+        </section>
+
+        {/* Per-agent leaderboard */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <h2 className="font-display text-[1rem] font-normal text-ink">Agent leaderboard</h2>
+            <span className="text-[0.72rem] text-slate">Click a row for the coaching plan</span>
+          </div>
+          <DataTable<Standing>
+            columns={columns}
+            rows={standings}
+            getRowId={(r) => r.slug}
+            onRowClick={(r) => setSelected(r)}
+            utilityLeft={<span className="text-[0.78rem] text-slate">active agents</span>}
+          />
+        </section>
       </div>
 
-      {/* Recommended This Week */}
-      <section>
-        <div className="mb-2.5 flex items-center gap-2">
-          <SectionLabel>Recommended This Week</SectionLabel>
-          <span className="h-px flex-1 bg-ink/[0.06]" />
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            {
-              icon: <Clock className="h-4 w-4 text-amber-600" />,
-              bg: "bg-amber-50/60 border-amber-200/60",
-              iconBg: "bg-amber-100",
-              label: "Appt-set rate below avg",
-              scenario: "Lead wants to wait 6 months",
-              id: "wait-6-months",
-            },
-            {
-              icon: <Users className="h-4 w-4 text-blue-600" />,
-              bg: "bg-blue-50/60 border-blue-200/60",
-              iconBg: "bg-blue-100",
-              label: "Buyer agreement conversion low",
-              scenario: "Buyer refuses to sign buyer agreement",
-              id: "buyer-agreement-refusal",
-            },
-            {
-              icon: <DollarSign className="h-4 w-4 text-emerald-600" />,
-              bg: "bg-emerald-50/60 border-emerald-200/60",
-              iconBg: "bg-emerald-100",
-              label: "Listing appt prep",
-              scenario: "Seller thinks Zillow is too high",
-              id: "zillow-high",
-            },
-          ].map((rec) => (
-            <button
-              key={rec.id}
-              type="button"
-              onClick={() => {
-                setPendingScenario(rec.id);
-                document
-                  .querySelector("[data-scenario-trainer]")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition-opacity hover:opacity-80",
-                rec.bg,
-              )}
-            >
-              <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl", rec.iconBg)}>
-                {rec.icon}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-wider text-slate/60">
-                  {rec.label}
+      {/* Per-agent coaching-plan drawer */}
+      <RecordDrawer
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        title={selected?.name ?? ""}
+        subtitle={selected ? `${selected.title} · Coaching plan` : undefined}
+        actions={
+          selected ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelected(null)}
+                className="rounded-lg border border-mist px-3 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  openAi(`Context: Coaching / ${selected.name} coaching plan`);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                Generate plan in Matin AI
+              </button>
+            </div>
+          ) : undefined
+        }
+      >
+        {selected ? (
+          <div className="space-y-5">
+            {/* Hero score */}
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-mist bg-paper-200/40 px-4 py-3">
+              <div>
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                  Avg scorecard
                 </p>
-                <p className="mt-0.5 text-[0.86rem] font-semibold text-ink leading-snug">
-                  {rec.scenario}
+                <p
+                  className={`mt-1 font-sans text-[1.7rem] font-bold leading-none tabular-nums ${scoreValueTone(
+                    selected.avgScore,
+                  )}`}
+                >
+                  {selected.avgScore}
                 </p>
               </div>
-              <span className="mt-0.5 shrink-0 text-[0.72rem] font-semibold text-slate/50 flex items-center gap-0.5 whitespace-nowrap">
-                Practice now <ChevronRight className="h-3 w-3" />
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Training + Leaderboard split (desktop: side-by-side) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
-          {/* Scenario trainer */}
-          <section data-scenario-trainer>
-            <div className="mb-2.5 flex items-center gap-2">
-              <SectionLabel>Live Scenario Training</SectionLabel>
-              <span className="h-px flex-1 bg-ink/[0.06]" />
+              <div className="text-right">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                  Quarter goal
+                </p>
+                <p className="mt-1 font-sans text-[1.7rem] font-bold leading-none tabular-nums text-ink">
+                  {selected.done}
+                  <span className="text-[1rem] font-medium text-slate">/{selected.goal}</span>
+                </p>
+              </div>
             </div>
-            <ScenarioTrainer
-              startScenarioId={pendingScenario}
-              onStarted={() => setPendingScenario(null)}
-            />
-          </section>
 
-          {/* Contract coach */}
-          <section>
-            <div className="mb-2.5 flex items-center gap-2">
-              <SectionLabel>Contract-Writing Coach</SectionLabel>
-              <span className="h-px flex-1 bg-ink/[0.06]" />
+            {/* Rubric breakdown */}
+            <div>
+              <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                Skill rubric
+              </p>
+              <div className="space-y-3">
+                {agentRubric(selected).map((r) => (
+                  <ProgressTrack
+                    key={r.label}
+                    label={r.label}
+                    value={r.value}
+                    tone={r.tone}
+                    valueRight={<span className="tabular-nums">{r.value}</span>}
+                  />
+                ))}
+              </div>
             </div>
-            <ContractCoach />
-          </section>
-        </div>
 
-        {/* Leaderboard sidebar — sticky on desktop */}
-        <aside className="lg:sticky lg:top-6 lg:self-start">
-          <div className="mb-2.5 flex items-center gap-2 lg:hidden">
-            <SectionLabel>Academy Leaderboard</SectionLabel>
-            <span className="h-px flex-1 bg-ink/[0.06]" />
+            {/* Auto coaching plan */}
+            <div className="rounded-xl border border-mist bg-paper-200/40 p-4">
+              <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                Auto-created coaching plan
+              </p>
+              <p className="text-[0.84rem] leading-relaxed text-ink">
+                Weakest skill is{" "}
+                <span className="font-semibold">{selected.weakest}</span> ({selected.avgScore} avg).
+                Plan: 3 practice calls on {selected.weakest.toLowerCase()}, one manager review, and a
+                CRM task to call two active sellers today.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                <StatusChip tone="info" variant="soft">
+                  Appears in Today
+                </StatusChip>
+                <StatusChip tone="success" variant="soft">
+                  Writes activity_event
+                </StatusChip>
+              </div>
+            </div>
+
+            {/* Attempt history */}
+            <div>
+              <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                Recent attempts
+              </p>
+              <MilestoneTimeline
+                milestones={[
+                  {
+                    id: "m1",
+                    title: "Commission objection · scored 88",
+                    dateLabel: "Today",
+                    tone: "success",
+                  },
+                  {
+                    id: "m2",
+                    title: `${selected.weakest} drill · scored ${Math.max(40, selected.avgScore - 18)}`,
+                    dateLabel: "2 days ago",
+                    tone: "warn",
+                  },
+                  {
+                    id: "m3",
+                    title: "Manager review — Jordan Matin",
+                    dateLabel: "Last week",
+                    tone: "info",
+                  },
+                  {
+                    id: "m4",
+                    title: "Buyer refuses agreement · scored 54",
+                    dateLabel: "Last week",
+                    tone: "danger",
+                    terminal: true,
+                  },
+                ]}
+              />
+            </div>
           </div>
-          <LeaderboardPanel />
-        </aside>
-      </div>
-
-      {/* Scorecard slide-over */}
-      <ScorecardSlideOver
-        agent={selectedAgent}
-        onClose={() => setSelectedAgent(null)}
-      />
+        ) : null}
+      </RecordDrawer>
     </div>
   );
+}
+
+/* Deterministic per-agent rubric for the drawer — derived from the standing. */
+function agentRubric(s: Standing) {
+  const base = s.avgScore;
+  const wobble = (n: number) => Math.max(38, Math.min(98, base + n));
+  const tone = (v: number) =>
+    v >= 85 ? ("success" as const) : v >= 70 ? ("warn" as const) : ("danger" as const);
+  const rows = [
+    { label: "Empathy", value: wobble(8) },
+    { label: "Pricing explanation", value: wobble(-6) },
+    { label: "Next-step close", value: wobble(-14) },
+    { label: "CRM hygiene", value: wobble(11) },
+    { label: "Speed to lead", value: wobble(-2) },
+  ];
+  // Force the agent's declared weakest skill to be the lowest bar (gold tone on speed).
+  return rows.map((r) => ({
+    ...r,
+    value: r.label === s.weakest ? Math.min(r.value, base - 16) : r.value,
+    tone: r.label === "Speed to lead" ? ("gold" as const) : tone(r.value),
+  }));
 }

@@ -1,47 +1,20 @@
-import { Briefcase, CalendarCheck, AlertTriangle } from "lucide-react";
 import { transactions } from "@/lib/data";
-import { StatTile, LiveDot } from "@/components/command/ui";
-import { TransactionsView } from "@/components/command/transactions/TransactionsView";
+import { TransactionsCockpit } from "@/components/command/transactions/TransactionsCockpit";
 
 export const metadata = { title: "Transactions" };
 
+/* Transaction Timeline + Checklist — contract-to-close cockpit (build ref §2.6).
+   The TopCommandBar renders the "Transactions" H1; this page renders only the
+   muted subtitle, then the KPI strip + one-deal 3-column screen via the client
+   cockpit (selection + streamAi need the client boundary). */
+
 export default function TransactionsPage() {
-  const active = transactions.filter((t) => t.stage !== "Closed");
-  const closingThisMonth = transactions.filter(
-    (t) => t.stage !== "Closed" && t.closeDateDaysOut <= 30,
-  ).length;
-  const atRisk = transactions.filter((t) => t.riskFlag).length;
-
   return (
-    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pt-3 md:px-6">
-      <div className="flex items-center justify-between border-b border-ink/[0.06] pb-3">
-        <h1 className="font-display text-[1.05rem] font-semibold text-ink">Transactions</h1>
-        <LiveDot tone="azure" />
-      </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <StatTile
-          label="Active transactions"
-          value={active.length}
-          icon={<Briefcase className="h-4 w-4" />}
-          accent
-          hint="Open deals in progress"
-        />
-        <StatTile
-          label="Closing this month"
-          value={closingThisMonth}
-          icon={<CalendarCheck className="h-4 w-4" />}
-          hint="Closing in ≤ 30 days"
-        />
-        <StatTile
-          label="At risk"
-          value={atRisk}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          delta={atRisk > 0 ? { value: "needs attention", dir: "down" } : { value: "all clear", dir: "up" }}
-        />
-      </div>
-
-      <TransactionsView transactions={transactions} />
+    <div className="px-4 pb-10 pt-4 md:px-6">
+      <p className="mb-5 text-[0.82rem] text-slate">
+        Deadlines, checklist, docs, risk, and emails on one deal screen — contract to close.
+      </p>
+      <TransactionsCockpit transactions={transactions} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import CashOfferPipeline from "@/components/command/cash-offer/CashOfferPipeline";
+import { SellerDeskWorkspace } from "@/components/command/seller/SellerDeskWorkspace";
 
 export default function CashOfferPage() {
-  return <CashOfferPipeline />;
+  return <SellerDeskWorkspace />;
 }
