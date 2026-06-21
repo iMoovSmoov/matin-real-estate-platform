@@ -14,7 +14,7 @@ import {
   MailCheck,
   MessageSquareText,
   RefreshCw,
-  Wand2,
+  PenLine,
 } from "lucide-react";
 import { leads } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
@@ -395,7 +395,7 @@ export default function LeadResponderPage() {
               {busy ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Generating…</>
               ) : (
-                <><Wand2 className="h-4 w-4" /> Try with live CRM lead</>
+                <><PenLine className="h-4 w-4" /> Try with live CRM lead</>
               )}
             </button>
           )}
@@ -609,7 +609,7 @@ export default function LeadResponderPage() {
                   </>
                 ) : (
                   <>
-                    <Wand2 className="h-4 w-4" />
+                    <PenLine className="h-4 w-4" />
                     {isSms ? "Draft SMS" : "Draft reply"}
                   </>
                 )}
@@ -711,7 +711,7 @@ export default function LeadResponderPage() {
               /* empty state */
               <div className="flex h-full min-h-[20rem] flex-col items-center justify-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper ring-1 ring-inset ring-ink/[0.06]">
-                  <Wand2 className="h-6 w-6 text-ink/30" />
+                  <PenLine className="h-6 w-6 text-ink/30" />
                 </div>
                 <p className="text-center text-[0.82rem] text-slate/45">
                   Fill in the details and draft your lead reply

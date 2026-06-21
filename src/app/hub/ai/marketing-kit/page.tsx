@@ -6,7 +6,7 @@ import {
   ChevronLeft,
   Megaphone,
   CheckCircle2,
-  Wand2,
+  PenLine,
   FileText,
   Loader2,
   ClipboardCopy,
@@ -402,7 +402,7 @@ export default function MarketingKitPage() {
             {/* Card header */}
             <div className="flex items-start gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
-                <Wand2 className="h-5 w-5" />
+                <PenLine className="h-5 w-5" />
               </span>
               <div className="flex-1 min-w-0">
                 <span className="mb-1.5 inline-block rounded-full bg-azure/[0.09] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-azure">
@@ -460,7 +460,7 @@ export default function MarketingKitPage() {
               {busy ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
               ) : (
-                <><Wand2 className="h-4 w-4" /> Try with live data &rarr;</>
+                <><PenLine className="h-4 w-4" /> Try with live data &rarr;</>
               )}
             </button>
 
@@ -556,7 +556,7 @@ export default function MarketingKitPage() {
                   {busy ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
                   ) : (
-                    <><Wand2 className="h-4 w-4" /> Generate full marketing kit</>
+                    <><PenLine className="h-4 w-4" /> Generate full marketing kit</>
                   )}
                 </button>
               </div>
@@ -650,7 +650,7 @@ export default function MarketingKitPage() {
                   style={{ minHeight: 450 }}
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper ring-1 ring-inset ring-ink/[0.06]">
-                    <Wand2 className="h-6 w-6 text-ink/30" />
+                    <PenLine className="h-6 w-6 text-ink/30" />
                   </div>
                   <p className="text-center text-[0.82rem] text-slate/45 max-w-[18rem]">
                     Fill in the details to generate your{" "}
