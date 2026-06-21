@@ -42,7 +42,7 @@ export default function HomePage() {
         {/* ── MOBILE: stacked — image on top, text panel below ── */}
         <div className="sm:hidden">
           {/* Image zone: 4:3 ratio so the full office interior is visible, no extreme portrait crop */}
-          <div className="relative w-full aspect-[4/3] overflow-hidden">
+          <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#0d0d0e]">
             <div className="absolute inset-0 ken-burns">
               <Image
                 src={company.officeHero}
@@ -77,7 +77,7 @@ export default function HomePage() {
         </div>
 
         {/* ── DESKTOP: full-bleed overlay (unchanged) ── */}
-        <div className="relative hidden sm:block min-h-[92vh] overflow-hidden">
+        <div className="relative hidden sm:block min-h-[92vh] overflow-hidden bg-[#0d0d0e]">
           <div className="absolute inset-0 ken-burns">
             <Image
               src={company.officeHero}
