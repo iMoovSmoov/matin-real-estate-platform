@@ -85,7 +85,7 @@ const buyingTools = [
     icon: Calculator,
     title: "Mortgage Calculator",
     body: "Estimate your monthly payment, amortization, and total interest in seconds.",
-    href: "/calculators",
+    href: "/mortgage-calculator",
     cta: "Try it →",
   },
   {

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Buy", href: "/buy" },
+  { label: "Mortgage Calculator", href: "/mortgage-calculator" },
   { label: "Sell", href: "/sell" },
   { label: "Cash Offer", href: "/cash-offer" },
   { label: "Communities", href: "/communities" },
