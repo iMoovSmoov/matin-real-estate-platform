@@ -45,7 +45,7 @@ export function SiteFooter() {
     <footer className="bg-ink text-white pb-16 sm:pb-0">
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
-          <Logo className="h-10 text-white" />
+          <Logo theme="white" className="h-10" />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-300">
             {company.tagline} {company.stats.annualVolume} in annual sales and the largest locally owned real estate
             website in the Portland area.

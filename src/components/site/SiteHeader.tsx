@@ -51,7 +51,7 @@ export function SiteHeader() {
 
       <div className="container-x flex items-center justify-between gap-6">
         <Link href="/" className="text-white transition-colors">
-          <Logo className="h-9" />
+          <Logo theme="white" className="h-9" />
         </Link>
 
         <nav aria-label="Main navigation" className="hidden items-center gap-7 lg:flex">

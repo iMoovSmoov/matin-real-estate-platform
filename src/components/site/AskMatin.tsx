@@ -76,7 +76,7 @@ export function AskMatin() {
           <X className="h-5 w-5" />
         </span>
         <span className={cn("absolute inset-0 flex items-center justify-center transition-all duration-300", open ? "opacity-0 scale-75 pointer-events-none" : "opacity-100 scale-100")}>
-          <MatinMark className="h-[22px] w-auto text-white" />
+          <MatinMark className="h-[22px] w-auto" theme="white" />
         </span>
       </button>
 
@@ -106,7 +106,7 @@ export function AskMatin() {
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-white/[0.07] px-4 py-3.5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-white/20">
-            <MatinMark className="h-[18px] w-auto text-ink" />
+            <MatinMark className="h-[18px] w-auto" theme="dark" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-display text-[0.95rem] font-semibold leading-none text-white">
@@ -132,7 +132,7 @@ export function AskMatin() {
             <div key={i} className={cn("flex gap-2.5", m.role === "user" ? "justify-end" : "justify-start items-end")}>
               {m.role === "assistant" && (
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 mb-0.5">
-                  <MatinMark className="h-[10px] w-auto text-white" />
+                  <MatinMark className="h-[10px] w-auto" theme="white" />
                 </div>
               )}
               <div

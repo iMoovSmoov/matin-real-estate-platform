@@ -530,7 +530,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           {/* Document letterhead */}
           <div className="flex items-start justify-between gap-4 border-b-2 border-slate-900/90 px-8 pb-5 pt-8">
             <div className="flex items-center gap-3 text-slate-900">
-              <MatinMark className="h-10 w-auto" />
+              <MatinMark className="h-10 w-auto" theme="dark" />
               <div className="leading-none">
                 <div className="font-sans text-lg font-semibold tracking-[0.2em]">MATIN</div>
                 <div className="mt-1 text-[0.55rem] font-medium tracking-[0.4em] text-slate-500">

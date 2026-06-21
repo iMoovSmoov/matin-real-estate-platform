@@ -1,53 +1,42 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** Matin Real Estate "M" monogram — recreated as a geometric SVG mark. */
-export function MatinMark({ className }: { className?: string }) {
+/** Matin Real Estate "M" favicon mark — rendered from real brand PNG. */
+export function MatinMark({ className, theme = "white" }: { className?: string; theme?: "white" | "dark" }) {
   return (
-    <svg viewBox="0 0 120 100" fill="none" className={cn("h-8 w-auto", className)} aria-hidden>
-      <path
-        d="M12 92 V14 L60 66 L108 14 V92"
-        stroke="currentColor"
-        strokeWidth="13"
-        strokeLinejoin="miter"
-        strokeLinecap="butt"
-      />
-      <path d="M60 66 L60 40" stroke="currentColor" strokeWidth="13" strokeLinecap="butt" />
-    </svg>
+    <Image
+      src="/matin/brand/logo-favicon-32x32.png"
+      alt="Matin Real Estate"
+      width={32}
+      height={32}
+      className={cn("h-7 w-auto", className)}
+      style={theme === "white" ? { filter: "brightness(10)" } : undefined}
+    />
   );
 }
 
 type LogoProps = {
-  variant?: "full" | "stacked" | "mark";
+  variant?: "full" | "mark";
   className?: string;
-  markClassName?: string;
+  theme?: "white" | "dark";
 };
 
-export function Logo({ variant = "full", className, markClassName }: LogoProps) {
-  if (variant === "mark") return <MatinMark className={cn("h-9", markClassName)} />;
+export function Logo({ variant = "full", className, theme = "white" }: LogoProps) {
+  if (variant === "mark") return <MatinMark className={className} theme={theme} />;
 
-  if (variant === "stacked") {
-    return (
-      <div className={cn("flex flex-col items-center gap-2 leading-none text-current", className)}>
-        <MatinMark className={cn("h-10", markClassName)} />
-        <div className="text-center">
-          <div className="font-sans text-2xl font-semibold tracking-[0.22em]">MATIN</div>
-          <div className="mt-1 font-sans text-[0.6rem] font-medium tracking-[0.42em] opacity-70">
-            REAL ESTATE
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Full wordmark — white PNG for dark backgrounds, dark JPG for light backgrounds
   return (
-    <div className={cn("flex items-center gap-3 leading-none text-current", className)}>
-      <MatinMark className={cn("h-9", markClassName)} />
-      <div className="flex flex-col">
-        <span className="font-sans text-[1.35rem] font-semibold tracking-[0.2em]">MATIN</span>
-        <span className="font-sans text-[0.55rem] font-medium tracking-[0.4em] opacity-70 -mt-0.5">
-          REAL ESTATE
-        </span>
-      </div>
-    </div>
+    <Image
+      src={
+        theme === "white"
+          ? "/matin/brand/logo-3586_logo_logo-white-20211102123653.png"
+          : "/matin/brand/logo-268-20240626125130.jpg"
+      }
+      alt="Matin Real Estate"
+      width={200}
+      height={50}
+      className={cn("h-8 w-auto object-contain", className)}
+      priority
+    />
   );
 }

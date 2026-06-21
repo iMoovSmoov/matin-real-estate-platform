@@ -188,7 +188,7 @@ function SidebarContent({
         )}
       >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-white ring-1 ring-inset ring-ink/[0.12] shadow-sm">
-          <MatinMark className="h-4 text-white" />
+          <MatinMark className="h-4" theme="white" />
         </span>
         {!collapsed && (
           <div className="min-w-0 leading-tight">

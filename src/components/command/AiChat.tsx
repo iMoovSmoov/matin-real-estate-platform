@@ -223,7 +223,7 @@ export function AiChat({
       <div className="flex items-center justify-between gap-3 border-b border-ink/[0.08] bg-gradient-to-r from-azure-deep/30 to-transparent px-5 py-3.5">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink/[0.08] ring-1 ring-inset ring-ink/[0.08]">
-            <MatinMark className="h-4 text-ink" />
+            <MatinMark className="h-4" theme="dark" />
           </span>
           <div className="leading-tight">
             <div className="flex items-center gap-1.5 font-semibold text-ink">{title}</div>
