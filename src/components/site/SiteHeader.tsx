@@ -9,13 +9,11 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Buy", href: "/buy" },
-  { label: "Mortgage Calculator", href: "/mortgage-calculator" },
   { label: "Sell", href: "/sell" },
   { label: "Cash Offer", href: "/cash-offer" },
   { label: "Communities", href: "/communities" },
   { label: "Agents", href: "/agents" },
   { label: "About", href: "/about" },
-  { label: "Blog", href: "/blog" },
 ];
 
 export function SiteHeader() {

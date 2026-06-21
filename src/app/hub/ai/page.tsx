@@ -12,7 +12,7 @@ import {
   PhoneCall,
   ArrowRight,
 } from "lucide-react";
-import { Pill, SectionLabel, LiveDot } from "@/components/command/ui";
+import { Pill, SectionLabel } from "@/components/command/ui";
 
 /* ── Tool metadata ──────────────────────────────────────────────────────── */
 
@@ -127,26 +127,18 @@ const TOOL_GROUPS: ToolGroup[] = [
 
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
-export default function AiStudioPage() {
+export default function AiToolsPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 px-4 pt-3 pb-12 md:px-6">
 
       {/* Page header */}
       <div className="border-b border-ink/[0.06] pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-[1.25rem] font-semibold tracking-tight text-ink">
-              AI Studio
-            </h1>
-            <p className="mt-0.5 text-[0.84rem] text-slate">
-              9 specialized AI tools built into your workflow
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <LiveDot tone="success" />
-            <span className="text-[0.75rem] font-medium text-slate">9 tools active</span>
-          </div>
-        </div>
+        <h1 className="font-display text-[1.25rem] font-semibold tracking-tight text-ink">
+          AI Tools
+        </h1>
+        <p className="mt-0.5 text-[0.84rem] text-slate">
+          Specialized AI tools built into your workflow
+        </p>
       </div>
 
       {/* Category-grouped tool list */}

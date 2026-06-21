@@ -12,7 +12,6 @@ import {
   Rocket,
   GraduationCap,
   BarChart2,
-  BrainCircuit,
   FileSignature,
   Search,
   Bell,
@@ -28,6 +27,7 @@ import {
   ScrollText,
   Settings,
 } from "lucide-react";
+
 import { MatinMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 import {
@@ -52,47 +52,36 @@ const NAV: NavGroup[] = [
     label: "OVERVIEW",
     items: [
       { label: "Dashboard", href: "/hub", icon: LayoutDashboard },
-      { label: "AI Studio", href: "/hub/ai", icon: Wand2 },
     ],
   },
   {
-    label: "AGENT",
-    items: [
-      { label: "My Workspace", href: "/hub/agent", icon: BrainCircuit },
-    ],
-  },
-  {
-    label: "CLIENTS",
+    label: "LEADS & CLIENTS",
     items: [
       { label: "CRM & Leads", href: "/hub/crm", icon: Users },
-      { label: "Cash Offers", href: "/hub/cash-offer", icon: DollarSign },
+      { label: "Cash Offer Pipeline", href: "/hub/cash-offer", icon: DollarSign },
       { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
-      { label: "Transactions", href: "/hub/transactions", icon: FileText },
     ],
   },
   {
     label: "LISTINGS",
     items: [
       { label: "Listing Launch", href: "/hub/listing-launch", icon: Rocket },
-      { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
+      { label: "Transactions", href: "/hub/transactions", icon: FileText },
     ],
   },
   {
     label: "TOOLS",
     items: [
+      { label: "AI Tools", href: "/hub/ai", icon: Wand2 },
       { label: "Forms Library", href: "/hub/forms", icon: ClipboardList },
       { label: "Contract Builder", href: "/hub/contracts", icon: ScrollText },
-    ],
-  },
-  {
-    label: "ANALYTICS",
-    items: [
       { label: "Reporting", href: "/hub/reporting", icon: BarChart2 },
     ],
   },
   {
-    label: "SYSTEM",
+    label: "ADMIN",
     items: [
+      { label: "Coaching", href: "/hub/coaching", icon: GraduationCap },
       { label: "Settings", href: "/hub/settings", icon: Settings },
     ],
   },
