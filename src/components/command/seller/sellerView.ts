@@ -142,6 +142,72 @@ export function agentName(slug: string): string {
   return getAgent(slug)?.name ?? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Stable exterior-photo seed for a lead so its home image never reshuffles. */
+export function leadPhotoSeed(lead: Pick<SellerLead, "id">): number {
+  let h = 0;
+  for (let i = 0; i < lead.id.length; i++) h = (h * 31 + lead.id.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+/** Equity band — plain-English seller-intel derived from value × age (no fake fields). */
+export function equityBand(lead: SellerLead): { label: string; tone: ChipTone } {
+  const ownedYears = Math.max(0, new Date().getFullYear() - lead.yearBuilt);
+  if (lead.estValue >= 1_000_000 || ownedYears >= 25)
+    return { label: "High equity", tone: "success" };
+  if (lead.estValue >= 650_000 || ownedYears >= 12)
+    return { label: "Strong equity", tone: "info" };
+  return { label: "Building equity", tone: "warn" };
+}
+
+/** Saved-view keys for the likely-sellers list (drives the table filter). */
+export type SellerViewKey = "all" | "hot" | "cash" | "needs-call" | "appts" | "lost";
+
+export const SELLER_VIEWS: { key: SellerViewKey; label: string }[] = [
+  { key: "all", label: "All opportunities" },
+  { key: "hot", label: "Hot (≥85)" },
+  { key: "cash", label: "Cash offers" },
+  { key: "needs-call", label: "Needs call" },
+  { key: "appts", label: "Booked" },
+  { key: "lost", label: "Lost" },
+];
+
+/** Predicate for a saved view — pure, reproducible from the record. */
+export function matchesView(lead: SellerLead, view: SellerViewKey): boolean {
+  switch (view) {
+    case "all":
+      return true;
+    case "hot":
+      return effectiveScore(lead) >= 85 && lead.stage !== "Dead";
+    case "cash":
+      return lead.stage === "Offer Pending" || lead.stage === "Offer Sent";
+    case "needs-call":
+      return lead.stage === "New Request" || lead.stage === "Needs Valuation";
+    case "appts":
+      return lead.stage === "Accepted" || lead.stage === "Converted to Listing";
+    case "lost":
+      return lead.stage === "Dead";
+  }
+}
+
+/** Status-dot tone for a seller lead's stage (4-color row marker). */
+export function stageTone(lead: SellerLead): ChipTone {
+  switch (lead.stage) {
+    case "New Request":
+      return "warn";
+    case "Needs Valuation":
+      return "info";
+    case "Offer Pending":
+    case "Offer Sent":
+      return "gold";
+    case "Accepted":
+      return "success";
+    case "Converted to Listing":
+      return "ink";
+    case "Dead":
+      return "danger";
+  }
+}
+
 /** Synthesize a plausible outreach history feed from the record (no fake placeholders). */
 export function outreachTimeline(lead: SellerLead): ActivityItem[] {
   const days = lead.daysInStage;

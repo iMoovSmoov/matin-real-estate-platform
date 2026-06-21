@@ -1,40 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Check, StickyNote, Sparkles, Star } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  CircleCheck,
+  StickyNote,
+  Banknote,
+  TriangleAlert,
+  Link2,
+  Copy,
+} from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
 import { cn, usd } from "@/lib/utils";
-import { StatusChip, CalloutCard, Dot } from "@/components/os";
+import {
+  StatusChip,
+  CalloutCard,
+  Dot,
+  Avatar,
+  PropertyThumb,
+} from "@/components/os";
+import { MatinMark } from "@/components/brand/Logo";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Seller / Cash Offers — cash-offer comparison matrix + net sheet (§2.3)
 
    SkySlope frozen-column offer comparison: terms are ROWS (frozen left label
-   column), competing offers are COLUMNS. Each offer column header is a big
-   price + agent + an Accept (ink primary) + Add Notes button. The (i) verdict
-   is upgraded to an AI verdict — streamAi('cash-offer-eval') renders into a
-   dark CalloutCard (AI/system surfaces are dark — §1.8).
-
-   The Net Sheet is a small summary card: hero proceeds $ + underline +
-   label/value line items with legend dots. Real, dense, reconcilable numbers.
+   column), competing offers are COLUMNS. Each offer column header carries the
+   buyer agent's real Avatar, a big price, an Accept (state-mutating) + Add
+   Notes (opens an inline note field). Accepting an offer highlights it, DISABLES
+   the others, shows an inline confirmation, and recomputes the Net Sheet to the
+   accepted offer. The (i) verdict is upgraded to an AI verdict — streamAi
+   ('cash-offer-eval') streams into a dark CalloutCard inline (AI surfaces are
+   dark — §1.8). A share-link block lets a buyer agent submit an offer.
    ────────────────────────────────────────────────────────────────────────── */
 
-type AttrKey =
-  | "price"
-  | "closing"
-  | "loan"
-  | "down"
-  | "contingencies";
+type AttrKey = "price" | "closing" | "loan" | "down" | "contingencies";
 
 interface OfferColumn {
   id: string;
   buyer: string;
   agent: string;
+  agentSlug: string;
   price: number;
   closing: string;
   loan: string;
   down: string;
   contingencies: string;
+  /** Costs that net out against this offer's gross price (per-offer net sheet). */
+  payoff: number;
+  commissionRate: number;
+  closingCosts: number;
+  taxProration: number;
   /** Flags weak terms in the grid (auto-ranked — §2.3 AI behavior). */
   weak: Partial<Record<AttrKey, boolean>>;
   recommended?: boolean;
@@ -54,11 +69,16 @@ const OFFERS: OfferColumn[] = [
     id: "OFF-01",
     buyer: "Cash Is King Home Buyers",
     agent: "Jordan Matin",
+    agentSlug: "jordan-matin",
     price: 798000,
     closing: "Jul 8 · 14 days",
     loan: "All cash",
     down: "100%",
     contingencies: "None — as-is",
+    payoff: 214500,
+    commissionRate: 0.05,
+    closingCosts: 6850,
+    taxProration: 3120,
     weak: {},
     recommended: true,
   },
@@ -66,36 +86,54 @@ const OFFERS: OfferColumn[] = [
     id: "OFF-02",
     buyer: "The Vance Household",
     agent: "Joshua Rose",
+    agentSlug: "joshua-rose",
     price: 821000,
     closing: "Aug 22 · 59 days",
     loan: "Conventional 30yr",
     down: "20%",
     contingencies: "Inspection + appraisal + financing",
+    payoff: 214500,
+    commissionRate: 0.05,
+    closingCosts: 7300,
+    taxProration: 4180,
     weak: { closing: true, contingencies: true },
   },
   {
     id: "OFF-03",
     buyer: "R. & M. Okonkwo",
     agent: "Ava Brooks",
+    agentSlug: "ava-brooks",
     price: 805000,
     closing: "Aug 1 · 38 days",
     loan: "FHA 30yr",
     down: "3.5%",
     contingencies: "Inspection + appraisal",
+    payoff: 214500,
+    commissionRate: 0.05,
+    closingCosts: 7050,
+    taxProration: 3650,
     weak: { down: true, loan: true },
   },
 ];
 
-/* Net sheet — reconciles to the recommended offer (OFF-01, $798,000 cash). */
-const NET_SHEET: { label: string; value: number; tone: "ink" | "danger" }[] = [
-  { label: "Accepted offer price", value: 798000, tone: "ink" },
-  { label: "Existing mortgage payoff", value: -214500, tone: "danger" },
-  { label: "Agent commission (5%)", value: -39900, tone: "danger" },
-  { label: "Title, escrow & recording", value: -6850, tone: "danger" },
-  { label: "Property tax proration", value: -3120, tone: "danger" },
-];
+const EST_VALUE = 812000;
 
-const NET_PROCEEDS = NET_SHEET.reduce((s, r) => s + r.value, 0);
+function netSheetFor(o: OfferColumn) {
+  const commission = Math.round(o.price * o.commissionRate);
+  const rows: { label: string; value: number; tone: "ink" | "danger" }[] = [
+    { label: "Accepted offer price", value: o.price, tone: "ink" },
+    { label: "Existing mortgage payoff", value: -o.payoff, tone: "danger" },
+    {
+      label: `Agent commission (${Math.round(o.commissionRate * 100)}%)`,
+      value: -commission,
+      tone: "danger",
+    },
+    { label: "Title, escrow & recording", value: -o.closingCosts, tone: "danger" },
+    { label: "Property tax proration", value: -o.taxProration, tone: "danger" },
+  ];
+  const net = rows.reduce((s, r) => s + r.value, 0);
+  return { rows, net };
+}
 
 function cellValue(o: OfferColumn, key: AttrKey): string {
   switch (key) {
@@ -112,19 +150,34 @@ function cellValue(o: OfferColumn, key: AttrKey): string {
   }
 }
 
+const SHARE_LINK = "matinos.app/offer/5127-cedar-hills";
+
 export function CashOfferMatrix() {
+  // Default the net sheet to the recommended offer until one is accepted.
   const [accepted, setAccepted] = useState<string | null>(null);
-  const [verdict, setVerdict] = useState<{ text: string; loading: boolean } | null>(null);
+  const [notesOpen, setNotesOpen] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [verdict, setVerdict] = useState<{ text: string; running: boolean } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const netSheetOffer = useMemo(
+    () => OFFERS.find((o) => o.id === accepted) ?? OFFERS.find((o) => o.recommended)!,
+    [accepted],
+  );
+  const { rows: netRows, net: netProceeds } = useMemo(
+    () => netSheetFor(netSheetOffer),
+    [netSheetOffer],
+  );
 
   async function runVerdict() {
-    setVerdict({ text: "", loading: true });
+    setVerdict({ text: "", running: true });
     await streamAi(
       {
         tool: "cash-offer-eval",
         input: {
           property: "5127 SW Cedar Hills Blvd, Beaverton",
           seller: "Sarah Mitchell",
-          estValue: 812000,
+          estValue: EST_VALUE,
           offers: OFFERS.map((o) => ({
             buyer: o.buyer,
             price: o.price,
@@ -132,38 +185,76 @@ export function CashOfferMatrix() {
             loan: o.loan,
             down: o.down,
             contingencies: o.contingencies,
+            netProceeds: netSheetFor(o).net,
           })),
-          netProceedsTopCashOffer: NET_PROCEEDS,
         },
       },
       (_chunk, full) => setVerdict((v) => (v ? { ...v, text: full } : v)),
     );
-    setVerdict((v) => (v ? { ...v, loading: false } : v));
+    setVerdict((v) => (v ? { ...v, running: false } : v));
   }
+
+  function copyLink() {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(`https://${SHARE_LINK}`);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  }
+
+  const acceptedOffer = accepted ? OFFERS.find((o) => o.id === accepted) : null;
 
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.65fr_1fr]">
       {/* ── Comparison matrix ─────────────────────────────────────────────── */}
       <section className="min-w-0 rounded-2xl border border-mist bg-cloud shadow-soft">
+        {/* Header — property photo + AI verdict trigger */}
         <div className="flex items-center justify-between gap-3 border-b border-mist px-5 py-3.5">
-          <div className="min-w-0">
-            <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
-              Offer comparison
-            </h3>
-            <p className="mt-0.5 text-[0.76rem] text-slate">
-              5127 SW Cedar Hills Blvd · Sarah Mitchell · 3 active offers
-            </p>
+          <div className="flex min-w-0 items-center gap-3">
+            <PropertyThumb
+              seedIndex={5}
+              ratio="square"
+              alt="5127 SW Cedar Hills Blvd"
+              className="h-11 w-11 shrink-0 rounded-lg"
+            />
+            <div className="min-w-0">
+              <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
+                Offer comparison
+              </h3>
+              <p className="mt-0.5 truncate text-[0.76rem] text-slate">
+                5127 SW Cedar Hills Blvd · Sarah Mitchell · 3 active offers · est. {usd(EST_VALUE)}
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={runVerdict}
-            disabled={verdict?.loading}
+            disabled={verdict?.running}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-50"
           >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            {verdict?.loading ? "Evaluating…" : "AI verdict"}
+            <MatinMark theme="dark" className="h-3.5 w-3.5" />
+            {verdict?.running ? "Evaluating…" : "AI verdict"}
           </button>
         </div>
+
+        {/* Accepted-offer confirmation banner (inline) */}
+        {acceptedOffer ? (
+          <div className="flex items-center gap-2 border-b border-success/25 bg-success/[0.07] px-5 py-2.5 text-[0.8rem]">
+            <CircleCheck className="h-4 w-4 shrink-0 text-success" aria-hidden />
+            <span className="text-ink">
+              Accepted <span className="font-semibold">{acceptedOffer.buyer}</span> at{" "}
+              <span className="font-semibold tabular-nums">{usd(acceptedOffer.price)}</span> — other
+              offers are on hold. Net sheet updated.
+            </span>
+            <button
+              type="button"
+              onClick={() => setAccepted(null)}
+              className="ml-auto shrink-0 rounded-md px-2 py-1 text-[0.74rem] font-medium text-slate transition-colors hover:text-ink"
+            >
+              Undo
+            </button>
+          </div>
+        ) : null}
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
@@ -173,48 +264,109 @@ export function CashOfferMatrix() {
                 <th className="sticky left-0 z-10 w-40 bg-paper-200/70 px-4 py-3 align-bottom" />
                 {OFFERS.map((o) => {
                   const isAccepted = accepted === o.id;
+                  const disabled = accepted != null && !isAccepted;
                   return (
                     <th
                       key={o.id}
                       className={cn(
-                        "min-w-[13rem] border-l border-mist px-4 py-3 align-top",
-                        o.recommended ? "bg-gold-soft/30" : "bg-cloud",
+                        "min-w-[13.5rem] border-l border-mist px-4 py-3 align-top transition-colors",
+                        isAccepted
+                          ? "bg-success/[0.06]"
+                          : o.recommended
+                            ? "bg-gold-soft/30"
+                            : "bg-cloud",
+                        disabled && "opacity-45",
                       )}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="font-display text-[1.35rem] font-normal leading-none text-ink tabular-nums">
                           {usd(o.price)}
                         </span>
-                        {o.recommended ? (
-                          <Star className="h-3.5 w-3.5 fill-gold text-gold" aria-hidden />
+                        {o.recommended && !accepted ? (
+                          <StatusChip tone="gold" variant="soft">
+                            Top pick
+                          </StatusChip>
+                        ) : null}
+                        {isAccepted ? (
+                          <StatusChip tone="success" variant="soft">
+                            Accepted
+                          </StatusChip>
                         ) : null}
                       </div>
-                      <p className="mt-1 truncate text-[0.78rem] font-medium text-ink" title={o.buyer}>
-                        {o.buyer}
-                      </p>
-                      <p className="text-[0.72rem] text-slate">{o.agent}</p>
+
+                      {/* Buyer agent identity — real Avatar */}
+                      <div className="mt-2 flex items-center gap-2">
+                        <Avatar name={o.agent} slug={o.agentSlug} size={26} ring />
+                        <div className="min-w-0">
+                          <p
+                            className="truncate text-[0.78rem] font-medium leading-tight text-ink"
+                            title={o.buyer}
+                          >
+                            {o.buyer}
+                          </p>
+                          <p className="truncate text-[0.72rem] leading-tight text-slate">
+                            {o.agent}
+                          </p>
+                        </div>
+                      </div>
+
                       <div className="mt-2.5 flex items-center gap-1.5">
                         <button
                           type="button"
+                          disabled={disabled}
                           onClick={() => setAccepted(isAccepted ? null : o.id)}
                           className={cn(
-                            "inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-semibold transition-colors",
+                            "inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-semibold transition-colors disabled:cursor-not-allowed",
                             isAccepted
                               ? "bg-success text-cloud hover:bg-success/90"
-                              : "bg-ink text-cloud hover:bg-ink-800",
+                              : "bg-ink text-cloud hover:bg-ink-800 disabled:bg-ink/30",
                           )}
                         >
-                          <Check className="h-3.5 w-3.5" aria-hidden />
+                          <CircleCheck className="h-3.5 w-3.5" aria-hidden />
                           {isAccepted ? "Accepted" : "Accept"}
                         </button>
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 rounded-lg border border-mist bg-cloud px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+                          onClick={() =>
+                            setNotesOpen((cur) => (cur === o.id ? null : o.id))
+                          }
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
+                            notes[o.id]
+                              ? "border-ink/20 bg-paper-200 text-ink"
+                              : "border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
+                          )}
                         >
                           <StickyNote className="h-3.5 w-3.5" aria-hidden />
-                          Notes
+                          {notes[o.id] ? "Note ✓" : "Notes"}
                         </button>
                       </div>
+
+                      {/* Inline note editor */}
+                      {notesOpen === o.id ? (
+                        <div className="mt-2">
+                          <textarea
+                            rows={2}
+                            value={notes[o.id] ?? ""}
+                            onChange={(e) =>
+                              setNotes((n) => ({ ...n, [o.id]: e.target.value }))
+                            }
+                            placeholder="Add a note for the seller…"
+                            className="w-full resize-none rounded-lg border border-mist bg-paper px-2.5 py-1.5 text-[0.76rem] text-ink outline-none focus:border-ink/30"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setNotesOpen(null)}
+                            className="mt-1 rounded-md bg-ink px-2.5 py-1 text-[0.72rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+                          >
+                            Save note
+                          </button>
+                        </div>
+                      ) : notes[o.id] ? (
+                        <p className="mt-2 line-clamp-2 rounded-lg bg-paper-200/70 px-2.5 py-1.5 text-[0.72rem] leading-snug text-slate">
+                          {notes[o.id]}
+                        </p>
+                      ) : null}
                     </th>
                   );
                 })}
@@ -231,12 +383,19 @@ export function CashOfferMatrix() {
                   </th>
                   {OFFERS.map((o) => {
                     const weak = !!o.weak[attr.key];
+                    const isAccepted = accepted === o.id;
+                    const disabled = accepted != null && !isAccepted;
                     return (
                       <td
                         key={o.id}
                         className={cn(
-                          "border-l border-mist px-4 py-3 align-top text-[0.82rem]",
-                          o.recommended ? "bg-gold-soft/15" : "",
+                          "border-l border-mist px-4 py-3 align-top text-[0.82rem] transition-colors",
+                          isAccepted
+                            ? "bg-success/[0.04]"
+                            : o.recommended && !accepted
+                              ? "bg-gold-soft/15"
+                              : "",
+                          disabled && "opacity-45",
                         )}
                       >
                         <span
@@ -249,7 +408,7 @@ export function CashOfferMatrix() {
                                 : "text-ink",
                           )}
                         >
-                          {weak ? <Dot tone="danger" /> : null}
+                          {weak ? <TriangleAlert className="h-3.5 w-3.5 shrink-0" aria-hidden /> : null}
                           {cellValue(o, attr.key)}
                         </span>
                       </td>
@@ -257,6 +416,33 @@ export function CashOfferMatrix() {
                   })}
                 </tr>
               ))}
+              {/* Net-proceeds row — reconciles each column to the net sheet */}
+              <tr className="border-t border-mist bg-paper-200/40">
+                <th
+                  scope="row"
+                  className="sticky left-0 z-10 w-40 bg-paper-200/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate"
+                >
+                  Net to seller
+                </th>
+                {OFFERS.map((o) => {
+                  const isAccepted = accepted === o.id;
+                  const disabled = accepted != null && !isAccepted;
+                  return (
+                    <td
+                      key={o.id}
+                      className={cn(
+                        "border-l border-mist px-4 py-3 align-top",
+                        isAccepted && "bg-success/[0.06]",
+                        disabled && "opacity-45",
+                      )}
+                    >
+                      <span className="font-semibold tabular-nums text-ink">
+                        {usd(netSheetFor(o).net)}
+                      </span>
+                    </td>
+                  );
+                })}
+              </tr>
             </tbody>
           </table>
         </div>
@@ -274,63 +460,106 @@ export function CashOfferMatrix() {
               }
             >
               <p className="whitespace-pre-wrap leading-relaxed">
-                {verdict.text || (verdict.loading ? "Matin AI is weighing the offers…" : "")}
+                {verdict.text ||
+                  (verdict.running ? "Matin AI is weighing the offers…" : "")}
               </p>
             </CalloutCard>
           </div>
         ) : null}
       </section>
 
-      {/* ── Net sheet ─────────────────────────────────────────────────────── */}
-      <aside className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
-            Net sheet
+      {/* ── Right rail: net sheet + share-link intake ─────────────────────── */}
+      <aside className="flex min-w-0 flex-col gap-5">
+        <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
+              Net sheet
+            </h3>
+            <StatusChip tone={accepted ? "success" : "gold"} variant="soft">
+              {accepted ? "Accepted offer" : "Top cash offer"}
+            </StatusChip>
+          </div>
+          <p className="mt-1 text-[0.74rem] text-slate">
+            {netSheetOffer.buyer} · {usd(netSheetOffer.price)}
+          </p>
+          <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate">
+            Estimated seller proceeds
+          </p>
+          <p className="mt-1 border-b-2 border-ink pb-2 font-display text-[2rem] font-normal leading-none text-ink tabular-nums">
+            {usd(netProceeds)}
+          </p>
+
+          <dl className="mt-4 space-y-2.5">
+            {netRows.map((row) => (
+              <div key={row.label} className="flex items-center justify-between gap-3">
+                <dt className="flex items-center gap-2 text-[0.8rem] text-slate">
+                  <Dot tone={row.tone === "danger" ? "danger" : "ink"} />
+                  {row.label}
+                </dt>
+                <dd
+                  className={cn(
+                    "text-[0.84rem] font-semibold tabular-nums",
+                    row.tone === "danger" ? "text-danger" : "text-ink",
+                  )}
+                >
+                  {row.value < 0 ? `(${usd(Math.abs(row.value))})` : usd(row.value)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-mist pt-3">
+            <span className="flex items-center gap-2 text-[0.8rem] font-semibold text-ink">
+              <Banknote className="h-4 w-4 text-success" aria-hidden />
+              Net to seller
+            </span>
+            <span className="font-display text-[1.05rem] font-normal text-success tabular-nums">
+              {usd(netProceeds)}
+            </span>
+          </div>
+
+          <p className="mt-3 text-[0.7rem] leading-relaxed text-slate">
+            Reconciles to {accepted ? "the accepted" : "the top"} offer ({usd(netSheetOffer.price)}).
+            Figures are estimates pending title and payoff confirmation.
+          </p>
+        </div>
+
+        {/* Share-link offer intake (realism must — §2.3) */}
+        <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <h3 className="flex items-center gap-1.5 font-display text-[1.02rem] font-normal leading-tight text-ink">
+            <Link2 className="h-4 w-4 text-slate" aria-hidden />
+            Buyer-agent intake
           </h3>
-          <StatusChip tone="gold" variant="soft">
-            Top cash offer
-          </StatusChip>
+          <p className="mt-1.5 text-[0.78rem] leading-relaxed text-slate">
+            Share this link with cash buyers and agents. Submitted offers land in
+            this grid for the seller to compare.
+          </p>
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-mist bg-paper-200/60 px-3 py-2">
+            <span className="min-w-0 flex-1 truncate font-mono text-[0.74rem] text-ink">
+              {SHARE_LINK}
+            </span>
+            <button
+              type="button"
+              onClick={copyLink}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-semibold transition-colors",
+                copied ? "text-success" : "text-slate hover:text-ink",
+              )}
+            >
+              {copied ? (
+                <>
+                  <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" aria-hidden />
+                  Copy
+                </>
+              )}
+            </button>
+          </div>
         </div>
-        <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate">
-          Estimated seller proceeds
-        </p>
-        <p className="mt-1 border-b-2 border-ink pb-2 font-display text-[2rem] font-normal leading-none text-ink tabular-nums">
-          {usd(NET_PROCEEDS)}
-        </p>
-
-        <dl className="mt-4 space-y-2.5">
-          {NET_SHEET.map((row) => (
-            <div key={row.label} className="flex items-center justify-between gap-3">
-              <dt className="flex items-center gap-2 text-[0.8rem] text-slate">
-                <Dot tone={row.tone === "danger" ? "danger" : "ink"} />
-                {row.label}
-              </dt>
-              <dd
-                className={cn(
-                  "text-[0.84rem] font-semibold tabular-nums",
-                  row.tone === "danger" ? "text-danger" : "text-ink",
-                )}
-              >
-                {row.value < 0 ? `(${usd(Math.abs(row.value))})` : usd(row.value)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-mist pt-3">
-          <span className="flex items-center gap-2 text-[0.8rem] font-semibold text-ink">
-            <Dot tone="success" />
-            Net to seller
-          </span>
-          <span className="font-display text-[1.05rem] font-normal text-success tabular-nums">
-            {usd(NET_PROCEEDS)}
-          </span>
-        </div>
-
-        <p className="mt-3 text-[0.7rem] leading-relaxed text-slate">
-          Reconciles to the accepted all-cash offer ({usd(798000)}). Figures are
-          estimates pending title and payoff confirmation.
-        </p>
       </aside>
     </div>
   );

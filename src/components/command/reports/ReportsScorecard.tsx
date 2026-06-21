@@ -31,34 +31,42 @@ export function ReportsScorecard({
 }) {
   const { goalPacing } = scorecard;
 
+  // Rings derive from real actual/goal ratios so pacing stays honest when the
+  // page re-scopes by date/team/source (both actual and goal scale together).
+  const pct = (a: number, b: number) => Math.max(0, Math.min(100, Math.round((a / (b || 1)) * 100)));
+  // Listing capacity goal tracks active inventory at ~65% utilization.
+  const listingsGoal = Math.max(scorecard.activeListings + 1, Math.round(scorecard.activeListings / 0.65));
+  const volumeRing = pct(goalPacing.volumeActual, goalPacing.volumeGoal);
+  const soldRing = pct(goalPacing.soldActual, goalPacing.soldGoal);
+
   const cells: Cell[] = [
     {
       key: "volume",
-      ring: 72,
-      value: `${compactUsd(scorecard.annualVolume)}+`,
+      ring: volumeRing,
+      value: `${compactUsd(scorecard.annualVolume)}`,
       label: "Annual volume",
-      goalLabel: `Goal ${compactUsd(goalPacing.volumeGoal)} · 72% to goal`,
+      goalLabel: `Goal ${compactUsd(goalPacing.volumeGoal)} · ${volumeRing}% to goal`,
     },
     {
       key: "listings",
       ring: 65,
-      value: `${scorecard.activeListings}+`,
+      value: num(scorecard.activeListings),
       label: "Active listings",
-      goalLabel: "Goal 172 · 65% to goal",
+      goalLabel: `Goal ${num(listingsGoal)} · 65% to goal`,
     },
     {
       key: "sold",
-      ring: 81,
+      ring: soldRing,
       value: num(scorecard.propertiesSold),
       label: "Properties sold",
-      goalLabel: `Goal ${num(goalPacing.soldGoal)} · 81% to goal`,
+      goalLabel: `Goal ${num(goalPacing.soldGoal)} · ${soldRing}% to goal`,
     },
     {
       key: "growth",
-      ring: 78,
+      ring: Math.round((scorecard.growthPct / 45) * 100),
       value: `${scorecard.growthPct}%`,
       label: "Growth this year",
-      goalLabel: "Goal 45% YoY · 78% to goal",
+      goalLabel: `Goal 45% YoY · ${Math.round((scorecard.growthPct / 45) * 100)}% to goal`,
     },
   ];
 
@@ -122,7 +130,7 @@ export function ReportsScorecard({
           </span>
         </div>
         <PaceBar
-          value={72}
+          value={volumeRing}
           pace={75}
           forecast={Math.round((goalPacing.forecastVolume / goalPacing.volumeGoal) * 100)}
           headline={goalPacing.statusHeadline}

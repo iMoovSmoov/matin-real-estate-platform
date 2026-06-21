@@ -6,15 +6,21 @@ import {
   ClipboardList,
   GraduationCap,
   MessageSquare,
-  Sparkles,
+  Mic,
+  RotateCcw,
+  CircleCheck,
+  Plus,
+  CalendarClock,
 } from "lucide-react";
 import type { CoachingScenario } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 import {
+  Avatar,
   CalloutCard,
   ProgressTrack,
-  ScoreChip,
+  ScoreRing,
   StatusChip,
   type TrackTone,
 } from "@/components/os";
@@ -22,12 +28,17 @@ import {
 /* ──────────────────────────────────────────────────────────────────────────
    CoachingWorkbench — the §2.9 three-pane coaching surface.
 
-   (1) Scenario library  — broker-approved objection drills; selected = dark-filled
-   (2) Roleplay transcript — alternating light AI-Seller / Agent bubbles, ending
-       in a DARK "Coach" CalloutCard (gold "Coach" label). Live via streamAi('coach').
-   (3) Scorecard         — rubric ProgressTrack bars + bordered auto-coaching plan.
+   (1) Scenario library  — broker-approved objection drills; selected = dark-filled.
+       Clicking a scenario LOADS its roleplay + scorecard (real state).
+   (2) Roleplay transcript — alternating light AI-Persona / Agent bubbles, ending
+       in a DARK "Coach" CalloutCard (gold "Coach" label). LIVE: the agent types a
+       reply → streamAi('coach') returns the persona's next line + a Coach note +
+       NUDGES the live scorecard. Real streamed back-and-forth.
+   (3) Scorecard — rubric ProgressTrack bars + bordered auto-coaching plan whose
+       drills can be assigned to local state (inline confirmation).
 
-   Composes ONLY @/components/os primitives. Client (roleplay interactivity).
+   Composes ONLY @/components/os primitives. Avatar wires real persona/agent
+   identity. AI presence = MatinMark (no Sparkles). Client (roleplay state).
    ────────────────────────────────────────────────────────────────────────── */
 
 type Speaker = "ai" | "agent";
@@ -35,6 +46,7 @@ type Speaker = "ai" | "agent";
 type Turn = { speaker: Speaker; text: string };
 
 type RubricRow = {
+  key: string;
   label: string;
   value: number;
   tone: TrackTone;
@@ -43,16 +55,58 @@ type RubricRow = {
 /** Pre-seeded transcript + rubric per scenario so each drill looks complete
     before any click. Keyed by scenario id; falls back to the seller-price drill. */
 type Seed = {
-  persona: string;
+  /** Persona display name + the listing/lead context line. */
+  personaName: string;
+  personaContext: string;
+  /** Avatar seed — real photos exist only for real agents, so personas fall back
+      to a clean initials token. A slug here would resolve a photo; we leave it
+      undefined so personas render as initials (they are clients, not agents). */
   transcript: Turn[];
   coach: string;
   rubric: RubricRow[];
   plan: string;
 };
 
+const RUBRIC_KEYS = [
+  "empathy",
+  "pricing",
+  "close",
+  "crm",
+  "speed",
+] as const;
+const RUBRIC_LABELS: Record<string, string> = {
+  empathy: "Empathy",
+  pricing: "Pricing explanation",
+  close: "Next-step close",
+  crm: "CRM hygiene",
+  speed: "Speed to lead",
+};
+
+function rubric(
+  empathy: number,
+  pricing: number,
+  close: number,
+  crm: number,
+  speed: number,
+): RubricRow[] {
+  return [
+    { key: "empathy", label: RUBRIC_LABELS.empathy, value: empathy, tone: toneFor(empathy) },
+    { key: "pricing", label: RUBRIC_LABELS.pricing, value: pricing, tone: toneFor(pricing) },
+    { key: "close", label: RUBRIC_LABELS.close, value: close, tone: toneFor(close) },
+    { key: "crm", label: RUBRIC_LABELS.crm, value: crm, tone: toneFor(crm) },
+    // Speed-to-lead is the AI/active dimension — rendered in gold per the spec.
+    { key: "speed", label: RUBRIC_LABELS.speed, value: speed, tone: "gold" },
+  ];
+}
+
+function toneFor(v: number): TrackTone {
+  return v >= 85 ? "success" : v >= 70 ? "warn" : "danger";
+}
+
 const SEEDS: Record<string, Seed> = {
   "CS-001": {
-    persona: "AI Seller — Sarah Mitchell · 1248 NW Cedar Hills Dr",
+    personaName: "Sarah Mitchell",
+    personaContext: "AI Seller · 1248 NW Cedar Hills Dr · listing interview",
     transcript: [
       {
         speaker: "ai",
@@ -72,17 +126,12 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "Good empathy. Improve by explaining absorption rate and net outcome — show her the dollars she nets after a 41-day stale period and a likely $30K reduction, vs. a clean sale in week one.",
-    rubric: [
-      { label: "Empathy", value: 85, tone: "success" },
-      { label: "Pricing explanation", value: 62, tone: "warn" },
-      { label: "Next-step close", value: 54, tone: "danger" },
-      { label: "CRM hygiene", value: 92, tone: "success" },
-      { label: "Speed to lead", value: 78, tone: "gold" },
-    ],
-    plan: "3 practice calls, one manager review, and a CRM task to call two active sellers today.",
+    rubric: rubric(85, 62, 54, 92, 78),
+    plan: "3 practice calls on pricing conversations, one manager review, and a CRM task to call two active sellers today.",
   },
   "CS-002": {
-    persona: "AI Buyer — Daniel Cho · Lake Oswego search",
+    personaName: "Daniel Cho",
+    personaContext: "AI Buyer · Lake Oswego search · pre-approved $780K",
     transcript: [
       {
         speaker: "ai",
@@ -102,17 +151,12 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "Solid reframe to buyer-benefit. Improve the close — name the exact term length and offer a 7-day scoped agreement on the spot instead of leaving it open. Get the signature before the first showing.",
-    rubric: [
-      { label: "Empathy", value: 80, tone: "success" },
-      { label: "Pricing explanation", value: 71, tone: "warn" },
-      { label: "Next-step close", value: 58, tone: "danger" },
-      { label: "CRM hygiene", value: 88, tone: "success" },
-      { label: "Speed to lead", value: 74, tone: "gold" },
-    ],
+    rubric: rubric(80, 71, 58, 88, 74),
     plan: "2 practice calls on scoped agreements, draft a 7-day OREF C-565, and a CRM task to send Daniel Cho the agreement explainer today.",
   },
   "ZILLOW-GHOST": {
-    persona: "AI Lead — Zillow inquiry · gone cold 17 days",
+    personaName: "Megan Pratt",
+    personaContext: "AI Lead · Zillow inquiry · gone cold 17 days",
     transcript: [
       {
         speaker: "agent",
@@ -128,17 +172,12 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "The break-up + value text is the right move on a ghosting lead. Improve speed to lead — this inquiry sat 4 hours before first contact. Auto-enroll Zillow leads in a 5-minute first-touch sequence so they never go cold.",
-    rubric: [
-      { label: "Empathy", value: 76, tone: "warn" },
-      { label: "Pricing explanation", value: 64, tone: "warn" },
-      { label: "Next-step close", value: 60, tone: "danger" },
-      { label: "CRM hygiene", value: 84, tone: "success" },
-      { label: "Speed to lead", value: 41, tone: "danger" },
-    ],
+    rubric: rubric(76, 64, 60, 84, 41),
     plan: "1 practice call on re-engagement, enable the 5-minute Zillow first-touch automation, and a CRM task to break-up-text 3 ghosting leads today.",
   },
   "CS-003": {
-    persona: "AI Listing Agent — inspection negotiation",
+    personaName: "Listing Agent — Pat Reyes",
+    personaContext: "AI Listing Agent · TX-8912 · inspection negotiation",
     transcript: [
       {
         speaker: "ai",
@@ -158,17 +197,12 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "Strong framing of safety vs. cosmetic and a concrete ask. Improve next-step close — you named the deadline but didn't pin a callback time. Set a 'respond by 5pm' so the contingency clock works for you.",
-    rubric: [
-      { label: "Empathy", value: 72, tone: "warn" },
-      { label: "Pricing explanation", value: 81, tone: "success" },
-      { label: "Next-step close", value: 66, tone: "warn" },
-      { label: "CRM hygiene", value: 90, tone: "success" },
-      { label: "Speed to lead", value: 79, tone: "gold" },
-    ],
+    rubric: rubric(72, 81, 66, 90, 79),
     plan: "2 practice calls on contingency negotiation, draft the repair-credit addendum, and a CRM task to confirm the inspection deadline on TX-8912 today.",
   },
   "CS-004": {
-    persona: "AI Seller — commission objection",
+    personaName: "Karen Whitfield",
+    personaContext: "AI Seller · West Linn · commission objection",
     transcript: [
       {
         speaker: "ai",
@@ -188,17 +222,12 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "Excellent move to net-proceeds math and no defensiveness. Improve pricing explanation — walk her line-by-line through the net sheet rather than citing one aggregate number; specificity beats averages.",
-    rubric: [
-      { label: "Empathy", value: 83, tone: "success" },
-      { label: "Pricing explanation", value: 69, tone: "warn" },
-      { label: "Next-step close", value: 64, tone: "warn" },
-      { label: "CRM hygiene", value: 91, tone: "success" },
-      { label: "Speed to lead", value: 77, tone: "gold" },
-    ],
+    rubric: rubric(83, 69, 64, 91, 77),
     plan: "2 practice calls on value defense, build a side-by-side net sheet template, and a CRM task to send the comparison to two listing prospects today.",
   },
   "CS-005": {
-    persona: "AI Homeowner — cash offer vs. traditional sale",
+    personaName: "Robert Nguyen",
+    personaContext: "AI Homeowner · Tigard · cash offer vs. traditional sale",
     transcript: [
       {
         speaker: "ai",
@@ -218,14 +247,33 @@ const SEEDS: Record<string, Seed> = {
       },
     ],
     coach: "Great net-sheet framing and you quantified convenience. Improve next-step close — end with a single clear ask ('want me to start the listing prep this week?') so the conversation converts.",
-    rubric: [
-      { label: "Empathy", value: 79, tone: "warn" },
-      { label: "Pricing explanation", value: 84, tone: "success" },
-      { label: "Next-step close", value: 57, tone: "danger" },
-      { label: "CRM hygiene", value: 89, tone: "success" },
-      { label: "Speed to lead", value: 80, tone: "gold" },
-    ],
+    rubric: rubric(79, 84, 57, 89, 80),
     plan: "2 practice calls on cash-vs-traditional, build the dual net-sheet, and a CRM task to call two cash-offer leads with the comparison today.",
+  },
+  "CS-006": {
+    personaName: "Diane Salazar",
+    personaContext: "AI Seller · Happy Valley · 4 offers on the table",
+    transcript: [
+      {
+        speaker: "ai",
+        text: "Just take the highest number, right? $812K beats everything else — why are we even talking?",
+      },
+      {
+        speaker: "agent",
+        text: "It's the biggest number, but not automatically the strongest deal. The $812K offer is FHA with a 5% down payment and asks for $9K in closing help. Let me show you which offer actually clears escrow cleanest.",
+      },
+      {
+        speaker: "ai",
+        text: "So which one do you actually like?",
+      },
+      {
+        speaker: "agent",
+        text: "The $798K cash offer with a 14-day close and an inspection waiver. You net within $4K of the top bid with near-zero fall-through risk. Want me to counter it up $6K and lock it tonight?",
+      },
+    ],
+    coach: "Excellent — you reframed 'highest' to 'strongest' and gave a clear recommendation. Improve next-step close by pre-drafting the counter so she can approve it in one tap instead of waiting on you.",
+    rubric: rubric(81, 86, 68, 90, 82),
+    plan: "2 practice calls on multiple-offer strategy, build an offer-comparison net sheet, and a CRM task to counter the strongest offer on the Happy Valley listing today.",
   },
 };
 
@@ -245,18 +293,50 @@ function seedFor(id: string): Seed {
   return SEEDS[id] ?? SEEDS[DEFAULT_SEED_KEY];
 }
 
+/** Initial live-score map from a seed's rubric (typed Record, not inferred). */
+function scoresFromSeed(seed: Seed): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of seed.rubric) out[r.key] = r.value;
+  return out;
+}
+
+/** Per-turn scoring nudge — derived from the agent's typed reply so the live
+    scorecard moves believably as the roleplay progresses (no model round-trip
+    needed for the visible bars; the model still streams the persona + Coach). */
+function nudgeFromReply(text: string): Partial<Record<string, number>> {
+  const t = text.toLowerCase();
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const nudge: Partial<Record<string, number>> = {};
+  // Empathy — acknowledgement / validating language.
+  if (/\b(i hear you|i understand|fair|great question|i get it|makes sense|totally)\b/.test(t))
+    nudge.empathy = 6;
+  // Pricing explanation — concrete numbers / comps / net.
+  if (/\$|\d{2,}|comp|net sheet|absorption|days on market|price/.test(t)) nudge.pricing = 7;
+  // Next-step close — a concrete ask / scheduling.
+  if (/\?|today|this week|sign|schedule|tonight|let's|can we|want me to|book/.test(t))
+    nudge.close = 8;
+  // CRM hygiene — note-taking / follow-up discipline language.
+  if (/\b(follow up|log|note|crm|send (you|over)|i'll email|reminder)\b/.test(t)) nudge.crm = 4;
+  // Speed to lead — brevity rewards quick, decisive replies.
+  if (words > 0 && words <= 45) nudge.speed = 5;
+  else if (words > 80) nudge.speed = -3;
+  return nudge;
+}
+
 export function CoachingWorkbench({
   scenarios,
-  onOpenAi,
+  onAskAi,
 }: {
   scenarios: CoachingScenario[];
-  onOpenAi?: (context: string) => void;
+  /** Explicit "Ask Matin" affordance — the ONLY path allowed to open the global
+      AI sidecar (the live roleplay itself streams inline, never the sidecar). */
+  onAskAi?: (context: string) => void;
 }) {
   // Library = broker-approved records + the synthetic Zillow ghosting drill,
   // ordered to match the wireframe storyline.
   const library = useMemo<CoachingScenario[]>(() => {
     const byId = new Map(scenarios.map((s) => [s.id, s]));
-    const order = ["CS-001", "CS-002", "ZILLOW-GHOST", "CS-003", "CS-004", "CS-005"];
+    const order = ["CS-001", "CS-002", "ZILLOW-GHOST", "CS-003", "CS-004", "CS-005", "CS-006"];
     return order
       .map((id) => (id === "ZILLOW-GHOST" ? ZILLOW_SCENARIO : byId.get(id)))
       .filter((s): s is CoachingScenario => Boolean(s));
@@ -271,7 +351,19 @@ export function CoachingWorkbench({
   const [draft, setDraft] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [liveCoach, setLiveCoach] = useState<string | null>(null);
+  const [practicing, setPracticing] = useState(false);
   const streamingRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+
+  // Live scorecard — starts at the seed rubric, nudged by each agent reply.
+  const [liveScores, setLiveScores] = useState<Record<string, number>>(() =>
+    scoresFromSeed(seed),
+  );
+  const [agentTurnCount, setAgentTurnCount] = useState(0);
+
+  // Drills the agent has assigned from the auto-plan (local state + confirmation).
+  const [assignedDrills, setAssignedDrills] = useState<string[]>([]);
 
   const transcript = [...seed.transcript, ...liveTurns];
 
@@ -280,15 +372,39 @@ export function CoachingWorkbench({
     setLiveTurns([]);
     setLiveCoach(null);
     setDraft("");
+    setPracticing(false);
+    setAgentTurnCount(0);
+    setLiveScores(scoresFromSeed(seedFor(id)));
+  }
+
+  function startPractice() {
+    setPracticing(true);
+    requestAnimationFrame(() => {
+      composerRef.current?.focus();
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    });
   }
 
   async function sendResponse(text: string) {
     if (!text.trim() || streamingRef.current) return;
     streamingRef.current = true;
     setStreaming(true);
+    setPracticing(true);
     setLiveTurns((t) => [...t, { speaker: "agent", text: text.trim() }]);
     setDraft("");
     setLiveCoach(null);
+    setAgentTurnCount((n) => n + 1);
+
+    // Nudge the live scorecard from the agent's reply (clamped 0–100).
+    const nudge = nudgeFromReply(text);
+    setLiveScores((prev) => {
+      const next = { ...prev };
+      for (const k of RUBRIC_KEYS) {
+        const d = nudge[k];
+        if (typeof d === "number") next[k] = Math.max(0, Math.min(100, (next[k] ?? 60) + d));
+      }
+      return next;
+    });
 
     // Build the conversation for the coach tool: scenario prompt + the running
     // transcript. AI plays the persona and returns the next line + scoring cues.
@@ -298,7 +414,7 @@ export function CoachingWorkbench({
         role: "user" as const,
         content:
           `Coaching roleplay. Scenario: "${active?.title}" — ${active?.prompt}\n\n` +
-          `You play the persona (${seed.persona}). Reply IN CHARACTER with one short objection or response, ` +
+          `You play the persona (${seed.personaName} — ${seed.personaContext}). Reply IN CHARACTER with one short objection or response, ` +
           `then on a new line starting with "COACH:" give the agent one specific improvement.\n\n` +
           `Transcript so far:\n` +
           history
@@ -309,6 +425,9 @@ export function CoachingWorkbench({
 
     // Add an empty AI turn we stream into.
     setLiveTurns((t) => [...t, { speaker: "ai", text: "" }]);
+    requestAnimationFrame(() =>
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }),
+    );
 
     try {
       await streamAi({ tool: "coach", messages }, (_chunk, full) => {
@@ -318,11 +437,11 @@ export function CoachingWorkbench({
         const coachNote = idx >= 0 ? full.slice(idx + "COACH:".length).trim() : null;
         setLiveTurns((t) => {
           const next = [...t];
-          // last turn is the streaming AI turn
           next[next.length - 1] = { speaker: "ai", text: reply || "…" };
           return next;
         });
         if (coachNote) setLiveCoach(coachNote);
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
       });
     } finally {
       streamingRef.current = false;
@@ -330,10 +449,36 @@ export function CoachingWorkbench({
     }
   }
 
+  function resetRoleplay() {
+    setLiveTurns([]);
+    setLiveCoach(null);
+    setDraft("");
+    setPracticing(false);
+    setAgentTurnCount(0);
+    setLiveScores(scoresFromSeed(seed));
+  }
+
+  function toggleDrill(label: string) {
+    setAssignedDrills((prev) =>
+      prev.includes(label) ? prev.filter((d) => d !== label) : [...prev, label],
+    );
+  }
+
   const coachText = liveCoach ?? seed.coach;
 
+  // Live rubric rows (seed labels + live values).
+  const liveRubric: RubricRow[] = seed.rubric.map((r) => ({
+    ...r,
+    value: liveScores[r.key] ?? r.value,
+    tone: r.key === "speed" ? "gold" : toneFor(liveScores[r.key] ?? r.value),
+  }));
+  const overallScore = overall(liveRubric);
+
+  // Drills that the auto-plan exposes as assignable CRM tasks.
+  const planDrills = useMemo(() => buildPlanDrills(active?.title ?? "", seed), [active, seed]);
+
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)_330px]">
       {/* ── Pane 1 — Scenario library ──────────────────────────────────── */}
       <section className="rounded-2xl border border-mist bg-cloud shadow-soft">
         <div className="flex items-center gap-2 border-b border-mist px-4 py-3.5">
@@ -341,11 +486,12 @@ export function CoachingWorkbench({
           <h2 className="font-display text-[1rem] font-normal text-ink">Scenario library</h2>
         </div>
         <p className="px-4 pt-3 text-[0.72rem] leading-snug text-slate">
-          Broker-approved objection drills. Selected drill loads the roleplay.
+          Broker-approved objection drills. Select one to load its roleplay and scorecard.
         </p>
         <ul className="space-y-1.5 p-3">
           {library.map((s) => {
             const isActive = s.id === activeId;
+            const sSeed = seedFor(s.id);
             return (
               <li key={s.id}>
                 <button
@@ -359,14 +505,26 @@ export function CoachingWorkbench({
                       : "border-mist bg-cloud text-ink hover:border-ink/20 hover:bg-paper-200/60",
                   )}
                 >
-                  <p
-                    className={cn(
-                      "text-[0.84rem] font-semibold leading-snug",
-                      isActive ? "text-cloud" : "text-ink",
-                    )}
-                  >
-                    {s.title}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p
+                      className={cn(
+                        "text-[0.84rem] font-semibold leading-snug",
+                        isActive ? "text-cloud" : "text-ink",
+                      )}
+                    >
+                      {s.title}
+                    </p>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-1.5 py-0.5 text-[0.66rem] font-semibold tabular-nums",
+                        isActive
+                          ? "bg-cloud/15 text-cloud"
+                          : "bg-gold-soft text-gold-ink ring-1 ring-inset ring-gold/25",
+                      )}
+                    >
+                      {overall(sSeed.rubric)}
+                    </span>
+                  </div>
                   <p
                     className={cn(
                       "mt-0.5 text-[0.7rem] font-medium uppercase tracking-[0.1em]",
@@ -383,43 +541,61 @@ export function CoachingWorkbench({
       </section>
 
       {/* ── Pane 2 — Roleplay transcript ───────────────────────────────── */}
-      <section className="flex flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+      <section className="flex min-h-[30rem] flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
         <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-slate" aria-hidden />
             <h2 className="font-display text-[1rem] font-normal text-ink">Roleplay transcript</h2>
           </div>
           <StatusChip tone="gold" variant="soft">
-            <Sparkles className="h-3 w-3" aria-hidden />
+            <MatinMark theme="dark" className="h-3 w-3" />
             AI roleplay
           </StatusChip>
         </div>
 
-        <div className="px-4 pb-3 pt-3">
-          <p className="text-[0.72rem] leading-snug text-slate">
-            <span className="font-semibold text-ink">{active?.title}</span> ·{" "}
-            <span className="font-mono text-[0.7rem]">{seed.persona}</span>
-          </p>
+        {/* Persona identity strip */}
+        <div className="flex items-center gap-2.5 border-b border-mist px-4 py-3">
+          <Avatar name={seed.personaName} size={32} ring />
+          <div className="min-w-0">
+            <p className="truncate text-[0.82rem] font-semibold leading-tight text-ink">
+              {seed.personaName}
+            </p>
+            <p className="truncate text-[0.7rem] leading-tight text-slate">{seed.personaContext}</p>
+          </div>
+          {(liveTurns.length > 0 || practicing) && (
+            <button
+              type="button"
+              onClick={resetRoleplay}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-mist px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+            >
+              <RotateCcw className="h-3 w-3" aria-hidden />
+              Reset
+            </button>
+          )}
         </div>
 
         {/* Bubbles */}
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 pb-4">
+        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-3">
           {transcript.map((turn, i) => (
             <div
               key={i}
-              className={cn(
-                "flex",
-                turn.speaker === "agent" ? "justify-end" : "justify-start",
-              )}
+              className={cn("flex gap-2", turn.speaker === "agent" ? "flex-row-reverse" : "flex-row")}
             >
-              <div className="max-w-[82%]">
+              {turn.speaker === "ai" ? (
+                <Avatar name={seed.personaName} size={26} className="mt-4" />
+              ) : (
+                <span className="mt-4 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-ink text-[0.6rem] font-bold text-cloud">
+                  YOU
+                </span>
+              )}
+              <div className="max-w-[78%]">
                 <p
                   className={cn(
-                    "mb-1 text-[0.64rem] font-semibold uppercase tracking-[0.14em]",
-                    turn.speaker === "agent" ? "text-right text-slate/70" : "text-slate/70",
+                    "mb-1 text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-slate/70",
+                    turn.speaker === "agent" ? "text-right" : "text-left",
                   )}
                 >
-                  {turn.speaker === "agent" ? "Agent" : "AI Seller"}
+                  {turn.speaker === "agent" ? "Agent (you)" : seed.personaName}
                 </p>
                 <div
                   className={cn(
@@ -429,7 +605,7 @@ export function CoachingWorkbench({
                       : "rounded-tl-sm bg-cloud text-ink ring-mist",
                   )}
                 >
-                  {turn.text || (streaming ? "…" : "")}
+                  {turn.text || (streaming ? <TypingDots /> : "")}
                 </div>
               </div>
             </div>
@@ -443,20 +619,20 @@ export function CoachingWorkbench({
                 <span className="rounded-md bg-gold px-2 py-0.5 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink">
                   Coach
                 </span>
-                <span className="text-cloud">Scored feedback</span>
+                <span className="text-cloud">
+                  {liveCoach ? "Live feedback" : "Scored feedback"}
+                </span>
               </span>
             }
             action={
-              onOpenAi ? (
+              onAskAi ? (
                 <button
                   type="button"
-                  onClick={() =>
-                    onOpenAi(`Context: Coaching / ${active?.title} roleplay`)
-                  }
+                  onClick={() => onAskAi(`Coaching / ${active?.title} roleplay`)}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
                 >
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                  Open in Matin AI
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                  Ask Matin
                 </button>
               ) : undefined
             }
@@ -466,42 +642,60 @@ export function CoachingWorkbench({
         </div>
 
         {/* Composer — practice this scenario live */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendResponse(draft);
-          }}
-          className="border-t border-mist px-4 py-3"
-        >
-          <div className="flex items-end gap-2 rounded-xl border border-mist bg-paper-200/50 px-3 py-2 focus-within:border-ink/30">
-            <textarea
-              rows={1}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendResponse(draft);
-                }
-              }}
-              placeholder="Type your response to practice this scenario…"
-              className="max-h-28 flex-1 resize-none bg-transparent text-[0.84rem] leading-relaxed text-ink outline-none placeholder:text-slate/50"
-            />
+        {practicing ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendResponse(draft);
+            }}
+            className="border-t border-mist px-4 py-3"
+          >
+            <div className="flex items-end gap-2 rounded-xl border border-mist bg-paper-200/50 px-3 py-2 focus-within:border-ink/30">
+              <textarea
+                ref={composerRef}
+                rows={1}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendResponse(draft);
+                  }
+                }}
+                placeholder={`Reply to ${seed.personaName.split(" ")[0]}…`}
+                className="max-h-28 flex-1 resize-none bg-transparent text-[0.84rem] leading-relaxed text-ink outline-none placeholder:text-slate/50"
+              />
+              <button
+                type="submit"
+                aria-label="Send response"
+                disabled={!draft.trim() || streaming}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink text-cloud transition-colors hover:bg-ink-800 disabled:opacity-40"
+              >
+                <ArrowUp className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+            <p className="mt-2 text-[0.66rem] leading-none text-slate/60">
+              {streaming
+                ? `${seed.personaName} is responding in character and the scorecard is updating…`
+                : `Press Enter to send · ${agentTurnCount} live ${agentTurnCount === 1 ? "turn" : "turns"} this session.`}
+            </p>
+          </form>
+        ) : (
+          <div className="border-t border-mist px-4 py-4">
             <button
-              type="submit"
-              aria-label="Send response"
-              disabled={!draft.trim() || streaming}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink text-cloud transition-colors hover:bg-ink-800 disabled:opacity-40"
+              type="button"
+              onClick={startPractice}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.86rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
             >
-              <ArrowUp className="h-4 w-4" aria-hidden />
+              <Mic className="h-4 w-4" aria-hidden />
+              Practice this scenario
             </button>
+            <p className="mt-2 text-center text-[0.7rem] leading-snug text-slate/70">
+              {seed.personaName} plays the {active?.category.toLowerCase()} objection. Reply in
+              character — Matin AI answers back and scores each turn live.
+            </p>
           </div>
-          <p className="mt-2 text-[0.66rem] leading-none text-slate/60">
-            {streaming
-              ? "Matin AI is responding in character and scoring your reply…"
-              : "Press Enter to send · AI plays the persona and grades each turn."}
-          </p>
-        </form>
+        )}
       </section>
 
       {/* ── Pane 3 — Scorecard ─────────────────────────────────────────── */}
@@ -512,12 +706,35 @@ export function CoachingWorkbench({
               <ClipboardList className="h-4 w-4 text-slate" aria-hidden />
               <h2 className="font-display text-[1rem] font-normal text-ink">Scorecard</h2>
             </div>
-            <ScoreChip score={overall(seed.rubric)} suffix="" />
+            {agentTurnCount > 0 ? (
+              <StatusChip tone="gold" variant="soft">
+                Live
+              </StatusChip>
+            ) : (
+              <StatusChip tone="info" variant="soft">
+                Last attempt
+              </StatusChip>
+            )}
+          </div>
+          <div className="flex items-center gap-4 border-b border-mist px-4 py-4">
+            <ScoreRing value={overallScore} size={64} />
+            <div className="min-w-0">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                Overall
+              </p>
+              <p className="mt-0.5 text-[0.78rem] leading-snug text-slate">
+                {overallScore >= 85
+                  ? "Strong — interview-ready on this drill."
+                  : overallScore >= 70
+                    ? "Solid — tighten the weakest rubric below."
+                    : "Needs reps — assign the plan and re-run."}
+              </p>
+            </div>
           </div>
           <div className="space-y-3.5 p-4">
-            {seed.rubric.map((r) => (
+            {liveRubric.map((r) => (
               <ProgressTrack
-                key={r.label}
+                key={r.key}
                 label={r.label}
                 value={r.value}
                 tone={r.tone}
@@ -536,21 +753,63 @@ export function CoachingWorkbench({
           </div>
         </div>
 
-        {/* Auto-created coaching plan — bordered note converting scores → CRM tasks */}
+        {/* Auto-created coaching plan — assignable CRM tasks */}
         <div className="rounded-2xl border border-mist bg-paper-200/40 p-4">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold/15 text-gold ring-1 ring-inset ring-gold/30">
-              <Sparkles className="h-3 w-3" aria-hidden />
+          <div className="mb-2.5 flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold/15 ring-1 ring-inset ring-gold/30">
+              <MatinMark theme="dark" className="h-3 w-3" />
             </span>
             <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-slate">
               Auto-created coaching plan
             </p>
           </div>
           <p className="text-[0.84rem] leading-relaxed text-ink">{seed.plan}</p>
+
+          {/* Each drill is an assignable CRM task — click to assign + confirm. */}
+          <ul className="mt-3 space-y-1.5">
+            {planDrills.map((d) => {
+              const assigned = assignedDrills.includes(d);
+              return (
+                <li key={d}>
+                  <button
+                    type="button"
+                    onClick={() => toggleDrill(d)}
+                    aria-pressed={assigned}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-[0.78rem] transition-colors",
+                      assigned
+                        ? "border-success/30 bg-success/[0.07] text-ink"
+                        : "border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
+                    )}
+                  >
+                    {assigned ? (
+                      <CircleCheck className="h-4 w-4 shrink-0 text-success" aria-hidden />
+                    ) : (
+                      <Plus className="h-4 w-4 shrink-0 text-slate" aria-hidden />
+                    )}
+                    <span className="flex-1">{d}</span>
+                    {assigned ? (
+                      <span className="shrink-0 text-[0.66rem] font-semibold uppercase tracking-[0.1em] text-success">
+                        Assigned
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            <StatusChip tone="info" variant="soft">
-              Appears in Today
-            </StatusChip>
+            {assignedDrills.length > 0 ? (
+              <StatusChip tone="success" variant="soft">
+                <CalendarClock className="h-3 w-3" aria-hidden />
+                {assignedDrills.length} task{assignedDrills.length === 1 ? "" : "s"} in Today
+              </StatusChip>
+            ) : (
+              <StatusChip tone="info" variant="soft">
+                Click a drill to add it to Today
+              </StatusChip>
+            )}
             <StatusChip tone="success" variant="soft">
               Writes activity_event
             </StatusChip>
@@ -559,6 +818,17 @@ export function CoachingWorkbench({
       </section>
     </div>
   );
+}
+
+/** Turn the plan sentence into discrete, assignable CRM-task drills. */
+function buildPlanDrills(_title: string, seed: Seed): string[] {
+  // Split the seed plan on commas/"and" into concrete, checkable tasks.
+  return seed.plan
+    .replace(/\.$/, "")
+    .split(/,\s*|\s+and\s+/i)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1));
 }
 
 function overall(rubric: RubricRow[]): number {
@@ -579,4 +849,18 @@ function scoreTextTone(tone: TrackTone): string {
     default:
       return "text-ink";
   }
+}
+
+function TypingDots() {
+  return (
+    <span className="inline-flex gap-1 py-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/25"
+          style={{ animationDelay: `${i * 120}ms` }}
+        />
+      ))}
+    </span>
+  );
 }

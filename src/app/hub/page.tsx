@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   UserPlus,
   Home,
@@ -9,22 +10,23 @@ import {
   TriangleAlert,
   ServerCrash,
   ArrowRight,
-  Loader2,
   ExternalLink,
   RefreshCw,
-  CheckCircle2,
+  CircleCheck,
+  Search,
+  X,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import {
   KpiStrip,
   KpiCard,
   SavedViewTabs,
-  StatusChip,
   Dot,
+  Avatar,
+  PropertyThumb,
   CalloutCard,
   ProgressTrack,
   RecordDrawer,
-  AIActionCard,
   EmptyState,
   useAiSidecar,
   type SavedView,
@@ -40,30 +42,34 @@ import {
 } from "@/lib/data";
 import type { WorkQueueItem } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
-import { cn, compactUsd } from "@/lib/utils";
+import { compactUsd } from "@/lib/utils";
 import {
-  CATEGORY_TONE,
   sourceHref,
   sourceLabel,
-  dueTone,
 } from "@/components/command/today/workQueueMeta";
+import { enrich } from "@/components/command/today/queueEnrich";
+import { QueueRow } from "@/components/command/today/QueueRow";
+import { QueueDrawerBody } from "@/components/command/today/QueueDrawerBody";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center  →  /hub   (build reference §2.1)
 
-   The first screen of the demo: one prioritized queue across leads, listings,
-   transactions, marketing, AI approvals, and system failures.
+   One prioritized queue across leads, listings, transactions, marketing, AI
+   approvals, and system failures. Every interaction is REAL: KPI tiles deep-link
+   to their section, the 5 queue tabs + a search box filter live rows, row-click
+   opens the record's drawer (not the AI panel), AI-draft rows stream a real draft
+   inline, and failed automations retry → resolve in state.
 
-   Layout: subtitle eyebrow → 6-tile KPI strip → Human Work Queue (saved-view
-   tabs + judgment-only rows → RecordDrawer) │ AI overnight summary (dark) +
-   Live Pipeline bars + Brokerage Calendar & Risk Alerts.
+   Layout: subtitle → 6-tile KPI strip → Human Work Queue (tabs + search →
+   judgment rows → RecordDrawer) │ AI overnight summary (dark) + Live Pipeline +
+   Brokerage Calendar & Risk Alerts.
    ────────────────────────────────────────────────────────────────────────── */
 
 /* ── Headline KPI numbers (spec §2.1; counts reconcile to the data layer) ── */
 const NEW_LEADS = 47;
 const HOT_SELLER_SIGNALS = 12;
 const LISTING_LAUNCHES = 8;
-const TX_AT_RISK = transactions.filter((t) => Boolean(t.riskFlag)).length; // 3
+const TX_AT_RISK = transactions.filter((t) => Boolean(t.riskFlag)).length;
 const AI_DRAFTS_WAITING = pendingAIActions.length;
 const WORKFLOW_ERRORS = failedWorkflowRuns.length;
 
@@ -103,7 +109,16 @@ type AlertRow = {
   title: string;
   date: string;
   href: string;
+  ownerSlug?: string;
+  ownerName?: string;
+  thumbSeed?: number;
 };
+
+function seedFromId(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h;
+}
 
 const RISK_ALERTS: AlertRow[] = [
   ...transactions
@@ -118,13 +133,16 @@ const RISK_ALERTS: AlertRow[] = [
           ? "Deadline tomorrow"
           : `Closes in ${t.closeDateDaysOut} days`,
       href: "/hub/transactions",
+      ownerSlug: t.agentSlug,
+      thumbSeed: seedFromId(t.id),
     })),
   {
     id: "appt-mitchell",
     tone: "info",
     title: "Listing consult — Sarah Mitchell (Beaverton)",
     date: "Today · 2:30 PM",
-    href: "/hub/seller-opportunities",
+    href: "/hub/cash-offer",
+    ownerSlug: "ava-brooks",
   },
   {
     id: "appt-cho",
@@ -132,63 +150,25 @@ const RISK_ALERTS: AlertRow[] = [
     title: "Buyer showing tour — Daniel Cho (7 Beaverton homes)",
     date: "Tomorrow · 10:00 AM",
     href: "/hub/crm",
+    ownerSlug: "ava-brooks",
   },
   {
     id: "broker-review",
     tone: "warn",
     title: "Broker review due — 1248 NW Cedar Hills Dr launch",
     date: "Today · before MLS input",
-    href: "/hub/listings",
+    href: "/hub/listing-launch",
+    ownerSlug: "marcus-lee",
   },
 ];
 
-/* ── A single queue row ───────────────────────────────────────────────────── */
-function QueueRow({
-  item,
-  onOpen,
-}: {
-  item: WorkQueueItem;
-  onOpen: (item: WorkQueueItem) => void;
-}) {
-  const tone = CATEGORY_TONE[item.category];
-  const dt = dueTone(item.dueLabel);
-  const isAi = item.category === "Approve" || item.category === "Coach";
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(item)}
-      className="group flex w-full items-start gap-3 border-b border-mist px-5 py-3.5 text-left transition-colors last:border-0 hover:bg-paper-200/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/20"
-    >
-      <span className="mt-0.5 shrink-0">
-        <StatusChip tone={tone}>
-          {isAi ? <MatinMark theme="dark" className="h-3 w-3" /> : <Dot tone={tone} />}
-          {item.category}
-        </StatusChip>
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[0.9rem] font-semibold leading-tight text-ink">
-          {item.subject}
-        </span>
-        <span className="mt-0.5 block text-[0.8rem] leading-snug text-slate line-clamp-2">
-          {item.why}
-        </span>
-      </span>
-      <span
-        className={cn(
-          "shrink-0 whitespace-nowrap pt-0.5 text-[0.74rem] font-medium tabular-nums",
-          dt === "danger" ? "text-danger" : dt === "warn" ? "text-warn" : "text-slate",
-        )}
-      >
-        {item.dueLabel}
-      </span>
-    </button>
-  );
-}
-
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 export default function TodayCommandCenter() {
+  const router = useRouter();
   const { openAi } = useAiSidecar();
+
   const [activeTab, setActiveTab] = useState<string>("My Work");
+  const [query, setQuery] = useState("");
 
   const [selected, setSelected] = useState<WorkQueueItem | null>(null);
   const [drawerTab, setDrawerTab] = useState<"preview" | "draft">("preview");
@@ -198,10 +178,16 @@ export default function TodayCommandCenter() {
   const [drafting, setDrafting] = useState<string | null>(null);
   const [retried, setRetried] = useState<Record<string, boolean>>({});
 
-  const rows = useMemo(
-    () => workQueue.filter((w) => w.tab === activeTab),
-    [activeTab],
-  );
+  const rows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return workQueue.filter(
+      (w) =>
+        w.tab === activeTab &&
+        (q === "" ||
+          w.subject.toLowerCase().includes(q) ||
+          w.why.toLowerCase().includes(q)),
+    );
+  }, [activeTab, query]);
 
   /* the AI action backing the selected row (if any) */
   const linkedAction = selected
@@ -219,7 +205,8 @@ export default function TodayCommandCenter() {
 
   function openRow(item: WorkQueueItem) {
     setSelected(item);
-    setDrawerTab("preview");
+    // AI-draft rows open straight to the draft tab; everything else previews.
+    setDrawerTab(item.tab === "AI Drafts" ? "draft" : "preview");
   }
 
   function runDraft(item: WorkQueueItem, action: NonNullable<typeof linkedAction>) {
@@ -240,6 +227,8 @@ export default function TodayCommandCenter() {
     ).finally(() => setDrafting(null));
   }
 
+  const selectedResolved = selected ? Boolean(retried[selected.id]) : false;
+
   return (
     <div className="px-4 py-5 md:px-6 lg:px-8">
       {/* Subtitle eyebrow (TopCommandBar already renders the H1) */}
@@ -248,7 +237,7 @@ export default function TodayCommandCenter() {
         approvals, and system failures.
       </p>
 
-      {/* ── KPI strip (6 tiles) ───────────────────────────────────────────── */}
+      {/* ── KPI strip (6 tiles) — each drills to its real section ──────────── */}
       <KpiStrip className="mt-4">
         <KpiCard
           label="New leads"
@@ -257,7 +246,7 @@ export default function TodayCommandCenter() {
           delta="+11 today"
           deltaTone="up"
           hint="Across IDX, Zillow & referrals"
-          onDrill={() => setActiveTab("My Work")}
+          onDrill={() => router.push("/hub/crm")}
         />
         <KpiCard
           label="Hot seller signals"
@@ -266,14 +255,14 @@ export default function TodayCommandCenter() {
           delta="4 new overnight"
           deltaTone="up"
           hint="Intent score 80+ this week"
-          onDrill={() => setActiveTab("My Work")}
+          onDrill={() => router.push("/hub/cash-offer")}
         />
         <KpiCard
           label="Listing launches"
           value={LISTING_LAUNCHES}
           icon={<Building2 className="h-4 w-4" />}
           hint="2 launching this week"
-          onDrill={() => setActiveTab("My Work")}
+          onDrill={() => router.push("/hub/listing-launch")}
         />
         <KpiCard
           label="Transactions at risk"
@@ -281,7 +270,7 @@ export default function TodayCommandCenter() {
           valueTone="danger"
           icon={<TriangleAlert className="h-4 w-4" />}
           hint="Deadlines & financing flags"
-          onDrill={() => setActiveTab("High Risk")}
+          onDrill={() => router.push("/hub/transactions")}
         />
         <KpiCard
           label="AI drafts waiting"
@@ -296,7 +285,7 @@ export default function TodayCommandCenter() {
           valueTone="danger"
           icon={<ServerCrash className="h-4 w-4" />}
           hint="Retryable from the queue"
-          onDrill={() => setActiveTab("Failed Automations")}
+          onDrill={() => router.push("/hub/systems-health")}
         />
       </KpiStrip>
 
@@ -327,25 +316,58 @@ export default function TodayCommandCenter() {
             </button>
           </div>
 
-          <div className="px-5 pb-3 pt-3.5">
-            <SavedViewTabs views={VIEWS} active={activeTab} onChange={setActiveTab} />
+          {/* Tabs + search */}
+          <div className="flex flex-wrap items-center gap-3 px-5 pb-3 pt-3.5">
+            <div className="min-w-0 flex-1">
+              <SavedViewTabs views={VIEWS} active={activeTab} onChange={setActiveTab} />
+            </div>
+            <label className="inline-flex items-center gap-2 rounded-lg border border-mist bg-paper-200/60 px-2.5 py-1.5 focus-within:border-ink/30">
+              <Search className="h-3.5 w-3.5 shrink-0 text-slate" aria-hidden />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Filter queue…"
+                aria-label="Filter the work queue by subject"
+                className="w-32 bg-transparent text-[0.8rem] text-ink outline-none placeholder:text-slate sm:w-40"
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear filter"
+                  className="shrink-0 text-slate transition-colors hover:text-ink"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </label>
           </div>
 
           <div className="border-t border-mist">
             {rows.length === 0 ? (
               <div className="p-5">
                 <EmptyState
-                  icon={<CheckCircle2 className="h-5 w-5" />}
-                  title="Queue clear"
-                  body="Nothing in this view needs human judgment right now. Automation is handling the rest — check back as new signals land."
-                  actionLabel="View My Work"
-                  onAction={() => setActiveTab("My Work")}
+                  icon={<CircleCheck className="h-5 w-5" />}
+                  title={query ? "No matches" : "Queue clear"}
+                  body={
+                    query
+                      ? `Nothing in ${activeTab} matches “${query}”. Clear the filter or switch views.`
+                      : "Nothing in this view needs human judgment right now. Automation is handling the rest — check back as new signals land."
+                  }
+                  actionLabel={query ? "Clear filter" : "View My Work"}
+                  onAction={() => (query ? setQuery("") : setActiveTab("My Work"))}
                 />
               </div>
             ) : (
               <div role="list">
                 {rows.map((item) => (
-                  <QueueRow key={item.id} item={item} onOpen={openRow} />
+                  <QueueRow
+                    key={item.id}
+                    item={item}
+                    resolved={Boolean(retried[item.id])}
+                    onOpen={openRow}
+                  />
                 ))}
               </div>
             )}
@@ -424,18 +446,35 @@ export default function TodayCommandCenter() {
                 <li key={a.id}>
                   <Link
                     href={a.href}
-                    className="group flex items-start gap-3 py-3 transition-colors hover:opacity-90"
+                    className="group flex items-center gap-3 py-3 transition-colors hover:bg-paper-200/40"
                   >
-                    <Dot tone={a.tone} className="mt-1.5" />
+                    {a.thumbSeed != null ? (
+                      <span className="h-9 w-12 shrink-0 overflow-hidden rounded-md">
+                        <PropertyThumb
+                          seedIndex={a.thumbSeed}
+                          ratio="video"
+                          rounded={false}
+                          alt={a.title}
+                          className="h-full w-full"
+                        />
+                      </span>
+                    ) : a.ownerSlug ? (
+                      <Avatar name={a.ownerName ?? a.title} slug={a.ownerSlug} size={32} ring />
+                    ) : (
+                      <Dot tone={a.tone} className="mx-2" />
+                    )}
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[0.84rem] font-medium leading-snug text-ink">
-                        {a.title}
+                      <span className="flex items-center gap-1.5">
+                        <Dot tone={a.tone} className="shrink-0" />
+                        <span className="block truncate text-[0.84rem] font-medium leading-snug text-ink">
+                          {a.title}
+                        </span>
                       </span>
                       <span className="mt-0.5 block text-[0.76rem] text-slate tabular-nums">
                         {a.date}
                       </span>
                     </span>
-                    <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </li>
               ))}
@@ -448,7 +487,7 @@ export default function TodayCommandCenter() {
       <RecordDrawer
         open={selected !== null}
         onClose={() => setSelected(null)}
-        title={selected?.subject ?? ""}
+        title={selected ? enrich(selected).personName ?? selected.subject : ""}
         subtitle={
           selected
             ? `${sourceLabel(selected.sourceType)} · ${selected.dueLabel}`
@@ -478,20 +517,34 @@ export default function TodayCommandCenter() {
                 <button
                   type="button"
                   onClick={() => setRetried((r) => ({ ...r, [selected.id]: true }))}
-                  disabled={retried[selected.id]}
+                  disabled={selectedResolved}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200 disabled:opacity-50"
                 >
-                  {retried[selected.id] ? (
+                  {selectedResolved ? (
                     <>
-                      <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden />
-                      Retrying
+                      <CircleCheck className="h-3.5 w-3.5 text-success" aria-hidden />
+                      Resolved
                     </>
                   ) : (
                     <>
                       <RefreshCw className="h-3.5 w-3.5" aria-hidden />
-                      Retry
+                      Retry now
                     </>
                   )}
+                </button>
+              ) : linkedAction ? (
+                <button
+                  type="button"
+                  onClick={() => runDraft(selected, linkedAction)}
+                  disabled={drafting === selected.id}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-3 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:cursor-default disabled:bg-gold/70"
+                >
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                  {drafting === selected.id
+                    ? "Drafting…"
+                    : drafts[selected.id]
+                      ? "Regenerate"
+                      : "Approve & draft"}
                 </button>
               ) : (
                 <button
@@ -508,107 +561,18 @@ export default function TodayCommandCenter() {
         }
       >
         {selected ? (
-          <div className="space-y-4">
-            {/* Why this is in the queue */}
-            <div>
-              <p className="eyebrow text-slate">Why this is here</p>
-              <p className="mt-1.5 text-[0.86rem] leading-relaxed text-ink">{selected.why}</p>
-            </div>
-
-            {/* Source provenance */}
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusChip tone={CATEGORY_TONE[selected.category]}>
-                {selected.category}
-              </StatusChip>
-              <span className="text-[0.76rem] text-slate">
-                Source:{" "}
-                <span className="font-medium text-ink">
-                  {sourceLabel(selected.sourceType)}
-                </span>{" "}
-                · {selected.sourceId}
-              </span>
-            </div>
-
-            {/* Failed-automation step detail */}
-            {failedRun ? (
-              <div className="rounded-xl border border-mist bg-paper-200/50 p-3.5">
-                <p className="eyebrow text-slate">Automation: {failedRun.name}</p>
-                <p className="mt-1 text-[0.82rem] text-ink">
-                  Failed at{" "}
-                  <span className="font-semibold text-danger">{failedRun.failedStep}</span> ·
-                  started {failedRun.startedLabel}
-                </p>
-                <ul className="mt-2.5 space-y-1.5">
-                  {failedRun.steps.map((s, i) => {
-                    const sTone: ChipTone =
-                      s.status === "succeeded"
-                        ? "success"
-                        : s.status === "failed"
-                          ? "danger"
-                          : "info";
-                    return (
-                      <li key={i} className="flex items-start gap-2">
-                        <Dot tone={sTone} className="mt-1.5" />
-                        <span className="min-w-0 flex-1">
-                          <span className="text-[0.8rem] font-medium text-ink">{s.name}</span>
-                          <span className="block text-[0.74rem] text-slate">{s.detail}</span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ) : null}
-
-            {/* Preview vs AI draft */}
-            {linkedAction && drawerTab === "draft" ? (
-              <div className="space-y-3">
-                <AIActionCard
-                  title={linkedAction.title}
-                  riskTag={linkedAction.riskTag}
-                  evidence={linkedAction.evidence}
-                  confidence={linkedAction.confidence}
-                  runLabel={drafting === selected.id ? "Drafting…" : "Generate draft"}
-                  onRun={() => runDraft(selected, linkedAction)}
-                  onEdit={() => openAi(`Context: Today / ${selected.subject}`)}
-                  onReject={() => setDrafts((d) => ({ ...d, [selected.id]: "" }))}
-                />
-                {drafting === selected.id && !drafts[selected.id] ? (
-                  <div className="flex items-center gap-2 text-[0.82rem] text-slate">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                    Matin AI is drafting from the source record…
-                  </div>
-                ) : drafts[selected.id] ? (
-                  <div className="rounded-xl border border-mist bg-paper-200/40 p-3.5">
-                    <p className="eyebrow text-slate">Draft — review before sending</p>
-                    <p className="mt-2 whitespace-pre-wrap text-[0.84rem] leading-relaxed text-ink">
-                      {drafts[selected.id]}
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-[0.8rem] leading-relaxed text-slate">
-                    Generate an editable draft from the cited evidence above. Nothing sends
-                    until you approve it.
-                  </p>
-                )}
-              </div>
-            ) : linkedAction ? (
-              <div className="rounded-xl border border-mist bg-paper-200/40 p-3.5">
-                <p className="text-[0.82rem] leading-relaxed text-slate">
-                  <span className="font-semibold text-ink">{linkedAction.evidence}</span>
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setDrawerTab("draft")}
-                  className="mt-3 inline-flex items-center gap-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:opacity-80"
-                >
-                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                  Open AI draft
-                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-                </button>
-              </div>
-            ) : null}
-          </div>
+          <QueueDrawerBody
+            item={selected}
+            tab={drawerTab}
+            linkedAction={linkedAction}
+            failedRun={failedRun}
+            resolved={selectedResolved}
+            draft={drafts[selected.id]}
+            drafting={drafting === selected.id}
+            onRunDraft={() => linkedAction && runDraft(selected, linkedAction)}
+            onReject={() => setDrafts((d) => ({ ...d, [selected.id]: "" }))}
+            onAskAi={() => openAi(`Context: Today / ${selected.subject}`)}
+          />
         ) : null}
       </RecordDrawer>
     </div>

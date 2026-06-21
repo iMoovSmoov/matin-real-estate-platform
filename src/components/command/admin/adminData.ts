@@ -13,18 +13,33 @@
 
 export type RoutingType = "Blast" | "Round Robin";
 
+export type RuleMember = {
+  name: string;
+  /** Round-robin weight (Blast rules ignore weights). */
+  weight: number;
+};
+
 export type RoutingRule = {
   id: string;
   source: string;
   sourceMeta: string;
   criteria: string[];
   type: RoutingType;
-  members: string[]; // full names → InitialsToken
+  members: RuleMember[]; // ordered recipients with weights
   team: string;
   status: "active" | "paused";
   priority: number;
   leadsRouted30d: number;
+  /** Plain-English description used in the edit drawer + AI message preview. */
+  firstResponseSla: string;
+  lastChangedBy: string;
+  lastChangedAt: string;
 };
+
+/** Build an ordered member list with sensible default weights. */
+function members(...rows: [string, number][]): RuleMember[] {
+  return rows.map(([name, weight]) => ({ name, weight }));
+}
 
 /** Lead-routing rules — ordered by priority (1 = evaluated first). */
 export const routingRules: RoutingRule[] = [
@@ -34,11 +49,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Saved-search + property inquiry",
     criteria: ["Area: Portland Metro", "Type: Buyer", "Price ≥ $600k"],
     type: "Round Robin",
-    members: ["Ava Brooks", "Amanda Conlon", "Andy Wilcox"],
+    members: members(["Ava Brooks", 3], ["Amanda Conlon", 2], ["Andy Wilcox", 1]),
     team: "Oregon",
     status: "active",
     priority: 1,
     leadsRouted30d: 184,
+    firstResponseSla: "5 minutes",
+    lastChangedBy: "Jordan Matin",
+    lastChangedAt: "22 min ago",
   },
   {
     id: "RR-002",
@@ -46,11 +64,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Paid lead feed (idempotency-keyed)",
     criteria: ["Area: Lake Oswego, West Linn", "Type: Buyer or Seller"],
     type: "Round Robin",
-    members: ["Amy Mead", "Ava Brooks"],
+    members: members(["Amy Mead", 2], ["Ava Brooks", 1]),
     team: "Oregon",
     status: "active",
     priority: 2,
     leadsRouted30d: 96,
+    firstResponseSla: "5 minutes",
+    lastChangedBy: "Alicia Smith",
+    lastChangedAt: "2 days ago",
   },
   {
     id: "RR-003",
@@ -58,11 +79,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Seller intent ≥ 80 / equity signal",
     criteria: ["Seller-intent score ≥ 80", "Equity ≥ 40%", "Any market"],
     type: "Blast",
-    members: ["Marcus Lee", "Alicia Smith"],
+    members: members(["Marcus Lee", 1], ["Alicia Smith", 1]),
     team: "Leadership",
     status: "active",
     priority: 3,
     leadsRouted30d: 41,
+    firstResponseSla: "10 minutes",
+    lastChangedBy: "Jordan Matin",
+    lastChangedAt: "6 days ago",
   },
   {
     id: "RR-004",
@@ -70,11 +94,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "QR / kiosk capture",
     criteria: ["Listing agent owns 24h", "Then Round Robin Oregon"],
     type: "Round Robin",
-    members: ["Andy Wilcox", "Amanda Conlon", "Amy Mead"],
+    members: members(["Andy Wilcox", 2], ["Amanda Conlon", 2], ["Amy Mead", 1]),
     team: "Oregon",
     status: "active",
     priority: 4,
     leadsRouted30d: 58,
+    firstResponseSla: "1 hour",
+    lastChangedBy: "Marcus Lee",
+    lastChangedAt: "1 week ago",
   },
   {
     id: "RR-005",
@@ -82,11 +109,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Vancouver + Clark County",
     criteria: ["State: WA", "Type: Buyer", "Dual-licensed only"],
     type: "Round Robin",
-    members: ["Amy Mead", "Andy Wilcox"],
+    members: members(["Amy Mead", 1], ["Andy Wilcox", 1]),
     team: "Washington",
     status: "active",
     priority: 5,
     leadsRouted30d: 33,
+    firstResponseSla: "15 minutes",
+    lastChangedBy: "Amy Mead",
+    lastChangedAt: "3 days ago",
   },
   {
     id: "RR-006",
@@ -94,11 +124,14 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Careers page form",
     criteria: ["Tag: agent-recruit", "Route to leadership"],
     type: "Blast",
-    members: ["Alicia Smith", "Jordan Matin"],
+    members: members(["Alicia Smith", 1], ["Jordan Matin", 1]),
     team: "Leadership",
     status: "paused",
     priority: 6,
     leadsRouted30d: 0,
+    firstResponseSla: "Same day",
+    lastChangedBy: "Jordan Matin",
+    lastChangedAt: "3 weeks ago",
   },
 ];
 

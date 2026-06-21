@@ -1,11 +1,12 @@
 import { Users, Building2, Route, MailPlus, ScrollText } from "lucide-react";
 import { KpiStrip, KpiCard } from "@/components/os";
-import { agents, auditLogs } from "@/lib/data";
+import { auditLogs } from "@/lib/data";
 import { AdminWorkspace } from "@/components/command/admin/AdminWorkspace";
 import {
   routingRules,
   teamRows,
   userRows,
+  roleDefs,
 } from "@/components/command/admin/adminData";
 
 export const metadata = { title: "Admin" };
@@ -20,6 +21,7 @@ export const metadata = { title: "Admin" };
    ────────────────────────────────────────────────────────────────────────── */
 
 export default function AdminSettingsPage() {
+  const totalUsers = roleDefs.reduce((sum, r) => sum + r.members, 0);
   const activeRules = routingRules.filter((r) => r.status === "active").length;
   const pendingInvites = userRows.filter((u) => u.status === "invited").length;
   // "today" audit events = anything not dated to a prior day
@@ -39,9 +41,9 @@ export default function AdminSettingsPage() {
       <KpiStrip className="xl:grid-cols-5">
         <KpiCard
           label="Users"
-          value={agents.length}
+          value={totalUsers}
           icon={<Users className="h-4 w-4" />}
-          hint="38 agents · 6 operations & leadership"
+          hint="38 agents · 5 operations & leadership"
         />
         <KpiCard
           label="Teams / Offices"

@@ -24,28 +24,23 @@ export const CATEGORY_TONE: Record<WorkCategory, ChipTone> = {
   Send: "success",
 };
 
+/* Canonical /hub routes per source type — mirrors SidebarNav NAV_ITEMS exactly
+   so every queue row, drawer "Open record", and risk-alert deep-links to a real
+   page that actually renders (no 404 stubs). */
+export const SOURCE_ROUTE: Record<string, string> = {
+  lead: "/hub/crm",
+  "seller-lead": "/hub/cash-offer",
+  listing: "/hub/listing-launch",
+  transaction: "/hub/transactions",
+  "ai-action": "/hub/ai",
+  "workflow-run": "/hub/systems-health",
+  agent: "/hub/coaching",
+  campaign: "/hub/marketing",
+};
+
 /** Where a queue item's source record lives — every row links somewhere. */
 export function sourceHref(item: WorkQueueItem): string {
-  switch (item.sourceType) {
-    case "lead":
-      return "/hub/crm";
-    case "seller-lead":
-      return "/hub/seller-opportunities";
-    case "listing":
-      return "/hub/listings";
-    case "transaction":
-      return "/hub/transactions";
-    case "ai-action":
-      return "/hub/ai";
-    case "workflow-run":
-      return "/hub/systems-health";
-    case "agent":
-      return "/hub/coaching";
-    case "campaign":
-      return "/hub/marketing";
-    default:
-      return "/hub";
-  }
+  return SOURCE_ROUTE[item.sourceType] ?? "/hub";
 }
 
 /** Human label for the source-record type (drawer subtitle). */

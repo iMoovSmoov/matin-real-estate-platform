@@ -1,5 +1,11 @@
 import type { Transaction } from "@/lib/types";
-import type { ChipTone, MilestoneTone, ChecklistStatus } from "@/components/os";
+import type {
+  ChipTone,
+  MilestoneTone,
+  ChecklistStatus,
+  ActivityChannel,
+  ActivityTagTone,
+} from "@/components/os";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Transactions — one-deal screen content model.
@@ -52,12 +58,44 @@ export type RiskNote = {
   draftPrompt: string;
 };
 
+/** Compliance document on the deal — drives the doc-tree + review drawer (§2.6). */
+export type DocStatus = "complete" | "needs-review" | "missing" | "rejected";
+export type DealDocument = {
+  id: string;
+  name: string;
+  /** Requirement group the doc tree organizes under. */
+  requirement: string;
+  status: DocStatus;
+  /** Pages in the rendered preview. */
+  pages: number;
+  /** Source / executed-on provenance line. */
+  meta: string;
+  /** When set, the doc preview surfaces these missing-field notes. */
+  missing?: string[];
+  /** Whether a literal boxed signature field renders in the preview. */
+  signature?: boolean;
+};
+
+/** A seed activity_event for the deal's audit chronology (§1.7 / §2.6). */
+export type DealActivitySeed = {
+  id: string;
+  channel: ActivityChannel;
+  name: string;
+  tag?: string;
+  tagTone?: ActivityTagTone;
+  meta?: string;
+  timeLabel: string;
+  group: string;
+};
+
 export type DealScreen = {
   /** "Buyer side · Under Contract · Close Jul 22" line under the address. */
   sideLine: string;
   statusRows: StatusRow[];
   milestones: DealMilestone[];
   checklist: DealChecklistItem[];
+  documents: DealDocument[];
+  activity: DealActivitySeed[];
   /** Null when the deal carries no open risk. */
   risk: RiskNote | null;
 };
@@ -87,6 +125,38 @@ const EVERETT: DealScreen = {
     { id: "c4", label: "Lender approval letter", status: "done", meta: "Conditional approval · Summit Mortgage" },
     { id: "c5", label: "HOA docs pending", status: "pending", meta: "Requested from Cedar Hills HOA · Jun 19" },
     { id: "c6", label: "Final walkthrough schedule", status: "pending", meta: "Targeting Jul 21" },
+  ],
+  documents: [
+    {
+      id: "d1", name: "OREF-001 Residential Sale Agreement", requirement: "Contract",
+      status: "complete", pages: 9, meta: "Executed Jun 18 · all initials present", signature: true,
+    },
+    {
+      id: "d2", name: "Seller's Property Disclosure", requirement: "Disclosures",
+      status: "complete", pages: 6, meta: "Property & lead-based paint · uploaded Jun 19",
+    },
+    {
+      id: "d3", name: "Inspection Repair Addendum", requirement: "Contingencies",
+      status: "missing", pages: 2, meta: "Roof concern raised — not yet generated",
+      missing: ["addendum body not drafted", "buyer & seller signatures · pages 1–2"], signature: true,
+    },
+    {
+      id: "d4", name: "Lender Conditional Approval", requirement: "Financing",
+      status: "needs-review", pages: 3, meta: "Summit Mortgage · received Jun 17",
+      missing: ["verify rate-lock expiration · page 2"],
+    },
+    {
+      id: "d5", name: "Earnest Money Receipt", requirement: "Escrow",
+      status: "complete", pages: 1, meta: "$10,000 wired to escrow · Jun 20",
+    },
+  ],
+  activity: [
+    { id: "a1", channel: "system", name: "AI Risk Note generated", tag: "needs action", tagTone: "danger", meta: "Roof concern vs. missing addendum · inspection ends Jun 23", timeLabel: "12m", group: "Today" },
+    { id: "a2", channel: "email", name: "Buyer email received", tag: "roof concern", tagTone: "warn", meta: "Daniel Cho asked about shingle condition", timeLabel: "1h", group: "Today" },
+    { id: "a3", channel: "system", name: "Conditional approval logged", tag: "financing", tagTone: "info", meta: "Summit Mortgage · auto-filed to deal", timeLabel: "Jun 19", group: "This week" },
+    { id: "a4", channel: "note", name: "Seller disclosure uploaded", tag: "disclosures", tagTone: "success", meta: "Property + lead-based paint", timeLabel: "Jun 19", group: "This week" },
+    { id: "a5", channel: "system", name: "Earnest money received", tag: "escrow", tagTone: "success", meta: "$10,000 wired · receipt on file", timeLabel: "Jun 20", group: "This week" },
+    { id: "a6", channel: "text", name: "Offer accepted", tag: "milestone", tagTone: "success", meta: "Sale agreement executed by both parties", timeLabel: "Jun 18", group: "Earlier" },
   ],
   risk: {
     title: "AI Risk Note",
@@ -122,6 +192,38 @@ const HAWTHORNE: DealScreen = {
     { id: "c4", label: "Repair addendum unsigned", status: "issue", meta: "Deadline tomorrow — buyer & seller not signed" },
     { id: "c5", label: "Appraisal ordered", status: "pending", meta: "Awaiting lender order trigger" },
     { id: "c6", label: "Loan approval letter", status: "pending", meta: "In processing · WaFd Bank" },
+  ],
+  documents: [
+    {
+      id: "d1", name: "OREF-001 Residential Sale Agreement", requirement: "Contract",
+      status: "complete", pages: 9, meta: "Executed Jun 02 · all initials present", signature: true,
+    },
+    {
+      id: "d2", name: "Earnest Money Receipt", requirement: "Escrow",
+      status: "complete", pages: 1, meta: "$15,000 wired to escrow · Jun 05",
+    },
+    {
+      id: "d3", name: "Pillar To Post Inspection Report", requirement: "Contingencies",
+      status: "needs-review", pages: 14, meta: "Uploaded Jun 19 · 2 flagged items",
+      missing: ["agent to summarize 2 negotiable items"],
+    },
+    {
+      id: "d4", name: "Repair Addendum", requirement: "Contingencies",
+      status: "missing", pages: 2, meta: "Deadline tomorrow — not yet executed",
+      missing: ["buyer signature · page 1", "seller signature · page 2"], signature: true,
+    },
+    {
+      id: "d5", name: "Loan Estimate", requirement: "Financing",
+      status: "needs-review", pages: 5, meta: "WaFd Bank · in processing",
+      missing: ["appraisal not yet ordered"],
+    },
+  ],
+  activity: [
+    { id: "a1", channel: "system", name: "AI Risk Note generated", tag: "deadline tomorrow", tagTone: "danger", meta: "Repair addendum unsigned · contingency at risk", timeLabel: "8m", group: "Today" },
+    { id: "a2", channel: "email", name: "Inspection report uploaded", tag: "2 flagged items", tagTone: "warn", meta: "Pillar To Post · roof flashing + GFCI outlets", timeLabel: "Jun 19", group: "This week" },
+    { id: "a3", channel: "system", name: "Loan moved to processing", tag: "financing", tagTone: "info", meta: "WaFd Bank · awaiting appraisal trigger", timeLabel: "Jun 17", group: "This week" },
+    { id: "a4", channel: "system", name: "Earnest money received", tag: "escrow", tagTone: "success", meta: "$15,000 wired · receipt on file", timeLabel: "Jun 05", group: "Earlier" },
+    { id: "a5", channel: "text", name: "Offer accepted", tag: "milestone", tagTone: "success", meta: "Sale agreement executed by both parties", timeLabel: "Jun 02", group: "Earlier" },
   ],
   risk: {
     title: "AI Risk Note",
@@ -219,6 +321,79 @@ function deriveMilestones(tx: Transaction): DealMilestone[] {
   ];
 }
 
+/** Map the deal's stage progress into a plausible compliance doc set. */
+function deriveDocuments(tx: Transaction): DealDocument[] {
+  const has = (label: string) => tx.checklist.find((c) => c.label === label)?.done ?? false;
+  const buyer = /purchase|buyer/i.test(tx.type);
+  const docs: DealDocument[] = [
+    {
+      id: "d1", name: "OREF-001 Residential Sale Agreement", requirement: "Contract",
+      status: has("Offer accepted") ? "complete" : "needs-review",
+      pages: 9, meta: has("Offer accepted") ? "Executed · all initials present" : "Draft circulating for signature",
+      signature: true,
+      missing: has("Offer accepted") ? undefined : ["buyer & seller signatures · pages 8–9"],
+    },
+    {
+      id: "d2", name: buyer ? "Buyer Advisory & Disclosures" : "Seller's Property Disclosure",
+      requirement: "Disclosures",
+      status: tx.stageIndex >= 2 ? "complete" : "needs-review",
+      pages: 6, meta: tx.stageIndex >= 2 ? "On file" : "Awaiting upload",
+    },
+    {
+      id: "d3", name: "Home Inspection Report", requirement: "Contingencies",
+      status: has("Inspection complete") ? "complete" : "missing",
+      pages: 12, meta: has("Inspection complete") ? "Uploaded · contingency cleared" : "Inspection not yet complete",
+      missing: has("Inspection complete") ? undefined : ["report not uploaded"],
+    },
+    {
+      id: "d4", name: "Lender Approval Letter", requirement: "Financing",
+      status: has("Loan approved") ? "complete" : "needs-review",
+      pages: 3, meta: has("Loan approved") ? "Final approval issued" : "Conditional / in processing",
+      missing: has("Loan approved") ? undefined : ["verify approval conditions · page 2"],
+    },
+    {
+      id: "d5", name: "Closing Disclosure", requirement: "Closing",
+      status: has("Closing disbursed") ? "complete" : tx.stageIndex >= 6 ? "needs-review" : "missing",
+      pages: 5, meta: has("Closing disbursed") ? "Signed at closing" : tx.stageIndex >= 6 ? "Prepared — awaiting review" : "Not yet prepared",
+      missing: tx.stageIndex >= 6 && !has("Closing disbursed") ? ["confirm figures with escrow · page 3"] : tx.stageIndex < 6 ? ["pending earlier milestones"] : undefined,
+      signature: true,
+    },
+  ];
+  return docs;
+}
+
+/** Seed a short audit chronology from the deal's real milestones. */
+function deriveActivity(tx: Transaction): DealActivitySeed[] {
+  const out: DealActivitySeed[] = [];
+  if (tx.riskFlag) {
+    out.push({
+      id: "a1", channel: "system", name: "AI Risk Note generated", tag: "needs action",
+      tagTone: "danger", meta: tx.riskFlag, timeLabel: "now", group: "Today",
+    });
+  }
+  out.push({
+    id: "a2", channel: "system", name: `Stage advanced to ${tx.stage}`, tag: "pipeline",
+    tagTone: "info", meta: "Auto-logged from the deal record", timeLabel: "today", group: "Today",
+  });
+  if (tx.checklist.find((c) => c.label === "Inspection complete")?.done) {
+    out.push({
+      id: "a3", channel: "email", name: "Inspection report uploaded", tag: "contingency",
+      tagTone: "success", meta: "Filed to the deal documents", timeLabel: "this week", group: "This week",
+    });
+  }
+  if (tx.checklist.find((c) => c.label === "Earnest money received")?.done) {
+    out.push({
+      id: "a4", channel: "system", name: "Earnest money received", tag: "escrow",
+      tagTone: "success", meta: "Receipt on file", timeLabel: "earlier", group: "Earlier",
+    });
+  }
+  out.push({
+    id: "a5", channel: "text", name: "Offer accepted", tag: "milestone",
+    tagTone: "success", meta: "Sale agreement executed by both parties", timeLabel: "earlier", group: "Earlier",
+  });
+  return out;
+}
+
 function deriveRisk(tx: Transaction): RiskNote | null {
   if (!tx.riskFlag) return null;
   return {
@@ -238,6 +413,8 @@ export function dealScreenFor(tx: Transaction): DealScreen {
     statusRows: deriveStatusRows(tx),
     milestones: deriveMilestones(tx),
     checklist: deriveChecklist(tx),
+    documents: deriveDocuments(tx),
+    activity: deriveActivity(tx),
     risk: deriveRisk(tx),
   };
 }

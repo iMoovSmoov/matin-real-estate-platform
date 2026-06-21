@@ -10,14 +10,22 @@
 
    Status taxonomy (carried by chip color per build-reference §1.10):
      complete       → success (green)  "Complete"
+     sent           → success (green)  "Out for signature"  (runtime; after Send)
      needs-initials → warn    (amber)  "Needs initials"
      required       → warn    (amber)  "Required"
+     correction     → danger  (red)    "Correction requested" (runtime)
      draft          → info    (gray)   "Draft"
    ────────────────────────────────────────────────────────────────────────── */
 
 import type { ChipTone } from "@/components/os";
 
-export type DocStatus = "complete" | "needs-initials" | "required" | "draft";
+export type DocStatus =
+  | "complete"
+  | "sent"
+  | "needs-initials"
+  | "required"
+  | "correction"
+  | "draft";
 
 export type PacketDoc = {
   id: string;
@@ -41,6 +49,11 @@ export type Packet = {
   subject: string;
   /** Owner initials token (coordinator/agent). */
   owner: string;
+  /** Real coordinator/agent identity for the Avatar (slug → headshot). */
+  ownerName: string;
+  ownerSlug: string;
+  /** Deterministic exterior photo seed so the packet always shows one home. */
+  photoSeed: number;
   /** Source-record join, shown as a mono backend note. */
   source: string;
   lastUpdated: string;
@@ -50,10 +63,22 @@ export type Packet = {
 /** Chip tone + label for a document status (single source of truth). */
 export const STATUS_META: Record<DocStatus, { tone: ChipTone; label: string }> = {
   complete: { tone: "success", label: "Complete" },
+  sent: { tone: "success", label: "Out for signature" },
   "needs-initials": { tone: "warn", label: "Needs initials" },
   required: { tone: "warn", label: "Required" },
+  correction: { tone: "danger", label: "Correction requested" },
   draft: { tone: "info", label: "Draft" },
 };
+
+/** A doc is blocked from sending while required fields/initials are missing. */
+export function isSendBlocked(status: DocStatus): boolean {
+  return status === "required" || status === "needs-initials";
+}
+
+/** Docs that count as "open" (not terminal) for the packet open-count badge. */
+export function isOpenDoc(status: DocStatus): boolean {
+  return status !== "complete" && status !== "sent";
+}
 
 export const PACKETS: Packet[] = [
   {
@@ -61,6 +86,9 @@ export const PACKETS: Packet[] = [
     name: "Listing packet",
     subject: "7428 SW Maple Ave · Lake Oswego",
     owner: "JM",
+    ownerName: "Jordan Matin",
+    ownerSlug: "jordan-matin",
+    photoSeed: 3,
     source: "listings > document_packets > document_fields + document_signers",
     lastUpdated: "Updated 2h ago by Jordan Matin",
     docs: [
@@ -123,6 +151,9 @@ export const PACKETS: Packet[] = [
     name: "Buyer agreement",
     subject: "Daniel Cho · Beaverton search",
     owner: "AC",
+    ownerName: "Amanda Conlon",
+    ownerSlug: "amanda-conlon",
+    photoSeed: 8,
     source: "contacts > document_packets > saved_searches + agreements",
     lastUpdated: "Updated 38m ago by Amanda Conlon",
     docs: [
@@ -164,6 +195,9 @@ export const PACKETS: Packet[] = [
     name: "Offer packet",
     subject: "Daniel Cho → 1248 NW Cedar Hills Dr",
     owner: "AC",
+    ownerName: "Amanda Conlon",
+    ownerSlug: "amanda-conlon",
+    photoSeed: 12,
     source: "transactions > document_packets > listings + cash_offer_requests",
     lastUpdated: "Updated 1h ago by Amanda Conlon",
     docs: [
@@ -216,6 +250,9 @@ export const PACKETS: Packet[] = [
     name: "Seller disclosure",
     subject: "Sarah Mitchell · 14920 SW Greenway",
     owner: "JM",
+    ownerName: "Jordan Matin",
+    ownerSlug: "jordan-matin",
+    photoSeed: 17,
     source: "seller_leads > document_packets > properties + valuations",
     lastUpdated: "Updated 4h ago by Jordan Matin",
     docs: [
@@ -258,6 +295,9 @@ export const PACKETS: Packet[] = [
     name: "Closing packet",
     subject: "8912 SE Hawthorne Blvd · Close Jul 22",
     owner: "JM",
+    ownerName: "Jordan Matin",
+    ownerSlug: "jordan-matin",
+    photoSeed: 5,
     source: "transactions > document_packets > broker_reviews + signature_envelopes",
     lastUpdated: "Updated 25m ago by Jordan Matin",
     docs: [
@@ -310,6 +350,9 @@ export const PACKETS: Packet[] = [
     name: "Lead intake",
     subject: "Melissa Grant · re-activated client",
     owner: "AC",
+    ownerName: "Amanda Conlon",
+    ownerSlug: "amanda-conlon",
+    photoSeed: 20,
     source: "contacts > document_packets > activity_events",
     lastUpdated: "Updated 6h ago by Amanda Conlon",
     docs: [
@@ -337,14 +380,19 @@ export const PACKETS: Packet[] = [
   },
 ];
 
-/** Aggregate counters reconciled from the packet/doc records (KPI strip). */
-export function packetMetrics() {
-  const allDocs = PACKETS.flatMap((p) => p.docs);
-  const inProgress = PACKETS.filter((p) =>
-    p.docs.some((d) => d.status !== "complete"),
+/**
+ * Aggregate counters reconciled from the packet/doc records (KPI strip).
+ * Accepts the LIVE packet array so the numbers re-derive after a Send / fix —
+ * KPIs always equal the rows they summarize (build-reference §1.4 / §3).
+ */
+export function packetMetrics(packets: Packet[] = PACKETS) {
+  const allDocs = packets.flatMap((p) => p.docs);
+  const inProgress = packets.filter((p) =>
+    p.docs.some((d) => isOpenDoc(d.status)),
   ).length;
+  // "Awaiting signature" = out for e-sign OR still needing initials before send.
   const awaitingSignature = allDocs.filter(
-    (d) => d.status === "needs-initials",
+    (d) => d.status === "needs-initials" || d.status === "sent",
   ).length;
   const missingFields = allDocs.reduce(
     (n, d) => n + (d.missing?.length ?? 0),
@@ -356,6 +404,6 @@ export function packetMetrics() {
     awaitingSignature,
     missingFields,
     completedThisWeek,
-    templates: PACKETS.length,
+    templates: packets.length,
   };
 }

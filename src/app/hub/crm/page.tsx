@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Inbox, PhoneOff, Flame, Home, Timer, CalendarCheck } from "lucide-react";
-import { leads as allLeads, aiActions } from "@/lib/data";
+import { Inbox, PhoneOff, Flame, Home, Timer, CalendarCheck, Search, UserPlus } from "lucide-react";
+import { leads as seedLeads, aiActions, getAgent } from "@/lib/data";
 import type { Lead } from "@/lib/types";
 import {
   KpiStrip,
   KpiCard,
   DataTable,
   TwoLineCell,
-  InitialsToken,
+  Avatar,
   StatusChip,
   ScoreChip,
   EmptyState,
@@ -17,6 +17,7 @@ import {
 } from "@/components/os";
 import { LeadDetailPanel } from "@/components/command/crm/LeadDetailPanel";
 import { LeadSourceAnalysis } from "@/components/command/crm/LeadSourceAnalysis";
+import { AddLeadDrawer } from "@/components/command/crm/AddLeadDrawer";
 import {
   type SavedViewKey,
   filterLeads,
@@ -29,15 +30,16 @@ import {
 /* ──────────────────────────────────────────────────────────────────────────
    CRM & Leads Workbench  → /hub/crm   (build-reference §2.2)
 
-   Daily lead conversion cockpit, master–detail on one screen:
-     • KPI strip (6) derived from the leads array
-     • SavedViewTabs smart lists filtering the inbox
-     • LEFT ~62%  DataTable lead inbox (name+source · type · signal · NBA · score)
-     • RIGHT ~36% selected-lead detail panel (defaults to Daniel Cho)
-     • below the table: Lead source analysis horizontal bars
+   Master–detail lead-conversion cockpit. Everything here does its REAL job:
+     • KPI strip (6) drills into the matching saved view
+     • SavedViewTabs + a working search box filter the inbox (state/useMemo)
+     • LEFT  DataTable — Avatar identity + sortable columns; row-click selects
+     • RIGHT selected-lead detail panel (Avatar/ScoreRing, AI drafts, compose)
+     • "+ Add lead" appends to local state and selects the new lead immediately
+     • "Assign" in the panel reassigns the owner in local state
+     • below the table: Lead source analysis
 
-   No page-level <h1> — the TopCommandBar renders the section name; we render
-   only the muted subtitle. Client page (filter + selection state).
+   No page-level <h1> — the TopCommandBar owns the title. Client page.
    ────────────────────────────────────────────────────────────────────────── */
 
 const VIEWS: { key: SavedViewKey; label: string }[] = [
@@ -52,30 +54,54 @@ const VIEWS: { key: SavedViewKey; label: string }[] = [
 const CANONICAL_LEAD = "LD-1999"; // Daniel Cho (84)
 
 export default function CrmPage() {
+  const [leads, setLeads] = useState<Lead[]>(seedLeads);
   const [view, setView] = useState<SavedViewKey>("hot");
+  const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string>(CANONICAL_LEAD);
+  const [addOpen, setAddOpen] = useState(false);
 
-  const kpis = useMemo(() => crmKpis(allLeads), []);
+  const kpis = useMemo(() => crmKpis(leads), [leads]);
+
   const viewCounts = useMemo(
     () =>
       Object.fromEntries(
-        VIEWS.map((v) => [v.key, filterLeads(allLeads, v.key).length]),
+        VIEWS.map((v) => [v.key, filterLeads(leads, v.key).length]),
       ) as Record<SavedViewKey, number>,
-    [],
+    [leads],
   );
 
   const rows = useMemo(() => {
-    const filtered = filterLeads(allLeads, view);
+    const q = search.trim().toLowerCase();
+    const filtered = filterLeads(leads, view).filter((l) => {
+      if (!q) return true;
+      const owner = getAgent(l.assignedAgent)?.name ?? l.assignedAgent;
+      const hay = `${l.name} ${l.email} ${l.community} ${l.intent} ${l.source} ${owner} ${l.tags.join(" ")}`.toLowerCase();
+      return hay.includes(q);
+    });
     // Strongest leads first, then most-recent.
     return [...filtered].sort(
       (a, b) => b.score - a.score || a.createdDaysAgo - b.createdDaysAgo,
     );
-  }, [view]);
+  }, [leads, view, search]);
 
   const selected = useMemo(
-    () => allLeads.find((l) => l.id === selectedId) ?? rows[0] ?? allLeads[0],
-    [selectedId, rows],
+    () => leads.find((l) => l.id === selectedId) ?? rows[0] ?? leads[0],
+    [leads, selectedId, rows],
   );
+
+  function handleAssign(leadId: string, agentSlug: string) {
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, assignedAgent: agentSlug } : l)),
+    );
+  }
+
+  function handleAddLead(newLead: Lead) {
+    setLeads((prev) => [newLead, ...prev]);
+    setView("all");
+    setSearch("");
+    setSelectedId(newLead.id);
+    setAddOpen(false);
+  }
 
   const columns: Column<Lead>[] = [
     {
@@ -84,7 +110,7 @@ export default function CrmPage() {
       sortable: true,
       render: (l) => (
         <div className="flex items-center gap-3">
-          <InitialsToken name={l.name} />
+          <Avatar name={l.name} size={36} ring={l.score >= 80} />
           <TwoLineCell title={l.name} sub={`${l.source} · ${l.community}`} />
         </div>
       ),
@@ -112,12 +138,26 @@ export default function CrmPage() {
     {
       key: "nextBestAction",
       header: "Next best action",
-      width: "16rem",
+      width: "15rem",
       render: (l) => (
         <span className="line-clamp-2 text-[0.8rem] font-medium leading-snug text-ink">
           {l.nextBestAction ?? "Qualify timeline & budget"}
         </span>
       ),
+    },
+    {
+      key: "owner",
+      header: "Owner",
+      width: "3.5rem",
+      align: "center",
+      render: (l) => {
+        const a = getAgent(l.assignedAgent);
+        return (
+          <span className="inline-flex justify-center">
+            <Avatar name={a?.name ?? l.assignedAgent} slug={a?.slug} size={28} ring />
+          </span>
+        );
+      },
     },
     {
       key: "score",
@@ -136,9 +176,19 @@ export default function CrmPage() {
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-6">
       {/* Subtitle (no h1 — the TopCommandBar owns the section title) */}
-      <p className="text-[0.82rem] text-slate">
-        Daily lead conversion cockpit — smart lists, scoring, activity, routing, AI next actions.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[0.82rem] text-slate">
+          Daily lead conversion cockpit — smart lists, scoring, activity, routing, AI next actions.
+        </p>
+        <button
+          type="button"
+          onClick={() => setAddOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+        >
+          <UserPlus className="h-4 w-4" aria-hidden />
+          Add lead
+        </button>
+      </div>
 
       {/* KPI strip */}
       <KpiStrip>
@@ -203,6 +253,19 @@ export default function CrmPage() {
             columns={columns}
             selectable
             onRowClick={(l) => setSelectedId(l.id)}
+            utilityLeft={
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate" aria-hidden />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search name, email, area, owner, tag…"
+                  className="h-8 w-56 rounded-lg border border-mist bg-cloud pl-8 pr-3 text-[0.78rem] text-ink placeholder:text-slate/55 focus:border-ink/30 focus:outline-none sm:w-64"
+                  aria-label="Search leads"
+                />
+              </div>
+            }
             savedViews={{
               views: VIEWS.map((v) => ({ ...v, count: viewCounts[v.key] })),
               active: view,
@@ -210,10 +273,14 @@ export default function CrmPage() {
             }}
             emptyState={
               <EmptyState
-                title="No leads in this view"
-                body="Switch smart lists or import leads from a connected source to start working this pool."
-                actionLabel="View all leads"
-                onAction={() => setView("all")}
+                title={search ? "No leads match your search" : "No leads in this view"}
+                body={
+                  search
+                    ? "Clear the search box or switch smart lists to widen the pool."
+                    : "Switch smart lists or add a lead to start working this pool."
+                }
+                actionLabel={search ? "Clear search" : "View all leads"}
+                onAction={() => (search ? setSearch("") : setView("all"))}
               />
             }
           />
@@ -222,13 +289,16 @@ export default function CrmPage() {
         {/* RIGHT — selected-lead detail panel */}
         <div className="min-w-0 xl:sticky xl:top-4 xl:h-[calc(100vh-9rem)]">
           {selected ? (
-            <LeadDetailPanel lead={selected} aiActions={aiActions} />
+            <LeadDetailPanel lead={selected} aiActions={aiActions} onAssign={handleAssign} />
           ) : null}
         </div>
       </div>
 
       {/* Lead source analysis */}
-      <LeadSourceAnalysis leads={allLeads} />
+      <LeadSourceAnalysis leads={leads} />
+
+      {/* Add-lead form drawer → appends to local state + selects the new lead */}
+      <AddLeadDrawer open={addOpen} onClose={() => setAddOpen(false)} onSave={handleAddLead} />
     </div>
   );
 }

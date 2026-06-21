@@ -3,19 +3,26 @@ import type { ReportSourceRoi } from "@/lib/types";
 import { cn, compactUsd, num } from "@/lib/utils";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Reports — Marketing ROI + Source Quality
+   MatinOS — Marketing ROI + Source Quality (build-ref §2.10)
 
-   Horizontal bar per lead source (single-hue ink ramp, length ∝ attributed
-   revenue) with a return-multiplier label (e.g. 4.3x). Color-as-data (Sisu):
-   the ROI multiplier prints in success-green, cost-per-lead in danger-red —
-   value text only, no badges. Ends with a DARK tone="ai" CalloutCard insight.
-   Each row is a drilldown button → onDrill(source). Server-safe presentational.
+   One horizontal SVG bar per lead source (single-hue ink ramp, length ∝
+   attributed revenue) with a return-multiplier label. Color-as-data (Sisu):
+   the ROI multiplier prints success-green, cost-per-lead danger-red — value
+   text only, no badges. CPL also drives a small red dot whose opacity scales
+   with cost so the worst channels read at a glance. Each row is a drilldown
+   button → onDrill(source). Ends with a DARK tone="ai" insight callout.
    ────────────────────────────────────────────────────────────────────────── */
 
-/** Revenue ÷ spend; pure referral ($0 spend) reads as ∞ (no paid attribution). */
+/* `revenue` is gross sale volume; real marketing ROAS compares the commission
+   it earns (≈2.5% GCI on the buy/list side) against ad spend — so the numbers
+   read like a media buyer's dashboard (e.g. 3.8x), not raw volume÷spend. */
+const GCI_BASIS = 0.025;
+const attributedGci = (s: ReportSourceRoi) => s.revenue * GCI_BASIS;
+
+/** GCI ÷ spend; pure referral ($0 spend) reads as ∞ (no paid attribution). */
 function multiplier(s: ReportSourceRoi): string {
   if (s.spend === 0) return "∞";
-  return `${(s.revenue / s.spend).toFixed(1)}x`;
+  return `${(attributedGci(s) / s.spend).toFixed(1)}x`;
 }
 
 export function SourceRoiPanel({
@@ -26,7 +33,12 @@ export function SourceRoiPanel({
   onDrill?: (source: ReportSourceRoi) => void;
 }) {
   const maxRevenue = Math.max(...sources.map((s) => s.revenue), 1);
+  const maxCpl = Math.max(...sources.map((s) => s.cpl), 1);
   const interactive = typeof onDrill === "function";
+
+  const totalGci = sources.reduce((s, x) => s + attributedGci(x), 0);
+  const totalSpend = sources.reduce((s, x) => s + x.spend, 0);
+  const blendedRoas = totalSpend ? (totalGci / totalSpend).toFixed(1) : "∞";
 
   return (
     <section className="flex flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
@@ -34,16 +46,16 @@ export function SourceRoiPanel({
         <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
           Marketing ROI + Source Quality
         </h2>
-        <span className="text-[0.72rem] font-medium text-slate">
-          Attributed revenue · YTD
+        <span className="text-[0.72rem] font-medium text-slate tabular-nums">
+          Blended {blendedRoas}x ROAS
         </span>
       </div>
 
       {/* Column legend */}
       <div className="flex items-center justify-between gap-2 border-b border-mist pb-2">
-        <span className="eyebrow text-[0.64rem]">Source</span>
+        <span className="eyebrow text-[0.64rem]">Source · attributed volume</span>
         <div className="flex items-center gap-5">
-          <span className="eyebrow w-14 text-right text-[0.64rem]">Return</span>
+          <span className="eyebrow w-12 text-right text-[0.64rem]">ROAS</span>
           <span className="eyebrow w-16 text-right text-[0.64rem]">Cost / lead</span>
         </div>
       </div>
@@ -51,6 +63,8 @@ export function SourceRoiPanel({
       <div className="flex flex-col">
         {sources.map((s) => {
           const pct = Math.max(4, Math.round((s.revenue / maxRevenue) * 100));
+          // CPL "heat": worse cost → more saturated red dot (color-as-data).
+          const cplHeat = s.cpl === 0 ? 0 : Math.max(0.25, Math.min(1, s.cpl / maxCpl));
           const body = (
             <>
               <div className="mb-1.5 flex items-center justify-between gap-3">
@@ -64,23 +78,28 @@ export function SourceRoiPanel({
                 </div>
                 <div className="flex shrink-0 items-center gap-5">
                   {/* ROI multiplier — green value text, no badge */}
-                  <span className="w-14 text-right text-[0.86rem] font-bold text-success tabular-nums">
+                  <span className="w-12 text-right text-[0.86rem] font-bold text-success tabular-nums">
                     {multiplier(s)}
                   </span>
-                  {/* Cost per lead — red value text, no badge */}
-                  <span className="w-16 text-right text-[0.86rem] font-bold text-danger tabular-nums">
+                  {/* Cost per lead — red value text + heat dot, no badge */}
+                  <span className="flex w-16 items-center justify-end gap-1.5 text-[0.86rem] font-bold text-danger tabular-nums">
+                    {s.cpl > 0 ? (
+                      <span
+                        aria-hidden
+                        className="h-1.5 w-1.5 rounded-full bg-danger"
+                        style={{ opacity: cplHeat }}
+                      />
+                    ) : null}
                     {s.cpl === 0 ? "$0" : `$${num(s.cpl)}`}
                   </span>
                 </div>
               </div>
-              {/* Single-hue revenue bar (ink ramp) */}
+              {/* Single-hue revenue bar (SVG ink ramp) */}
               <div className="flex items-center gap-3">
-                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-200">
-                  <div
-                    className="h-full rounded-full bg-ink/80"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="h-2.5 flex-1">
+                  <rect x={0} y={0} width={100} height={10} rx={3} fill="var(--color-paper-200)" />
+                  <rect x={0} y={0} width={pct} height={10} rx={3} fill="var(--color-ink)" fillOpacity={0.8} />
+                </svg>
                 <span className="w-16 shrink-0 text-right text-[0.78rem] font-semibold text-ink tabular-nums">
                   {compactUsd(s.revenue)}
                 </span>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
-  Dumbbell,
+  GraduationCap,
   Gauge,
   TrendingDown,
   ClipboardCheck,
-  Drama,
-  Sparkles,
+  Activity,
+  CircleCheck,
+  CalendarClock,
 } from "lucide-react";
 import { salesAgents, coachingScenarios } from "@/lib/data";
 import { useAiSidecar } from "@/components/os";
@@ -18,26 +19,36 @@ import {
   ProgressTrack,
   DataTable,
   TwoLineCell,
-  InitialsToken,
+  Avatar,
   ScoreChip,
+  ScoreRing,
   StatusChip,
+  Dot,
   RecordDrawer,
   CalloutCard,
+  AIActionCard,
   MilestoneTimeline,
+  EmptyState,
   type Column,
 } from "@/components/os";
+import { MatinMark } from "@/components/brand/Logo";
+import { streamAi } from "@/lib/ai/client";
 import { CoachingWorkbench } from "@/components/command/coaching/CoachingWorkbench";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — Coaching  (ref §2.9)
 
-   AI Coaching + Scenario Training. The page renders inside AppShell, so the
-   TopCommandBar already shows the "Coaching" section name — no page <h1> here,
-   only a muted subtitle. Composes @/components/os primitives + the
-   CoachingWorkbench three-pane surface.
+   AI Coaching + Scenario Training. Renders inside AppShell (TopCommandBar owns
+   the "Coaching" title — no page <h1>, only a muted subtitle). Composes
+   @/components/os primitives + the CoachingWorkbench three-pane surface.
+
+   MAKE-IT-REAL: KPI tiles drill into a real on-screen roster drawer (not the AI
+   panel); leaderboard rows open a per-agent coaching-plan drawer; the plan is
+   STREAMED inline via streamAi('report_agent_coach') into an AIActionCard; the
+   ONLY path to the global AI sidecar is the explicit "Ask Matin" affordances.
+   Real agent photos via Avatar; the live roleplay streams in the workbench.
    ────────────────────────────────────────────────────────────────────────── */
 
-/* ── Deterministic per-agent coaching standing, derived from real agent stats ── */
 interface Standing {
   slug: string;
   name: string;
@@ -66,18 +77,7 @@ function buildStandings(): Standing[] {
       const pace = Math.round((done / goal) * 100);
       const behind = done < expected;
       const weakest = SKILLS[(a.homesSold + a.reviews) % SKILLS.length];
-      return {
-        slug: a.slug,
-        name: a.name,
-        title: a.title,
-        scenariosRun,
-        avgScore,
-        goal,
-        done,
-        pace,
-        behind,
-        weakest,
-      };
+      return { slug: a.slug, name: a.name, title: a.title, scenariosRun, avgScore, goal, done, pace, behind, weakest };
     })
     .sort((x, y) => y.avgScore - x.avgScore || y.scenariosRun - x.scenariosRun);
 }
@@ -88,10 +88,28 @@ function scoreValueTone(score: number): string {
   return "text-danger";
 }
 
+/** Which KPI a tile drilldown opens — drives the on-screen roster drawer. */
+type RosterView = "practice" | "avgScore" | "behind" | "reviews" | "scenarios";
+
+const ROSTER_META: Record<RosterView, { title: string; sub: string }> = {
+  practice: { title: "Practice sessions", sub: "Completed roleplay drills this quarter" },
+  avgScore: { title: "Average scorecard", sub: "Mean rubric score across scored attempts" },
+  behind: { title: "Agents behind pace", sub: "Below the quarter practice goal" },
+  reviews: { title: "Manager reviews due", sub: "Attempts awaiting manager sign-off" },
+  scenarios: { title: "Scenarios run", sub: "All-time drills across the team" },
+};
+
 export default function CoachingPage() {
   const { openAi } = useAiSidecar();
   const standings = useMemo(buildStandings, []);
+
   const [selected, setSelected] = useState<Standing | null>(null);
+  const [drawerTab, setDrawerTab] = useState("plan");
+  const [roster, setRoster] = useState<RosterView | null>(null);
+
+  // Streamed coaching plan per agent (AIActionCard inline result).
+  const [planState, setPlanState] = useState<{ running: boolean; text: string } | null>(null);
+  const planRunningRef = useRef(false);
 
   // KPI roll-ups reconcile to the standings rows below them.
   const totalScenariosRun = standings.reduce((s, r) => s + r.scenariosRun, 0);
@@ -109,13 +127,48 @@ export default function CoachingPage() {
   const teamExpected = 75; // dashed Pace marker
   const teamForecast = Math.min(100, Math.round(teamPace * (12 / 9))); // straight-line forecast
 
+  function openAgent(s: Standing) {
+    setSelected(s);
+    setDrawerTab("plan");
+    setPlanState(null);
+  }
+
+  // Stream the AI coaching plan INLINE (no sidecar) into the AIActionCard.
+  async function runPlan(s: Standing) {
+    if (planRunningRef.current) return;
+    planRunningRef.current = true;
+    setPlanState({ running: true, text: "" });
+    try {
+      await streamAi(
+        {
+          tool: "report_agent_coach",
+          messages: [
+            {
+              role: "user",
+              content:
+                `Agent: ${s.name} (${s.title}). Quarter practice: ${s.done} of ${s.goal} sessions ` +
+                `(${s.pace}% — ${s.behind ? "behind" : "on"} pace). Average scorecard: ${s.avgScore}. ` +
+                `Weakest skill: ${s.weakest}. Drills run this quarter: ${s.scenariosRun}.\n\n` +
+                `Write a brief coaching note: what's going well (1 line), the one metric to fix and why, ` +
+                `and one concrete drill or CRM action for this week. Under 100 words.`,
+            },
+          ],
+        },
+        (_chunk, full) => setPlanState({ running: true, text: full }),
+      );
+    } finally {
+      planRunningRef.current = false;
+      setPlanState((p) => (p ? { running: false, text: p.text } : null));
+    }
+  }
+
   const columns: Column<Standing>[] = [
     {
       key: "name",
       header: "Agent",
       render: (r) => (
         <div className="flex items-center gap-2.5">
-          <InitialsToken name={r.name} />
+          <Avatar name={r.name} slug={r.slug} size={32} ring />
           <TwoLineCell title={r.name} sub={r.title} />
         </div>
       ),
@@ -162,23 +215,52 @@ export default function CoachingPage() {
     },
   ];
 
+  // Rows the roster drawer shows for a given KPI view.
+  const rosterRows = useMemo<Standing[]>(() => {
+    if (!roster) return [];
+    switch (roster) {
+      case "behind":
+        return standings.filter((r) => r.behind);
+      case "reviews":
+        return standings.filter((r) => r.avgScore < 75);
+      case "avgScore":
+        return [...standings].sort((a, b) => b.avgScore - a.avgScore);
+      case "scenarios":
+        return [...standings].sort((a, b) => b.scenariosRun - a.scenariosRun);
+      case "practice":
+      default:
+        return [...standings].sort((a, b) => b.done - a.done);
+    }
+  }, [roster, standings]);
+
   return (
     <div className="mx-auto max-w-[1500px] space-y-5 px-4 py-4 md:px-6">
       {/* Subtitle / eyebrow (no h1 — TopCommandBar owns the section title) */}
-      <p className="text-[0.8rem] leading-snug text-slate">
-        Coach agents and brokers with scorecards, roleplay, and real CRM outcomes.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[0.8rem] leading-snug text-slate">
+          Coach agents and brokers with scorecards, roleplay, and real CRM outcomes.
+        </p>
+        {/* The ONLY explicit "Ask Matin" entry into the global AI sidecar. */}
+        <button
+          type="button"
+          onClick={() => openAi("Coaching / Team performance overview")}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+        >
+          <MatinMark theme="dark" className="h-3.5 w-3.5" />
+          Ask Matin
+        </button>
+      </div>
 
-      {/* KPI strip */}
+      {/* KPI strip — each tile drills into the on-screen roster drawer */}
       <KpiStrip className="xl:grid-cols-5">
         <KpiCard
           label="Practice sessions"
           value={practiceSessions}
-          icon={<Dumbbell className="h-4 w-4" aria-hidden />}
+          icon={<GraduationCap className="h-4 w-4" aria-hidden />}
           delta="this quarter"
           deltaTone="up"
           hint="Completed roleplay drills across the team"
-          onDrill={() => openAi("Context: Coaching / Practice sessions this quarter")}
+          onDrill={() => setRoster("practice")}
         />
         <KpiCard
           label="Avg scorecard"
@@ -188,7 +270,7 @@ export default function CoachingPage() {
           delta="rubric-weighted"
           deltaTone="flat"
           hint="Mean across all scored attempts"
-          onDrill={() => openAi("Context: Coaching / Average scorecard")}
+          onDrill={() => setRoster("avgScore")}
         />
         <KpiCard
           label="Agents behind pace"
@@ -198,7 +280,7 @@ export default function CoachingPage() {
           delta={`of ${standings.length} active`}
           deltaTone="down"
           hint="Below the quarter practice goal"
-          onDrill={() => openAi("Context: Coaching / Agents behind pace")}
+          onDrill={() => setRoster("behind")}
         />
         <KpiCard
           label="Reviews due"
@@ -208,30 +290,31 @@ export default function CoachingPage() {
           delta="manager review"
           deltaTone="flat"
           hint="Attempts awaiting manager sign-off"
-          onDrill={() => openAi("Context: Coaching / Manager reviews due")}
+          onDrill={() => setRoster("reviews")}
         />
         <KpiCard
           label="Scenarios run"
           value={totalScenariosRun}
-          icon={<Drama className="h-4 w-4" aria-hidden />}
+          icon={<Activity className="h-4 w-4" aria-hidden />}
           delta="all-time"
           deltaTone="up"
           hint={`Across ${coachingScenarios.length + 1} broker-approved drills`}
-          onDrill={() => openAi("Context: Coaching / Scenarios run")}
+          onDrill={() => setRoster("scenarios")}
         />
       </KpiStrip>
 
-      {/* Three-pane coaching workbench */}
-      <CoachingWorkbench scenarios={coachingScenarios} onOpenAi={openAi} />
+      {/* Three-pane coaching workbench (live roleplay streams inline here) */}
+      <CoachingWorkbench
+        scenarios={coachingScenarios}
+        onAskAi={(ctx) => openAi(ctx)}
+      />
 
       {/* Leadership goal-pacing + leaderboard */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         {/* Goal pacing (leadership view) */}
         <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="font-display text-[1rem] font-normal text-ink">
-              Team practice goal
-            </h2>
+            <h2 className="font-display text-[1rem] font-normal text-ink">Team practice goal</h2>
             <StatusChip tone={teamPace >= teamExpected ? "success" : "danger"} variant="soft">
               {teamPace >= teamExpected ? "On pace" : "Behind pace"}
             </StatusChip>
@@ -264,11 +347,11 @@ export default function CoachingPage() {
               action={
                 <button
                   type="button"
-                  onClick={() => openAi("Context: Coaching / Team pacing & focus")}
+                  onClick={() => openAi("Coaching / Team pacing & focus")}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
                 >
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                  Assign drills
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                  Ask Matin
                 </button>
               }
             >
@@ -291,21 +374,75 @@ export default function CoachingPage() {
             columns={columns}
             rows={standings}
             getRowId={(r) => r.slug}
-            onRowClick={(r) => setSelected(r)}
-            utilityLeft={<span className="text-[0.78rem] text-slate">active agents</span>}
+            onRowClick={openAgent}
+            utilityLeft={<span className="text-[0.78rem] text-slate">Showing {standings.length} active agents</span>}
           />
         </section>
       </div>
 
-      {/* Per-agent coaching-plan drawer */}
+      {/* ── Roster drawer — opened from a KPI tile drilldown (real on-screen) ── */}
+      <RecordDrawer
+        open={roster !== null}
+        onClose={() => setRoster(null)}
+        title={roster ? ROSTER_META[roster].title : ""}
+        subtitle={roster ? ROSTER_META[roster].sub : undefined}
+      >
+        {roster ? (
+          rosterRows.length > 0 ? (
+            <ul className="space-y-1.5">
+              {rosterRows.map((r) => (
+                <li key={r.slug}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoster(null);
+                      openAgent(r);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl border border-mist bg-cloud px-3 py-2.5 text-left transition-colors hover:border-ink/20 hover:bg-paper-200/50"
+                  >
+                    <Avatar name={r.name} slug={r.slug} size={34} ring />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[0.86rem] font-semibold text-ink">{r.name}</p>
+                      <p className="truncate text-[0.74rem] text-slate">{r.title}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className={`text-[0.95rem] font-bold tabular-nums ${scoreValueTone(r.avgScore)}`}>
+                        {roster === "scenarios" ? r.scenariosRun : roster === "practice" ? `${r.done}/${r.goal}` : r.avgScore}
+                      </p>
+                      <p className="text-[0.66rem] uppercase tracking-[0.1em] text-slate">
+                        {roster === "scenarios" ? "drills" : roster === "practice" ? "sessions" : roster === "behind" ? `${r.pace}% pace` : "avg score"}
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={<CircleCheck className="h-6 w-6" aria-hidden />}
+              title="Nobody in this bucket"
+              body="Every active agent is on pace and above the review threshold this quarter."
+            />
+          )
+        ) : null}
+      </RecordDrawer>
+
+      {/* ── Per-agent coaching-plan drawer (real content + inline AI plan) ── */}
       <RecordDrawer
         open={selected !== null}
         onClose={() => setSelected(null)}
         title={selected?.name ?? ""}
         subtitle={selected ? `${selected.title} · Coaching plan` : undefined}
+        tabs={[
+          { key: "plan", label: "Plan" },
+          { key: "rubric", label: "Rubric" },
+          { key: "history", label: "Attempts" },
+        ]}
+        activeTab={drawerTab}
+        onTab={setDrawerTab}
         actions={
           selected ? (
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setSelected(null)}
@@ -315,13 +452,11 @@ export default function CoachingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  openAi(`Context: Coaching / ${selected.name} coaching plan`);
-                }}
+                onClick={() => openAi(`Coaching / ${selected.name} coaching plan`)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
               >
-                <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                Generate plan in Matin AI
+                <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                Ask Matin
               </button>
             </div>
           ) : undefined
@@ -329,105 +464,120 @@ export default function CoachingPage() {
       >
         {selected ? (
           <div className="space-y-5">
-            {/* Hero score */}
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-mist bg-paper-200/40 px-4 py-3">
-              <div>
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
-                  Avg scorecard
-                </p>
-                <p
-                  className={`mt-1 font-sans text-[1.7rem] font-bold leading-none tabular-nums ${scoreValueTone(
-                    selected.avgScore,
-                  )}`}
-                >
-                  {selected.avgScore}
-                </p>
-              </div>
-              <div className="text-right">
+            {/* Hero score — identity + ring */}
+            <div className="flex items-center gap-4 rounded-xl border border-mist bg-paper-200/40 px-4 py-3.5">
+              <Avatar name={selected.name} slug={selected.slug} size={46} ring />
+              <ScoreRing value={selected.avgScore} size={56} />
+              <div className="min-w-0">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
                   Quarter goal
                 </p>
-                <p className="mt-1 font-sans text-[1.7rem] font-bold leading-none tabular-nums text-ink">
+                <p className="mt-0.5 font-sans text-[1.4rem] font-bold leading-none tabular-nums text-ink">
                   {selected.done}
-                  <span className="text-[1rem] font-medium text-slate">/{selected.goal}</span>
+                  <span className="text-[0.9rem] font-medium text-slate">/{selected.goal}</span>
+                </p>
+                <div className="mt-1.5">
+                  <StatusChip tone={selected.behind ? "danger" : "success"} variant="soft">
+                    <Dot tone={selected.behind ? "danger" : "success"} />
+                    {selected.behind ? "Behind pace" : "On pace"}
+                  </StatusChip>
+                </div>
+              </div>
+            </div>
+
+            {drawerTab === "plan" ? (
+              <>
+                {/* AI coaching plan — streamed INLINE into the AIActionCard */}
+                <div>
+                  <p className="mb-2 flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                    <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                    AI coaching plan
+                  </p>
+                  <AIActionCard
+                    title={`Draft a weekly plan for ${selected.name.split(" ")[0]}`}
+                    riskTag="Ready"
+                    evidence={`Weakest skill is ${selected.weakest} (${selected.avgScore} avg); ${selected.done}/${selected.goal} practice sessions this quarter${selected.behind ? " — behind pace." : "."}`}
+                    confidence="High"
+                    runLabel={planState?.text ? "Regenerate" : "Generate plan"}
+                    running={planState?.running ?? false}
+                    result={planState?.text ? planState.text : undefined}
+                    onRun={() => runPlan(selected)}
+                  />
+                </div>
+
+                {/* Static fallback plan summary + CRM downstream chips */}
+                <div className="rounded-xl border border-mist bg-paper-200/40 p-4">
+                  <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                    Auto-created coaching plan
+                  </p>
+                  <p className="text-[0.84rem] leading-relaxed text-ink">
+                    Weakest skill is <span className="font-semibold">{selected.weakest}</span> (
+                    {selected.avgScore} avg). Plan: 3 practice calls on{" "}
+                    {selected.weakest.toLowerCase()}, one manager review, and a CRM task to call two
+                    active sellers today.
+                  </p>
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    <StatusChip tone="info" variant="soft">
+                      <CalendarClock className="h-3 w-3" aria-hidden />
+                      Appears in Today
+                    </StatusChip>
+                    <StatusChip tone="success" variant="soft">
+                      Writes activity_event
+                    </StatusChip>
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            {drawerTab === "rubric" ? (
+              <div>
+                <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                  Skill rubric
+                </p>
+                <div className="space-y-3">
+                  {agentRubric(selected).map((r) => (
+                    <ProgressTrack
+                      key={r.label}
+                      label={r.label}
+                      value={r.value}
+                      tone={r.tone}
+                      valueRight={<span className="tabular-nums">{r.value}</span>}
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 text-[0.72rem] leading-snug text-slate/70">
+                  Rubric-weighted from {selected.scenariosRun} scored drills · stored to the agent
+                  record and surfaced in Reports.
                 </p>
               </div>
-            </div>
+            ) : null}
 
-            {/* Rubric breakdown */}
-            <div>
-              <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
-                Skill rubric
-              </p>
-              <div className="space-y-3">
-                {agentRubric(selected).map((r) => (
-                  <ProgressTrack
-                    key={r.label}
-                    label={r.label}
-                    value={r.value}
-                    tone={r.tone}
-                    valueRight={<span className="tabular-nums">{r.value}</span>}
-                  />
-                ))}
+            {drawerTab === "history" ? (
+              <div>
+                <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                  Recent attempts
+                </p>
+                <MilestoneTimeline
+                  milestones={[
+                    { id: "m1", title: "Commission objection · scored 88", dateLabel: "Today", tone: "success" },
+                    {
+                      id: "m2",
+                      title: `${selected.weakest} drill · scored ${Math.max(40, selected.avgScore - 18)}`,
+                      dateLabel: "2 days ago",
+                      tone: "warn",
+                    },
+                    { id: "m3", title: "Manager review — Jordan Matin", dateLabel: "Last week", tone: "info" },
+                    {
+                      id: "m4",
+                      title: "Buyer refuses agreement · scored 54",
+                      dateLabel: "Last week",
+                      tone: "danger",
+                      terminal: true,
+                    },
+                  ]}
+                />
               </div>
-            </div>
-
-            {/* Auto coaching plan */}
-            <div className="rounded-xl border border-mist bg-paper-200/40 p-4">
-              <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
-                Auto-created coaching plan
-              </p>
-              <p className="text-[0.84rem] leading-relaxed text-ink">
-                Weakest skill is{" "}
-                <span className="font-semibold">{selected.weakest}</span> ({selected.avgScore} avg).
-                Plan: 3 practice calls on {selected.weakest.toLowerCase()}, one manager review, and a
-                CRM task to call two active sellers today.
-              </p>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                <StatusChip tone="info" variant="soft">
-                  Appears in Today
-                </StatusChip>
-                <StatusChip tone="success" variant="soft">
-                  Writes activity_event
-                </StatusChip>
-              </div>
-            </div>
-
-            {/* Attempt history */}
-            <div>
-              <p className="mb-2.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
-                Recent attempts
-              </p>
-              <MilestoneTimeline
-                milestones={[
-                  {
-                    id: "m1",
-                    title: "Commission objection · scored 88",
-                    dateLabel: "Today",
-                    tone: "success",
-                  },
-                  {
-                    id: "m2",
-                    title: `${selected.weakest} drill · scored ${Math.max(40, selected.avgScore - 18)}`,
-                    dateLabel: "2 days ago",
-                    tone: "warn",
-                  },
-                  {
-                    id: "m3",
-                    title: "Manager review — Jordan Matin",
-                    dateLabel: "Last week",
-                    tone: "info",
-                  },
-                  {
-                    id: "m4",
-                    title: "Buyer refuses agreement · scored 54",
-                    dateLabel: "Last week",
-                    tone: "danger",
-                    terminal: true,
-                  },
-                ]}
-              />
-            </div>
+            ) : null}
           </div>
         ) : null}
       </RecordDrawer>
@@ -448,7 +598,6 @@ function agentRubric(s: Standing) {
     { label: "CRM hygiene", value: wobble(11) },
     { label: "Speed to lead", value: wobble(-2) },
   ];
-  // Force the agent's declared weakest skill to be the lowest bar (gold tone on speed).
   return rows.map((r) => ({
     ...r,
     value: r.label === s.weakest ? Math.min(r.value, base - 16) : r.value,
