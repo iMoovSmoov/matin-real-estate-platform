@@ -5,9 +5,8 @@ import Link from "next/link";
 import {
   UserPlus,
   Home,
-  Rocket,
+  Building2,
   TriangleAlert,
-  Sparkles,
   ServerCrash,
   ArrowRight,
   Loader2,
@@ -15,6 +14,7 @@ import {
   RefreshCw,
   CheckCircle2,
 } from "lucide-react";
+import { MatinMark } from "@/components/brand/Logo";
 import {
   KpiStrip,
   KpiCard,
@@ -161,7 +161,7 @@ function QueueRow({
     >
       <span className="mt-0.5 shrink-0">
         <StatusChip tone={tone}>
-          {isAi ? <Sparkles className="h-3 w-3" aria-hidden /> : <Dot tone={tone} />}
+          {isAi ? <MatinMark theme="dark" className="h-3 w-3" /> : <Dot tone={tone} />}
           {item.category}
         </StatusChip>
       </span>
@@ -271,7 +271,7 @@ export default function TodayCommandCenter() {
         <KpiCard
           label="Listing launches"
           value={LISTING_LAUNCHES}
-          icon={<Rocket className="h-4 w-4" />}
+          icon={<Building2 className="h-4 w-4" />}
           hint="2 launching this week"
           onDrill={() => setActiveTab("My Work")}
         />
@@ -286,7 +286,7 @@ export default function TodayCommandCenter() {
         <KpiCard
           label="AI drafts waiting"
           value={AI_DRAFTS_WAITING}
-          icon={<Sparkles className="h-4 w-4" />}
+          icon={<MatinMark theme="dark" className="h-4 w-4" />}
           hint="Need your approval to send"
           onDrill={() => setActiveTab("AI Drafts")}
         />
@@ -322,7 +322,7 @@ export default function TodayCommandCenter() {
               }
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               Ask AI to prioritize
             </button>
           </div>
@@ -499,7 +499,7 @@ export default function TodayCommandCenter() {
                   onClick={() => openAi(`Context: Today / ${selected.subject}`)}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-gold" aria-hidden />
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
                   Ask AI
                 </button>
               )}
@@ -602,7 +602,7 @@ export default function TodayCommandCenter() {
                   onClick={() => setDrawerTab("draft")}
                   className="mt-3 inline-flex items-center gap-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:opacity-80"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-gold" aria-hidden />
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
                   Open AI draft
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </button>
