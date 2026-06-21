@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, Award, MapPin, Star, Phone, Mail, Cpu,
-  TrendingUp, Building2, Trophy, Users, BarChart2, Eye, Zap,
+  ArrowRight, Award, MapPin, Star, Phone, Mail,
+  Trophy, BarChart2, Eye, Zap,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -30,7 +30,7 @@ const milestones = [
   { year: "2014", title: "Founded in West Linn", body: "Jordan Matin opens Matin Real Estate with a simple thesis: treat a brokerage like a tech company and clients win." },
   { year: "2018", title: "Built the largest local website", body: "We grow into the largest locally owned real-estate website in the Portland area — more homes, sooner, for every client." },
   { year: "2021", title: "Recognized for growth", body: "Named to the Portland Business Journal's Fastest Growing Private Companies as the team scales past 40 brokers." },
-  { year: "Today", title: "The Matin Hub era", body: "A custom platform unifies CRM, listings, transactions, marketing, and AI — so brokers spend their time on people, not paperwork." },
+  { year: "Today", title: "Built to keep getting better", body: "We continue to invest in superior marketing, data tools, and talent — staying ahead of the market so clients close faster and net more." },
 ];
 
 const values = [
@@ -52,7 +52,7 @@ const values = [
   {
     Icon: Zap,
     title: "Technology-first",
-    body: "The Matin Hub gives our clients real-time listing alerts, market snapshots, and a single dashboard for every step of the transaction.",
+    body: "We invest in proprietary data tools and live market intelligence so every broker recommendation is backed by real numbers — not gut feel.",
   },
 ];
 
@@ -441,53 +441,6 @@ export default function AboutPage() {
         </Container>
       </Section>
 
-      {/* ---------- TECH-FORWARD FUTURE ---------- */}
-      <section className="relative overflow-hidden bg-ink py-16 pb-24 text-white sm:py-24">
-        <div className="absolute inset-0 grid-tech opacity-60" />
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[rgba(210,160,80,0.15)] blur-3xl" />
-        <Container className="relative">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <span className="eyebrow eyebrow-light border-l-2 border-white/40 pl-3">The platform behind the results</span>
-              <h2 className="display-2 mt-4 font-display text-white text-balance">
-                One system. Every deal.
-              </h2>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">
-                The <strong className="text-white">Matin Hub</strong> is our proprietary platform — it
-                unifies CRM, listings, transactions, and marketing into one system. It&apos;s how a
-                40-broker team delivers a boutique experience at scale, without dropping a detail.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/hub" variant="primary" size="lg">
-                  <Cpu className="h-4 w-4" /> Tour the Matin Hub
-                </ButtonLink>
-                <ButtonLink href="/contact" variant="outline-light" size="lg">
-                  Talk to our team
-                </ButtonLink>
-              </div>
-            </div>
-            <Reveal delay={0.1}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {[
-                  [TrendingUp, "Live market data", "Real-time comps driving every decision"],
-                  [Users, "Dedicated brokers", "A named agent on every deal, start to close"],
-                  [Building2, "Unified platform", "One system for listings, CRM, and transactions"],
-                  [Cpu, "Matin Hub", "Custom software built for this brokerage"],
-                ].map(([Icon, t, d]) => {
-                  const I = Icon as React.ComponentType<{ className?: string }>;
-                  return (
-                    <div key={t as string} className="glass rounded-2xl p-5">
-                      <I className="h-5 w-5 text-azure-bright" />
-                      <div className="mt-3 font-display text-lg text-white">{t as string}</div>
-                      <div className="mt-1 text-[0.84rem] text-slate-300">{d as string}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Reveal>
-          </div>
-        </Container>
-      </section>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ArrowRight, Award, ShieldCheck, TrendingUp, Cpu, Quote, Star, Database, Zap, GraduationCap, BrainCircuit, BadgeCheck,
+  ArrowRight, Award, ShieldCheck, TrendingUp, Quote, Star, BadgeCheck,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -252,52 +252,6 @@ export default function HomePage() {
           </div>
         </Container>
       </Section>
-
-      {/* ---------- TECH / COMMAND CENTER ---------- */}
-      <section className="relative overflow-hidden bg-ink py-16 text-white md:py-20 lg:py-24">
-        <div className="absolute inset-0 grid-tech opacity-60" />
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-white/[0.03] blur-3xl" />
-        <div className="absolute -right-40 bottom-10 h-80 w-80 rounded-full bg-white/[0.02] blur-3xl" />
-        <Container className="relative">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
-            <div>
-              <span className="eyebrow eyebrow-light border-l-2 border-white/40 pl-3">The future of the brokerage</span>
-              <h2 className="display-2 mt-4 font-display text-white text-balance">
-                The most technologically advanced brokerage in Oregon
-              </h2>
-              <p className="mt-5 max-w-lg text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg text-pretty">
-                Behind every Matin client is the <strong className="text-white font-semibold">Matin Hub</strong> — a custom
-                platform that unifies our CRM, listings, transactions, marketing and AI into one seamless system. Real-time
-                dashboards, AI coaching, and automated workflows so our brokers spend their time on you.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href="/hub" variant="primary" size="lg">
-                  <Cpu className="h-4 w-4" /> Tour the Matin Hub
-                </ButtonLink>
-                <ButtonLink href="/about" variant="outline-light" size="lg">
-                  Our story
-                </ButtonLink>
-              </div>
-            </div>
-            <Reveal delay={0.1}>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {[
-                  ["Structured data", "Spreadsheets → live databases", Database],
-                  ["AI integration", "AI woven into the CRM", BrainCircuit],
-                  ["Automation", "Speed-to-lead in under 60s", Zap],
-                  ["AI coaching", "Scenario training for brokers", GraduationCap],
-                ].map(([t, d, Icon]) => (
-                  <div key={t as string} className="glass rounded-2xl p-4 sm:p-5">
-                    <Icon className="h-5 w-5 text-white/70 sm:h-6 sm:w-6" />
-                    <div className="mt-3 font-display text-sm text-white sm:text-base md:text-lg">{t as string}</div>
-                    <div className="mt-1 text-[0.72rem] leading-snug text-slate-300 sm:text-[0.84rem]">{d as string}</div>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </Container>
-      </section>
 
       {/* ---------- AGENTS TEASER ---------- */}
       <Section className="pt-14 pb-14 md:pt-20 md:pb-16">
