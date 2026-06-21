@@ -16,8 +16,8 @@ function Bill({ i }: { i: number }) {
   const blur = [0, 0.6, 1.7][depth];
   const opacity = [0.98, 0.86, 0.6][depth];
   const rz = ((i * 47) % 44) - 22;
-  const bx = 8 + ((i * 37) % 70);           // bias toward bill faces
-  const by = 8 + ((i * 61) % 70);
+  const bx = 30 + ((i * 37) % 25);   // stays 30–55%, always near bill center
+  const by = 25 + ((i * 61) % 25);   // stays 25–50%, always near bill center
   return (
     <div
       className="absolute top-0 will-change-transform"
