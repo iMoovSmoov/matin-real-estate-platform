@@ -551,11 +551,16 @@ export function BrandedDocument(props: BrandedDocumentProps) {
      multiple BrandedDocuments on a page each print only themselves when fired. */
   const printCss = `
 @media print {
+  @page { size: letter portrait; margin: 0.5in; }
+  html, body { background: #fff !important; }
   body * { visibility: hidden !important; }
   .${printClass}, .${printClass} * { visibility: visible !important; }
   .${printClass} {
-    position: absolute !important; left: 0; top: 0; width: 100%;
+    position: fixed !important; left: 0 !important; top: 0 !important; right: 0 !important;
+    width: 100% !important; max-width: none !important; min-height: 0 !important;
+    margin: 0 !important; aspect-ratio: auto !important; transform: none !important;
     box-shadow: none !important; border: none !important; border-radius: 0 !important;
+    overflow: visible !important;
   }
   .matindoc-toolbar { display: none !important; }
 }

@@ -915,7 +915,7 @@ function DocStackPane({
       ) : (
         /* SCROLLABLE branded-document grid — all docs reachable past the fold */
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mx-auto grid max-w-[640px] grid-cols-1 gap-4">
             {packet.docs.map((d) => (
               <DocCard
                 key={d.id}
