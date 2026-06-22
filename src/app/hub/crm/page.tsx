@@ -288,8 +288,9 @@ function CrmPageInner() {
         </button>
       </div>
 
-      {/* KPI strip */}
-      <KpiStrip>
+      {/* KPI strip — 3-up through the lg band (the 1024–1279 default 4-up would
+          orphan 2 of the 6 tiles in a half-empty second row), 6-up only at xl. */}
+      <KpiStrip className="lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           label="New leads"
           value={kpis.newLeads}

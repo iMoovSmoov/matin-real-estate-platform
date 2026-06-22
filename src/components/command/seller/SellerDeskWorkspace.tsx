@@ -204,9 +204,10 @@ export function SellerDeskWorkspace() {
       </div>
 
       {/* KPI strip — money-weighted (count + attributed $), drills into the
-          list filtered to the relevant pool (S3 ticket 3). Phone never orphans
-          a tile (2-up); 4-up at lg. */}
-      <KpiStrip cols={4}>
+          list filtered to the relevant pool (S3 ticket 3). 2-up through the sm
+          band (the default 3-up would orphan the 4th tile in a half-empty row),
+          4-up at lg — no orphaned tile at any width. */}
+      <KpiStrip cols={4} className="sm:grid-cols-2">
         <KpiCard
           label="Homeowners tracked"
           value="38,420"

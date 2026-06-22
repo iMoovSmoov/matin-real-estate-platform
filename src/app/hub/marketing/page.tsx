@@ -20,6 +20,7 @@ import type { Campaign } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
 import { downloadTextFile } from "@/lib/download";
 import { cn, compactUsd, num } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 import {
   KpiStrip,
   KpiCard,
@@ -729,6 +730,7 @@ export default function MarketingStudioPage() {
                 onClick={() => openAi(`Working on: ${studioContext}`)}
                 className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
               >
+                <MatinMark theme="dark" className="h-3.5 w-3.5" />
                 Ask Matin
               </button>
             </div>
@@ -762,7 +764,7 @@ export default function MarketingStudioPage() {
             <h2 className="min-w-0 font-display text-[1.05rem] font-normal leading-tight text-ink">
               Print flyer
             </h2>
-            <span className="text-[0.72rem] text-slate">
+            <span className="hidden shrink-0 text-[0.72rem] text-slate sm:inline">
               {STUDIO_LISTING.address} · Matin-branded · print-ready
             </span>
           </div>

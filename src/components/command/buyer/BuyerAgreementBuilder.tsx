@@ -1286,7 +1286,7 @@ export default function BuyerAgreementBuilder() {
   );
 
   return (
-    <div className="px-4 py-5 md:px-6">
+    <div className="px-4 pb-10 pt-4 md:px-6">
       {/* Subtitle (TopCommandBar owns the H1) */}
       <p className="text-[0.82rem] leading-snug text-slate">
         One intake builds the agreement, checks it against your broker rules,
@@ -1295,7 +1295,7 @@ export default function BuyerAgreementBuilder() {
 
       {/* ── KPI strip (ticket 6 — money sub-stats, no orphan) ─────────────── */}
       <div className="mt-4">
-        <KpiStrip cols={5}>
+        <KpiStrip cols={5} rail>
           <KpiCard
             label="All agreements"
             value={kpis.out}

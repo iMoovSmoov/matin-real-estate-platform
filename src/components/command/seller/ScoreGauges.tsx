@@ -96,13 +96,15 @@ export function ScoreGauges({ lead }: { lead: SellerLead }) {
           <div className="relative mt-1.5 h-2 w-full rounded-full bg-paper-200">
             {/* Subtle Low→High band so the marker reads against a scale */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-paper-200 via-mist to-paper-200 opacity-60" />
-            {/* Positioned marker */}
+            {/* Positioned marker — clamp the visual position to a small inset
+                band so the dot never hangs past either rounded track end at the
+                extremes (e.g. engagement = 100). */}
             <span
               className={cn(
                 "absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-cloud",
                 TONE_DOT[g.tone],
               )}
-              style={{ left: `${g.level}%` }}
+              style={{ left: `${Math.max(4, Math.min(96, g.level))}%` }}
               aria-hidden
             />
           </div>

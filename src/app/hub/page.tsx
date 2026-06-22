@@ -436,8 +436,9 @@ export default function TodayCommandCenter() {
             />
           </button>
         </div>
-        {/* sm+: full 6-up strip */}
-        <KpiStrip className="hidden sm:grid">
+        {/* sm+: 3-up through the lg band (1024–1279 would cram 6 tiles beside
+            the rail), 6-up only at xl. 6 = 2·3 = clean rows, no orphaned tile. */}
+        <KpiStrip className="hidden sm:grid lg:grid-cols-3 xl:grid-cols-6">
           {kpiTiles.map((t) => (
             <Fragment key={t.key}>{t.el}</Fragment>
           ))}

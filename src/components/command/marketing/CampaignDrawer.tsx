@@ -24,6 +24,7 @@ import {
   type ActivityItem,
   AIInsightChip,
 } from "@/components/os";
+import { MatinMark } from "@/components/brand/Logo";
 import { campaignOwner } from "./marketing-data";
 import { STUDIO_LISTING } from "./marketing-branding";
 
@@ -250,6 +251,7 @@ export function CampaignDrawer({
             onClick={() => onAskAi(campaign)}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper"
           >
+            <MatinMark theme="dark" className="h-3.5 w-3.5" />
             Ask Matin
           </button>
         </>
