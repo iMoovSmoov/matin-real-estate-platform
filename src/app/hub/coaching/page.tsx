@@ -163,8 +163,10 @@ export default function CoachingPage() {
       </div>
 
       {/* KPI strip — each tile drills into the on-screen roster drawer.
-          R4: 2-up phone, 3-up sm, never orphan a tile; rail-free 5-up at lg. */}
-      <KpiStrip cols={5}>
+          R4: 5 tiles is odd, so a 2-up phone grid would orphan the 5th tile;
+          use a horizontal scroll-snap RAIL on phone (no orphan) that reverts to
+          a clean 3-up grid at sm and a 5-up row at lg. */}
+      <KpiStrip cols={5} rail>
         <KpiCard
           label="Practice sessions"
           value={k.practiceSessions}
@@ -222,8 +224,11 @@ export default function CoachingPage() {
         onAskAi={(ctx) => openAi(ctx)}
       />
 
-      {/* Leadership goal-pacing + ROI leaderboard */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)]">
+      {/* Leadership goal-pacing + ROI leaderboard. Split at xl, not lg: at the
+          1024–1279 band the 280px app sidebar leaves too little width to fit the
+          pacing chart beside a 6-column ROI table without horizontal scroll, so
+          below xl they stack full-width (each readable on its own row). */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)]">
         {/* Goal pacing (leadership view) + real recharts pacing chart */}
         <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
           <div className="mb-3 flex items-center justify-between gap-2">

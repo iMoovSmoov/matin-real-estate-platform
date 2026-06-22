@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { useScrollIntoView, prefersReducedMotion } from "./useScrollIntoView";
 import {
   ArrowUp,
   ClipboardList,
@@ -346,6 +347,16 @@ export function CoachingWorkbench({
   const active = library.find((s) => s.id === activeId) ?? library[0];
   const seed = seedFor(activeId);
 
+  // Bump a key on scenario swap so the roleplay + scorecard panes cross-fade in
+  // (tasteful change-view transition; gated on motion-safe so reduced-motion
+  // users get an instant swap).
+  const [swapKey, setSwapKey] = useState(0);
+
+  // Below the split breakpoint the roleplay pane is far down the stacked column;
+  // selecting a scenario should smooth-scroll it into view so the tap produces a
+  // visible result instead of an off-screen content change (R1/R2).
+  const [transcriptRef, scrollTranscriptIntoView] = useScrollIntoView<HTMLElement>();
+
   // Live roleplay state — layered ON TOP of the pre-seeded transcript.
   const [liveTurns, setLiveTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState("");
@@ -368,6 +379,11 @@ export function CoachingWorkbench({
   const transcript = [...seed.transcript, ...liveTurns];
 
   function selectScenario(id: string) {
+    if (id === activeId) {
+      // Re-tapping the active scenario still surfaces the roleplay on phone.
+      scrollTranscriptIntoView();
+      return;
+    }
     setActiveId(id);
     setLiveTurns([]);
     setLiveCoach(null);
@@ -375,13 +391,19 @@ export function CoachingWorkbench({
     setPracticing(false);
     setAgentTurnCount(0);
     setLiveScores(scoresFromSeed(seedFor(id)));
+    setSwapKey((k) => k + 1);
+    // Surface the freshly-loaded roleplay on stacked (sub-lg) layouts.
+    scrollTranscriptIntoView();
   }
 
   function startPractice() {
     setPracticing(true);
     requestAnimationFrame(() => {
       composerRef.current?.focus();
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+      });
     });
   }
 
@@ -426,7 +448,10 @@ export function CoachingWorkbench({
     // Add an empty AI turn we stream into.
     setLiveTurns((t) => [...t, { speaker: "ai", text: "" }]);
     requestAnimationFrame(() =>
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }),
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
+      }),
     );
 
     try {
@@ -478,8 +503,13 @@ export function CoachingWorkbench({
   const planDrills = useMemo(() => buildPlanDrills(active?.title ?? "", seed), [active, seed]);
 
   return (
-    // R8: real responsive Tailwind — 1-col phone, md two-column, lg three-column.
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[260px_minmax(0,1fr)_330px]">
+    // R8: real responsive Tailwind — 1-col phone, md two-column, xl three-column.
+    // The three-pane split is gated at xl (1280px), NOT lg: at the 1024–1279
+    // band the 280px app sidebar already eats the width, so a 3-col grid there
+    // squeezes the middle roleplay pane to an unreadable sliver. Below xl we use
+    // the md two-column layout instead (library + scorecard side-by-side, the
+    // roleplay full-width beneath) which stays readable across the lg band.
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[240px_minmax(0,1fr)_320px]">
       {/* ── Pane 1 — Scenario library ──────────────────────────────────── */}
       <section className="rounded-2xl border border-mist bg-cloud shadow-soft md:self-start">
         <div className="flex items-center gap-2 border-b border-mist px-4 py-3.5">
@@ -541,8 +571,11 @@ export function CoachingWorkbench({
         </ul>
       </section>
 
-      {/* ── Pane 2 — Roleplay transcript (spans both cols at md) ───────── */}
-      <section className="flex min-h-[30rem] flex-col rounded-2xl border border-mist bg-cloud shadow-soft md:order-3 md:col-span-2 lg:order-none lg:col-span-1">
+      {/* ── Pane 2 — Roleplay transcript (spans both cols at md→lg) ─────── */}
+      <section
+        ref={transcriptRef}
+        className="flex min-h-[30rem] scroll-mt-20 flex-col rounded-2xl border border-mist bg-cloud shadow-soft md:order-3 md:col-span-2 xl:order-none xl:col-span-1"
+      >
         <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-slate" aria-hidden />
@@ -554,8 +587,11 @@ export function CoachingWorkbench({
           </StatusChip>
         </div>
 
-        {/* Persona identity strip */}
-        <div className="flex items-center gap-2.5 border-b border-mist px-4 py-3">
+        {/* Persona identity strip — re-fades when the loaded scenario changes. */}
+        <div
+          key={`persona-${swapKey}`}
+          className="flex items-center gap-2.5 border-b border-mist px-4 py-3 motion-safe:animate-fade"
+        >
           <Avatar name={seed.personaName} size={32} ring />
           <div className="min-w-0">
             <p className="truncate text-[0.82rem] font-semibold leading-tight text-ink">
@@ -575,8 +611,12 @@ export function CoachingWorkbench({
           )}
         </div>
 
-        {/* Bubbles */}
-        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-3">
+        {/* Bubbles — cross-fade when a new scenario loads (motion-safe). */}
+        <div
+          key={swapKey}
+          ref={scrollRef}
+          className="flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-3 motion-safe:animate-fade"
+        >
           {transcript.map((turn, i) => (
             <div
               key={i}
@@ -700,8 +740,8 @@ export function CoachingWorkbench({
       </section>
 
       {/* ── Pane 3 — Scorecard ─────────────────────────────────────────── */}
-      <section className="flex flex-col gap-4 md:order-2 md:self-start lg:order-none">
-        <div className="rounded-2xl border border-mist bg-cloud shadow-soft">
+      <section className="flex flex-col gap-4 md:order-2 md:self-start xl:order-none">
+        <div key={`score-${swapKey}`} className="rounded-2xl border border-mist bg-cloud shadow-soft motion-safe:animate-fade">
           <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
             <div className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4 text-slate" aria-hidden />

@@ -45,8 +45,10 @@ export default function AdminSettingsPage() {
         operator back office.
       </p>
 
-      {/* KPI strip — every tile drills into its source category (S12 #8) */}
-      <KpiStrip cols={5}>
+      {/* KPI strip — every tile drills into its source category (S12 #8).
+          5 tiles is odd → a 2-up phone grid orphans the 5th; use a scroll-snap
+          rail on phone (no orphan), reverting to a 3-up grid at sm / 5-up at lg. */}
+      <KpiStrip cols={5} rail>
         <KpiCard
           label="Users"
           value={totalUsers}

@@ -2,11 +2,13 @@
 
 import {
   useCallback,
+  useRef,
   useState,
   type ReactNode,
   type InputHTMLAttributes,
   type SelectHTMLAttributes,
 } from "react";
+import { CircleCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { agents } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
@@ -79,6 +81,36 @@ export function useInlineAi() {
   const reset = useCallback(() => setState(IDLE), []);
 
   return { state, run, reset };
+}
+
+/* ── Transient inline confirmation (so secondary actions are never dead) ────── */
+
+/** Drives a short-lived confirmation message + the <FlashToast/> that renders
+ *  it. Use for export / download / change-policy style actions in this demo so
+ *  every click produces a visible result (Mandate 1 — no dead controls). */
+export function useFlash() {
+  const [msg, setMsg] = useState<string | null>(null);
+  const timer = useRef<number | null>(null);
+  const flash = useCallback((m: string) => {
+    setMsg(m);
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setMsg(null), 2600);
+  }, []);
+  return { msg, flash };
+}
+
+/** Centered pill toast that clears the 64px mobile tab bar (R7). Mount once per
+ *  view and feed it the `msg` from useFlash(). */
+export function FlashToast({ msg }: { msg: string | null }) {
+  if (!msg) return null;
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-[60] flex justify-center px-4 lg:bottom-5">
+      <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[0.8rem] font-medium text-cloud shadow-lift motion-safe:animate-rise">
+        <CircleCheck className="h-4 w-4 text-success" />
+        {msg}
+      </div>
+    </div>
+  );
 }
 
 /* ── Button atoms (human action = ink; gold is reserved for AI) ────────────── */

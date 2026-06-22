@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Plus,
   Pencil,
@@ -51,6 +51,8 @@ import {
   SelectInput,
   slugForName,
   useInlineAi,
+  useFlash,
+  FlashToast,
 } from "./adminUi";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -508,6 +510,26 @@ export function TemplatesView() {
   const [selected, setSelected] = useState<TemplateRow | null>(null);
   const draftAi = useInlineAi();
   const [describe, setDescribe] = useState("");
+  const { msg, flash } = useFlash();
+
+  // "New template" is the AI drafter below the table — scroll it into view and
+  // focus the description input so the button has a visible, real result (not a
+  // dead click). Honors prefers-reduced-motion.
+  const drafterRef = useRef<HTMLDivElement>(null);
+  const describeRef = useRef<HTMLInputElement>(null);
+  function focusDrafter() {
+    setSelected(null);
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      drafterRef.current?.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: "center",
+      });
+      describeRef.current?.focus();
+    });
+  }
 
   function publishToggle(id: string) {
     setTemplates((prev) =>
@@ -562,7 +584,7 @@ export function TemplatesView() {
             <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Templates</h2>
             <p className="mt-0.5 text-[0.78rem] text-slate">Click a template to preview · every edit version-bumps and writes an audit log.</p>
           </div>
-          <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={() => setSelected(null)}>
+          <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={focusDrafter}>
             New template
           </InkButton>
         </div>
@@ -570,7 +592,7 @@ export function TemplatesView() {
       </section>
 
       {/* AI checklist drafter — streams INLINE in this dark card, not the sidecar */}
-      <div className="rounded-2xl border border-ink-700 bg-ink-800 p-5 text-slate-300 shadow-soft">
+      <div ref={drafterRef} className="scroll-mt-20 rounded-2xl border border-ink-700 bg-ink-800 p-5 text-slate-300 shadow-soft">
         <div className="flex items-start gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
             <MatinMark theme="white" className="h-4 w-4" />
@@ -585,6 +607,7 @@ export function TemplatesView() {
 
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <input
+                ref={describeRef}
                 value={describe}
                 onChange={(e) => setDescribe(e.target.value)}
                 placeholder="new construction listing in Clark County"
@@ -637,7 +660,7 @@ export function TemplatesView() {
         actions={
           selected ? (
             <>
-              <GhostButton>
+              <GhostButton onClick={() => flash(`Opening ${selected.id} in the template editor…`)}>
                 <Pencil className="h-3.5 w-3.5" />
                 Edit
               </GhostButton>
@@ -677,6 +700,8 @@ export function TemplatesView() {
           </div>
         ) : null}
       </RecordDrawer>
+
+      <FlashToast msg={msg} />
     </div>
   );
 }
@@ -756,8 +781,10 @@ function Swatch({ name, hex, cls, note }: { name: string; hex: string; cls: stri
 export function BrandKitView() {
   const broker = getAgent(roles.principalBroker);
   const marketing = getAgent(roles.marketingLead);
+  const { msg, flash } = useFlash();
 
   return (
+    <>
     <div className="grid gap-5 lg:grid-cols-2">
       {/* ── Wordmark lockups (real Matin marks — white-on-dark + dark-on-light) ── */}
       <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft lg:col-span-2">
@@ -766,7 +793,10 @@ export function BrandKitView() {
             <p className="eyebrow text-slate">Logo lockups</p>
             <h2 className="mt-1 font-display text-[1.1rem] font-normal text-ink">Matin Real Estate marks</h2>
           </div>
-          <GhostButton ariaLabel="Download brand assets">
+          <GhostButton
+            ariaLabel="Download brand assets"
+            onClick={() => flash("Preparing brand asset pack (logos, palette, fonts)…")}
+          >
             <Pencil className="h-3.5 w-3.5" />
             Download assets
           </GhostButton>
@@ -895,6 +925,8 @@ export function BrandKitView() {
         />
       </div>
     </div>
+    <FlashToast msg={msg} />
+    </>
   );
 }
 
@@ -903,6 +935,7 @@ export function BrandKitView() {
 export function AiPolicyView() {
   const [selected, setSelected] = useState<AiPolicyRow | null>(null);
   const explain = useInlineAi();
+  const { msg, flash } = useFlash();
 
   function openPolicy(p: AiPolicyRow) {
     setSelected(p);
@@ -934,6 +967,7 @@ export function AiPolicyView() {
   ];
 
   return (
+    <>
     <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
       <section className="space-y-3">
         <div>
@@ -962,7 +996,14 @@ export function AiPolicyView() {
               <span className="text-[0.78rem] text-slate">
                 Policy: <span className="font-semibold text-ink">{selected.mode}</span>
               </span>
-              <InkButton className="ml-auto">Change policy</InkButton>
+              <InkButton
+                className="ml-auto"
+                onClick={() =>
+                  flash(`Change to “${selected.capability}” staged — needs owner sign-off · writes audit_log`)
+                }
+              >
+                Change policy
+              </InkButton>
             </>
           ) : null
         }
@@ -1010,6 +1051,8 @@ export function AiPolicyView() {
         ) : null}
       </RecordDrawer>
     </div>
+    <FlashToast msg={msg} />
+    </>
   );
 }
 
@@ -1070,6 +1113,7 @@ function isSystem(actor: string) {
 export function AuditView() {
   const [view, setView] = useState("all");
   const [selected, setSelected] = useState<AuditLog | null>(null);
+  const { msg, flash } = useFlash();
 
   const rows = useMemo(() => {
     if (view === "system") return auditLogs.filter((a) => isSystem(a.actor));
@@ -1119,7 +1163,10 @@ export function AuditView() {
             Click an entry for full context · immutable · exportable for compliance.
           </p>
         </div>
-        <GhostButton ariaLabel="Export audit log">
+        <GhostButton
+          ariaLabel="Export audit log"
+          onClick={() => flash(`Exporting ${rows.length} audit events to CSV…`)}
+        >
           <Send className="h-3.5 w-3.5" />
           Export
         </GhostButton>
@@ -1180,6 +1227,8 @@ export function AuditView() {
           </div>
         ) : null}
       </RecordDrawer>
+
+      <FlashToast msg={msg} />
     </section>
   );
 }

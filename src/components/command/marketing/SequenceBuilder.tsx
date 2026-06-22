@@ -9,6 +9,7 @@ import {
   Clock,
   Reply,
   Plus,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -104,6 +105,7 @@ export function SequenceBuilder() {
   const [nodes, setNodes] = useState<FlowNode[]>(INITIAL_NODES);
   const [selected, setSelected] = useState<string>("ai-draft");
   const [range, setRange] = useState<string>(RANGES[0]);
+  const [addedCount, setAddedCount] = useState(0);
 
   const active = nodes.find((n) => n.id === selected) ?? nodes[0];
   const committedCount = nodes.filter((n) => n.state === "committed").length;
@@ -116,6 +118,34 @@ export function SequenceBuilder() {
           : n,
       ),
     );
+  }
+
+  /* Add step — real mutation: append a pending "Wait + nudge" step and select it
+     so the inspector immediately shows its config (no dead affordance). */
+  function addStep() {
+    const n = addedCount + 1;
+    const id = `step-${n}`;
+    const newNode: FlowNode = {
+      id,
+      label: `Wait + nudge ${n}`,
+      kind: "wait",
+      icon: Clock,
+      detail: "Pause, then re-touch if no reply",
+      config: `Delay · 2 days · skip if reply received · branch ${n}`,
+      state: "pending",
+    };
+    setNodes((prev) => [...prev, newNode]);
+    setAddedCount(n);
+    setSelected(id);
+  }
+
+  function removeStep(id: string) {
+    setNodes((prev) => {
+      if (prev.length <= 1) return prev;
+      const next = prev.filter((x) => x.id !== id);
+      if (id === selected) setSelected(next[next.length - 1]?.id ?? next[0].id);
+      return next;
+    });
   }
 
   return (
@@ -196,7 +226,6 @@ export function SequenceBuilder() {
                     node={n}
                     selected={n.id === selected}
                     onSelect={() => setSelected(n.id)}
-                    onToggle={() => toggleState(n.id)}
                   />
                   {i < nodes.length - 1 ? (
                     <Connector
@@ -212,9 +241,10 @@ export function SequenceBuilder() {
                 <Connector committed={false} />
                 <button
                   type="button"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-mist text-slate transition-colors hover:border-ink/30 hover:text-ink"
+                  onClick={addStep}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-dashed border-mist text-slate transition-colors hover:border-ink/30 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                   aria-label="Add step"
-                  title="Add step"
+                  title="Add a wait + nudge step"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                 </button>
@@ -241,21 +271,37 @@ export function SequenceBuilder() {
                   <p className="text-[0.72rem] text-slate">{active.detail}</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => toggleState(active.id)}
-                className={cn(
-                  "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-[0.74rem] font-semibold transition-colors",
-                  active.state === "committed"
-                    ? "bg-success/12 text-success ring-1 ring-inset ring-success/25 hover:bg-success/20"
-                    : "bg-warn/12 text-warn ring-1 ring-inset ring-warn/25 hover:bg-warn/20",
-                )}
-              >
-                {active.state === "committed" ? "Committed" : "Pending — commit"}
-              </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                {active.id.startsWith("step-") ? (
+                  <button
+                    type="button"
+                    onClick={() => removeStep(active.id)}
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist px-2.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-danger/30 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                    Remove
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => toggleState(active.id)}
+                  className={cn(
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-[0.74rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+                    active.state === "committed"
+                      ? "bg-success/12 text-success ring-1 ring-inset ring-success/25 hover:bg-success/20"
+                      : "bg-warn/12 text-warn ring-1 ring-inset ring-warn/25 hover:bg-warn/20",
+                  )}
+                >
+                  {active.state === "committed" ? "Committed — set pending" : "Pending — commit"}
+                </button>
+              </div>
             </div>
             <p className="mt-3 rounded-lg border border-mist bg-cloud px-3 py-2 font-mono text-[0.72rem] leading-relaxed text-slate">
               {active.config}
+            </p>
+            <p className="mt-2 text-[0.7rem] text-slate">
+              Selecting a node opens it here. Commit toggles its connector solid;
+              pending steps stay dashed until you commit them.
             </p>
           </div>
         </div>
@@ -268,12 +314,10 @@ function FlowNodeCard({
   node,
   selected,
   onSelect,
-  onToggle,
 }: {
   node: FlowNode;
   selected: boolean;
   onSelect: () => void;
-  onToggle: () => void;
 }) {
   const Icon = node.icon;
   const isAi = node.kind === "ai";
@@ -281,9 +325,8 @@ function FlowNodeCard({
     <button
       type="button"
       onClick={onSelect}
-      onDoubleClick={onToggle}
       className={cn(
-        "flex w-[136px] shrink-0 flex-col gap-1.5 rounded-xl border p-3 text-left transition-colors",
+        "flex w-[136px] shrink-0 flex-col gap-1.5 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
         selected ? "border-ink bg-paper shadow-soft" : "border-mist bg-cloud hover:border-ink/20",
       )}
     >

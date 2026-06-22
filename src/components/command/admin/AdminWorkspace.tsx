@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Users,
   Building2,
@@ -56,6 +56,34 @@ export function AdminWorkspace({
   const [internal, setInternal] = useState<CategoryKey>("routing");
   const active = controlled ?? internal;
 
+  // Below the split breakpoint the content pane sits beneath the category pill
+  // row; switching categories should smooth-scroll the freshly-swapped content
+  // into view so the tap produces a visible result instead of an off-screen
+  // change (R1) — whether the change came from a pill click OR a KPI drilldown
+  // on the page (which sets `active` via the controlled prop). An effect that
+  // watches `active` covers both paths; we skip the initial mount. Honors
+  // prefers-reduced-motion and only fires below the xl split.
+  const contentRef = useRef<HTMLDivElement>(null);
+  const prevActive = useRef<CategoryKey | null>(null);
+
+  useEffect(() => {
+    if (prevActive.current === null) {
+      prevActive.current = active;
+      return; // don't scroll on first render
+    }
+    if (prevActive.current === active) return;
+    prevActive.current = active;
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    if (!window.matchMedia("(max-width: 1279px)").matches) return; // only below the xl split
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      contentRef.current?.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  }, [active]);
+
   function setActive(key: CategoryKey) {
     if (onActiveChange) onActiveChange(key);
     else setInternal(key);
@@ -85,11 +113,16 @@ export function AdminWorkspace({
   }, [active]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[224px_1fr]">
-      {/* Mobile category pill row (R1/R6) — horizontally scrollable < lg */}
+    // Split the category rail beside content only at xl. At the 1024–1279 band
+    // the 280px app sidebar plus a 224px settings rail would leave the content
+    // pane too narrow (a 6-column routing table would overflow), so below xl the
+    // categories collapse to the scrollable pill row and content takes the full
+    // width.
+    <div className="grid gap-6 xl:grid-cols-[224px_1fr]">
+      {/* Mobile category pill row (R1/R6) — horizontally scrollable < xl */}
       <nav
         aria-label="Settings categories (mobile)"
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden"
+        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:hidden"
       >
         {settingsCategories.map((c) => {
           const Icon = CATEGORY_ICON[c.key];
@@ -129,10 +162,10 @@ export function AdminWorkspace({
         })}
       </nav>
 
-      {/* Desktop category settings sidebar */}
+      {/* Desktop category settings sidebar (xl+) */}
       <nav
         aria-label="Settings categories"
-        className="hidden lg:sticky lg:top-4 lg:block lg:self-start"
+        className="hidden xl:sticky xl:top-4 xl:block xl:self-start"
       >
         <p className="eyebrow mb-2 px-2 text-slate">Settings</p>
         <ul className="space-y-0.5">
@@ -194,8 +227,12 @@ export function AdminWorkspace({
         </div>
       </nav>
 
-      {/* Content area */}
-      <div className="min-w-0">{content}</div>
+      {/* Content area — scroll-target on mobile + cross-fade on category swap. */}
+      <div ref={contentRef} className="min-w-0 scroll-mt-20">
+        <div key={active} className="motion-safe:animate-fade">
+          {content}
+        </div>
+      </div>
     </div>
   );
 }

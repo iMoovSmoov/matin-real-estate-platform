@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Plus,
   Pencil,
@@ -427,14 +427,14 @@ function LiveRecipientEditor({
                 </label>
               ) : null}
               <span className="flex flex-col text-slate">
-                <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)} className="hover:text-ink disabled:opacity-30">
+                <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)} className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30">
                   <ChevronUp className="h-3.5 w-3.5" />
                 </button>
-                <button type="button" aria-label="Move down" disabled={i === rule.members.length - 1} onClick={() => move(i, 1)} className="hover:text-ink disabled:opacity-30">
+                <button type="button" aria-label="Move down" disabled={i === rule.members.length - 1} onClick={() => move(i, 1)} className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30">
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
               </span>
-              <button type="button" aria-label={`Remove ${m.name}`} onClick={() => remove(m.slug)} className="text-slate hover:text-danger">
+              <button type="button" aria-label={`Remove ${m.name}`} onClick={() => remove(m.slug)} className="flex h-9 w-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-danger/[0.06] hover:text-danger">
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </span>
@@ -526,14 +526,14 @@ function RecipientBuilder({
               </label>
             ) : null}
             <span className="flex flex-col text-slate">
-              <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)} className="hover:text-ink disabled:opacity-30">
+              <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)} className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30">
                 <ChevronUp className="h-3 w-3" />
               </button>
-              <button type="button" aria-label="Move down" disabled={i === members.length - 1} onClick={() => move(i, 1)} className="hover:text-ink disabled:opacity-30">
+              <button type="button" aria-label="Move down" disabled={i === members.length - 1} onClick={() => move(i, 1)} className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30">
                 <ChevronDown className="h-3 w-3" />
               </button>
             </span>
-            <button type="button" aria-label={`Remove ${m.name}`} onClick={() => remove(m.slug)} className="text-slate hover:text-danger">
+            <button type="button" aria-label={`Remove ${m.name}`} onClick={() => remove(m.slug)} className="flex h-9 w-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-danger/[0.06] hover:text-danger">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </span>
@@ -702,7 +702,7 @@ function RuleFormDrawer({
               <div key={i} className="flex items-center gap-2">
                 <TextInput value={c.label} onChange={(e) => setCriterion(i, "label", e.target.value)} placeholder="Label" className="w-1/3" />
                 <TextInput value={c.value} onChange={(e) => setCriterion(i, "value", e.target.value)} placeholder="e.g. $600k+" />
-                <button type="button" aria-label="Remove condition" onClick={() => removeCriterion(i)} className="shrink-0 text-slate hover:text-danger">
+                <button type="button" aria-label="Remove condition" onClick={() => removeCriterion(i)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate transition-colors hover:bg-danger/[0.06] hover:text-danger">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -803,6 +803,25 @@ export function RoutingView() {
 
   const selected = rules.find((r) => r.id === selectedId) ?? rules[0];
   const sorted = useMemo(() => [...rules].sort((a, b) => a.priority - b.priority), [rules]);
+
+  // Selecting a rule updates the ownership + live recipient editor in the right
+  // column, which sits BELOW the table on stacked (sub-xl) layouts. Scroll it
+  // into view so the row tap produces a visible result instead of an off-screen
+  // change (R1/R2). Honors prefers-reduced-motion; only scrolls below the xl
+  // split where the detail is actually off-screen.
+  const detailRef = useRef<HTMLDivElement>(null);
+  const selectRule = useCallback((id: string) => {
+    setSelectedId(id);
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    if (!window.matchMedia("(max-width: 1279px)").matches) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  }, []);
 
   function flash(msg: string) {
     setToast(msg);
@@ -1039,10 +1058,10 @@ export function RoutingView() {
         <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
           <span className="tabular-nums text-[0.84rem] font-semibold text-ink">{r.priority}</span>
           <span className="flex flex-col text-slate">
-            <button type="button" aria-label="Move up" className="hover:text-ink disabled:opacity-30" disabled={r.priority === 1} onClick={() => reorder(r.id, -1)}>
+            <button type="button" aria-label="Move up" className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30" disabled={r.priority === 1} onClick={() => reorder(r.id, -1)}>
               <ChevronUp className="h-3.5 w-3.5" />
             </button>
-            <button type="button" aria-label="Move down" className="hover:text-ink disabled:opacity-30" disabled={r.priority === rules.length} onClick={() => reorder(r.id, 1)}>
+            <button type="button" aria-label="Move down" className="flex h-[22px] w-7 items-center justify-center rounded transition-colors hover:bg-paper-200 hover:text-ink disabled:opacity-30" disabled={r.priority === rules.length} onClick={() => reorder(r.id, 1)}>
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           </span>
@@ -1100,7 +1119,7 @@ export function RoutingView() {
               columns={columns}
               rows={sorted}
               getRowId={(r) => r.id}
-              onRowClick={(r) => setSelectedId(r.id)}
+              onRowClick={(r) => selectRule(r.id)}
               responsive
               utilityLeft={
                 <span className="text-[0.78rem] text-slate tabular-nums">
@@ -1141,11 +1160,16 @@ export function RoutingView() {
           </section>
         </div>
 
-        {/* Right: selected-rule ownership + LIVE recipient editor + AI panel */}
-        <div className="space-y-5">
-          <OwnershipCard rule={selected} />
+        {/* Right: selected-rule ownership + LIVE recipient editor + AI panel.
+            scroll-target so a row tap surfaces the detail on stacked layouts. */}
+        <div ref={detailRef} className="scroll-mt-20 space-y-5">
+          {/* Re-fade the two detail cards when the selected rule changes so the
+              swap is visibly confirmed even when already on-screen (xl+). */}
+          <div key={selected.id} className="space-y-5 motion-safe:animate-fade">
+            <OwnershipCard rule={selected} />
 
-          <LiveRecipientEditor rule={selected} onChange={patchSelected} />
+            <LiveRecipientEditor rule={selected} onChange={patchSelected} />
+          </div>
 
           <AiPanel
             context={`Admin / Lead Routing — ${selected.id}`}

@@ -54,6 +54,7 @@ import { ReportFinancialStrip } from "@/components/command/reports/ReportFinanci
 import { TeamRoiScoreboard } from "@/components/command/reports/TeamRoiScoreboard";
 import { ActivityGauges, type ActivityGauge } from "@/components/command/reports/ActivityGauges";
 import { ReportExport } from "@/components/command/reports/ReportExport";
+import { ViewTransition } from "@/components/command/reports/ViewTransition";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — Reports + Accountability  (build-ref §2.10, source/10_reports.md)
@@ -77,6 +78,32 @@ type SourceFilter = "All sources" | "Paid" | "Organic" | "Referral";
 
 type LeaderTab = "gci" | "signed" | "appts" | "leads";
 type DatasetTab = "overview" | "performance" | "funnel";
+
+/* The metric toggle that re-drives the primary time-series (Lofty per-card
+   metric switcher). Volume/Closings come straight off the real monthly series;
+   GCI ≈ 2.5% of volume; Revenue (net) ≈ 62% of GCI — the same basis the hero
+   financial strip uses, so the chart reconciles to the KPI band. */
+type SeriesMetric = "volume" | "closings" | "gci" | "revenue";
+
+const SERIES_METRICS: {
+  key: SeriesMetric;
+  label: string;
+  unit: "usd" | "count";
+  /** maps a monthly {volume, closings} point to this metric's value */
+  pick: (m: { volume: number; closings: number }) => number;
+  title: string;
+}[] = [
+  { key: "volume", label: "Volume", unit: "usd", pick: (m) => m.volume, title: "Closed volume trend" },
+  { key: "closings", label: "Closings", unit: "count", pick: (m) => m.closings, title: "Closings trend" },
+  { key: "gci", label: "GCI", unit: "usd", pick: (m) => Math.round(m.volume * 0.025), title: "GCI trend" },
+  {
+    key: "revenue",
+    label: "Revenue",
+    unit: "usd",
+    pick: (m) => Math.round(m.volume * 0.025 * 0.62),
+    title: "Net revenue trend",
+  },
+];
 
 const DATASET_TABS: { key: DatasetTab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -173,6 +200,7 @@ export default function ReportingPage() {
   const [source, setSource] = useState<SourceFilter>("All sources");
   const [leaderTab, setLeaderTab] = useState<LeaderTab>("gci");
   const [dataset, setDataset] = useState<DatasetTab>("overview");
+  const [metric, setMetric] = useState<SeriesMetric>("volume");
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [explain, setExplain] = useState<ExplainScope | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -261,24 +289,41 @@ export default function ReportingPage() {
     return { companyScorecard, agentLeaderboard, sourceRoi, funnel, pipeline };
   }, [f, range, team, source]);
 
-  /* ── time-series (current vs prior) scoped from real monthly metrics ─────── */
+  /* ── time-series (current vs prior) scoped from real monthly metrics ───────
+     The active metric toggle (Volume/Closings/GCI/Revenue) drives which value
+     each monthly point contributes, so flipping the toggle visibly re-draws the
+     whole chart with a new unit + scale (not just a relabel). */
+  const metricCfg = SERIES_METRICS.find((m) => m.key === metric) ?? SERIES_METRICS[0];
   const series = useMemo(() => {
     const months = metrics.volumeByMonth; // 12 months Jul→Jun
-    const teamScale = TEAM_FACTOR[team] * SOURCE_FACTOR[source];
+    const pick = metricCfg.pick;
+    // Counts shouldn't be scaled by the money-weighted source factor; only the
+    // team split applies to unit counts, while money metrics carry both.
+    const teamScale =
+      metricCfg.unit === "count"
+        ? TEAM_FACTOR[team]
+        : TEAM_FACTOR[team] * SOURCE_FACTOR[source];
     // window per range: MTD=last 1, QTD=last 3, YTD=all 12
     const win = range === "MTD" ? 2 : range === "QTD" ? 6 : 12;
+    const scale = (n: number) =>
+      metricCfg.unit === "count"
+        ? Math.max(0, Math.round(n * teamScale))
+        : Math.round(n * teamScale);
     const cur = months.slice(months.length - win).map((m) => ({
       label: m.month,
-      value: Math.round(m.volume * teamScale),
+      value: scale(pick(m)),
     }));
     // "prior" period = the window before this one, faded back to fill same length
     const priorRaw = months.slice(Math.max(0, months.length - win * 2), months.length - win);
-    const prior = cur.map((p, i) => ({
-      label: p.label,
-      value: Math.round((priorRaw[i % Math.max(1, priorRaw.length)]?.volume ?? p.value * 0.88) * teamScale),
-    }));
+    const prior = cur.map((p, i) => {
+      const pm = priorRaw[i % Math.max(1, priorRaw.length)];
+      const base = pm ? pick(pm) : pick(months[(months.length - win + i) % months.length]) * 0.88;
+      return { label: p.label, value: scale(base) };
+    });
     return { cur, prior };
-  }, [range, team, source]);
+    // metricCfg is derived purely from `metric`, so depend on the primitive.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range, team, source, metric]);
 
   const { companyScorecard, agentLeaderboard, sourceRoi, funnel, pipeline } = scoped;
 
@@ -318,6 +363,44 @@ export default function ReportingPage() {
       { key: "appts", label: "Appts set", kind: "appts", value: totalAppts, target: Math.round(totalAppts / 0.9) },
     ];
   }, [totalLeads, totalAppts]);
+
+  /* ── Dataset tab + metric toggle — swap the visible surface WITH feedback ──
+     Both controls smooth-scroll the affected surface into view so the user SEES
+     the result change (R: "changing a setting must give visible feedback"). The
+     ViewTransition wrapper keyed on the dataset/metric replays a short fade-up
+     (motion-safe only). */
+  function selectDataset(next: DatasetTab) {
+    setDataset(next);
+    if (typeof document !== "undefined") {
+      requestAnimationFrame(() =>
+        document
+          .getElementById("report-dataset-surface")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    }
+  }
+  function selectMetric(next: SeriesMetric) {
+    setMetric(next);
+    if (typeof document !== "undefined") {
+      requestAnimationFrame(() =>
+        document
+          .getElementById("report-timeseries")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      );
+    }
+  }
+
+  /* A filter change re-scopes every number (skeleton recompute already gives a
+     full-board reflow). On top of that, bring the freshly-scoped surface into
+     view so the result is unmissable even when the user scrolled down. */
+  function afterFilterChange() {
+    if (typeof document === "undefined") return;
+    requestAnimationFrame(() =>
+      document
+        .getElementById("report-dataset-surface")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }
 
   /* ── Ask Matin — stream an explanation INLINE (never the global sidecar) ── */
   function askMatin(context: string, drivers: string[], action: ExplainScope["action"]) {
@@ -429,6 +512,104 @@ export default function ReportingPage() {
     return arr[(i + 1) % arr.length];
   }
 
+  /* ── Primary time-series block — the metric toggle (Volume/Closings/GCI/
+       Revenue) sits in the chart header and genuinely re-draws the series. Built
+       once here, reused by every dataset view so it stays consistent. ───────── */
+  const timeSeries = (
+    <div id="report-timeseries" className="scroll-mt-20 space-y-2.5">
+      <div
+        role="tablist"
+        aria-label="Time-series metric"
+        className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <span className="eyebrow mr-1 shrink-0 px-1 text-[0.6rem]">Trend metric</span>
+        {SERIES_METRICS.map((m) => {
+          const isActive = m.key === metric;
+          return (
+            <button
+              key={m.key}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => selectMetric(m.key)}
+              className={cn(
+                "inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-full px-3 text-[0.76rem] font-semibold leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+                isActive
+                  ? "bg-ink text-cloud"
+                  : "border border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
+              )}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
+      <ViewTransition swapKey={metric}>
+        <TimeSeriesChart
+          title={dataset === "funnel" ? `Funnel velocity · ${metricCfg.label}` : metricCfg.title}
+          unit={metricCfg.unit}
+          current={series.cur}
+          prior={series.prior}
+          currentLabel={RANGE_LABEL[range]}
+          priorLabel={PRIOR_LABEL[range]}
+        />
+      </ViewTransition>
+    </div>
+  );
+
+  /* ── Agent leaderboard card — reused by Overview + Performance datasets ───── */
+  const leaderboardCard = (
+    <div className="flex flex-col gap-3 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
+            Agent leaderboard
+          </h2>
+          <p className="mt-1.5 text-[0.74rem] text-slate tabular-nums">
+            {num(totalSigned)} signed · {compactUsd(totalGci)} GCI across{" "}
+            {agentLeaderboard.length} agents · {range}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            askMatin(
+              "Agent accountability",
+              [
+                "Top quartile averages 14 appts → 7 signed",
+                "Speed-to-lead 4 min on the leaders",
+                "Bottom two trail on appt-set rate",
+              ],
+              {
+                title: "Assign a coaching plan to the bottom-quartile agents",
+                evidence:
+                  "Lowest two agents convert leads→appts under 40%. A scripted objection drill + a stale-lead sweep typically recovers 1-2 signings/month.",
+              },
+            )
+          }
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+        >
+          <MatinMark theme="dark" className="h-3.5 w-3.5" />
+          Summarize
+        </button>
+      </div>
+
+      <SavedViewTabs
+        views={leaderViews}
+        active={leaderTab}
+        onChange={(k) => setLeaderTab(k as LeaderTab)}
+      />
+
+      <DataTable<ReportAgentLeaderboardRow>
+        columns={leaderColumns}
+        rows={leaderRows}
+        getRowId={(r) => r.slug}
+        responsive
+        onRowClick={(r) => setDrawer({ kind: "agent", row: r })}
+      />
+    </div>
+  );
+
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 pb-16 pt-3 md:px-6">
       {/* Subtitle eyebrow (no page <h1> — TopCommandBar owns the title) */}
@@ -467,9 +648,13 @@ export default function ReportingPage() {
             <button
               key={r}
               type="button"
-              onClick={() => setRange(r)}
+              onClick={() => {
+                setRange(r);
+                afterFilterChange();
+              }}
+              aria-pressed={range === r}
               className={cn(
-                "rounded-full px-3 py-1 text-[0.76rem] font-semibold transition-colors",
+                "inline-flex min-h-9 items-center rounded-full px-3 py-1 text-[0.76rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
                 range === r ? "bg-ink text-cloud" : "text-slate hover:text-ink",
               )}
             >
@@ -478,13 +663,29 @@ export default function ReportingPage() {
           ))}
         </div>
 
-        <button type="button" onClick={() => setTeam((t) => cycle(TEAMS, t))} className={chip}>
+        <button
+          type="button"
+          onClick={() => {
+            setTeam((t) => cycle(TEAMS, t));
+            afterFilterChange();
+          }}
+          className={cn(chip, "min-h-9")}
+          title="Cycle team scope"
+        >
           <Users2 className="h-3.5 w-3.5" />
           {team}
           <ChevronDown className="h-3 w-3 opacity-60" />
         </button>
 
-        <button type="button" onClick={() => setSource((s) => cycle(SOURCES, s))} className={chip}>
+        <button
+          type="button"
+          onClick={() => {
+            setSource((s) => cycle(SOURCES, s));
+            afterFilterChange();
+          }}
+          className={cn(chip, "min-h-9")}
+          title="Cycle lead-source scope"
+        >
           <Radio className="h-3.5 w-3.5" />
           {source}
           <ChevronDown className="h-3 w-3 opacity-60" />
@@ -543,9 +744,9 @@ export default function ReportingPage() {
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => setDataset(d.key)}
+                  onClick={() => selectDataset(d.key)}
                   className={cn(
-                    "inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-xl px-3.5 text-[0.8rem] font-medium leading-none transition-colors",
+                    "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-xl px-3.5 text-[0.8rem] font-medium leading-none transition-colors",
                     active ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
                   )}
                 >
@@ -555,8 +756,10 @@ export default function ReportingPage() {
             })}
           </div>
 
-          {/* Hero financial strip — taller band, $ glyph, Revenue cell green,
-              colored ▲/▼ vs-prior delta in every cell (S10 tickets 1 + 9). */}
+          {/* Hero financial strip — persistent KPI band across every dataset.
+              Each cell is also a SHORTCUT: clicking it sets the time-series
+              metric (and scrolls to the chart) AND opens its drilldown drawer,
+              so the band reconciles with the chart the user is looking at. */}
           <ReportFinancialStrip
             cells={[
               {
@@ -566,7 +769,10 @@ export default function ReportingPage() {
                 money: true,
                 sub: `${Math.round((companyScorecard.goalPacing.volumeActual / companyScorecard.goalPacing.volumeGoal) * 100)}% to goal`,
                 deltaPct: 14,
-                onDrill: () => setDrawer({ kind: "metric", metric: "volume" }),
+                onDrill: () => {
+                  selectMetric("volume");
+                  setDrawer({ kind: "metric", metric: "volume" });
+                },
               },
               {
                 key: "closings",
@@ -574,7 +780,10 @@ export default function ReportingPage() {
                 value: num(companyScorecard.propertiesSold),
                 sub: `Goal ${num(companyScorecard.goalPacing.soldGoal)}`,
                 deltaPct: 9,
-                onDrill: () => setDrawer({ kind: "metric", metric: "sold" }),
+                onDrill: () => {
+                  selectMetric("closings");
+                  setDrawer({ kind: "metric", metric: "sold" });
+                },
               },
               {
                 key: "gci",
@@ -584,7 +793,10 @@ export default function ReportingPage() {
                 tone: "success",
                 sub: "Gross commission income",
                 deltaPct: 12,
-                onDrill: () => setDrawer({ kind: "metric", metric: "volume" }),
+                onDrill: () => {
+                  selectMetric("gci");
+                  setDrawer({ kind: "metric", metric: "volume" });
+                },
               },
               {
                 key: "revenue",
@@ -594,119 +806,104 @@ export default function ReportingPage() {
                 tone: "success",
                 sub: "After splits + brokerage cost",
                 deltaPct: -3,
-                onDrill: () => setDrawer({ kind: "metric", metric: "growth" }),
+                onDrill: () => {
+                  selectMetric("revenue");
+                  setDrawer({ kind: "metric", metric: "growth" });
+                },
               },
             ]}
           />
 
-          {/* HERO — Company scorecard (4 score rings + pace bar) */}
-          <ReportsScorecard
-            scorecard={companyScorecard}
-            onDrill={(metric) => setDrawer({ kind: "metric", metric })}
-          />
+          {/* ── Dataset surface — the dataset tabs genuinely SWAP what renders
+              here, under a short motion-safe fade-up keyed on the active tab. ── */}
+          <div id="report-dataset-surface" className="scroll-mt-20">
+            <ViewTransition swapKey={dataset} className="space-y-5">
+              {dataset === "overview" ? (
+                <>
+                  {/* Company scorecard (4 score rings + pace bar) */}
+                  <ReportsScorecard
+                    scorecard={companyScorecard}
+                    onDrill={(m) => setDrawer({ kind: "metric", metric: m })}
+                  />
 
-          {/* Hero activity card — donut gauges (Calls/Emails/Texts/Appts) */}
-          <ActivityGauges gauges={gauges} />
+                  {/* Activity donut gauges (Calls/Emails/Texts/Appts) */}
+                  <ActivityGauges gauges={gauges} />
 
-          {/* PRIMARY time-series — current vs prior (Sierra report grammar).
-              Funnel dataset swaps the metric framing in the subtitle. */}
-          <TimeSeriesChart
-            title={dataset === "funnel" ? "Funnel velocity trend" : "Closed volume trend"}
-            unit="usd"
-            current={series.cur}
-            prior={series.prior}
-            currentLabel={RANGE_LABEL[range]}
-            priorLabel={PRIOR_LABEL[range]}
-          />
+                  {/* PRIMARY time-series — driven by the metric toggle */}
+                  {timeSeries}
 
-          {/* Performance Table dataset — the Sisu Team-ROI-by-source scoreboard */}
-          {dataset === "performance" ? (
-            <TeamRoiScoreboard
-              sources={sourceRoi}
-              onDrill={(s) => setDrawer({ kind: "source", source: s })}
-            />
-          ) : null}
-
-          {/* GRID — leaderboard (wide) + source ROI */}
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {/* (A) Agent leaderboard — color-as-data scoreboard */}
-            <div className="lg:col-span-2">
-              <div className="flex flex-col gap-3 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <div>
-                    <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
-                      Agent leaderboard
-                    </h2>
-                    <p className="mt-1.5 text-[0.74rem] text-slate tabular-nums">
-                      {num(totalSigned)} signed · {compactUsd(totalGci)} GCI across{" "}
-                      {agentLeaderboard.length} agents · {range}
-                    </p>
+                  {/* GRID — leaderboard (wide) + source ROI + pipeline + funnel */}
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <div className="lg:col-span-2">{leaderboardCard}</div>
+                    <div className="lg:col-span-1">
+                      <SourceRoiPanel
+                        sources={sourceRoi}
+                        onDrill={(s) => setDrawer({ kind: "source", source: s })}
+                      />
+                    </div>
+                    <div className="lg:col-span-2">
+                      <PipelineRamp
+                        stages={pipeline}
+                        onDrill={(s) => setDrawer({ kind: "pipeline", stage: s })}
+                      />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <FunnelRamp
+                        stages={funnel}
+                        onDrill={(s) => setDrawer({ kind: "stage", stage: s })}
+                      />
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      askMatin(
-                        "Agent accountability",
-                        [
-                          "Top quartile averages 14 appts → 7 signed",
-                          "Speed-to-lead 4 min on the leaders",
-                          "Bottom two trail on appt-set rate",
-                        ],
-                        {
-                          title: "Assign a coaching plan to the bottom-quartile agents",
-                          evidence:
-                            "Lowest two agents convert leads→appts under 40%. A scripted objection drill + a stale-lead sweep typically recovers 1-2 signings/month.",
-                        },
-                      )
-                    }
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-mist px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
-                  >
-                    <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                    Summarize
-                  </button>
-                </div>
 
-                <SavedViewTabs
-                  views={leaderViews}
-                  active={leaderTab}
-                  onChange={(k) => setLeaderTab(k as LeaderTab)}
-                />
-
-                <DataTable<ReportAgentLeaderboardRow>
-                  columns={leaderColumns}
-                  rows={leaderRows}
-                  getRowId={(r) => r.slug}
-                  responsive
-                  onRowClick={(r) => setDrawer({ kind: "agent", row: r })}
-                />
-              </div>
-            </div>
-
-            {/* (B) Marketing ROI + Source Quality */}
-            <div className="lg:col-span-1">
-              <SourceRoiPanel
-                sources={sourceRoi}
-                onDrill={(s) => setDrawer({ kind: "source", source: s })}
-              />
-            </div>
-
-            {/* (C) Pipeline ramp + lead funnel side by side under the grid */}
-            <div className="lg:col-span-2">
-              <PipelineRamp
-                stages={pipeline}
-                onDrill={(s) => setDrawer({ kind: "pipeline", stage: s })}
-              />
-            </div>
-            <div className="lg:col-span-1">
-              <FunnelRamp
-                stages={funnel}
-                onDrill={(s) => setDrawer({ kind: "stage", stage: s })}
-              />
-            </div>
+                  {/* Recent closings — real photos + agent headshots */}
+                  <RecentClosings />
+                </>
+              ) : dataset === "performance" ? (
+                <>
+                  {/* Performance Table — the accountability scoreboards take over.
+                      Sisu Team-ROI-by-source ledger + the full agent leaderboard
+                      + the source-quality ROI panel, with the metric-driven
+                      time-series as the trend anchor. No score rings / gauges /
+                      recent-closings clutter — this view is the ledger. */}
+                  <TeamRoiScoreboard
+                    sources={sourceRoi}
+                    onDrill={(s) => setDrawer({ kind: "source", source: s })}
+                  />
+                  {timeSeries}
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <div className="lg:col-span-2">{leaderboardCard}</div>
+                    <div className="lg:col-span-1">
+                      <SourceRoiPanel
+                        sources={sourceRoi}
+                        onDrill={(s) => setDrawer({ kind: "source", source: s })}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Funnel Table — conversion is the headline. The lead funnel +
+                      pipeline ramp lead, the metric-driven velocity trend anchors
+                      it, and the source ROI grounds where the funnel fills from. */}
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <FunnelRamp
+                      stages={funnel}
+                      onDrill={(s) => setDrawer({ kind: "stage", stage: s })}
+                    />
+                    <PipelineRamp
+                      stages={pipeline}
+                      onDrill={(s) => setDrawer({ kind: "pipeline", stage: s })}
+                    />
+                  </div>
+                  {timeSeries}
+                  <SourceRoiPanel
+                    sources={sourceRoi}
+                    onDrill={(s) => setDrawer({ kind: "source", source: s })}
+                  />
+                </>
+              )}
+            </ViewTransition>
           </div>
-
-          {/* Recent closings — real photos + agent headshots (asset wiring) */}
-          <RecentClosings />
         </>
       )}
 
