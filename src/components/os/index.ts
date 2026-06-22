@@ -38,6 +38,19 @@ export type { SavedView } from "./SavedViewTabs";
 export { DataTable, TwoLineCell, InitialsToken } from "./DataTable";
 export type { Column, Align } from "./DataTable";
 
+// Mobile primitives — pane switcher (R1) ------------------------------------
+export { PaneSwitcher, usePaneSwitcher } from "./PaneSwitcher";
+export type { Pane, PaneSwitcherController } from "./PaneSwitcher";
+
+// Territory map (G-C) ------------------------------------------------------
+export { TerritoryMap, MATIN_OFFICES, PORTLAND_METRO_CENTER } from "./TerritoryMap";
+export type {
+  TerritoryMapProps,
+  TerritoryOffice,
+  TerritoryListing,
+  TerritoryCommunity,
+} from "./TerritoryMap";
+
 // Kanban -------------------------------------------------------------------
 export { KanbanBoard } from "./KanbanBoard";
 export type { KanbanColumn, BackendColumn } from "./KanbanBoard";
@@ -74,3 +87,6 @@ export type { ChecklistItem, ChecklistGroup, ChecklistStatus } from "./Checklist
 
 // Document preview ---------------------------------------------------------
 export { DocumentPreview } from "./DocumentPreview";
+
+// Branded document system (G-B — built by Agent B in parallel) --------------
+export { BrandedDocument } from "./BrandedDocument";

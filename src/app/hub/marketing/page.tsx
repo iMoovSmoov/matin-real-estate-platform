@@ -101,7 +101,7 @@ export default function MarketingStudioPage() {
 
   const [approvers, setApprovers] = useState<Approver[]>([
     { slug: "jordan-matin", name: "Jordan Matin", role: "Broker", approved: false },
-    { slug: "ava-brooks", name: "Ava Brooks", role: "Listing agent", approved: false },
+    { slug: "chase-bright", name: "Chase Bright", role: "Listing agent", approved: false },
   ]);
 
   /* ── Campaigns (mutable local copy so + New / pause shows immediately) ── */

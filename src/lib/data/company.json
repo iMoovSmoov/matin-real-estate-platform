@@ -38,5 +38,125 @@
     "Portland Business Journal — Fastest Growing Private Companies",
     "Top 10 Brokers in the Region",
     "RealTrends America's Best"
+  ],
+  "offices": [
+    {
+      "name": "Matin Real Estate (Oregon — Headquarters)",
+      "address": "18825 Willamette Dr",
+      "city": "West Linn",
+      "state": "OR",
+      "zip": "97068",
+      "phone": "(503) 622-9624",
+      "email": "info@matinrealestate.com",
+      "hours": "Mon–Sun · 8am–8pm",
+      "lat": 45.3897394,
+      "lng": -122.6446416,
+      "role": "Principal Broker Oregon",
+      "disclosures": "Oregon Disclosures",
+      "isHeadquarters": true
+    },
+    {
+      "name": "Matin Real Estate (Washington)",
+      "address": "1220 Main Street Suite 400",
+      "city": "Vancouver",
+      "state": "WA",
+      "zip": "98660",
+      "phone": "(503) 622-9624",
+      "email": "info@matinrealestate.com",
+      "hours": "Mon–Sun · 8am–8pm",
+      "lat": 45.6307508,
+      "lng": -122.6718,
+      "role": "Managing Broker Washington",
+      "disclosures": "Washington Disclosures",
+      "isHeadquarters": false
+    }
+  ],
+  "counties": [
+    {
+      "name": "Clackamas County",
+      "state": "OR",
+      "url": "/clackamas-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Columbia County",
+      "state": "OR",
+      "url": "/columbia-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Lincoln County",
+      "state": "OR",
+      "url": "/lincoln-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Marion County",
+      "state": "OR",
+      "url": "/marion-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Multnomah County",
+      "state": "OR",
+      "url": "/multnomah-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Tillamook County",
+      "state": "OR",
+      "url": "/tillamook-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Washington County",
+      "state": "OR",
+      "url": "/washington-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Yamhill County",
+      "state": "OR",
+      "url": "/yamhill-county-or-homes-for-sale/"
+    },
+    {
+      "name": "Clark County",
+      "state": "WA",
+      "url": "/clark-county-wa-homes-for-sale/"
+    },
+    {
+      "name": "Cowlitz County",
+      "state": "WA",
+      "url": "/cowlitz-county-wa-homes-for-sale/"
+    },
+    {
+      "name": "Skamania County",
+      "state": "WA",
+      "url": "/skamania-county-wa-homes-for-sale/"
+    }
+  ],
+  "communitiesServed": [
+    "Battle Ground",
+    "Beaverton",
+    "Boring",
+    "Brush Prairie",
+    "Camas",
+    "Clackamas",
+    "Damascus",
+    "Estacada",
+    "Gresham",
+    "Happy Valley",
+    "Hillsboro",
+    "Keizer",
+    "La Center",
+    "Lake Oswego",
+    "Milwaukie",
+    "Oregon City",
+    "Portland",
+    "Ridgefield",
+    "Salem",
+    "Sandy",
+    "Sherwood",
+    "Southwest Washington",
+    "Tualatin",
+    "Vancouver",
+    "Washougal",
+    "West Linn",
+    "Wilsonville",
+    "Woodland",
+    "Yacolt"
   ]
 }

@@ -28,6 +28,15 @@ import type {
   DataQualityIssue, AuditLog, CoachingScenario, ReportMetrics,
 } from "./types";
 
+// ---- G-A Wave-0 real-data layer (roles, remap, photo binding, derived KPIs) ----
+import { roles, defaultListingCoordinator, defaultTransactionCoordinator, isLeadership } from "./data/roles";
+import {
+  remapAgent, remapAgentName, isFabricatedAgent,
+  FABRICATED_AGENT_SLUGS, AGENT_REMAP, AGENT_NAME_REMAP,
+} from "./data/agent-remap";
+import { listingPhoto as listingPhotoBase, exteriorFallback, makeListingPhotoResolver } from "./data/listing-photo";
+import { derived, todayKpis } from "./data/derive";
+
 export const company = companyJson as Company;
 export const agents = agentsJson as Agent[];
 export const communities = communitiesJson as Community[];
@@ -83,3 +92,44 @@ export const liveCampaigns = campaigns.filter((c) => c.status === "live");
 export const assetsForCampaign = (campaignId: string) =>
   marketingAssets.filter((a) => a.campaignId === campaignId);
 export const failingIntegrations = integrations.filter((i) => i.status !== "Healthy");
+
+// ---------------------------------------------------------------------------
+// G-A Wave-0 real-data layer — re-exported here so every section imports the
+// roles / remap / listing-photo / derived KPIs from a single `@/lib/data` entry.
+// ---------------------------------------------------------------------------
+
+// Role slots (real principal broker, coordinators, marketing lead, leadership)
+export { roles, defaultListingCoordinator, defaultTransactionCoordinator, isLeadership };
+
+// Agent remap shim (fabricated → real) + the canonical fabricated-slug list
+export {
+  remapAgent, remapAgentName, isFabricatedAgent,
+  FABRICATED_AGENT_SLUGS, AGENT_REMAP, AGENT_NAME_REMAP,
+};
+
+// Derived KPIs (computed from rows; never hardcoded)
+export { derived, todayKpis };
+
+// Real vs synthetic cohorts (Listings/Communities scrape merge)
+export const realListings = listings.filter((l) => l.real);
+export const realCommunities = communities.filter((c) => c.real);
+
+/** Both real Matin offices (OR HQ + WA), if present. */
+export const offices = company.offices ?? [];
+/** Real counties served (live-site URLs). */
+export const counties = company.counties ?? [];
+
+/**
+ * listingPhoto(listingIdOrListing) — returns the listing's real hero
+ * (`photos[0]`) when available, else a DETERMINISTIC `/matin/exteriors`
+ * fallback keyed by listing id. Bound to the canonical `listings` collection so
+ * passing a bare id still resolves a real hero when one exists.
+ */
+const _resolveById = makeListingPhotoResolver(listings);
+export function listingPhoto(
+  input: string | { id: string; photos?: string[] } | null | undefined,
+): string {
+  if (typeof input === "string") return _resolveById(input);
+  return listingPhotoBase(input);
+}
+export { exteriorFallback };

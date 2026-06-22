@@ -8,7 +8,7 @@
     "tab": "My Work",
     "sourceType": "lead",
     "sourceId": "LD-1999",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-002",
@@ -19,7 +19,7 @@
     "tab": "My Work",
     "sourceType": "seller-lead",
     "sourceId": "SL-000",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-003",
@@ -30,7 +30,7 @@
     "tab": "High Risk",
     "sourceType": "transaction",
     "sourceId": "TX-3998",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-004",
@@ -41,7 +41,7 @@
     "tab": "My Work",
     "sourceType": "listing",
     "sourceId": "LP-000",
-    "agent": "marcus-lee"
+    "agent": "sierra-palmeri"
   },
   {
     "id": "WQ-005",
@@ -52,7 +52,7 @@
     "tab": "AI Drafts",
     "sourceType": "ai-action",
     "sourceId": "AI-001",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-006",
@@ -63,7 +63,7 @@
     "tab": "AI Drafts",
     "sourceType": "ai-action",
     "sourceId": "AI-002",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-007",
@@ -74,7 +74,7 @@
     "tab": "AI Drafts",
     "sourceType": "seller-lead",
     "sourceId": "SL-000B",
-    "agent": "ava-brooks"
+    "agent": "chase-bright"
   },
   {
     "id": "WQ-008",
@@ -85,7 +85,7 @@
     "tab": "Failed Automations",
     "sourceType": "workflow-run",
     "sourceId": "WR-003",
-    "agent": "evan-carter"
+    "agent": "paris-vollstedt"
   },
   {
     "id": "WQ-009",
@@ -96,7 +96,7 @@
     "tab": "Failed Automations",
     "sourceType": "workflow-run",
     "sourceId": "WR-007",
-    "agent": "nina-patel"
+    "agent": "kimberly-ilosvay"
   },
   {
     "id": "WQ-010",
@@ -162,7 +162,7 @@
     "tab": "AI Drafts",
     "sourceType": "ai-action",
     "sourceId": "AI-006",
-    "agent": "nina-patel"
+    "agent": "kimberly-ilosvay"
   },
   {
     "id": "WQ-016",

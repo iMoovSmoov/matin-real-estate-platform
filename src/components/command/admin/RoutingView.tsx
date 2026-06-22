@@ -260,14 +260,14 @@ function OwnershipCard({ rule }: { rule: RoutingRule }) {
 /* ── Recipient builder (shared by New + Edit drawers) ──────────────────────── */
 
 const ALL_AGENTS = [
-  "Ava Brooks",
+  "Chase Bright",
   "Amanda Conlon",
   "Andy Wilcox",
   "Amy Mead",
-  "Marcus Lee",
+  "Sierra Seggerman",
   "Alicia Smith",
   "Jordan Matin",
-  "Evan Carter",
+  "Paris Vollstedt",
 ];
 
 function RecipientBuilder({
@@ -375,7 +375,7 @@ function blankDraft(nextId: string): RuleDraft {
     sourceMeta: "Saved-search + property inquiry",
     criteria: ["Area: Portland Metro", "Type: Buyer"],
     type: "Round Robin",
-    members: [{ name: "Ava Brooks", weight: 1 }],
+    members: [{ name: "Chase Bright", weight: 1 }],
     team: "Oregon",
     firstResponseSla: "5 minutes",
   };
@@ -730,7 +730,7 @@ export function RoutingView() {
       title: "Rebalance RR-001 round-robin weights",
       riskTag: "Auto-safe",
       evidence:
-        "Ava Brooks holds 47% of RR-001 volume vs a 33% target. Andy Wilcox's first-response time is 2.1× the team median. Lower Ava's weight 3→2 to even distribution.",
+        "Chase Bright holds 47% of RR-001 volume vs a 33% target. Andy Wilcox's first-response time is 2.1× the team median. Lower Ava's weight 3→2 to even distribution.",
       confidence: "Medium",
     },
   ];

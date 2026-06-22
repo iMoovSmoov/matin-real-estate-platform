@@ -8,6 +8,10 @@ export interface Agent {
   scorecardWeek?: { calls: number; texts: number; appts: number; agreements: number; showings: number; offers: number };
   responseTimeMins?: number;
   rank?: number;
+  /** Real per-state license numbers parsed from the live roster (additive). */
+  licenseNumbers?: Record<string, string>;
+  /** Verbatim license string from the live roster. */
+  licenseRaw?: string;
 }
 
 export interface Community {
@@ -15,6 +19,10 @@ export interface Community {
   hero: string; thumb: string; medianPrice: number; medianPpsf: number; activeListings: number;
   avgDaysOnMarket: number; schoolRating: number; walkScore: number; yoyAppreciation: number;
   vibe: string[]; popular: boolean;
+  /** Real-scrape cohort flag (community/county/region pages from the live site). */
+  real?: boolean;
+  /** Canonical live-site URL for the real community/county/region page. */
+  url?: string;
 }
 
 export type ListingStatus = "Active" | "New" | "Pending" | "Coming Soon" | "Sold";
@@ -25,6 +33,12 @@ export interface Listing {
   pricePerSqft: number; daysOnMarket: number; hoa: number; garage: number;
   photos: string[]; agentSlug: string; featured: boolean; lat: number; lng: number;
   features: string[]; description: string;
+  /** Real-scrape cohort flag (live MLS-fed featured/new listings). */
+  real?: boolean;
+  /** Listing brokerage name (for non-Matin broader-market new listings). */
+  listingBrokerage?: string;
+  /** Verbatim live-site status string (e.g. "Active - Open 6/21", "Active - Condo"). */
+  statusRaw?: string;
 }
 
 export type LeadStage = "New" | "Nurture" | "Active" | "Showing" | "Offer" | "Under Contract" | "Closed" | "Lost";
@@ -69,12 +83,25 @@ export interface Integration {
   errors?: number;
 }
 
+export interface CompanyOffice {
+  name: string; address: string; city: string; state: string; zip: string;
+  phone: string; email: string; hours: string; lat: number; lng: number;
+  role: string; disclosures: string; isHeadquarters: boolean;
+}
+export interface CompanyCounty { name: string; state: string; url: string; }
+
 export interface Company {
   name: string; founder: string; tagline: string; phone: string; phoneRaw: string; email: string;
   address: { street: string; city: string; state: string; zip: string };
   hours: string; founded: number; logo: string; officeHero: string; officeMeeting: string;
   stats: Record<string, string | number>;
   social: Record<string, string>; awards: string[];
+  /** Both real Matin offices (OR HQ + WA) with real lat/lng (additive). */
+  offices?: CompanyOffice[];
+  /** The 11 real counties served, with live-site URLs. */
+  counties?: CompanyCounty[];
+  /** The real market/community names served (29 markets). */
+  communitiesServed?: string[];
 }
 
 export interface Metrics {

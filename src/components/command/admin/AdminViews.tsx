@@ -429,7 +429,7 @@ export function TeamsView() {
           </Field>
           <Field label="Team lead">
             <SelectInput value={draft.lead} onChange={(e) => setDraft({ ...draft, lead: e.target.value })}>
-              {["Alicia Smith", "Amy Mead", "Marcus Lee", "Jordan Matin"].map((l) => (
+              {["Alicia Smith", "Amy Mead", "Sierra Seggerman", "Jordan Matin"].map((l) => (
                 <option key={l}>{l}</option>
               ))}
             </SelectInput>

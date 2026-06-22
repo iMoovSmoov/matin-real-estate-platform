@@ -101,8 +101,8 @@ const OFFERS: OfferColumn[] = [
   {
     id: "OFF-03",
     buyer: "R. & M. Okonkwo",
-    agent: "Ava Brooks",
-    agentSlug: "ava-brooks",
+    agent: "Chase Bright",
+    agentSlug: "chase-bright",
     price: 805000,
     closing: "Aug 1 · 38 days",
     loan: "FHA 30yr",

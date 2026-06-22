@@ -9,9 +9,9 @@ import { agentPhoto } from "@/lib/assets";
 
    Round identity token used in CRM rows, drawers, leaderboards, and assignment
    chips. Resolves a real headshot from `src` (explicit) or `slug`
-   (→ /matin/agents/<slug>.jpg). When the file is missing — synthetic agents
-   such as ava-brooks have no photo — it falls back gracefully to an initials
-   token in a neutral circle. No layout shift: the circle is always rendered;
+   (→ /matin/agents/<slug>.jpg). When the file is missing — e.g. an unknown
+   or external slug with no headshot on disk — it falls back gracefully to an
+   initials token in a neutral circle. No layout shift: the circle is always rendered;
    the <img> overlays it and is hidden on error.
    ────────────────────────────────────────────────────────────────────────── */
 

@@ -49,7 +49,7 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Saved-search + property inquiry",
     criteria: ["Area: Portland Metro", "Type: Buyer", "Price ≥ $600k"],
     type: "Round Robin",
-    members: members(["Ava Brooks", 3], ["Amanda Conlon", 2], ["Andy Wilcox", 1]),
+    members: members(["Chase Bright", 3], ["Amanda Conlon", 2], ["Andy Wilcox", 1]),
     team: "Oregon",
     status: "active",
     priority: 1,
@@ -64,7 +64,7 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Paid lead feed (idempotency-keyed)",
     criteria: ["Area: Lake Oswego, West Linn", "Type: Buyer or Seller"],
     type: "Round Robin",
-    members: members(["Amy Mead", 2], ["Ava Brooks", 1]),
+    members: members(["Amy Mead", 2], ["Chase Bright", 1]),
     team: "Oregon",
     status: "active",
     priority: 2,
@@ -79,7 +79,7 @@ export const routingRules: RoutingRule[] = [
     sourceMeta: "Seller intent ≥ 80 / equity signal",
     criteria: ["Seller-intent score ≥ 80", "Equity ≥ 40%", "Any market"],
     type: "Blast",
-    members: members(["Marcus Lee", 1], ["Alicia Smith", 1]),
+    members: members(["Sierra Seggerman", 1], ["Alicia Smith", 1]),
     team: "Leadership",
     status: "active",
     priority: 3,
@@ -100,7 +100,7 @@ export const routingRules: RoutingRule[] = [
     priority: 4,
     leadsRouted30d: 58,
     firstResponseSla: "1 hour",
-    lastChangedBy: "Marcus Lee",
+    lastChangedBy: "Sierra Seggerman",
     lastChangedAt: "1 week ago",
   },
   {
@@ -257,10 +257,10 @@ export type UserRow = {
 export const userRows: UserRow[] = [
   { id: "U-001", name: "Jordan Matin", email: "jordan@matinrealestate.com", role: "Owner · Principal Broker", team: "Leadership", status: "active", lastActive: "Online now" },
   { id: "U-002", name: "Alicia Smith", email: "alicia@matinrealestate.com", role: "Managing Principal Broker", team: "Leadership", status: "active", lastActive: "8 min ago" },
-  { id: "U-003", name: "Ava Brooks", email: "ava@matinrealestate.com", role: "Agent — Licensed Broker", team: "Oregon", status: "active", lastActive: "Online now" },
-  { id: "U-004", name: "Marcus Lee", email: "marcus@matinrealestate.com", role: "Listing Coordinator", team: "Operations", status: "active", lastActive: "38 min ago" },
-  { id: "U-005", name: "Evan Carter", email: "evan@matinrealestate.com", role: "Transaction Coordinator", team: "Operations", status: "active", lastActive: "1 hr ago" },
-  { id: "U-006", name: "Nina Patel", email: "nina@matinrealestate.com", role: "Marketing Director", team: "Operations", status: "active", lastActive: "2 hr ago" },
+  { id: "U-003", name: "Chase Bright", email: "chase@matinrealestate.com", role: "Agent — Licensed Broker", team: "Oregon", status: "active", lastActive: "Online now" },
+  { id: "U-004", name: "Sierra Seggerman", email: "sierra@matinrealestate.com", role: "Listing Coordinator", team: "Operations", status: "active", lastActive: "38 min ago" },
+  { id: "U-005", name: "Paris Vollstedt", email: "paris@matinrealestate.com", role: "Transaction Coordinator", team: "Operations", status: "active", lastActive: "1 hr ago" },
+  { id: "U-006", name: "Kimberly Ilosvay", email: "kimberly@matinrealestate.com", role: "Marketing Director", team: "Operations", status: "active", lastActive: "2 hr ago" },
   { id: "U-007", name: "Amy Mead", email: "amy@matinrealestate.com", role: "Agent — OR & WA Broker", team: "Washington", status: "active", lastActive: "Yesterday" },
   { id: "U-008", name: "Taylor Reed", email: "taylor@matinrealestate.com", role: "Agent — Licensed Broker", team: "Oregon", status: "invited", lastActive: "Invite sent 2d ago" },
   { id: "U-009", name: "Priya Shah", email: "priya@matinrealestate.com", role: "Agent — Licensed Broker", team: "Oregon", status: "invited", lastActive: "Invite sent 4h ago" },
@@ -280,7 +280,7 @@ export const roleDefs: { role: string; members: number; scope: string }[] = [
 export const teamRows: { id: string; name: string; office: string; lead: string; members: number; markets: string }[] = [
   { id: "T-001", name: "Oregon", office: "West Linn HQ", lead: "Alicia Smith", members: 28, markets: "Portland Metro, Lake Oswego, West Linn" },
   { id: "T-002", name: "Washington", office: "Vancouver Satellite", lead: "Amy Mead", members: 9, markets: "Clark County, Vancouver" },
-  { id: "T-003", name: "Operations", office: "West Linn HQ", lead: "Marcus Lee", members: 4, markets: "Brokerage-wide" },
+  { id: "T-003", name: "Operations", office: "West Linn HQ", lead: "Sierra Seggerman", members: 4, markets: "Brokerage-wide" },
   { id: "T-004", name: "Leadership", office: "West Linn HQ", lead: "Jordan Matin", members: 3, markets: "Brokerage-wide" },
 ];
 
@@ -295,11 +295,11 @@ export const templateRows: {
   updatedAt: string;
   status: "published" | "draft";
 }[] = [
-  { id: "TPL-001", name: "Listing launch checklist", kind: "Checklist", version: "v4.2", updatedBy: "Marcus Lee", updatedAt: "2 days ago", status: "published" },
+  { id: "TPL-001", name: "Listing launch checklist", kind: "Checklist", version: "v4.2", updatedBy: "Sierra Seggerman", updatedAt: "2 days ago", status: "published" },
   { id: "TPL-002", name: "Buyer agreement (OREF C-565)", kind: "Document", version: "v2.1", updatedBy: "Alicia Smith", updatedAt: "1 week ago", status: "published" },
-  { id: "TPL-003", name: "Seller disclosure packet", kind: "Document", version: "v3.0", updatedBy: "Evan Carter", updatedAt: "3 days ago", status: "published" },
-  { id: "TPL-004", name: "Under-contract concierge checklist", kind: "Checklist", version: "v1.8", updatedBy: "Evan Carter", updatedAt: "5 hr ago", status: "draft" },
-  { id: "TPL-005", name: "New-lead first reply", kind: "Email", version: "v6.0", updatedBy: "Nina Patel", updatedAt: "Yesterday", status: "published" },
+  { id: "TPL-003", name: "Seller disclosure packet", kind: "Document", version: "v3.0", updatedBy: "Paris Vollstedt", updatedAt: "3 days ago", status: "published" },
+  { id: "TPL-004", name: "Under-contract concierge checklist", kind: "Checklist", version: "v1.8", updatedBy: "Paris Vollstedt", updatedAt: "5 hr ago", status: "draft" },
+  { id: "TPL-005", name: "New-lead first reply", kind: "Email", version: "v6.0", updatedBy: "Kimberly Ilosvay", updatedAt: "Yesterday", status: "published" },
 ];
 
 /* ── AI Policies ───────────────────────────────────────────────────────────── */

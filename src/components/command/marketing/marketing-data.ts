@@ -40,22 +40,22 @@ export const PREVIEW_CHANNELS = [
 export type PreviewChannel = (typeof PREVIEW_CHANNELS)[number];
 
 /* ── Campaign owners — each campaign is run by a real Matin person. Marketing
-   is owned by Nina (Marketing Director); listing launches pair the listing
+   is owned by Kimberly (marketing lead); listing launches pair the listing
    agent; recruiting sits with the broker. Avatar resolves these slugs to real
    headshots, falling back to initials for synthetic names. ──────────────── */
 export const CAMPAIGN_OWNER: Record<string, { name: string; slug: string }> = {
-  "CMP-001": { name: "Ava Brooks", slug: "ava-brooks" }, // Cedar Hills listing agent
-  "CMP-002": { name: "Nina Patel", slug: "nina-patel" },
-  "CMP-003": { name: "Nina Patel", slug: "nina-patel" },
-  "CMP-004": { name: "Ava Brooks", slug: "ava-brooks" },
-  "CMP-005": { name: "Marcus Lee", slug: "marcus-lee" },
-  "CMP-006": { name: "Nina Patel", slug: "nina-patel" },
-  "CMP-007": { name: "Nina Patel", slug: "nina-patel" },
+  "CMP-001": { name: "Chase Bright", slug: "chase-bright" }, // Cedar Hills listing agent
+  "CMP-002": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
+  "CMP-003": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
+  "CMP-004": { name: "Chase Bright", slug: "chase-bright" },
+  "CMP-005": { name: "Sierra Seggerman", slug: "sierra-palmeri" },
+  "CMP-006": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
+  "CMP-007": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
   "CMP-008": { name: "Jordan Matin", slug: "jordan-matin" },
 };
 
 export function campaignOwner(id: string) {
-  return CAMPAIGN_OWNER[id] ?? { name: "Nina Patel", slug: "nina-patel" };
+  return CAMPAIGN_OWNER[id] ?? { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" };
 }
 
 /* Deterministic property photo per campaign so cards/drawers stay consistent. */
@@ -197,7 +197,7 @@ const TEMPLATE_SEEDS: Record<TemplateKey, Record<PreviewChannel, string>> = {
     Social:
       "OPEN HOUSE this weekend 🏡 1248 NW Cedar Hills Dr · Beaverton · Sat 11–1. Primary on main, quartz kitchen, greenspace out back. Tap for directions + tour times.",
     Flyer:
-      "OPEN HOUSE · Sat 11AM–1PM · 1248 NW Cedar Hills Dr, Beaverton · $845,000 · 4 bed / 3 bath / 2,580 sqft · Hosted by Ava Brooks, Matin Real Estate.",
+      "OPEN HOUSE · Sat 11AM–1PM · 1248 NW Cedar Hills Dr, Beaverton · $845,000 · 4 bed / 3 bath / 2,580 sqft · Hosted by Chase Bright, Matin Real Estate.",
     Ad: "",
     "Web page": "",
   },

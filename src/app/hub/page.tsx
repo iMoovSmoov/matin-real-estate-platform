@@ -142,7 +142,7 @@ const RISK_ALERTS: AlertRow[] = [
     title: "Listing consult — Sarah Mitchell (Beaverton)",
     date: "Today · 2:30 PM",
     href: "/hub/cash-offer",
-    ownerSlug: "ava-brooks",
+    ownerSlug: "chase-bright",
   },
   {
     id: "appt-cho",
@@ -150,7 +150,7 @@ const RISK_ALERTS: AlertRow[] = [
     title: "Buyer showing tour — Daniel Cho (7 Beaverton homes)",
     date: "Tomorrow · 10:00 AM",
     href: "/hub/crm",
-    ownerSlug: "ava-brooks",
+    ownerSlug: "chase-bright",
   },
   {
     id: "broker-review",
@@ -158,7 +158,7 @@ const RISK_ALERTS: AlertRow[] = [
     title: "Broker review due — 1248 NW Cedar Hills Dr launch",
     date: "Today · before MLS input",
     href: "/hub/listing-launch",
-    ownerSlug: "marcus-lee",
+    ownerSlug: "sierra-palmeri",
   },
 ];
 

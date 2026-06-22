@@ -54,28 +54,28 @@ export const STEP_LABEL: Record<WorkflowStep["status"], string> = {
    agent slugs so Avatar resolves a true headshot (falls back to initials).
    Maps by run id so the inspector can show a human accountable owner. */
 export const RUN_OWNER: Record<string, { name: string; slug: string }> = {
-  "WR-001": { name: "Ava Brooks", slug: "ava-brooks" },
-  "WR-002": { name: "Marcus Lee", slug: "marcus-lee" },
-  "WR-003": { name: "Nina Patel", slug: "nina-patel" },
+  "WR-001": { name: "Chase Bright", slug: "chase-bright" },
+  "WR-002": { name: "Sierra Seggerman", slug: "sierra-palmeri" },
+  "WR-003": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
   "WR-004": { name: "Jason Veith", slug: "jason-veith" },
   "WR-005": { name: "Jason Veith", slug: "jason-veith" },
-  "WR-006": { name: "Ava Brooks", slug: "ava-brooks" },
-  "WR-007": { name: "Nina Patel", slug: "nina-patel" },
+  "WR-006": { name: "Chase Bright", slug: "chase-bright" },
+  "WR-007": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
   "WR-008": { name: "Erin Martin", slug: "erin-martin" },
   "WR-009": { name: "Jordan Matin", slug: "jordan-matin" },
-  "WR-010": { name: "Marcus Lee", slug: "marcus-lee" },
+  "WR-010": { name: "Sierra Seggerman", slug: "sierra-palmeri" },
 };
 
 /* Automation ownership for the breakdown panel (by automation id). */
 export const AUTOMATION_OWNER: Record<string, { name: string; slug: string }> = {
-  au1: { name: "Ava Brooks", slug: "ava-brooks" },
-  au2: { name: "Marcus Lee", slug: "marcus-lee" },
-  au3: { name: "Nina Patel", slug: "nina-patel" },
+  au1: { name: "Chase Bright", slug: "chase-bright" },
+  au2: { name: "Sierra Seggerman", slug: "sierra-palmeri" },
+  au3: { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
   au4: { name: "Jason Veith", slug: "jason-veith" },
-  au5: { name: "Nina Patel", slug: "nina-patel" },
+  au5: { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
   au6: { name: "Erin Martin", slug: "erin-martin" },
   au7: { name: "Jordan Matin", slug: "jordan-matin" },
-  au8: { name: "Marcus Lee", slug: "marcus-lee" },
+  au8: { name: "Sierra Seggerman", slug: "sierra-palmeri" },
 };
 
 /* Each integration ties to a real property/seed so its drawer hero can carry a

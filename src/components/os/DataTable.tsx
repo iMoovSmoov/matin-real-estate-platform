@@ -31,6 +31,19 @@ export type Column<T> = {
   width?: string;
   sortable?: boolean;
   render?: (row: T) => ReactNode;
+  /**
+   * Card-mode (responsive, R3) hints — all optional & backward-compatible:
+   * - `primary`: marks the single most important column (score / next-best-
+   *   action / attributed $). It is pinned top-right of each mobile card so it
+   *   is ALWAYS visible without horizontal scroll. Mark exactly one column.
+   * - `cardHidden`: omit this column from the mobile card body (e.g. a
+   *   redundant checkbox or a column already shown in the card title).
+   * - `cardLabel`: the small label shown beside the value in the card body;
+   *   defaults to the column `header`.
+   */
+  primary?: boolean;
+  cardHidden?: boolean;
+  cardLabel?: ReactNode;
 };
 
 type SortState = { key: string; dir: "asc" | "desc" } | null;
@@ -100,6 +113,7 @@ export function DataTable<T>({
   savedViews,
   className,
   emptyState,
+  responsive = false,
 }: {
   columns: Column<T>[];
   rows: T[];
@@ -115,6 +129,14 @@ export function DataTable<T>({
   };
   className?: string;
   emptyState?: ReactNode;
+  /**
+   * R3 — when true, render rows as stacked full-width cards below `lg` and keep
+   * the dense table at `lg+`. Default OFF (fully backward-compatible). Use a
+   * column's `primary`/`cardHidden`/`cardLabel` hints to control the card; the
+   * `primary` column pins top-right so the most important value never needs a
+   * horizontal scroll.
+   */
+  responsive?: boolean;
 }) {
   const [sort, setSort] = useState<SortState>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -199,8 +221,108 @@ export function DataTable<T>({
         </div>
       </div>
 
+      {/* Mobile card list (R3) — only when responsive; dense table hides < lg */}
+      {responsive ? (
+        <ul className="flex flex-col gap-2.5 lg:hidden">
+          {sortedRows.length === 0 ? (
+            <li className="rounded-2xl border border-mist bg-cloud px-4 py-10 shadow-soft">
+              {emptyState ?? (
+                <p className="text-center text-[0.82rem] text-slate">No records.</p>
+              )}
+            </li>
+          ) : (
+            sortedRows.map((row) => {
+              const id = getRowId(row);
+              const isSelected = selected.has(id);
+              const clickable = typeof onRowClick === "function";
+              const primaryCol = columns.find((c) => c.primary);
+              const titleKey = columns[0]?.key;
+              // Body = everything except the title column, the pinned primary
+              // column, and any card-hidden columns.
+              const bodyCols = columns.filter(
+                (c) => !c.cardHidden && !c.primary && c.key !== titleKey,
+              );
+              const renderCell = (col: Column<T>): ReactNode =>
+                col.render
+                  ? col.render(row)
+                  : ((getSortValue(row, col.key) as ReactNode) ?? "—");
+              return (
+                <li key={id}>
+                  <div
+                    role={clickable ? "button" : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    onClick={clickable ? () => onRowClick!(row) : undefined}
+                    onKeyDown={
+                      clickable
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onRowClick!(row);
+                            }
+                          }
+                        : undefined
+                    }
+                    className={cn(
+                      "rounded-2xl border bg-cloud p-4 shadow-soft transition-colors",
+                      isSelected ? "border-ink/30 bg-paper" : "border-mist",
+                      clickable &&
+                        "cursor-pointer hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+                    )}
+                  >
+                    {/* Top line: first column (identity) + pinned primary value */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        {selectable ? (
+                          <input
+                            type="checkbox"
+                            aria-label={`Select row ${id}`}
+                            checked={isSelected}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={() => toggleOne(id)}
+                            className="h-4 w-4 shrink-0 cursor-pointer accent-ink"
+                          />
+                        ) : null}
+                        <div className="min-w-0">
+                          {columns[0] ? renderCell(columns[0]) : null}
+                        </div>
+                      </div>
+                      {primaryCol && primaryCol.key !== titleKey ? (
+                        <div className="shrink-0 text-right tabular-nums">
+                          {renderCell(primaryCol)}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* Body: remaining columns as label / value rows */}
+                    {bodyCols.length > 0 ? (
+                      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-mist/70 pt-3">
+                        {bodyCols.map((col) => (
+                          <div key={col.key} className="min-w-0">
+                            <dt className="eyebrow text-[0.6rem] text-slate">
+                              {col.cardLabel ?? col.header}
+                            </dt>
+                            <dd className="mt-0.5 truncate text-[0.82rem] text-ink">
+                              {renderCell(col)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })
+          )}
+        </ul>
+      ) : null}
+
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-mist bg-cloud shadow-soft">
+      <div
+        className={cn(
+          "overflow-x-auto rounded-2xl border border-mist bg-cloud shadow-soft",
+          responsive && "hidden lg:block",
+        )}
+      >
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-mist">

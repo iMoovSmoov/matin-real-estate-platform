@@ -1,7 +1,7 @@
 [
   {
     "id": "AL-001",
-    "actor": "Ava Brooks",
+    "actor": "Chase Bright",
     "action": "Approved AI draft",
     "target": "First reply to Daniel Cho (AI-001)",
     "timeLabel": "4 min ago"
@@ -15,7 +15,7 @@
   },
   {
     "id": "AL-003",
-    "actor": "Marcus Lee",
+    "actor": "Sierra Seggerman",
     "action": "Rejected listing for launch",
     "target": "1248 NW Cedar Hills Dr — disclosure missing initials",
     "timeLabel": "38 min ago"
@@ -29,14 +29,14 @@
   },
   {
     "id": "AL-005",
-    "actor": "Evan Carter",
+    "actor": "Paris Vollstedt",
     "action": "Retried workflow",
     "target": "Under-Contract Concierge — 8912 SE Hawthorne Blvd",
     "timeLabel": "1 hr ago"
   },
   {
     "id": "AL-006",
-    "actor": "Nina Patel",
+    "actor": "Kimberly Ilosvay",
     "action": "Scheduled campaign",
     "target": "Spring Seller Nurture (CMP-002)",
     "timeLabel": "2 hr ago"
@@ -45,12 +45,12 @@
     "id": "AL-007",
     "actor": "Jordan Matin",
     "action": "Changed user role",
-    "target": "Evan Carter → Transaction Coordinator",
+    "target": "Paris Vollstedt → Transaction Coordinator",
     "timeLabel": "3 hr ago"
   },
   {
     "id": "AL-008",
-    "actor": "Ava Brooks",
+    "actor": "Chase Bright",
     "action": "Sent for signature",
     "target": "Buyer agreement — Daniel Cho (OREF C-565)",
     "timeLabel": "3 hr ago"
@@ -64,14 +64,14 @@
   },
   {
     "id": "AL-010",
-    "actor": "Marcus Lee",
+    "actor": "Sierra Seggerman",
     "action": "Approved AI asset",
     "target": "Cedar Hills open house flyer (MA-003)",
     "timeLabel": "4 hr ago"
   },
   {
     "id": "AL-011",
-    "actor": "Evan Carter",
+    "actor": "Paris Vollstedt",
     "action": "Resolved data quality issue",
     "target": "Duplicate contacts merged (DQ-002, 6 of 18)",
     "timeLabel": "5 hr ago"

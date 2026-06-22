@@ -10,7 +10,7 @@
       { "name": "Capture IDX lead", "status": "succeeded", "detail": "Pulled from MatinRealEstate.com IDX search" },
       { "name": "Enrich + de-dupe in CRM", "status": "succeeded", "detail": "Matched to existing contact, merged 3 saved searches" },
       { "name": "Score lead", "status": "succeeded", "detail": "Intent score 84 — viewed 7 Beaverton homes" },
-      { "name": "Assign best-fit agent", "status": "succeeded", "detail": "Routed to Ava Brooks (Portland Metro)" },
+      { "name": "Assign best-fit agent", "status": "succeeded", "detail": "Routed to Chase Bright (Portland Metro)" },
       { "name": "AI draft first reply", "status": "succeeded", "detail": "Drafted reply with 3 matched homes" },
       { "name": "Send SMS + email", "status": "waiting", "detail": "Held for human approval before send" }
     ]
@@ -23,7 +23,7 @@
     "startedLabel": "2 hr ago",
     "failedStep": null,
     "steps": [
-      { "name": "Create listing record", "status": "succeeded", "detail": "Listing LP-000 opened, assigned to Ava Brooks" },
+      { "name": "Create listing record", "status": "succeeded", "detail": "Listing LP-000 opened, assigned to Chase Bright" },
       { "name": "Generate MLS description", "status": "succeeded", "detail": "AI drafted remarks from property facts" },
       { "name": "Build social + email creative", "status": "succeeded", "detail": "6 assets generated to draft" },
       { "name": "Schedule photographer", "status": "succeeded", "detail": "Booked; photos delivered" },
@@ -84,7 +84,7 @@
       { "name": "Pull equity + market delta", "status": "succeeded", "detail": "8 years owned, est. equity strong" },
       { "name": "AI writes home value touch", "status": "succeeded", "detail": "Drafted CMA email" },
       { "name": "Send + log", "status": "succeeded", "detail": "Sent, opened seller report" },
-      { "name": "Notify agent if reply", "status": "succeeded", "detail": "Flagged to Ava Brooks as warm" }
+      { "name": "Notify agent if reply", "status": "succeeded", "detail": "Flagged to Chase Bright as warm" }
     ]
   },
   {

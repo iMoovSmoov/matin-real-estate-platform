@@ -70,8 +70,9 @@ export function KpiCard({
     <>
       <div className="flex items-center justify-between gap-2">
         <p className="text-[0.74rem] font-medium leading-none text-slate">{label}</p>
+        {/* R4: hide the icon chip on the smallest screens to tighten tiles. */}
         {icon ? (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-slate ring-1 ring-inset ring-mist">
+          <span className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-slate ring-1 ring-inset ring-mist sm:flex">
             {icon}
           </span>
         ) : null}
@@ -93,8 +94,9 @@ export function KpiCard({
     </>
   );
 
+  // R4: tighter padding on phone, full padding from sm up.
   const base =
-    "rounded-2xl border border-mist bg-cloud p-5 text-left shadow-soft";
+    "rounded-2xl border border-mist bg-cloud p-4 text-left shadow-soft sm:p-5";
 
   if (interactive) {
     return (
@@ -115,18 +117,64 @@ export function KpiCard({
   return <div className={cn(base, className)}>{body}</div>;
 }
 
-/** Row wrapper for separate KPI tiles — equal columns, responsive. */
+/* Large-screen column counts → literal Tailwind classes (no dynamic interp so
+   the JIT keeps them). Phone is always 2-up, sm always 3-up (R4: never orphan
+   a tile at 2-up regardless of N). */
+const LG_COLS: Record<number, string> = {
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+  5: "lg:grid-cols-5",
+  6: "lg:grid-cols-6",
+};
+
+/**
+ * Row wrapper for separate KPI tiles. Backward-compatible: with no props it
+ * keeps the prior `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6`
+ * behavior.
+ *
+ * R4 responsive controls (all optional):
+ * - `cols`: how many tiles per row at `lg+` (3–6, default keeps legacy 4/6).
+ * - `rail`: on phone, render a horizontal scroll-snap RAIL instead of a 2-up
+ *   grid — ideal for 5–6 tiles that would otherwise orphan/cramp; tiles get a
+ *   min-width and snap. Reverts to the grid at `sm+`.
+ */
 export function KpiStrip({
   children,
   className,
+  cols,
+  rail = false,
 }: {
   children: ReactNode;
   className?: string;
+  cols?: 3 | 4 | 5 | 6;
+  rail?: boolean;
 }) {
+  // Large-screen track: explicit `cols` wins; otherwise the legacy 4→6 ramp.
+  const lgTrack = cols ? LG_COLS[cols] : "lg:grid-cols-4 xl:grid-cols-6";
+
+  if (rail) {
+    return (
+      <div
+        className={cn(
+          // Phone: horizontal scroll-snap rail (R4/R6). sm+: equal-column grid.
+          "-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "sm:mx-0 sm:grid sm:snap-none sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 sm:grid-cols-3",
+          lgTrack,
+          // Direct children become fixed-width snap items on phone, auto in grid.
+          "[&>*]:min-w-[44vw] [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:min-w-0 sm:[&>*]:shrink",
+          className,
+        )}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
-        "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6",
+        "grid grid-cols-2 gap-4 sm:grid-cols-3",
+        lgTrack,
         className,
       )}
     >

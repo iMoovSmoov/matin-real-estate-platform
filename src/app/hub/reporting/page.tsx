@@ -123,7 +123,7 @@ type Drawer =
 /* Recent closings strip — real addresses + photos (PropertyThumb wiring) */
 const RECENT_CLOSINGS = [
   { address: "7428 SW Maple Ave", city: "Lake Oswego", price: 1180000, agent: "Lexa Brice", slug: "lexa-brice", seed: 4 },
-  { address: "215 NW Skyline Blvd", city: "Portland", price: 925000, agent: "Ava Brooks", slug: "ava-brooks", seed: 9 },
+  { address: "215 NW Skyline Blvd", city: "Portland", price: 925000, agent: "Chase Bright", slug: "chase-bright", seed: 9 },
   { address: "3390 Riverview Dr", city: "West Linn", price: 1340000, agent: "Joshua Rose", slug: "joshua-rose", seed: 13 },
   { address: "1102 Iron Mountain Rd", city: "Lake Oswego", price: 760000, agent: "Karen Tse", slug: "karen-tse", seed: 17 },
 ];
