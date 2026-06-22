@@ -38,7 +38,7 @@ const TEMPLATES: Template[] = [
     id: "listing",
     name: "Listing packet",
     listingId: "MRE-1016",
-    source: "listings > document_packets > document_fields + document_signers",
+    source: "Pulls in the property listing, its required disclosures, and who needs to sign.",
     docs: [
       { code: "OREF-015", title: "Residential Listing Agreement — Exclusive", status: "draft", pages: 6, signatureField: true, lines: 7 },
       { code: "C-530", title: "Initial Agency Disclosure Pamphlet", status: "draft", pages: 2, signatureField: false, lines: 6 },
@@ -50,7 +50,7 @@ const TEMPLATES: Template[] = [
     id: "buyer",
     name: "Buyer agreement",
     listingId: "MRE-1006",
-    source: "contacts > document_packets > saved_searches + agreements",
+    source: "Pulls in the buyer's contact details, their saved searches, and any agreements on file.",
     docs: [
       { code: "C-565", title: "Buyer Representation Agreement — Exclusive", status: "required", pages: 5, signatureField: true, lines: 7 },
       { code: "C-530", title: "Initial Agency Disclosure Pamphlet", status: "draft", pages: 2, signatureField: false, lines: 6 },
@@ -61,7 +61,7 @@ const TEMPLATES: Template[] = [
     id: "offer",
     name: "Offer packet",
     listingId: "MRE-R02",
-    source: "transactions > document_packets > listings + cash_offer_requests",
+    source: "Pulls in the deal, the property listing, and any cash-offer requests.",
     docs: [
       { code: "OREF-001", title: "Residential Real Estate Sale Agreement", status: "required", pages: 12, signatureField: true, lines: 9 },
       { code: "EMR", title: "Earnest Money Receipt", status: "required", pages: 1, signatureField: false, lines: 4 },
@@ -72,7 +72,7 @@ const TEMPLATES: Template[] = [
     id: "disclosure",
     name: "Seller disclosure",
     listingId: "MRE-R05",
-    source: "seller_leads > document_packets > properties + valuations",
+    source: "Pulls in the seller's details, the property record, and recent value estimates.",
     docs: [
       { code: "SPDS", title: "Seller's Property Disclosure Statement", status: "required", pages: 5, signatureField: true, lines: 8 },
       { code: "LBP", title: "Lead-Based Paint Disclosure", status: "draft", pages: 2, signatureField: true, lines: 5 },
@@ -160,7 +160,7 @@ export function NewPacketDrawer({
       lines: d.lines,
       missing:
         d.status === "required"
-          ? ["Required — not started", "Auto-fill from record pending"]
+          ? ["Required — not started", "Auto-fill pending"]
           : undefined,
     }));
     const packet: Packet = {
@@ -185,7 +185,7 @@ export function NewPacketDrawer({
       open={open}
       onClose={onClose}
       title="New packet"
-      subtitle="Seed documents from a template and a source record"
+      subtitle="Start from a template and the property or contact this packet is for"
       actions={
         <div className="flex w-full items-center gap-2">
           <button
@@ -240,8 +240,8 @@ export function NewPacketDrawer({
 
         {/* Subject */}
         <Field
-          label="Source record / subject"
-          hint="The listing, contact, or deal this packet binds to."
+          label="Property, contact, or deal"
+          hint="What this packet is for — the listing, client, or deal."
         >
           <input
             value={subject}
@@ -330,9 +330,9 @@ export function NewPacketDrawer({
           </ul>
         </Field>
 
-        {/* Backend join note (transparency) */}
+        {/* What this packet pulls in (transparency) */}
         <div className="rounded-xl border border-mist bg-paper px-3.5 py-3">
-          <p className="eyebrow text-slate">Backend record joins</p>
+          <p className="eyebrow text-slate">What this packet pulls in</p>
           <p className="mt-1.5 font-mono text-[0.72rem] leading-relaxed text-slate">
             {template.source}
           </p>

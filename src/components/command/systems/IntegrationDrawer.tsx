@@ -163,17 +163,17 @@ export function IntegrationDrawer({
             />
           </dl>
 
-          {/* Field mapping — the monospace transparency note */}
+          {/* Where this connector's data lands — the transparency note */}
           <div>
-            <p className="eyebrow mb-2 text-[0.64rem] text-slate">Field mapping</p>
+            <p className="eyebrow mb-2 text-[0.64rem] text-slate">Where the data lands</p>
             <div className="overflow-hidden rounded-xl border border-mist bg-paper px-3.5 py-3">
               <code className="block break-words font-mono text-[0.74rem] leading-relaxed text-ink">
-                {i.name} <span className="text-slate">→</span> contacts ·
-                properties · activity_events
+                {i.name} <span className="text-slate">→</span> Contacts ·
+                Properties · Activity log
               </code>
               <p className="mt-1.5 text-[0.72rem] text-slate">
-                Stored with the external record ID so every sync is replayable
-                and auditable.
+                Each record keeps a link back to the source system, so every
+                sync can be traced and replayed.
               </p>
             </div>
           </div>

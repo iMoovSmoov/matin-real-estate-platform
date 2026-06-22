@@ -76,7 +76,7 @@ export function AiPanel({
           </h2>
         </div>
         <p className="mt-2 truncate font-mono text-[0.72rem] leading-none text-gold/90">
-          Context: {context}
+          Working on: {context}
         </p>
       </div>
 

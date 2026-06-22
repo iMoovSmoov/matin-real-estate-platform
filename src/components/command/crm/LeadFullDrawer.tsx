@@ -203,9 +203,10 @@ export function LeadFullDrawer({
         </div>
       </div>
 
-      {/* Monospace backend joins note — system transparency */}
+      {/* Plain-English note on what this 360 view pulls together */}
       <p className="mb-4 rounded-lg border border-mist bg-paper px-3 py-2 font-mono text-[0.7rem] leading-relaxed text-slate">
-        Backend record joins: contacts › saved_searches › property_views › tasks + agreements
+        What this 360 pulls together: contact details, saved searches, the homes they&rsquo;ve viewed,
+        follow-up tasks, and signed agreements.
       </p>
 
       {/* ── ACTIVITY ── */}

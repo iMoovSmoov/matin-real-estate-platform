@@ -121,8 +121,8 @@ export function AiExplainPanel({
       }
     >
       {/* Context line binds the analysis to the record (AI transparency). */}
-      <p className="mb-2.5 font-mono text-[0.7rem] text-slate-300/70">
-        Context: Reports / {scope.context}
+      <p className="mb-2.5 text-[0.7rem] text-slate-300/70">
+        Working on: Reports / {scope.context}
       </p>
 
       {/* Streamed answer */}
@@ -140,7 +140,7 @@ export function AiExplainPanel({
       {/* Cited drivers */}
       {scope.drivers.length > 0 ? (
         <div className="mt-3.5">
-          <p className="eyebrow mb-2 text-[0.6rem] text-slate-300/70">Cited drivers</p>
+          <p className="eyebrow mb-2 text-[0.6rem] text-slate-300/70">Key drivers</p>
           <div className="flex flex-wrap gap-1.5">
             {scope.drivers.map((d) => (
               <AIInsightChip key={d}>{d}</AIInsightChip>

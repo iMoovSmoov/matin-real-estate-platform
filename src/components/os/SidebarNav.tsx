@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
+import { useAiSidecar } from "./AISidecar";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — SidebarNav  (ref §1.3)
@@ -82,6 +83,7 @@ export function SidebarNav({
 }) {
   const primary = NAV_ITEMS.filter((i) => !i.admin);
   const admin = NAV_ITEMS.filter((i) => i.admin);
+  const { openAi } = useAiSidecar();
 
   return (
     <div className="flex h-full flex-col bg-ink-900 text-slate-300">
@@ -145,24 +147,31 @@ export function SidebarNav({
       <div className={cn("border-t border-ink-700", collapsed ? "p-2" : "p-3")}>
         {collapsed ? (
           <div className="flex justify-center">
-            <span
-              className="h-2 w-2 rounded-full bg-gold ring-2 ring-gold/30"
-              title="AI Assist: Ready"
-              aria-label="AI Assist: Ready"
-            />
+            <button
+              type="button"
+              onClick={() => openAi("Working on: Matin Brokerage OS")}
+              title="Ask Matin"
+              aria-label="Ask Matin"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold/40 bg-gold/[0.08] transition-colors hover:bg-gold/[0.16]"
+            >
+              <MatinMark theme="white" className="h-4 w-4" />
+            </button>
           </div>
         ) : (
           <>
             <p className="px-1 text-[0.68rem] leading-tight text-slate-300/60">
-              Role: <span className="text-slate-300/90">Leadership</span> · Team:{" "}
-              <span className="text-slate-300/90">Oregon</span>
+              <span className="text-slate-300/90">Jordan Matin</span> · Principal Broker
             </p>
-            <div className="mt-2 inline-flex w-full items-center gap-2 rounded-lg border border-gold/40 bg-gold/[0.08] px-3 py-2">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden />
+            <button
+              type="button"
+              onClick={() => openAi("Working on: Matin Brokerage OS")}
+              className="mt-2 inline-flex w-full items-center gap-2 rounded-lg border border-gold/40 bg-gold/[0.08] px-3 py-2 text-left transition-colors hover:bg-gold/[0.16]"
+            >
+              <MatinMark theme="white" className="h-3.5 w-3.5 shrink-0" />
               <span className="text-[0.74rem] font-semibold text-gold-bright">
-                AI Assist: Ready
+                Ask Matin
               </span>
-            </div>
+            </button>
           </>
         )}
       </div>

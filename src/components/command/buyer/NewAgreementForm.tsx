@@ -112,15 +112,15 @@ export function NewAgreementForm({
           <UserPlus className="h-4 w-4" />
         </span>
         <p className="text-[0.78rem] leading-snug text-slate">
-          Structured intake — every field writes to a database column. A draft
-          OREF C-565 packet is created in <span className="font-medium text-ink">Not Signed</span> state.
+          Fill in the buyer&apos;s details and we&apos;ll create a draft OREF
+          C-565 buyer agreement, saved as{" "}
+          <span className="font-medium text-ink">Not Signed</span> until you send it.
         </p>
       </div>
 
       {/* Start from a REAL CRM buyer lead — truthful contacts join */}
       <IntakeField
         label="Start from a CRM lead"
-        column="contacts.id → agreement_answers"
         flag={
           selectedLead ? (
             <span className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-success">
@@ -146,7 +146,6 @@ export function NewAgreementForm({
 
       <IntakeField
         label="Buyer name"
-        column="contacts.full_name"
         flag={
           touched && !nameValid ? (
             <span className="text-[0.7rem] font-medium text-danger">Required</span>
@@ -165,7 +164,6 @@ export function NewAgreementForm({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <IntakeField
           label="Email"
-          column="contacts.email"
           flag={
             touched && !emailValid ? (
               <span className="text-[0.7rem] font-medium text-danger">Invalid</span>
@@ -180,7 +178,7 @@ export function NewAgreementForm({
             placeholder="buyer@email.com"
           />
         </IntakeField>
-        <IntakeField label="Phone" column="contacts.phone">
+        <IntakeField label="Phone">
           <input
             className={intakeInputClass}
             value={phone}
@@ -190,7 +188,7 @@ export function NewAgreementForm({
         </IntakeField>
       </div>
 
-      <IntakeField label="Representing agent" column="agreement_answers.agent_slug">
+      <IntakeField label="Representing agent">
         <select
           className={intakeSelectClass}
           value={agentSlug}
@@ -204,7 +202,7 @@ export function NewAgreementForm({
         </select>
       </IntakeField>
 
-      <IntakeField label="Representation area" column="agreement_answers.areas[]">
+      <IntakeField label="Representation area">
         <input
           className={intakeInputClass}
           value={areas}
@@ -214,7 +212,7 @@ export function NewAgreementForm({
       </IntakeField>
 
       <div className="grid grid-cols-2 gap-3">
-        <IntakeField label="Budget min" column="agreement_answers.budget_min">
+        <IntakeField label="Budget min">
           <input
             className={intakeInputClass}
             value={budgetMin}
@@ -222,7 +220,7 @@ export function NewAgreementForm({
             placeholder="$500K"
           />
         </IntakeField>
-        <IntakeField label="Budget max" column="agreement_answers.budget_max">
+        <IntakeField label="Budget max">
           <input
             className={intakeInputClass}
             value={budgetMax}
@@ -233,7 +231,7 @@ export function NewAgreementForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <IntakeField label="Pre-approval" column="agreement_answers.preapproval">
+        <IntakeField label="Pre-approval">
           <select
             className={intakeSelectClass}
             value={preapproval}
@@ -244,7 +242,7 @@ export function NewAgreementForm({
             <option value="No">No</option>
           </select>
         </IntakeField>
-        <IntakeField label="Timeline" column="agreement_answers.timeline">
+        <IntakeField label="Timeline">
           <select
             className={intakeSelectClass}
             value={timeline}
@@ -259,8 +257,8 @@ export function NewAgreementForm({
 
       <p className="font-mono text-[0.66rem] leading-relaxed text-slate/70">
         {selectedLead
-          ? `Writes: contacts[${selectedLead.id}] → agreement_answers → buyer_agreements (status: Not Signed)`
-          : "Writes: contacts → agreement_answers → buyer_agreements (status: Not Signed)"}
+          ? `Saved as a draft buyer agreement for ${selectedLead.name} — Not Signed until you send it.`
+          : "Saved as a draft buyer agreement — Not Signed until you send it."}
       </p>
     </form>
   );

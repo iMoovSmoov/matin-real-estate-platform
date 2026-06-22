@@ -519,7 +519,7 @@ export default function ReportingPage() {
     <div id="report-timeseries" className="scroll-mt-20 space-y-2.5">
       <div
         role="tablist"
-        aria-label="Time-series metric"
+        aria-label="Trend metric"
         className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <span className="eyebrow mr-1 shrink-0 px-1 text-[0.6rem]">Trend metric</span>
@@ -615,8 +615,8 @@ export default function ReportingPage() {
       {/* Subtitle eyebrow (no page <h1> — TopCommandBar owns the title) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[0.82rem] text-slate">
-          Goals, agent leaderboards, marketing ROI, and brokerage operating metrics —
-          scoped live to <span className="font-semibold text-ink">{RANGE_LABEL[range]}</span>,{" "}
+          Goals, agent leaderboards, marketing ROI, and brokerage metrics —
+          shown for <span className="font-semibold text-ink">{RANGE_LABEL[range]}</span>,{" "}
           {team}, {source.toLowerCase()}.
         </p>
         <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ export default function ReportingPage() {
               R6 horizontally scrollable on phone. */}
           <div
             role="tablist"
-            aria-label="Report dataset"
+            aria-label="Report view"
             className="-mx-1 flex gap-1 overflow-x-auto rounded-2xl border border-mist bg-paper-200/60 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {DATASET_TABS.map((d) => {
@@ -1032,7 +1032,7 @@ function ReportingDrawer({
           valueRight={`${copy.pct}%`}
         />
         <DefinitionList rows={copy.lines} />
-        <SourceNote text="metrics_daily › listings + transactions › goals (board plan v3)" />
+        <SourceNote text="Closings, active listings, and signed transactions measured against the board's annual plan." />
       </div>
     );
   } else if (drawer?.kind === "agent") {
@@ -1107,7 +1107,7 @@ function ReportingDrawer({
             ["Speed-to-lead", a?.responseTimeMins ? `${a.responseTimeMins} min` : "—"],
           ]}
         />
-        <SourceNote text="agent_activity › lead_events + appointments + buyer_agreements" />
+        <SourceNote text="This agent's leads, appointments, and signed buyer agreements." />
       </div>
     );
   } else if (drawer?.kind === "source") {
@@ -1160,7 +1160,7 @@ function ReportingDrawer({
           </StatusChip>
           <StatusChip tone="info">{s.closed} closings attributed</StatusChip>
         </div>
-        <SourceNote text="campaign_events › lead_sources › transactions (attribution: last-touch)" />
+        <SourceNote text="Leads from this source, followed through to closed deals (credited to the last touch before close)." />
       </div>
     );
   } else if (drawer?.kind === "stage") {
@@ -1181,7 +1181,7 @@ function ReportingDrawer({
           <p className="font-display text-[2rem] leading-none text-ink tabular-nums">{num(s.count)}</p>
           <p className="mt-1 text-[0.74rem] text-slate">contacts currently at this stage</p>
         </div>
-        <SourceNote text="lead_events › saved_searches › appointments › transactions" />
+        <SourceNote text="New leads, saved home searches, appointments, and closed deals." />
       </div>
     );
   } else if (drawer?.kind === "pipeline") {
@@ -1211,7 +1211,7 @@ function ReportingDrawer({
             ["Stage", s.stage],
           ]}
         />
-        <SourceNote text="transactions › milestones › workflow_runs (stage rollup)" />
+        <SourceNote text="Live deals and their milestones, rolled up by pipeline stage." />
       </div>
     );
   }
@@ -1388,8 +1388,8 @@ function StatPanel({
 function SourceNote({ text }: { text: string }) {
   return (
     <div className="rounded-lg border border-dashed border-mist bg-paper/40 px-3 py-2">
-      <p className="eyebrow mb-1 text-[0.6rem]">Backend record joins</p>
-      <p className="font-mono text-[0.72rem] leading-relaxed text-slate">{text}</p>
+      <p className="eyebrow mb-1 text-[0.6rem]">What we look at</p>
+      <p className="text-[0.72rem] leading-relaxed text-slate">{text}</p>
     </div>
   );
 }

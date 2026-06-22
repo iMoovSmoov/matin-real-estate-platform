@@ -154,10 +154,10 @@ export function WorkflowRunDrawer({
               <p className="eyebrow mb-2 flex items-center gap-1.5 text-[0.64rem] text-slate">
                 {isFailed ? (
                   <>
-                    <FileWarning className="h-3 w-3 text-danger" /> Artifact this run failed to render
+                    <FileWarning className="h-3 w-3 text-danger" /> Document this run failed to produce
                   </>
                 ) : (
-                  "Artifact this run produced"
+                  "Document this run produced"
                 )}
               </p>
               <div className={cn("rounded-xl", isFailed && "ring-1 ring-inset ring-danger/30")}>
@@ -244,7 +244,7 @@ export function WorkflowRunDrawer({
               <AIActionCard
                 title="Explain this failure and the first fix"
                 riskTag="Auto-safe"
-                evidence={`Run ${run.id} failed at "${run.failedStep}". AI reads the step detail + connector logs to name the root cause.`}
+                evidence={`Run ${run.id} failed at "${run.failedStep}". Get the likely root cause and the first fix to try.`}
                 confidence="High"
                 runLabel="Explain failure"
                 running={explaining}

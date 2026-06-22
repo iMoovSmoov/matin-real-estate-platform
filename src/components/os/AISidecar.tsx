@@ -36,7 +36,7 @@ import { streamAi } from "@/lib/ai/client";
    close; body scroll locked while open.
    ────────────────────────────────────────────────────────────────────────── */
 
-const DEFAULT_CONTEXT = "Context: Matin Brokerage OS";
+const DEFAULT_CONTEXT = "Working on: Matin Brokerage OS";
 
 type AiSidecarValue = {
   open: boolean;
@@ -94,9 +94,9 @@ export function AiSidecarProvider({
 
 type Turn = { role: "ai" | "user"; text: string; error?: boolean };
 
-/** Strip the leading `Context:` label so we can speak about the subject. */
+/** Strip the leading `Working on:`/`Context:` label so we can speak about the subject. */
 function subjectOf(context: string): string {
-  return context.replace(/^\s*context\s*:\s*/i, "").trim();
+  return context.replace(/^\s*(working on|context)\s*:\s*/i, "").trim();
 }
 
 /** A short greeting bound to whatever record the sidecar is docked to. */

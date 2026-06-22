@@ -297,10 +297,10 @@ export function CampaignChart({ data }: { data: CampaignPerfRow[] }) {
 
       <p className="text-[0.7rem] leading-snug text-slate">
         <span className="font-medium text-ink">{range}</span> ·{" "}
-        <span className="font-medium text-ink">{granularity}</span> — funnel
-        decomposed from delivered sends. Hover a bar for the full
-        open → click → reply → lead breakdown. Syncs back to CRM + Reports
-        attribution.
+        <span className="font-medium text-ink">{granularity}</span> — each bar
+        breaks delivered emails into opens, clicks, replies, and leads. Hover a
+        bar for the full open → click → reply → lead path. These results feed back
+        into the CRM and Reports.
       </p>
     </section>
   );

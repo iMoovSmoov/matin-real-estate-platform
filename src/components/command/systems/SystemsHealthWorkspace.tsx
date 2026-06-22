@@ -804,7 +804,7 @@ export function SystemsHealthWorkspace({
           <MatinMark theme="dark" className="!h-5 w-auto" />
           <p className="text-[0.74rem] leading-snug text-slate">
             {company.name} · {company.address.city}, {company.address.state} ·{" "}
-            {company.stats?.agents ?? 40} agents · primary store: Supabase Postgres
+            {company.stats?.agents ?? 40} agents · data store: Supabase
           </p>
         </div>
 
@@ -858,7 +858,7 @@ export function SystemsHealthWorkspace({
 
           <div className="border-t border-mist px-5 py-3.5">
             <code className="block break-words font-mono text-[0.72rem] leading-relaxed text-ink">
-              every run writes → workflow_runs · ai_actions · audit_logs
+              every run is recorded in Automation runs · AI actions · Activity log
             </code>
           </div>
         </section>
@@ -986,7 +986,7 @@ const SELLER_LEAD_STAGES: { label: string; value: string }[] = [
   { label: "Create", value: "CRM person + seller opportunity" },
   { label: "Route", value: "Best agent by area + load" },
   { label: "AI draft", value: "Text + email + task notes" },
-  { label: "Log", value: "Audit trail + report metrics" },
+  { label: "Log", value: "Activity log + reporting" },
 ];
 
 const USAGE_QUOTAS: { label: string; used: number; cap: number }[] = [

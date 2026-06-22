@@ -116,7 +116,7 @@ export function TopCommandBar({
         {/* Ask AI — gold-filled (the ONE accent, rationed to AI) */}
         <button
           type="button"
-          onClick={() => openAi("Context: Matin Brokerage OS")}
+          onClick={() => openAi("Working on: Matin Brokerage OS")}
           className="inline-flex items-center gap-1.5 rounded-full bg-gold py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
         >
           {/* Gold surface = LIGHT → dark "M" mark */}

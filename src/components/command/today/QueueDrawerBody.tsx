@@ -141,14 +141,9 @@ export function QueueDrawerBody({
         </dl>
       ) : null}
 
-      {/* ── Provenance line ──────────────────────────────────────────────── */}
+      {/* ── Category chip ────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
         <StatusChip tone={CATEGORY_TONE[item.category]}>{item.category}</StatusChip>
-        <span className="text-[0.76rem] text-slate">
-          Source:{" "}
-          <span className="font-medium text-ink">{item.sourceType}</span> ·{" "}
-          <span className="font-mono text-[0.72rem]">{item.sourceId}</span>
-        </span>
       </div>
 
       {/* ── Failed-automation step detail ────────────────────────────────── */}

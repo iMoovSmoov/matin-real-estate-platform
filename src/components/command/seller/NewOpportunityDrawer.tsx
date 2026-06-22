@@ -257,9 +257,8 @@ export function NewOpportunityDrawer({
 
         <p className="text-[0.72rem] leading-relaxed text-slate">
           Lands in <span className="font-medium text-ink">Signal detected</span> with a
-          derived seller-intent score. Maps to <span className="font-mono text-[0.7rem]">contacts</span>,{" "}
-          <span className="font-mono text-[0.7rem]">properties</span> and{" "}
-          <span className="font-mono text-[0.7rem]">ownership_signals</span>.
+          seller-intent score, ready for first outreach. We&rsquo;ll start tracking their
+          home value, equity, and activity.
         </p>
       </form>
     </RecordDrawer>

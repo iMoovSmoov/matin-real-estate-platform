@@ -171,7 +171,7 @@ export function UsersView() {
           <div>
             <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Users</h2>
             <p className="mt-0.5 text-[0.78rem] text-slate">
-              40 brokerage members · {counts.invited} pending invites · recently active shown · server-side authorization
+              40 brokerage members · {counts.invited} pending invites · most recently active shown
             </p>
           </div>
           <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={() => setInviteOpen(true)}>
@@ -298,7 +298,7 @@ export function UsersView() {
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         title="Invite user"
-        subtitle="Sends an invite email · role enforced server-side"
+        subtitle="Sends an invite email · their role sets what they can access"
         actions={
           <>
             <button type="button" onClick={() => setInviteOpen(false)} className="rounded-lg border border-mist bg-cloud px-3.5 py-2 text-[0.82rem] font-medium text-slate hover:text-ink">
@@ -351,8 +351,9 @@ export function UsersView() {
           </Field>
           <div className="rounded-xl border border-mist bg-paper px-3.5 py-3">
             <p className="font-mono text-[0.7rem] leading-relaxed text-slate">
-              On send · create <span className="text-ink">user (invited)</span> → email invite → write{" "}
-              <span className="text-ink">audit_log</span>
+              When you send: the invite email goes out, the person shows as{" "}
+              <span className="text-ink">Invited</span>, and the change is saved to the{" "}
+              <span className="text-ink">activity log</span>.
             </p>
           </div>
         </div>
@@ -416,7 +417,7 @@ export function TeamsView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Teams &amp; offices</h2>
-          <p className="mt-0.5 text-[0.78rem] text-slate">Click a team to view it · scope re-scopes every dashboard to the selected office.</p>
+          <p className="mt-0.5 text-[0.78rem] text-slate">Click a team to view it · choosing one filters every dashboard to that office.</p>
         </div>
         <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={() => setCreateOpen(true)}>
           Create team
@@ -455,9 +456,9 @@ export function TeamsView() {
                 </div>
               ))}
             </dl>
-            <CalloutCard tone="system" title="Scope behavior">
-              Selecting <span className="text-cloud">{selected.name}</span> as the active scope filters
-              CRM, Reports, Transactions, and the Today queue to this office&apos;s records only.
+            <CalloutCard tone="system" title="What this does">
+              Selecting <span className="text-cloud">{selected.name}</span> as your active office filters
+              CRM, Reports, Transactions, and the Today list to that office only.
             </CalloutCard>
           </div>
         ) : null}
@@ -467,7 +468,7 @@ export function TeamsView() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         title="Create team"
-        subtitle="A team scopes records and dashboards"
+        subtitle="A team groups agents and filters dashboards to one office"
         actions={
           <>
             <button type="button" onClick={() => setCreateOpen(false)} className="rounded-lg border border-mist bg-cloud px-3.5 py-2 text-[0.82rem] font-medium text-slate hover:text-ink">
@@ -549,7 +550,7 @@ export function TemplatesView() {
       messages: [
         {
           role: "user",
-          content: `Draft a versioned MatinOS checklist template for this workflow: "${describe || "new construction listing in Clark County, WA"}". Output a numbered checklist of 6-9 concrete steps mapped to DB fields where obvious (e.g. disclosures, photos, MLS draft, broker approval). Plain text, no preamble. End with one line noting it is held as a draft for broker review.`,
+          content: `Draft a checklist template for this listing or transaction: "${describe || "new construction listing in Clark County, WA"}". Output a numbered checklist of 6-9 concrete steps covering the real work (e.g. disclosures, photos, MLS draft, broker approval). Plain text, no preamble. End with one line noting it is saved as a draft for broker review.`,
         },
       ],
     });
@@ -588,7 +589,7 @@ export function TemplatesView() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Templates</h2>
-            <p className="mt-0.5 text-[0.78rem] text-slate">Click a template to preview · every edit version-bumps and writes an audit log.</p>
+            <p className="mt-0.5 text-[0.78rem] text-slate">Click a template to preview · every edit saves a new version and is logged.</p>
           </div>
           <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={focusDrafter}>
             New template
@@ -608,7 +609,7 @@ export function TemplatesView() {
               Generate a checklist template from a description
             </h3>
             <p className="mt-1 text-[0.82rem] text-slate-300">
-              Describe a workflow and Matin AI drafts a versioned checklist mapped to DB fields — held as a draft for broker review.
+              Describe a listing or transaction and Matin AI drafts a step-by-step checklist — saved as a draft for broker review.
             </p>
 
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -980,7 +981,7 @@ export function AiPolicyView() {
         <div>
           <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">AI approval policies</h2>
           <p className="mt-0.5 text-[0.78rem] text-slate">
-            Click a capability for an AI-written explanation. Client-facing, legal, and outbound require approval — enforced server-side.
+            Click a capability for an AI-written explanation. Client-facing, legal, and outbound messages always require human approval.
           </p>
         </div>
         <DataTable columns={cols} rows={aiPolicyRows} getRowId={(p) => p.id} onRowClick={openPolicy} responsive />
@@ -988,8 +989,8 @@ export function AiPolicyView() {
 
       <CalloutCard tone="risk" title="Risky policy flagged">
         Turning <span className="text-cloud">Automated outbound send</span> from <span className="text-cloud">Off</span> to{" "}
-        <span className="text-cloud">Auto-safe</span> would let AI send client messages with no human in the loop — a compliance
-        and chargeback risk. Requires owner sign-off and writes to <span className="font-mono text-[0.72rem]">audit_logs</span>.
+        <span className="text-cloud">Auto-safe</span> would let AI send client messages with no one reviewing them first — a compliance
+        and chargeback risk. Requires owner sign-off and is recorded in the activity log.
       </CalloutCard>
 
       <RecordDrawer
@@ -1006,7 +1007,7 @@ export function AiPolicyView() {
               <InkButton
                 className="ml-auto"
                 onClick={() =>
-                  flash(`Change to “${selected.capability}” staged — needs owner sign-off · writes audit_log`)
+                  flash(`Change to “${selected.capability}” is ready — needs owner sign-off and will be logged`)
                 }
               >
                 Change policy
@@ -1043,15 +1044,15 @@ export function AiPolicyView() {
                 <p className="mt-2.5 whitespace-pre-wrap text-[0.82rem] leading-relaxed text-slate-300">{explain.state.result}</p>
               ) : (
                 <p className="mt-2 text-[0.78rem] leading-relaxed text-slate-300/70">
-                  Get a plain-English explanation of what AI may do under the {selected.mode} setting and why the gate exists.
+                  Get a plain-English explanation of what AI may do under the {selected.mode} setting and why approval is required.
                 </p>
               )}
             </div>
 
             <div className="rounded-xl border border-mist bg-paper p-4">
               <p className="font-mono text-[0.7rem] leading-relaxed text-slate">
-                Enforced at <span className="text-ink">/api/ai</span> · approval state stored on{" "}
-                <span className="text-ink">ai_actions</span> · every change writes <span className="text-ink">audit_logs</span>
+                Every AI action runs through this approval check, and each change to a policy is recorded in the{" "}
+                <span className="text-ink">activity log</span>.
               </p>
             </div>
           </div>
@@ -1079,7 +1080,7 @@ export function NotificationsView({ alertsGrid }: { alertsGrid: ReactNode }) {
       <div>
         <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Notification &amp; automation rules</h2>
         <p className="mt-0.5 text-[0.78rem] text-slate">
-          Per-status: what notifies a human vs what the system handles automatically.
+          For each stage of a deal: what alerts a person, and what the system handles automatically.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -1167,12 +1168,12 @@ export function AuditView() {
         <div>
           <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Audit log</h2>
           <p className="mt-0.5 text-[0.78rem] text-slate">
-            Click an entry for full context · immutable · exportable for compliance.
+            Click an entry for full detail · permanent record · exportable for compliance.
           </p>
         </div>
         <GhostButton
           ariaLabel="Export audit log"
-          onClick={() => flash(`Exporting ${rows.length} audit events to CSV…`)}
+          onClick={() => flash(`Exporting ${rows.length} log entries to CSV…`)}
         >
           <Send className="h-3.5 w-3.5" />
           Export
@@ -1232,7 +1233,7 @@ export function AuditView() {
               ))}
             </dl>
             <CalloutCard tone="system" title="Chain of custody">
-              This entry is append-only. It cannot be edited or deleted — only superseded by a newer event.
+              This entry is permanent. It cannot be edited or deleted — only followed by a newer entry.
               Included in the monthly compliance export.
             </CalloutCard>
           </div>

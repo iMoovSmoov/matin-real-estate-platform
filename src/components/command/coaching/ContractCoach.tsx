@@ -189,7 +189,7 @@ export function ContractCoach() {
             ) : (
               <div className="px-4 text-center text-[0.82rem] leading-relaxed text-slate/55">
                 <PenTool className="mx-auto mb-2 h-5 w-5 text-ink/60" />
-                Your assessment, fixes, and a stronger rewrite will stream here.
+                Your assessment, fixes, and a stronger rewrite will appear here.
               </div>
             )}
           </div>

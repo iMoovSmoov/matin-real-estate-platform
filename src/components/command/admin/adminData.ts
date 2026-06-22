@@ -94,7 +94,7 @@ export const routingRules: RoutingRule[] = [
   {
     id: "RR-002",
     source: "Zillow / Premier Agent",
-    sourceMeta: "Paid lead feed (idempotency-keyed)",
+    sourceMeta: "Paid lead feed (de-duplicated)",
     criteria: [
       { label: "Area", value: "Lake Oswego, West Linn" },
       { label: "Type", value: "Buyer or Seller" },
@@ -114,7 +114,7 @@ export const routingRules: RoutingRule[] = [
   {
     id: "RR-003",
     source: "Cash Offer request",
-    sourceMeta: "Seller intent ≥ 80 / equity signal",
+    sourceMeta: "Seller intent ≥ 80 · high equity",
     criteria: [
       { label: "Seller score", value: "≥ 80" },
       { label: "Equity", value: "≥ 40%" },
@@ -261,7 +261,7 @@ export const statusConfig: StatusConfigRow[] = [
     status: "Buyer agreement unsigned > 3d",
     statusTone: "warn",
     notify: { label: "Email reminder to agent", on: true },
-    automate: { label: "Auto-resend signature envelope", on: false, risk: "auto" },
+    automate: { label: "Auto-resend the e-signature request", on: false, risk: "auto" },
     fired7d: 6,
   },
   {
@@ -274,10 +274,10 @@ export const statusConfig: StatusConfigRow[] = [
   },
   {
     id: "SC-006",
-    status: "Workflow failed",
+    status: "Automation didn't run",
     statusTone: "danger",
-    notify: { label: "Email admin + Systems Health flag", on: true },
-    automate: { label: "Retry up to 3× then escalate", on: true, risk: "auto" },
+    notify: { label: "Email admin + alert in Systems Health", on: true },
+    automate: { label: "Try again up to 3×, then escalate", on: true, risk: "auto" },
     fired7d: 3,
   },
 ];
@@ -386,7 +386,7 @@ export const settingsCategories: SettingsCategory[] = [
   { key: "routing", label: "Lead Routing", desc: "Assignment rules & recipients", count: routingRules.length },
   { key: "templates", label: "Templates", desc: "Checklists, documents, forms", count: 5 },
   { key: "brand", label: "Brand Kit", desc: "Logo, colors, voice, merge fields", count: 8 },
-  { key: "ai-policies", label: "AI Policies", desc: "Approval gates & guardrails", count: 7 },
+  { key: "ai-policies", label: "AI Policies", desc: "Approvals & safeguards", count: 7 },
   { key: "notifications", label: "Notifications", desc: "Alerts vs automation", count: statusConfig.length },
   { key: "audit", label: "Audit Log", desc: "Every admin & system change", count: auditCount },
 ];

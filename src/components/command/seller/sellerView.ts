@@ -220,7 +220,7 @@ export function outreachTimeline(lead: SellerLead): ActivityItem[] {
     name: "Seller signal detected",
     tag: lead.source ?? "Website activity",
     tagTone: "gold",
-    meta: `Scored ${effectiveScore(lead)}/100 from CRM + web behavior`,
+    meta: `Scored ${effectiveScore(lead)}/100 from past contact and website activity`,
     timeLabel: `${days + 2}d ago`,
     group: "This month",
   });
@@ -232,7 +232,7 @@ export function outreachTimeline(lead: SellerLead): ActivityItem[] {
       name: sig,
       tag: "tracked",
       tagTone: "gold",
-      meta: "Behavioral signal logged to lead_events",
+      meta: "Seller activity recorded",
       timeLabel: `${Math.max(1, days)}d ago`,
       group: "This month",
     });

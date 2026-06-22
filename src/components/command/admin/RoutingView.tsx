@@ -204,9 +204,9 @@ export function AlertsAutomationGrid() {
                 {r.automate.label}
               </span>
               {r.automate.risk === "approval" ? (
-                <StatusChip tone="warn" className="mt-1">Approval gate</StatusChip>
+                <StatusChip tone="warn" className="mt-1">Needs approval</StatusChip>
               ) : (
-                <StatusChip tone="success" className="mt-1">Auto-safe</StatusChip>
+                <StatusChip tone="success" className="mt-1">Runs on its own</StatusChip>
               )}
             </span>
             <MiniToggle on={r.automate.on} onChange={(v) => setAutomate(r.id, v)} label={`Automate — ${r.status}`} />
@@ -331,7 +331,7 @@ function OwnershipCard({ rule }: { rule: RoutingRule }) {
       <p className="mt-3 text-[0.72rem] text-slate">
         Last changed by <span className="font-medium text-ink">{rule.lastChangedBy}</span> · {rule.lastChangedAt}
         <span className="mx-1.5 text-mist">·</span>
-        writes to <span className="font-mono text-[0.7rem]">audit_logs</span>
+        recorded in the activity log
       </p>
     </div>
   );
@@ -461,8 +461,8 @@ function LiveRecipientEditor({
       )}
 
       <p className="mt-3 border-t border-mist pt-3 font-mono text-[0.7rem] leading-relaxed text-slate">
-        Edits upsert <span className="text-ink">routing_rule</span> → write{" "}
-        <span className="text-ink">audit_log</span> live.
+        Changes save instantly and are recorded in the{" "}
+        <span className="text-ink">activity log</span>.
       </p>
     </div>
   );
@@ -696,7 +696,7 @@ function RuleFormDrawer({
           </SelectInput>
         </Field>
 
-        <Field label="Criteria" hint="Label: value · all must match (AND)">
+        <Field label="Criteria" hint="Label: value · a lead must match all of these">
           <div className="space-y-2">
             {draft.criteria.map((c, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -767,12 +767,12 @@ function RuleFormDrawer({
             </p>
           ) : (
             <p className="mt-2 text-[0.78rem] leading-relaxed text-slate-300/70">
-              Generates the exact merge-field auto-reply leads matching this rule receive — review before it can fire.
+              Shows the exact auto-reply a new lead matching this rule will get — review it before it goes out.
             </p>
           )}
           {preview.state.done && !preview.state.error ? (
             <div className="mt-2.5 flex flex-wrap gap-1.5">
-              <AIInsightChip>Merge fields validated</AIInsightChip>
+              <AIInsightChip>Merge fields ready</AIInsightChip>
               <AIInsightChip>Brand voice · approved</AIInsightChip>
             </div>
           ) : null}
@@ -780,8 +780,8 @@ function RuleFormDrawer({
 
         <div className="rounded-xl border border-mist bg-paper px-3.5 py-3">
           <p className="font-mono text-[0.7rem] leading-relaxed text-slate">
-            Automation after save · upsert <span className="text-ink">routing_rule</span> → test simulated
-            leads → write <span className="text-ink">audit_log</span> → notify recipients
+            After you save: the rule is tested against recent leads, the change is{" "}
+            <span className="text-ink">logged</span>, and the recipients are notified.
           </p>
         </div>
       </div>
@@ -846,7 +846,7 @@ export function RoutingView() {
       [ordered[idx], ordered[j]] = [ordered[j], ordered[idx]];
       return ordered.map((r, i) => ({ ...r, priority: i + 1 }));
     });
-    flash("Priority reordered · audit_log written");
+    flash("Priority updated and logged");
   }
 
   function toggleStatus(id: string) {
@@ -889,7 +889,7 @@ export function RoutingView() {
         .map((r, i) => ({ ...r, priority: i + 1 })),
     );
     if (selectedId === id) setSelectedId((cur) => (cur === id ? seedRules[0].id : cur));
-    flash(`${id} deleted · audit_log written`);
+    flash(`${id} deleted and logged`);
   }
 
   function openNew() {
@@ -995,7 +995,7 @@ export function RoutingView() {
           messages: [
             {
               role: "user",
-              content: `You are the MatinOS routing admin assistant. A broker is reviewing this proposed change to lead-routing rules: "${a.title}". Evidence: ${a.evidence}. Write a concise (under 90 words) confirmation of the exact change you will stage, the one audit_log entry it writes, and a one-line revert note. Plain text, no markdown headers.`,
+              content: `You are the MatinOS routing admin assistant. A broker is reviewing this proposed change to lead-routing rules: "${a.title}". Evidence: ${a.evidence}. Write a concise (under 90 words) confirmation of the exact change you will make, what gets logged, and a one-line note on how to undo it. Plain text, no markdown headers.`,
             },
           ],
         },
@@ -1014,7 +1014,7 @@ export function RoutingView() {
 
   function rejectAction(a: AIAction) {
     const key = a.id ?? a.title;
-    setActionState((prev) => ({ ...prev, [key]: { running: false, result: "Dismissed — no change staged." } }));
+    setActionState((prev) => ({ ...prev, [key]: { running: false, result: "Dismissed — nothing changed." } }));
   }
 
   // Edit a proposed change → open the referenced rule in the Edit drawer so the
@@ -1117,7 +1117,7 @@ export function RoutingView() {
                   Lead routing rules
                 </h2>
                 <p className="mt-0.5 text-[0.78rem] text-slate">
-                  Evaluated top-to-bottom by priority. First match wins · click a rule to edit.
+                  Checked top-to-bottom by priority. The first match wins · click a rule to edit.
                 </p>
               </div>
               <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={openNew}>
@@ -1189,12 +1189,12 @@ export function RoutingView() {
                 text: (
                   <>
                     {selected.id} is {selected.status === "active" ? "active" : "paused"} ·{" "}
-                    {selected.leadsRouted30d.toLocaleString()} leads / 30d. I checked all {rules.length} rules
-                    for overlap and weight imbalance — {aiActions.length} advisories below. None auto-fire;
-                    routing changes are approval-gated. Run one to stream the staged change inline.
+                    {selected.leadsRouted30d.toLocaleString()} leads in the last 30 days. I found{" "}
+                    {aiActions.length} things worth a look below — nothing changes without your
+                    approval. Open one to review the change.
                   </>
                 ),
-                citations: ["routing_rules", "leads.source", "agents.responseTime"],
+                citations: ["Routing rules", "Lead sources", "Agent response times"],
               },
             ]}
             actions={aiActions}
@@ -1210,7 +1210,7 @@ export function RoutingView() {
               </p>
               <button
                 type="button"
-                onClick={() => openAi(`Context: Admin / Routing — ${selected.id} ${selected.source}`)}
+                onClick={() => openAi(`Working on: Admin / Routing — ${selected.id} ${selected.source}`)}
                 className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-gold/40 px-2.5 py-1 text-[0.74rem] font-semibold text-gold transition-colors hover:bg-gold/10"
               >
                 <MatinMark theme="white" className="h-3 w-3" />

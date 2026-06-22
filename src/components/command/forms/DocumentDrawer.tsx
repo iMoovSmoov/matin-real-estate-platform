@@ -284,7 +284,7 @@ export function DocumentDrawer({
             body={
               <p className="text-[0.84rem] leading-relaxed text-ink/90">
                 {FORM_BLURB[doc.code] ??
-                  `${doc.title} — prepared by ${packet.ownerName} for ${packet.subject}. All fields are bound to the live record; complete the flagged items before sending for signature.`}
+                  `${doc.title} — prepared by ${packet.ownerName} for ${packet.subject}. Every field is filled in from this deal's record; complete the flagged items before sending for signature.`}
               </p>
             }
           />
@@ -368,7 +368,7 @@ export function DocumentDrawer({
             <p className="eyebrow text-slate">AI field check</p>
             <AIActionCard
               title="Run missing-field check"
-              riskTag={blocked ? "Approval required" : "Auto-safe"}
+              riskTag={blocked ? "Approval required" : "Ready"}
               evidence={
                 missingCount > 0
                   ? `${missingCount} field${missingCount > 1 ? "s" : ""} flagged across ${doc.pages} page${doc.pages > 1 ? "s" : ""}: ${missing.join("; ")}.`
@@ -491,7 +491,7 @@ function buildDocActivity(packet: Packet, doc: PacketDoc): ActivityItem[] {
     items.push({
       id: `${doc.id}-miss-${i}`,
       channel: "note",
-      name: "Field check flag",
+      name: "Missing field flagged",
       tag: meta.label,
       tagTone: meta.tone === "danger" ? "danger" : "warn",
       meta: mi,

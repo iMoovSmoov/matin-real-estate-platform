@@ -80,7 +80,7 @@ export function leadTypeTone(l: Lead): ChipTone {
 /** One-line intent signal for the table — the strongest recent behavioral cue. */
 export function intentSignal(l: Lead): string {
   if (l.propertyViews && l.propertyViews.length > 0) return l.propertyViews[0];
-  if (isSellerIntent(l)) return "Seller intent signal detected";
+  if (isSellerIntent(l)) return "Showing seller intent";
   if (l.unread > 0) return `${l.unread} unread inbound message${l.unread > 1 ? "s" : ""}`;
   return `Last contact ${l.lastContactDaysAgo === 0 ? "today" : `${l.lastContactDaysAgo}d ago`}`;
 }
@@ -280,15 +280,15 @@ export function leadTimeline(l: Lead): ActivityItem[] {
 
   // Behavioral signals from saved searches / property views drive the score.
   (l.propertyViews ?? []).forEach((pv, i) => {
-    push("system", "Website activity", pv, "gold", "Captured from IDX behavior", ago(i), "Recent");
+    push("system", "Website activity", pv, "gold", "From IDX website activity", ago(i), "Recent");
   });
 
   // Last agent contact + first-response benchmark.
   if (typeof l.responseMinutes === "number") {
     push(
       "call",
-      "First response logged",
-      l.responseMinutes <= 5 ? "On pace" : l.responseMinutes <= 30 ? "Within SLA" : "Slow",
+      "First response sent",
+      l.responseMinutes <= 5 ? "On pace" : l.responseMinutes <= 30 ? "On time" : "Slow",
       l.responseMinutes <= 30 ? "success" : "danger",
       `Replied in ${l.responseMinutes} min after lead came in`,
       ago(l.createdDaysAgo),
@@ -299,10 +299,10 @@ export function leadTimeline(l: Lead): ActivityItem[] {
   // AI scored & routed the lead on intake (system event).
   push(
     "system",
-    "Matin AI scored & routed lead",
+    "Matin AI scored and routed this lead",
     `Score ${l.score}`,
     "gold",
-    `Normalized, deduped, scored ${l.score}/100, routed to owner`,
+    `Scored ${l.score}/100 and routed to the right agent`,
     ago(l.createdDaysAgo),
     "Earlier",
   );

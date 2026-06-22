@@ -789,7 +789,7 @@ export function CoachingWorkbench({
           </div>
           <div className="border-t border-mist px-4 py-3">
             <p className="text-[0.7rem] leading-snug text-slate/70">
-              Rubric-based · scores stored to the agent record and surfaced in Reports.
+              Rubric-based · saved to the agent&apos;s file and shown in Reports.
             </p>
           </div>
         </div>
@@ -852,7 +852,7 @@ export function CoachingWorkbench({
               </StatusChip>
             )}
             <StatusChip tone="success" variant="soft">
-              Writes activity_event
+              Logged to the agent&apos;s file
             </StatusChip>
           </div>
         </div>

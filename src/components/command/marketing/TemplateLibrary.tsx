@@ -147,7 +147,7 @@ export function TemplateLibrary({
       </div>
 
       <p className="mb-3 px-1 text-[0.74rem] leading-snug text-slate">
-        Brand-locked templates. Edits stay inside the approved kit — logo,
+        Brand-controlled templates. Edits stay inside the approved look — logo,
         colors, and disclosures can&apos;t be overridden.
       </p>
 

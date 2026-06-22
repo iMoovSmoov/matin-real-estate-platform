@@ -239,10 +239,9 @@ export function DealDrawer({
       ) : (
         <div className="space-y-3">
           <p className="text-[0.78rem] leading-relaxed text-slate">
-            Audit-friendly chronology for{" "}
-            <span className="font-medium text-ink">{dealAddress}</span>. Every
-            status change writes an{" "}
-            <span className="font-mono text-[0.72rem]">activity_event</span>.
+            Full history for{" "}
+            <span className="font-medium text-ink">{dealAddress}</span> — every
+            status change is recorded here.
           </p>
           {activity.length > 0 ? (
             <ActivityTimeline items={activity} />

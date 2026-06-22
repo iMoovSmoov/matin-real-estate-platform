@@ -197,7 +197,7 @@ export function enrich(item: WorkQueueItem): QueueRecord {
           { label: "AI action", value: ai.title },
           { label: "Confidence", value: ai.confidence },
           { label: "Approval", value: ai.riskTag },
-          { label: "Context", value: ai.context },
+          { label: "Working on", value: ai.context },
         ],
       };
     }
@@ -257,7 +257,7 @@ export function activityFor(item: WorkQueueItem, rec: QueueRecord): ActivityItem
         {
           id: `${item.id}-a1`,
           channel: "system",
-          name: "Matin AI grouped this lead",
+          name: "Matin AI prioritized this lead",
           tag: "prioritized",
           tagTone: "gold",
           meta: rec.provenance,
@@ -312,7 +312,7 @@ export function activityFor(item: WorkQueueItem, rec: QueueRecord): ActivityItem
         {
           id: `${item.id}-a1`,
           channel: "system",
-          name: "Seller-intent score computed",
+          name: "Seller-intent score updated",
           tag: rec.score ? `${rec.score} score` : "scored",
           tagTone: "gold",
           meta: rec.provenance,
@@ -356,7 +356,7 @@ export function activityFor(item: WorkQueueItem, rec: QueueRecord): ActivityItem
         {
           id: `${item.id}-a1`,
           channel: "system",
-          name: "Weekly scorecard rolled up",
+          name: "Weekly scorecard updated",
           tag: "behind pace",
           tagTone: "danger",
           meta: item.why,

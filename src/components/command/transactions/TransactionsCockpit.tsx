@@ -480,7 +480,7 @@ function DealScreen({
             name: next === "done" ? `Marked complete: ${c.label}` : `Reopened: ${c.label}`,
             tag: next === "done" ? "checklist" : "reopened",
             tagTone: next === "done" ? "success" : "warn",
-            meta: "Checklist updated · activity_event written",
+            meta: "Checklist updated",
             timeLabel: "now",
           });
           return { ...c, status: next, meta: next === "done" ? "Marked complete" : c.meta };
@@ -535,7 +535,7 @@ function DealScreen({
         name: `Accepted: ${doc.name}`,
         tag: "compliance",
         tagTone: "success",
-        meta: `${doc.requirement} · verdict logged for audit`,
+        meta: `${doc.requirement} · added to the deal file`,
         timeLabel: "now",
       });
     },
@@ -745,7 +745,7 @@ function DealScreen({
             </div>
             <button
               type="button"
-              onClick={() => onOpenAi(`Context: ${aiContext}`)}
+              onClick={() => onOpenAi(`Working on: ${aiContext}`)}
               className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
             >
               <MatinMark theme="dark" className="h-3.5 w-3.5" />
@@ -788,8 +788,7 @@ function DealScreen({
         <MilestoneTimeline milestones={screen.milestones} />
       </div>
       <p className="mt-auto border-t border-mist px-5 py-3 text-[0.72rem] leading-snug text-slate">
-        Date-driven and audit-friendly. Each status change writes an{" "}
-        <span className="font-mono text-[0.7rem]">activity_event</span>.
+        Every date and status change is saved to this deal&apos;s history.
       </p>
     </section>
   );
@@ -921,12 +920,12 @@ function DealScreen({
               <AIActionCard
                 title={screen.risk.actionLabel}
                 riskTag="Approval required"
-                evidence="Email thread cross-referenced against deal state; no matching addendum on file before the contingency deadline."
+                evidence="An open contingency item still needs action before its deadline."
                 confidence="High"
                 runLabel={draft ? "Re-draft" : "Draft"}
                 running={drafting}
                 onRun={handleDraft}
-                onEdit={() => onOpenAi(`Context: ${aiContext}`)}
+                onEdit={() => onOpenAi(`Working on: ${aiContext}`)}
                 onReject={dismissDraft}
                 result={
                   draft ? (
@@ -982,7 +981,7 @@ function DealScreen({
           action={
             <button
               type="button"
-              onClick={() => onOpenAi(`Context: ${aiContext}`)}
+              onClick={() => onOpenAi(`Working on: ${aiContext}`)}
               className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
             >
               <MatinMark theme="dark" className="h-3.5 w-3.5" />
@@ -992,8 +991,8 @@ function DealScreen({
         >
           <p>
             {riskState === "dismissed"
-              ? `The AI risk note for ${addressShort} was dismissed for manual handling. Ask Matin to re-check the deal state any time.`
-              : `Matin AI cross-referenced deadlines, the email thread, and document state for ${addressShort}. Every contingency is on track — no addendum or deadline action is outstanding right now.`}
+              ? `The risk note for ${addressShort} was dismissed — you're handling it manually. Ask Matin to re-check this deal any time.`
+              : `No open risks — every contingency on ${addressShort} is on track and nothing needs action right now.`}
           </p>
         </CalloutCard>
       )}
@@ -1112,7 +1111,7 @@ function DealScreen({
           rejectDoc(d);
           setOpenDocId(null);
         }}
-        onAskAi={() => onOpenAi(`Context: ${aiContext}`)}
+        onAskAi={() => onOpenAi(`Working on: ${aiContext}`)}
       />
     </div>
   );

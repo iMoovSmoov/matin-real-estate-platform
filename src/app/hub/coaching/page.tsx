@@ -475,10 +475,10 @@ export default function CoachingPage() {
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     <StatusChip tone="info" variant="soft">
                       <CalendarClock className="h-3 w-3" aria-hidden />
-                      Appears in Today
+                      Added to today&apos;s tasks
                     </StatusChip>
                     <StatusChip tone="success" variant="soft">
-                      Writes activity_event
+                      Logged to the agent&apos;s file
                     </StatusChip>
                     <button
                       type="button"
@@ -520,8 +520,8 @@ export default function CoachingPage() {
                   ))}
                 </div>
                 <p className="mt-3 text-[0.72rem] leading-snug text-slate/70">
-                  Rubric-weighted from {selected.scenariosRun} scored drills · stored to the agent
-                  record and surfaced in Reports.
+                  Rubric-weighted from {selected.scenariosRun} scored drills · saved to the agent&apos;s
+                  file and shown in Reports.
                 </p>
               </div>
             ) : null}

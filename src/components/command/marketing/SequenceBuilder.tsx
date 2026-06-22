@@ -48,8 +48,8 @@ const INITIAL_NODES: FlowNode[] = [
     label: "Trigger",
     kind: "trigger",
     icon: Zap,
-    detail: "New seller lead enters the database",
-    config: "When · seller_score ≥ 80 OR cash_offer_request created",
+    detail: "A new seller lead comes in",
+    config: "Starts when a likely seller comes in or asks for a cash offer.",
     state: "committed",
   },
   {
@@ -58,7 +58,7 @@ const INITIAL_NODES: FlowNode[] = [
     kind: "ai",
     icon: Sparkle,
     detail: "Matin AI drafts on-brand home-value outreach",
-    config: "Tool · marketing-kit · merge {{first_name}} {{address}}",
+    config: "Matin AI writes the email and fills in each person's name and address.",
     state: "committed",
   },
   {
@@ -67,7 +67,7 @@ const INITIAL_NODES: FlowNode[] = [
     kind: "approval",
     icon: ShieldCheck,
     detail: "Listing agent reviews before anything sends",
-    config: "Gate · requires 1 broker approval · client-facing copy",
+    config: "A broker reviews and approves the copy before it goes out.",
     state: "committed",
   },
   {
@@ -76,16 +76,16 @@ const INITIAL_NODES: FlowNode[] = [
     kind: "email",
     icon: Mail,
     detail: "Branded home-value email goes out",
-    config: "Channel · email · branded shell + Equal-Housing footer",
+    config: "Sends as a branded Matin email with the Equal Housing footer.",
     state: "committed",
   },
   {
     id: "wait",
-    label: "Wait 3d",
+    label: "Wait 3 days",
     kind: "wait",
     icon: Clock,
     detail: "Pause three days for a reply",
-    config: "Delay · 3 days · skip if reply received",
+    config: "Waits 3 days, then skips ahead if they've already replied.",
     state: "pending",
   },
   {
@@ -94,7 +94,7 @@ const INITIAL_NODES: FlowNode[] = [
     kind: "followup",
     icon: Reply,
     detail: "AI follow-up or hand to a live agent",
-    config: "Branch · replied → agent task · no reply → SMS nudge",
+    config: "If they reply, the agent gets a task. If not, a friendly text reminder goes out.",
     state: "pending",
   },
 ];
@@ -140,7 +140,7 @@ export function SequenceBuilder() {
       kind: "wait",
       icon: Clock,
       detail: "Pause, then re-touch if no reply",
-      config: `Delay · 2 days · skip if reply received · branch ${n}`,
+      config: `Waits 2 days, then re-touches only if there's been no reply.`,
       state: "pending",
     };
     setNodes((prev) => [...prev, newNode]);
@@ -190,7 +190,7 @@ export function SequenceBuilder() {
             />
           </div>
           <span className="tabular-nums text-[0.72rem] text-slate">
-            {committedCount}/{nodes.length} committed
+            {committedCount}/{nodes.length} steps active
           </span>
         </div>
       </div>
@@ -337,16 +337,16 @@ export function SequenceBuilder() {
                       : "bg-warn/12 text-warn ring-1 ring-inset ring-warn/25 hover:bg-warn/20",
                   )}
                 >
-                  {active.state === "committed" ? "Committed — set pending" : "Pending — commit"}
+                  {active.state === "committed" ? "Active — set to draft" : "Draft — set active"}
                 </button>
               </div>
             </div>
-            <p className="mt-3 rounded-lg border border-mist bg-cloud px-3 py-2 font-mono text-[0.72rem] leading-relaxed text-slate">
+            <p className="mt-3 rounded-lg border border-mist bg-cloud px-3 py-2 text-[0.72rem] leading-relaxed text-slate">
               {active.config}
             </p>
             <p className="mt-2 text-[0.7rem] text-slate">
-              Selecting a node opens it here. Commit toggles its connector solid;
-              pending steps stay dashed until you commit them.
+              Pick a step to set it up here. Active steps connect with a solid
+              line; steps still in draft stay dashed until you turn them on.
             </p>
           </div>
         </div>

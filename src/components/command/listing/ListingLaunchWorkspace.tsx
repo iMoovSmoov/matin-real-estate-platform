@@ -107,8 +107,8 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
         tone: "success",
         blockerTitle: "Intake — complete",
         aiExplanation:
-          "All seller intake fields captured and validated. Listing agreement on file, property facts reconciled against county records. No action required.",
-        insight: "Intake validated · 0 missing fields",
+          "Seller intake is complete and checked. The listing agreement is on file and the property details match county records. No action needed.",
+        insight: "Intake complete · nothing missing",
         icon: ClipboardCheck,
       },
       {
@@ -116,10 +116,10 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
         label: "Seller disclosures",
         value: 45,
         tone: "warn",
-        blockerTitle: "Selected blocker: seller disclosures",
+        blockerTitle: "Seller disclosures — needs corrections",
         aiExplanation:
-          "AI found missing initials on page 4 of the seller property disclosure and a name/title mismatch between the form and the signature block. Drafted a correction request for the seller to e-sign.",
-        insight: "Needs initials · page 4 · name/title mismatch",
+          "Page 4 of the seller property disclosure is missing initials, and the name on the form doesn't match the signature block. A correction request is ready for the seller to e-sign.",
+        insight: "Needs initials · page 4 · name doesn't match",
         icon: ShieldCheck,
       },
       {
@@ -140,7 +140,7 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
         tone: "info",
         blockerTitle: "MLS draft — input form incomplete",
         aiExplanation:
-          "AI generated the RMLS remarks (draft ready for agent approval). The structured input form is 62% complete — room dimensions and HOA section remain before it can publish.",
+          "The RMLS remarks are drafted and ready for agent approval. The MLS input form is 62% complete — room dimensions and the HOA section still need filling in before it can publish.",
         insight: "Remarks drafted · input form 62%",
         icon: FileText,
       },
@@ -194,7 +194,7 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
       blockerTitle: prep >= 100 ? "Intake — complete" : "Intake — in progress",
       aiExplanation:
         prep >= 100
-          ? "All seller intake fields captured and validated. No action required."
+          ? "Seller intake is complete and checked. No action needed."
           : "Seller intake still has open items in the prep checklist — repairs, staging or disclosure signature outstanding.",
       insight: `Prep checklist ${prep}% complete`,
       icon: ClipboardCheck,
@@ -205,11 +205,11 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
       value: disclosures,
       tone: toneFor(disclosures, "warn"),
       blockerTitle:
-        disclosures >= 100 ? "Seller disclosures — signed" : "Selected blocker: seller disclosures",
+        disclosures >= 100 ? "Seller disclosures — signed" : "Seller disclosures — needs corrections",
       aiExplanation:
         disclosures >= 100
           ? "Seller property disclosure (OREF-016) signed and on file."
-          : "Seller property disclosure is not yet fully executed — AI is monitoring for missing initials and signature mismatches.",
+          : "Seller property disclosure isn't fully signed yet — we're watching for missing initials and signatures that don't match.",
       insight: disclosures >= 100 ? "Disclosure executed" : "Disclosure not yet executed",
       icon: ShieldCheck,
     },
@@ -235,7 +235,7 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
       aiExplanation:
         mls >= 100
           ? "Listing is live on RMLS with remarks and input form complete."
-          : "MLS remarks drafted; structured input form and publish step remain.",
+          : "MLS remarks drafted; the MLS input form and publish step still remain.",
       insight: `MLS workflow ${mls}%`,
       icon: FileText,
     },
@@ -331,7 +331,7 @@ function outputsFor(
       lines: 8,
       body:
         `Refined ${listing.beds}-bed, ${listing.baths}-bath retreat in ${listing.city}. ` +
-        `${listing.features.slice(0, 3).join(", ")} anchor a ${listing.sqft.toLocaleString()} sqft floor plan built in ${listing.yearBuilt}. AI-drafted in Matin brand voice; saved as draft version v2.`,
+        `${listing.features.slice(0, 3).join(", ")} anchor a ${listing.sqft.toLocaleString()} sqft floor plan built in ${listing.yearBuilt}. AI-drafted in Matin brand voice; saved as a draft.`,
     },
     {
       key: "checklist",
@@ -344,7 +344,7 @@ function outputsFor(
       previewStatusTone: checklistDone === checklistTotal ? "success" : "warn",
       lines: 11,
       body:
-        "Grouped launch checklist (Intake · Disclosures · Photos · MLS · Marketing · Launch). Every item carries an owner and due date; export reconciles to the readiness score.",
+        "Grouped launch checklist (Intake · Disclosures · Photos · MLS · Marketing · Launch). Every item has an owner and a due date, and the export matches the readiness score.",
     },
     {
       key: "seller-email",
@@ -359,8 +359,8 @@ function outputsFor(
       missing: ["Approval required before client send"],
       body:
         `Here's where the ${listing.address} launch stands — we're ${overall}% through prep. ` +
-        `Remaining items reconcile to the open blockers: ${(listing.blockers ?? ["final checklist items"]).join("; ")}. ` +
-        `We're targeting MLS-live within the week.`,
+        `What's still open: ${(listing.blockers ?? ["final checklist items"]).join("; ")}. ` +
+        `We're aiming to go live on the MLS within the week.`,
     },
     {
       key: "flyer",
@@ -579,7 +579,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
   const pane = usePaneSwitcher(
     [
       { key: "record", label: "Record" },
-      { key: "outputs", label: "Outputs", count: outputs.length },
+      { key: "outputs", label: "Assets", count: outputs.length },
       { key: "action", label: "Action" },
     ],
     "record",
@@ -598,7 +598,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
   };
   const heroPhoto = listingPhoto({ id: selected.id });
 
-  const contextLine = `Context: Listing Launch / ${selected.address}`;
+  const contextLine = `Working on: Listing Launch / ${selected.address}`;
 
   async function handleGenerateKit() {
     setKitLoading(true);
@@ -657,7 +657,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           value={activeLaunches}
           icon={<Rocket className="h-4 w-4" />}
           hint="In prep before MLS live"
-          onDrill={() => openAi("Context: Listing Launch / Active launches")}
+          onDrill={() => openAi("Working on: Listing Launch / Active launches")}
         />
         <KpiCard
           label="Blocked"
@@ -665,7 +665,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           valueTone="danger"
           icon={<AlertTriangle className="h-4 w-4" />}
           hint="One or more open blockers"
-          onDrill={() => openAi("Context: Listing Launch / Blocked launches")}
+          onDrill={() => openAi("Working on: Listing Launch / Blocked launches")}
         />
         <KpiCard
           label="Photos pending"
@@ -801,14 +801,14 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         </div>
       </div>
 
-      {/* Schema-transparency note (S4 ticket 8) */}
+      {/* What this view pulls together — plain-language data sources */}
       <div className="rounded-xl border border-mist bg-paper-200/40 px-4 py-3">
         <p className="flex items-center gap-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate">
           <Database className="h-3.5 w-3.5" aria-hidden />
-          Backend record joins
+          What we look at
         </p>
-        <p className="mt-1.5 font-mono text-[0.72rem] leading-relaxed text-slate">
-          listings · checklist_items · documents · marketing_assets · ai_actions
+        <p className="mt-1.5 text-[0.72rem] leading-relaxed text-slate">
+          Listing details, the launch checklist, documents, marketing assets, and AI activity — all in one place.
         </p>
       </div>
 
@@ -850,7 +850,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
                     <button
                       type="button"
                       onClick={() =>
-                        setAssetAction("Approved — sent for agent review · logged to ai_actions")
+                        setAssetAction("Approved — sent for agent review")
                       }
                       className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
                     >
@@ -860,7 +860,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
                     <button
                       type="button"
                       onClick={() =>
-                        setAssetAction("Sent for signature · envelope created, CRM timeline updated")
+                        setAssetAction("Sent for signature — saved to the file; the checklist updates once it's signed")
                       }
                       className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
                     >
@@ -875,7 +875,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
       >
         {openAsset ? (
           <div key={openAsset.key} className="space-y-4 motion-safe:animate-fade">
-            <AIInsightChip>Generated by Matin AI · saved as draft version</AIInsightChip>
+            <AIInsightChip>Generated by Matin AI · saved as a draft</AIInsightChip>
             {/* Client-facing types render through BrandedDocument (G-B); the
                 internal checklist export keeps the gray-ruled DocumentPreview. */}
             {openAsset.key === "seller-email" ? (
@@ -1265,8 +1265,8 @@ function OutputPreviews({
   return (
     <div className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       <div className="flex items-center justify-between border-b border-mist px-5 py-3.5">
-        <h3 className="font-display text-[1.02rem] font-normal text-ink">Output previews</h3>
-        <span className="text-[0.74rem] text-slate">{outputs.length} assets</span>
+        <h3 className="font-display text-[1.02rem] font-normal text-ink">Listing assets</h3>
+        <span className="text-[0.74rem] text-slate">{outputs.length} ready</span>
       </div>
       <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
         {outputs.map((o) => {
@@ -1332,7 +1332,7 @@ function ActionDrawerCard({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.16em] text-slate-300/70">
-            Action drawer
+            What to do next
           </p>
           <h3 className="mt-0.5 font-display text-[1.05rem] font-normal leading-tight text-cloud">
             {track.blockerTitle}
@@ -1415,7 +1415,7 @@ function ActionDrawerCard({
               </p>
               <span className="inline-flex items-center gap-1 text-[0.7rem] text-gold">
                 <MatinMark theme="white" className="h-3 w-3" />
-                {kitLoading ? "Streaming" : "Draft ready"}
+                {kitLoading ? "Writing…" : "Draft ready"}
               </span>
             </div>
             <p className="mt-2 max-h-48 overflow-y-auto whitespace-pre-wrap text-[0.8rem] leading-relaxed text-slate-300">
@@ -1425,7 +1425,7 @@ function ActionDrawerCard({
             </p>
             <p className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-slate-300/70">
               <ChevronRight className="h-3 w-3" />
-              Saved as draft version · requires agent approval before any send.
+              Saved as a draft · needs agent approval before it's sent.
             </p>
           </div>
         ) : null}

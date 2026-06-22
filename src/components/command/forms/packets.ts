@@ -68,7 +68,7 @@ export type Packet = {
   ownerSlug: string;
   /** Real listing id this packet binds to → resolves the real hero photo. */
   listingId: string;
-  /** Source-record join, shown as a mono backend note. */
+  /** Plain-English summary of what the packet pulls in (shown in the New packet drawer). */
   source: string;
   lastUpdated: string;
   /** Relative-time label for the packet row (densification). */
@@ -122,7 +122,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(LC),
     ownerSlug: LC,
     listingId: "MRE-1016",
-    source: "listings > document_packets > document_fields + document_signers",
+    source: "Pulls in the property listing, its required disclosures, and who needs to sign.",
     lastUpdated: `Updated 2h ago by ${ownerName(LC)}`,
     updatedAgo: "2h ago",
     docs: [
@@ -188,7 +188,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(TC),
     ownerSlug: TC,
     listingId: "MRE-1006",
-    source: "contacts[LD-1999] > document_packets > saved_searches + agreements",
+    source: "Pulls in the buyer's contact details, their saved searches, and any agreements on file.",
     lastUpdated: `Updated 38m ago by ${ownerName(TC)}`,
     updatedAgo: "38m ago",
     docs: [
@@ -233,7 +233,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(TC),
     ownerSlug: TC,
     listingId: "MRE-R02",
-    source: "transactions[TX-3998] > document_packets > listings + cash_offer_requests",
+    source: "Pulls in the deal, the property listing, and any cash-offer requests.",
     lastUpdated: `Updated 1h ago by ${ownerName(TC)}`,
     updatedAgo: "1h ago",
     docs: [
@@ -289,7 +289,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(LC),
     ownerSlug: LC,
     listingId: "MRE-R05",
-    source: "seller_leads[SL-000] > document_packets > properties + valuations",
+    source: "Pulls in the seller's details, the property record, and recent value estimates.",
     lastUpdated: `Updated 4h ago by ${ownerName(LC)}`,
     updatedAgo: "4h ago",
     docs: [
@@ -335,7 +335,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(TC),
     ownerSlug: TC,
     listingId: "MRE-R02",
-    source: "transactions[TX-3999] > document_packets > broker_reviews + signature_envelopes",
+    source: "Pulls in the deal, broker review notes, and the documents out for signature.",
     lastUpdated: `Updated 25m ago by ${ownerName(TC)}`,
     updatedAgo: "25m ago",
     docs: [
@@ -391,7 +391,7 @@ export const PACKETS: Packet[] = [
     ownerName: ownerName(TC),
     ownerSlug: TC,
     listingId: "MRE-1001",
-    source: "contacts[SL-000B] > document_packets > activity_events",
+    source: "Pulls in the contact's details and their recent activity.",
     lastUpdated: `Updated 6h ago by ${ownerName(TC)}`,
     updatedAgo: "6h ago",
     docs: [

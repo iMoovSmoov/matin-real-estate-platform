@@ -21,8 +21,9 @@ export default function SystemsHealthPage() {
   return (
     <div className="px-4 pb-10 pt-4 md:px-6">
       <p className="mb-5 max-w-3xl text-[0.82rem] leading-relaxed text-slate">
-        Hide technical plumbing from normal users, but make it inspectable for
-        the builder/operator — the part most demos miss.
+        The technical console behind MatinOS — every connected system,
+        automation run, and data check, here for the operator to inspect and
+        fix.
       </p>
 
       <SystemsHealthWorkspace

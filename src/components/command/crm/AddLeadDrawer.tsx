@@ -124,7 +124,7 @@ export function AddLeadDrawer({
             <X className="h-4 w-4" />
           </button>
           <h2 className="font-display text-xl text-ink">Add new lead</h2>
-          <p className="mt-0.5 text-[0.78rem] text-slate/55">Fill in the details to create a new lead record.</p>
+          <p className="mt-0.5 text-[0.78rem] text-slate/55">Fill in the details to add a new lead.</p>
         </div>
 
         {/* Body */}
@@ -251,12 +251,12 @@ export function AddLeadDrawer({
 
           {/* Assign Agent */}
           <div>
-            <label className={labelClass}>Assign Agent (slug)</label>
+            <label className={labelClass}>Assign agent</label>
             <input
               type="text"
               value={assignedAgent}
               onChange={(e) => setAssignedAgent(e.target.value)}
-              placeholder="e.g. alicia-smith"
+              placeholder="e.g. Alicia Smith"
               className={inputClass}
             />
           </div>

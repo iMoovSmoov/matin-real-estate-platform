@@ -297,15 +297,15 @@ export default function MarketingStudioPage() {
         id: "shorten-subject",
         title: `Tighten the ${channel} subject line`,
         riskTag: "Ready",
-        evidence: `Current ${channel} draft for ${STUDIO_LISTING.address}. Shorter subjects lift opens — the Cash Offer Funnel sits 7 pts under the email benchmark on a long subject.`,
+        evidence: `This campaign's emails are opening below our usual rate, and a long subject line is the likely cause — shorter subjects tend to do better.`,
         confidence: "High",
       },
       {
         id: "ab-variants",
-        title: "Draft A/B subject variants",
+        title: "Draft two subject lines to test",
         riskTag: "Approval required",
         evidence:
-          "Cash Offer Funnel opens 31.2% vs 38.4% on Spring Seller — a weak subject, not a weak audience. Two variants let us test before the full send.",
+          "The low open rate points to the subject line, not the audience. Two subject options let us see which one works before sending to everyone.",
         confidence: "Medium",
       },
     ],
@@ -577,7 +577,7 @@ export default function MarketingStudioPage() {
           delta="4 sources tracked"
           deltaTone="flat"
           valueTone="success"
-          hint="Closed-loop to CRM + reports"
+          hint="Tracked back to the CRM and Reports"
           onDrill={drillToTopAttributed}
         />
         <KpiCard
@@ -637,13 +637,13 @@ export default function MarketingStudioPage() {
           >
             <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-ink-800 px-3.5 py-3 ring-1 ring-inset ring-ink-700">
               <p className="min-w-0 flex-1 text-[0.82rem] leading-relaxed text-slate-300">
-                Brand kit is locked: Matin logo lockup, ink/paper palette, and the
-                Oregon fair-housing disclosure apply to every channel. Drafts stay
-                drafts until the broker and listing agent approve.
+                Every channel carries Matin&apos;s logo, colors, and the required
+                Oregon fair-housing line. Nothing goes out until both the broker
+                and the listing agent sign off.
               </p>
               <button
                 type="button"
-                onClick={() => openAi(`Context: ${studioContext}`)}
+                onClick={() => openAi(`Working on: ${studioContext}`)}
                 className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
               >
                 Ask Matin
@@ -702,7 +702,7 @@ export default function MarketingStudioPage() {
               Campaigns
             </h2>
             <p className="mt-0.5 text-[0.74rem] text-slate">
-              Performance syncs opens, clicks, and leads back to CRM and Reports.
+              Opens, clicks, and leads flow back into the CRM and Reports.
             </p>
           </div>
           <button
@@ -748,7 +748,7 @@ export default function MarketingStudioPage() {
         campaign={openCampaign}
         onClose={() => setOpenCampaign(null)}
         onToggleStatus={toggleCampaignStatus}
-        onAskAi={(c) => openAi(`Context: Marketing Studio / Campaign · ${c.name}`)}
+        onAskAi={(c) => openAi(`Working on: Marketing Studio / Campaign · ${c.name}`)}
       />
 
       {/* Create-campaign form drawer */}

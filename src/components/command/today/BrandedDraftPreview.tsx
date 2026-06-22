@@ -134,7 +134,7 @@ export function BrandedDraftPreview({
               {agent?.title ? `, ${agent.title}` : ""}
             </p>
             <p className="text-[0.72rem] text-slate">
-              Sending to {sellersAudience.toLocaleString()} tracked likely-seller signals · held for
+              Sending to {sellersAudience.toLocaleString()} likely sellers we&rsquo;re tracking · held for
               your approval before scheduling.
             </p>
           </div>

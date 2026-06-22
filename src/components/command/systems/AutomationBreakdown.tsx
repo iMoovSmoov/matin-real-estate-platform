@@ -220,11 +220,11 @@ export function AutomationBreakdown({
               </ol>
             </div>
 
-            {/* Backend joins note */}
+            {/* Where each run is recorded */}
             <div className="flex items-start gap-2 rounded-xl border border-mist bg-paper px-3.5 py-2.5">
               <Database className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate" />
               <code className="break-words font-mono text-[0.72rem] leading-relaxed text-ink">
-                writes → workflow_runs <ArrowRight className="inline h-3 w-3 text-slate" /> ai_actions <ArrowRight className="inline h-3 w-3 text-slate" /> audit_logs
+                Logged to Automation runs <ArrowRight className="inline h-3 w-3 text-slate" /> AI actions <ArrowRight className="inline h-3 w-3 text-slate" /> Activity log
               </code>
             </div>
 
@@ -237,7 +237,7 @@ export function AutomationBreakdown({
                 <AIActionCard
                   title="Diagnose & draft a safe restart plan"
                   riskTag="Approval required"
-                  evidence={`"${selected.name}" is paused and ran 0 times this month. AI inspects the step chain + last failure to propose a restart plan.`}
+                  evidence={`"${selected.name}" is paused and ran 0 times this month. Get the likely reason and a safe restart plan to approve.`}
                   confidence="Medium"
                   runLabel="Diagnose"
                   running={diagnosing}

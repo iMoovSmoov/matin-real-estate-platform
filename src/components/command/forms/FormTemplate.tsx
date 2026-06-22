@@ -201,7 +201,7 @@ function EsignModal({
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
-            {sending ? "Sending…" : "Send Envelope"}
+            {sending ? "Sending…" : "Send for signature"}
           </button>
         </div>
       </div>
@@ -338,13 +338,13 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     try {
       localStorage.setItem(`form-draft-${form.code}`, JSON.stringify(values));
       setSaved(true);
-      setSaveMessage("Draft saved (local)");
+      setSaveMessage("Draft saved");
       setTimeout(() => {
         setSaved(false);
         setSaveMessage(null);
       }, 2400);
     } catch {
-      setSaveMessage("Could not save — storage unavailable");
+      setSaveMessage("Couldn't save your draft. Please try again.");
       setTimeout(() => setSaveMessage(null), 2400);
     }
   }
@@ -362,18 +362,14 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           values,
         }),
       });
-      const data = await res.json().catch(() => null);
+      await res.json().catch(() => null);
       setShowEsignModal(false);
       const roleList = roles.join(", ");
-      setEsignConfirm(
-        data?.id
-          ? `Envelope ${data.id.slice(0, 8)}… sent — recipients: ${roleList}`
-          : `Sent for e-signature (${roleList})`,
-      );
+      setEsignConfirm(`Sent for signature to ${roleList}.`);
       setTimeout(() => setEsignConfirm(null), 4000);
     } catch {
       setShowEsignModal(false);
-      setEsignConfirm("Error — could not send envelope. Try again.");
+      setEsignConfirm("Couldn't send for signature. Please try again.");
       setTimeout(() => setEsignConfirm(null), 3000);
     } finally {
       setEsignSending(false);
@@ -422,7 +418,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
                 value={recordKey}
                 onChange={(e) => setRecordKey(e.target.value)}
                 className="appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-ink focus:outline-none"
-                aria-label="Source record for auto-fill"
+                aria-label="Choose a listing or lead to auto-fill from"
               >
                 <option value="">Pick a listing or lead…</option>
                 <optgroup label="Listings">
@@ -476,7 +472,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               value={recordKey}
               onChange={(e) => setRecordKey(e.target.value)}
               className="w-full appearance-none rounded-md bg-transparent py-1 pl-2 pr-6 text-[0.76rem] text-ink focus:outline-none"
-              aria-label="Source record for auto-fill"
+              aria-label="Choose a listing or lead to auto-fill from"
             >
               <option value="">Pick a listing or lead…</option>
               <optgroup label="Listings">
@@ -593,7 +589,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               <span className="text-[0.82rem] font-semibold text-ink">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>
-              {aiBusy && <span className="text-[0.72rem] text-slate/70">streaming live</span>}
+              {aiBusy && <span className="text-[0.72rem] text-slate/70">drafting…</span>}
             </div>
             <div className="px-4 py-3">
               <AiMarkdown text={aiOut} />

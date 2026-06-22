@@ -131,7 +131,7 @@ export function LeadDetailPanel({
         {
           key: "value-text",
           title: `Text ${lead.firstName} their estimated value range`,
-          evidence: `Likely-seller signal with ${budgetLabel(lead)} estimated equity band. Send a short, personal value-range text and offer a no-obligation valuation walkthrough.`,
+          evidence: `Estimated equity band of ${budgetLabel(lead)}. Send a short, personal value-range text and offer a no-obligation home-value walkthrough.`,
           risk: "Approval required",
           conf: "Medium",
           channel: "text",
@@ -151,7 +151,7 @@ export function LeadDetailPanel({
         {
           key: "send-homes",
           title: `Email ${lead.firstName} ${matches.length || 3} matching ${lead.community} homes`,
-          evidence: `Buyer band ${budgetLabel(lead)} with ${lead.propertyViews?.length ?? 0} tracked viewing signals. Real active matches ready to send: ${matchCite}.`,
+          evidence: `Buyer budget ${budgetLabel(lead)} with ${lead.propertyViews?.length ?? 0} recent home views. Real active matches ready to send: ${matchCite}.`,
           risk: "Approval required",
           conf: lead.score >= 75 ? "High" : "Medium",
           channel: "email",
@@ -314,7 +314,7 @@ export function LeadDetailPanel({
             <p className="eyebrow text-slate">AI proposed actions</p>
             <button
               type="button"
-              onClick={() => openAi(`Context: CRM & Leads / ${lead.name}`)}
+              onClick={() => openAi(`Working on: CRM & Leads / ${lead.name}`)}
               className="inline-flex items-center gap-1.5 rounded-full bg-gold-soft px-2.5 py-1 text-[0.72rem] font-semibold text-gold-ink ring-1 ring-inset ring-gold/25 transition-colors hover:bg-gold/20"
             >
               <MatinMark theme="dark" className="h-3 w-3" />

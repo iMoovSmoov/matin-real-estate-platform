@@ -181,7 +181,7 @@ export function OpportunityDrawer({
       name: "Home-value outreach sent",
       tag: "approved",
       tagTone: "success",
-      meta: `AI draft reviewed & sent by ${agentName(lead.assignedAgent)} · logged to ai_actions`,
+      meta: `AI draft reviewed and sent by ${agentName(lead.assignedAgent)}`,
       timeLabel: "just now",
       group: "Now",
     });
@@ -234,7 +234,7 @@ export function OpportunityDrawer({
             type="button"
             onClick={() =>
               openAi(
-                `Context: Cash Offer / ${lead.sellerName} · ${lead.address}, ${lead.city}`,
+                `Working on: cash offer for ${lead.sellerName} · ${lead.address}, ${lead.city}`,
               )
             }
             className="ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
@@ -358,7 +358,7 @@ export function OpportunityDrawer({
             </div>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[0.78rem]">
               <Fact label="Seller" value={lead.sellerName} />
-              <Fact label="Source" value={lead.source ?? "Database mining"} />
+              <Fact label="Source" value={lead.source ?? "Owner database"} />
               <Fact label="Stage" value={lead.stage} />
               <Fact
                 label="Days in stage"
@@ -410,7 +410,7 @@ export function OpportunityDrawer({
                         {approved ? (
                           <span className="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-success">
                             <CircleCheck className="h-4 w-4" aria-hidden />
-                            Sent &amp; logged to the activity feed
+                            Sent &amp; saved to the activity feed
                           </span>
                         ) : (
                           <>

@@ -64,18 +64,12 @@ const COLUMN_META: { key: PipelineColumnKey; title: string; ai?: boolean }[] = [
 ];
 
 const BACKEND_INPUTS = [
-  "Score sellers from CRM contacts, equity estimate, site behavior, email clicks, form submissions, conversation sentiment, listing timeline",
-];
-
-const BACKEND_TABLES = [
-  "contacts",
-  "properties",
-  "ownership_signals",
-  "valuations",
-  "seller_campaigns",
-  "cash_offer_requests",
-  "agent_appointments",
-  "ai_actions",
+  "Home equity and how long they've owned",
+  "Recent home-value estimates",
+  "Cash-offer requests",
+  "Calls, emails, and texts so far",
+  "Website and email activity",
+  "How soon they want to sell",
 ];
 
 type ViewMode = "pipeline" | "list";
@@ -179,7 +173,7 @@ export function SellerDeskWorkspace() {
       {/* Subtitle (no h1 — TopCommandBar owns the section title) + create action */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[0.82rem] text-slate">
-          Find hidden homeowners, enrich data, trigger campaigns, route hot opportunities — signal to listing won.
+          Find homeowners who may be ready to sell, fill in the details, start outreach, and route the hottest opportunities — from first signal to signed listing.
         </p>
         <button
           type="button"
@@ -196,7 +190,7 @@ export function SellerDeskWorkspace() {
           a tile (2-up); 4-up at lg. */}
       <KpiStrip cols={4}>
         <KpiCard
-          label="Database owners"
+          label="Homeowners tracked"
           value="38,420"
           icon={<Database className="h-4 w-4" />}
           hint={<RampHint pct={48} label={`${compactUsd(farmEquity)} est. equity in farm`} />}
@@ -218,7 +212,7 @@ export function SellerDeskWorkspace() {
           label="Cash offer requests"
           value={72 + cashCount}
           icon={<Banknote className="h-4 w-4" />}
-          hint={<RampHint pct={36} label={`${compactUsd(cashValue)} in play · bypass priority`} />}
+          hint={<RampHint pct={36} label={`${compactUsd(cashValue)} in play · fast-track`} />}
           delta={`${cashCount} in pipeline`}
           deltaTone="flat"
           onDrill={() => drillTo("cash")}
@@ -243,7 +237,7 @@ export function SellerDeskWorkspace() {
             </h2>
             <p className="text-[0.76rem] text-slate">
               {mode === "pipeline"
-                ? "Behavioral stages — automated nurture on the left of the line, humans on the right."
+                ? "Pipeline stages — automated nurture on the left of the line, humans on the right."
                 : "The same opportunities as a sortable scoreboard — highest intent first."}
             </p>
           </div>
@@ -278,9 +272,8 @@ export function SellerDeskWorkspace() {
             <KanbanBoard
               columns={columns}
               backendColumn={{
-                title: "Backend logic",
+                title: "How we score sellers",
                 inputs: BACKEND_INPUTS,
-                tables: BACKEND_TABLES,
               }}
               renderCard={(lead) => (
                 <OpportunityKanbanCard lead={lead} onClick={() => setSelectedId(lead.id)} />
@@ -430,7 +423,7 @@ function OpportunityKanbanCard({
         {/* Source chip + last-touch relative time */}
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <StatusChip tone="info" variant="soft">
-            {lead.source ?? "Database"}
+            {lead.source ?? "Owner database"}
           </StatusChip>
           <StatusChip tone={stale ? "danger" : "info"} variant="soft">
             {lead.daysInStage}d since touch

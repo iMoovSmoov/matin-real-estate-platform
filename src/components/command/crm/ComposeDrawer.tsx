@@ -245,7 +245,7 @@ export function ComposeDrawer({
               riskTag="Approval required"
               evidence={`Personalized from ${lead.score}/100 intent, ${lead.community} interest, and ${
                 (lead.propertyViews ?? []).length
-              } tracked signals. Review before it goes into your message.`}
+              } recent home views. Review before it goes into your message.`}
               confidence={lead.score >= 75 ? "High" : "Medium"}
               runLabel={draftResult ? "Redraft" : "Draft"}
               running={drafting}

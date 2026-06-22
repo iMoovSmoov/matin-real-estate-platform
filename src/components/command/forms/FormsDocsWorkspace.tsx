@@ -225,7 +225,7 @@ export function FormsDocsWorkspace() {
           : p,
       ),
     );
-    flashPane(`Sent ${ids.length} packet${ids.length === 1 ? "" : "s"} for signature · envelopes created.`);
+    flashPane(`Sent ${ids.length} packet${ids.length === 1 ? "" : "s"} for signature.`);
     setSelectedPackets(new Set());
   }
 
@@ -418,7 +418,7 @@ export function FormsDocsWorkspace() {
       onResolve={paneResolve}
       onView={() => setDrawerDocId(doc.id)}
       onAskAi={() =>
-        openAi(`Context: Forms & Docs / ${packet.name} · ${doc.code}`)
+        openAi(`Working on: Forms & Docs / ${packet.name} · ${doc.code}`)
       }
     />
   );
@@ -1373,7 +1373,7 @@ function ActionsPane({
           </span>
         </div>
         <p className="mt-1.5 text-[0.76rem] leading-snug text-slate">
-          AI inspects required fields, initials, and signatures — and tells you
+          Checks every required field, initial, and signature, and tells you
           exactly what&apos;s incomplete and where.
         </p>
 
@@ -1435,10 +1435,10 @@ function ActionsPane({
         }
       >
         <div className="rounded-lg border border-ink-700 bg-ink-900/60 px-3 py-2.5 font-mono text-[0.72rem] leading-relaxed text-slate-300">
-          <p>→ signature_envelope sent · e-sign requested</p>
-          <p>→ activity_event logged to packet timeline</p>
-          <p>→ signer reminder scheduled · +3 days</p>
-          <p>→ transaction checklist updated · status synced</p>
+          <p>→ The signature request goes out to the signer</p>
+          <p>→ A copy is saved to this packet</p>
+          <p>→ A reminder is set for 3 days</p>
+          <p>→ The transaction checklist updates automatically</p>
         </div>
       </CalloutCard>
     </section>

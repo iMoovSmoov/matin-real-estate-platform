@@ -40,21 +40,21 @@ const SAMPLE_RECORDS: Record<string, { label: string; detail: string }[]> = {
     { label: "mgrant@outlook.com", detail: "2 contacts: 'Melissa Grant' + 'M. Grant'" },
   ],
   "DQ-003": [
-    { label: "preferred_area = 'Lake O'", detail: "no mapping → community" },
-    { label: "preferred_area = 'PDX metro'", detail: "no mapping → community" },
-    { label: "preferred_area = 'West side'", detail: "no mapping → community" },
+    { label: "Preferred area = 'Lake O'", detail: "doesn't match a known community" },
+    { label: "Preferred area = 'PDX metro'", detail: "doesn't match a known community" },
+    { label: "Preferred area = 'West side'", detail: "doesn't match a known community" },
   ],
   "DQ-004": [
-    { label: "Lead #IDX-7741 · phone '503.555.21'", detail: "fails E.164 normalization" },
+    { label: "Lead #IDX-7741 · phone '503.555.21'", detail: "phone number isn't a valid format" },
     { label: "Lead #IDX-7720 · phone '(503) 5-0188'", detail: "too few digits" },
   ],
   "DQ-005": [
-    { label: "Lead #Z-9981 · source: (none)", detail: "Zillow handoff dropped utm_source" },
-    { label: "Lead #Z-9970 · source: (none)", detail: "Zillow handoff dropped utm_source" },
+    { label: "Lead #Z-9981 · source: (none)", detail: "Zillow handoff dropped the lead source" },
+    { label: "Lead #Z-9970 · source: (none)", detail: "Zillow handoff dropped the lead source" },
   ],
   "DQ-006": [
-    { label: "MLS #23457881", detail: "list_price null — agent entered draft only" },
-    { label: "MLS #23457902", detail: "list_price null — coming-soon hold" },
+    { label: "MLS #23457881", detail: "list price blank — saved as a draft" },
+    { label: "MLS #23457902", detail: "list price blank — coming-soon hold" },
   ],
 };
 
@@ -158,7 +158,7 @@ export function DataQualityDrawer({
               <CircleCheck className="mt-px h-4 w-4 shrink-0 text-success" />
               <p className="text-[0.78rem] font-medium leading-snug text-success">
                 Queued {dq.count.toLocaleString("en-US")} records for auto-repair.
-                They will clear on the next sync and write to audit_logs.
+                They will clear on the next sync and be recorded in the activity log.
               </p>
             </div>
           ) : null}
@@ -199,7 +199,7 @@ export function DataQualityDrawer({
             <AIActionCard
               title="Draft a fix plan for this rule"
               riskTag="Auto-safe"
-              evidence={`"${dq.issue}" — ${dq.count} records from ${dq.source}. AI proposes the mapping/normalization to clear the flag safely.`}
+              evidence={`"${dq.issue}" — ${dq.count} records from ${dq.source}. Get a safe, step-by-step plan to clean these up.`}
               confidence="High"
               runLabel="Draft fix plan"
               running={drafting}

@@ -373,8 +373,8 @@ export function AssetPreview({
               </span>
             </div>
             <p className="mt-1.5 text-[0.66rem] text-slate">
-              Hero photo · {STUDIO_LISTING.address}, {STUDIO_LISTING.cityShort} ·
-              brand frame + logo lockup applied
+              Listing photo · {STUDIO_LISTING.address}, {STUDIO_LISTING.cityShort} ·
+              Matin frame and logo added
             </p>
           </div>
 

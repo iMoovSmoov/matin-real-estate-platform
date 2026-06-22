@@ -386,12 +386,12 @@ export default function TodayCommandCenter() {
       }
     >
       <p>
-        Grouped <span className="font-semibold text-cloud">181 lead events</span> into{" "}
+        Sorted <span className="font-semibold text-cloud">181 overnight lead updates</span> into{" "}
         <span className="font-semibold text-cloud">22 priorities</span>, drafted{" "}
         <span className="font-semibold text-cloud">{K.aiDraftsWaiting} replies</span>, and flagged{" "}
         <span className="font-semibold text-danger">{K.txAtRisk} deals at risk</span> plus{" "}
-        <span className="font-semibold text-danger">{K.workflowErrors} failed automations</span>. No
-        client-facing message was sent — everything is held for your approval.
+        <span className="font-semibold text-danger">{K.workflowErrors} failed automations</span>.
+        Nothing went out to clients — everything is waiting for your approval.
       </p>
       <p className="mt-2 text-slate-300/80">
         Top of the list: call Daniel Cho before his speed-to-lead window closes, and resolve the
@@ -543,7 +543,7 @@ export default function TodayCommandCenter() {
               type="button"
               onClick={() =>
                 openAi(
-                  "Context: Today / Human Work Queue — prioritize my queue and explain what to do first",
+                  "Working on: Today / Human Work Queue — prioritize my queue and explain what to do first",
                 )
               }
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
@@ -705,7 +705,7 @@ export default function TodayCommandCenter() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => openAi(`Context: Today / ${selected.subject}`)}
+                  onClick={() => openAi(`Working on: Today / ${selected.subject}`)}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
                 >
                   <MatinMark theme="dark" className="h-3.5 w-3.5" />
@@ -727,7 +727,7 @@ export default function TodayCommandCenter() {
             drafting={drafting === selected.id}
             onRunDraft={() => linkedAction && runDraft(selected, linkedAction)}
             onReject={() => setDrafts((d) => ({ ...d, [selected.id]: "" }))}
-            onAskAi={() => openAi(`Context: Today / ${selected.subject}`)}
+            onAskAi={() => openAi(`Working on: Today / ${selected.subject}`)}
           />
         ) : null}
       </RecordDrawer>

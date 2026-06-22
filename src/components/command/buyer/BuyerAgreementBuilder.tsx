@@ -550,18 +550,18 @@ export default function BuyerAgreementBuilder() {
       meta: missing.length ? missing[0].hint : "All required fields complete",
     },
     {
-      label: "Send envelope",
+      label: "Send for signature",
       chip: sent ? "Sent" : canSend ? "Ready" : "Blocked",
       tone: (sent ? "success" : canSend ? "info" : "warn") as "success" | "warn" | "info",
       variant: sent ? ("solid" as const) : ("soft" as const),
       meta: sent ? `Delivered to ${buyer.email} via DocuSign` : "DocuSign · buyer + agent recipients",
     },
     {
-      label: "CRM timeline",
+      label: "Buyer's timeline",
       chip: sent ? "Updated" : "Will update",
       tone: (sent ? "success" : "info") as "success" | "warn" | "info",
       variant: "soft" as const,
-      meta: "Writes activity_event on contact record",
+      meta: "Logged to the buyer's activity timeline",
     },
     {
       label: "Reminder schedule",
@@ -721,7 +721,7 @@ export default function BuyerAgreementBuilder() {
       </div>
 
       <div className="space-y-4 px-5 py-4">
-        <IntakeField label="Buyer" column="contacts.full_name">
+        <IntakeField label="Buyer">
           <input
             id="f-buyer"
             className={intakeInputClass}
@@ -731,7 +731,7 @@ export default function BuyerAgreementBuilder() {
         </IntakeField>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <IntakeField label="Email" column="contacts.email">
+          <IntakeField label="Email">
             <input
               id="f-email"
               className={intakeInputClass}
@@ -739,7 +739,7 @@ export default function BuyerAgreementBuilder() {
               onChange={(e) => setField("email", e.target.value)}
             />
           </IntakeField>
-          <IntakeField label="Phone" column="contacts.phone">
+          <IntakeField label="Phone">
             <input
               id="f-phone"
               className={intakeInputClass}
@@ -749,7 +749,7 @@ export default function BuyerAgreementBuilder() {
           </IntakeField>
         </div>
 
-        <IntakeField label="Agent" column="agreement_answers.agent_slug">
+        <IntakeField label="Agent">
           <select
             id="f-agent"
             className={intakeSelectClass}
@@ -773,7 +773,7 @@ export default function BuyerAgreementBuilder() {
           </select>
         </IntakeField>
 
-        <IntakeField label="Representation area" column="agreement_answers.areas[]">
+        <IntakeField label="Representation area">
           <input
             id="f-areas"
             className={intakeInputClass}
@@ -783,14 +783,14 @@ export default function BuyerAgreementBuilder() {
         </IntakeField>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" id="f-budget">
-          <IntakeField label="Budget min" column="agreement_answers.budget_min">
+          <IntakeField label="Budget min">
             <input
               className={intakeInputClass}
               value={form.budgetMin}
               onChange={(e) => setField("budgetMin", e.target.value)}
             />
           </IntakeField>
-          <IntakeField label="Budget max" column="agreement_answers.budget_max">
+          <IntakeField label="Budget max">
             <input
               className={intakeInputClass}
               value={form.budgetMax}
@@ -800,7 +800,7 @@ export default function BuyerAgreementBuilder() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <IntakeField label="Representation period" column="agreement_answers.term_months">
+          <IntakeField label="Representation period">
             <select
               id="f-term"
               className={intakeSelectClass}
@@ -820,7 +820,7 @@ export default function BuyerAgreementBuilder() {
               <option value="12">12 months (max)</option>
             </select>
           </IntakeField>
-          <IntakeField label="Expiration" column="buyer_agreements.expires_at">
+          <IntakeField label="Expiration">
             <input
               id="f-expiration"
               className={intakeInputClass}
@@ -830,7 +830,7 @@ export default function BuyerAgreementBuilder() {
           </IntakeField>
         </div>
 
-        <IntakeField label="Broker compensation clause" column="agreement_answers.compensation">
+        <IntakeField label="Broker compensation clause">
           <select
             id="f-compensation"
             className={intakeSelectClass}
@@ -845,7 +845,7 @@ export default function BuyerAgreementBuilder() {
           </select>
         </IntakeField>
 
-        <IntakeField label="Broker clauses" column="agreement_templates.clauses[]">
+        <IntakeField label="Broker clauses">
           <div id="f-agency" className="space-y-2 rounded-lg border border-mist bg-paper px-3 py-2.5">
             {ALL_CLAUSES.map((clause) => (
               <label
@@ -1013,8 +1013,8 @@ export default function BuyerAgreementBuilder() {
             {sent ? "Sent" : "Send for signature"}
           </button>
           <p className="basis-full text-[0.72rem] leading-snug text-slate">
-            Mandatory in Oregon per HB 4058. Download / Print produces the branded
-            Matin artifact above — not a toast.
+            Mandatory in Oregon per HB 4058. Download or Print produces the branded
+            Matin document above — a real file you can use.
           </p>
         </div>
       </div>
@@ -1108,7 +1108,7 @@ export default function BuyerAgreementBuilder() {
           <div className="min-w-0 flex-1">
             <p className="text-[0.78rem] font-semibold text-ink">Representation readiness</p>
             <p className="mt-0.5 text-[0.72rem] leading-snug text-slate">
-              AI signal — intake completeness + buyer engagement.
+              Based on how complete the intake is and how engaged the buyer is.
             </p>
           </div>
         </div>
@@ -1141,7 +1141,7 @@ export default function BuyerAgreementBuilder() {
         <div className="flex items-center gap-2 border-b border-mist px-5 py-4">
           <Database className="h-4 w-4 text-slate" />
           <h2 className="font-display text-[1.02rem] font-normal leading-tight text-ink">
-            Automation state
+            Automation
           </h2>
         </div>
         <ul className="divide-y divide-mist px-5">
@@ -1176,8 +1176,9 @@ export default function BuyerAgreementBuilder() {
             className="[&_article]:min-h-0"
           />
           <p className="mt-2 font-mono text-[0.68rem] leading-relaxed text-slate">
-            signature_envelopes → activity_events → reminder task → notify{" "}
-            {signatureAgent.name.split(" ")[0]} → checklist update
+            After you send: the e-signature request goes out, it&apos;s saved to
+            the buyer&apos;s file, {signatureAgent.name.split(" ")[0]} is notified,
+            a reminder is set for 3 days, and the checklist updates.
           </p>
         </div>
       </div>
@@ -1242,7 +1243,7 @@ export default function BuyerAgreementBuilder() {
       {/* Explicit "Ask Matin" affordance — the ONLY thing that opens the sidecar */}
       <button
         type="button"
-        onClick={() => openAi(`Context: ${aiContext}`)}
+        onClick={() => openAi(`Working on: ${aiContext}`)}
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-gold-soft px-4 py-2.5 text-[0.82rem] font-semibold text-gold-ink transition-colors hover:bg-gold/20"
       >
         <MatinMark theme="dark" className="h-4 w-4" />
@@ -1255,8 +1256,8 @@ export default function BuyerAgreementBuilder() {
     <div className="px-4 py-5 md:px-6">
       {/* Subtitle (TopCommandBar owns the H1) */}
       <p className="text-[0.82rem] leading-snug text-slate">
-        Replace Google Forms: structured intake feeds templates, broker rules,
-        e-signature, CRM timeline, and reporting.
+        One intake builds the agreement, checks it against your broker rules,
+        sends it for e-signature, and logs everything to the buyer&apos;s record.
       </p>
 
       {/* ── KPI strip (ticket 6 — money sub-stats, no orphan) ─────────────── */}

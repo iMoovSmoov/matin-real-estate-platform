@@ -83,7 +83,7 @@ export function CreateCampaignForm({
         />
       </Field>
 
-      <Field label="Template" hint="Locks the brand kit + asset set">
+      <Field label="Template" hint="Sets the approved branding and assets">
         <select
           value={draft.templateKey}
           onChange={(e) => onChange({ ...draft, templateKey: e.target.value })}
@@ -132,11 +132,11 @@ export function CreateCampaignForm({
       </Field>
 
       <div className="rounded-lg border border-mist bg-paper px-3 py-2.5">
-        <p className="font-mono text-[0.68rem] leading-relaxed text-slate">
-          <span className="font-semibold text-ink">New record writes</span>
+        <p className="text-[0.68rem] leading-relaxed text-slate">
+          <span className="font-semibold text-ink">What happens next</span>
           <br />
-          campaigns (status: draft) &gt; marketing_assets (AI-drafted) &gt;
-          approval_queue
+          the campaign is saved as a draft, Matin AI drafts each asset on-brand,
+          and the whole kit goes to your approvers before anything sends.
         </p>
       </div>
     </div>

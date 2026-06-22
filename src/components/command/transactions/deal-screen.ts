@@ -485,7 +485,7 @@ function deriveActivity(tx: Transaction): DealActivitySeed[] {
   }
   out.push({
     id: "a2", channel: "system", name: `Stage advanced to ${tx.stage}`, tag: "pipeline",
-    tagTone: "info", meta: "Auto-logged from the deal record", timeLabel: "today", group: "Today",
+    tagTone: "info", meta: "Logged automatically", timeLabel: "today", group: "Today",
   });
   if (tx.checklist.find((c) => c.label === "Inspection complete")?.done) {
     out.push({
@@ -510,7 +510,7 @@ function deriveRisk(tx: Transaction): RiskNote | null {
   if (!tx.riskFlag) return null;
   return {
     title: "AI Risk Note",
-    body: `${tx.riskFlag}. Matin AI cross-referenced the deal state and the email thread for ${tx.address} and recommends drafting a response to keep the contingency on track.`,
+    body: `${tx.riskFlag}. Drafting a response now will keep this contingency on track.`,
     actionLabel: "Draft response",
     draftPrompt: `Draft a transaction-coordinator response for the deal at ${tx.address}. Open risk: "${tx.riskFlag}". Address the issue, protect the contingency timeline, and keep it professional. Reference the executed OREF purchase agreement.`,
   };

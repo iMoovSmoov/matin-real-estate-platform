@@ -96,10 +96,10 @@ function activityFor(c: Campaign): ActivityItem[] {
       {
         id: `${c.id}-a1`,
         channel: "system",
-        name: "Performance synced",
+        name: "Results updated",
         tag: `${c.openRate.toFixed(1)}% open`,
         tagTone: "gold",
-        meta: "Opens, clicks, and replies posted back to CRM + Reports",
+        meta: "Opens, clicks, and replies now show in the CRM and Reports",
         timeLabel: "12m ago",
         group: "Today",
       },
@@ -152,7 +152,7 @@ function activityFor(c: Campaign): ActivityItem[] {
     id: `${c.id}-a9`,
     channel: "note",
     name: `${owner.name} created the campaign`,
-    meta: `Template applied · brand kit locked`,
+    meta: `Template applied · Matin branding set`,
     timeLabel: "Earlier",
     group: "History",
   });
@@ -282,24 +282,25 @@ export function CampaignDrawer({
           <div className="flex flex-wrap gap-1.5">
             {isLive && campaign.openRate < 35 ? (
               <AIInsightChip>
-                Open rate {campaign.openRate.toFixed(1)}% — {(38.4 - campaign.openRate).toFixed(1)} pts under benchmark
+                Opening {campaign.openRate.toFixed(1)}% — about {(38.4 - campaign.openRate).toFixed(1)} points below our usual rate
               </AIInsightChip>
             ) : isLive ? (
-              <AIInsightChip>Outperforming the email benchmark</AIInsightChip>
+              <AIInsightChip>Opening above our usual rate</AIInsightChip>
             ) : (
               <AIInsightChip>
-                {assets.length} brand-locked assets ready to launch
+                {assets.length} on-brand assets ready to launch
               </AIInsightChip>
             )}
           </div>
 
-          {/* Schema/automation transparency note */}
+          {/* What happens automatically once a campaign sends */}
           <div className="rounded-lg border border-mist bg-paper px-3 py-2.5">
-            <p className="font-mono text-[0.68rem] leading-relaxed text-slate">
-              <span className="font-semibold text-ink">Automation after send</span>
+            <p className="text-[0.68rem] leading-relaxed text-slate">
+              <span className="font-semibold text-ink">After you send</span>
               <br />
-              campaigns &gt; marketing_assets &gt; activity_events + crm_timeline
-              &gt; attribution_rollup
+              every asset is saved to the campaign file, each open and reply is
+              logged to the contact&apos;s history, and any pipeline this campaign
+              earns rolls up into Reports.
             </p>
           </div>
         </div>
