@@ -3,6 +3,7 @@ import Groq from "groq-sdk";
 import { SYSTEMS, buildUserMessage, type AiTool } from "@/lib/ai/prompts";
 import { fallbackFor } from "@/lib/ai/fallback";
 import { groundInput, hardenFallback } from "@/lib/data/ai-fallback-grounding";
+import { businessContext, businessFacts, FULL_CONTEXT_TOOLS } from "@/lib/ai/business-context";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -80,7 +81,16 @@ export async function POST(req: Request) {
     : [{ role: "user", content: buildUserMessage(tool, input) }];
 
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content;
-  const system = SYSTEMS[tool] || SYSTEMS["ask-matin"];
+  // Ground the AI in the REAL Matin database. Conversational/knowledge tools
+  // (ask-matin = public client chat, concierge = hub sidecar, general) get the
+  // FULL database — company + offices + all 40 agents + the live listing
+  // inventory + communities — so a buyer can ask "homes under $600k in
+  // Beaverton" or a broker "who covers Lake Oswego" and get real answers.
+  // Every other tool still gets the company-facts header so drafts use the
+  // real office/phone/brand. This is what makes "Ask Matin" fully connected.
+  const baseSystem = SYSTEMS[tool] || SYSTEMS["ask-matin"];
+  const context = FULL_CONTEXT_TOOLS.has(tool) ? businessContext() : businessFacts();
+  const system = `${baseSystem}\n\n--- MATIN BUSINESS DATA (authoritative — answer from this, do not invent contact info, agents, or listings) ---\n${context}`;
 
   // Hardened fallback: ground the input, render the canned template, then swap
   // any placeholders baked into fallback.ts (e.g. the demo contract block) for
