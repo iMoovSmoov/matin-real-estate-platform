@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
   FileSignature,
   Send,
@@ -59,6 +59,7 @@ import { streamAi } from "@/lib/ai/client";
 import { cn, compactUsd, daysLabel } from "@/lib/utils";
 import { IntakeField, intakeInputClass, intakeSelectClass } from "./IntakeField";
 import { NewAgreementForm } from "./NewAgreementForm";
+import { scrollIntoView } from "./interactions";
 import {
   ALL_CLAUSES,
   COMPENSATION_OPTIONS,
@@ -211,6 +212,11 @@ function focusInput(inputId: string) {
 
 export default function BuyerAgreementBuilder() {
   const { openAi } = useAiSidecar();
+
+  // Desktop preview column anchor — scrolled into view when the selected record
+  // changes so the in-place document swap is unmistakable. (Mobile panes scroll
+  // by id since they mount on demand.)
+  const desktopDocsRef = useRef<HTMLDivElement>(null);
 
   // Mobile pane switcher (R1) — List / Documents / Actions.
   const pane = usePaneSwitcher(
@@ -393,15 +399,67 @@ export default function BuyerAgreementBuilder() {
     setSaved(false);
   }
 
+  // Is the lg+ (desktop) grid the one currently on screen? Below lg the mobile
+  // single-pane stack is visible and the pane switcher governs what's shown.
+  function isDesktopWidth() {
+    return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  }
+
+  /** Scroll whichever record-list instance is currently on screen (the list
+     `aside` is mounted in both the mobile + desktop layouts; one is hidden).
+     Resolved post-render so a just-switched mobile List pane is found. */
+  function scrollListIntoView() {
+    if (typeof document === "undefined") return;
+    scrollIntoView(() => {
+      const lists = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-buyer-list]"),
+      );
+      return lists.find((n) => n.offsetParent !== null) ?? lists[0] ?? null;
+    }, "start");
+  }
+
+  /** KPI tile drilldown — set the saved view AND surface the filtered list so
+     the result is visible (mobile: jump to List pane; both: scroll list in). */
+  function drillView(next: ViewKey) {
+    setView(next);
+    if (!isDesktopWidth()) pane.go("list");
+    scrollListIntoView();
+  }
+
   function selectRecord(id: string) {
     setSelectedId(id);
-    pane.go("docs");
+    if (isDesktopWidth()) {
+      // Desktop: the preview column updates in place — scroll it into view so
+      // the change is unmistakable even if the user had scrolled the page.
+      scrollIntoView(desktopDocsRef.current, "start");
+    } else {
+      // Mobile: jump to the Documents pane and scroll its (freshly-mounted) top
+      // into view (R1). Scroll by id so the lookup runs AFTER the pane renders.
+      pane.go("docs");
+      scrollIntoView("buyer-pane-docs", "start");
+    }
+  }
+
+  /** Focus + scroll a source intake input, guaranteeing its pane is visible
+     first (on mobile the form lives in the Documents pane). */
+  function fixField(inputId: string) {
+    if (!isDesktopWidth() && !pane.is("docs")) {
+      pane.go("docs");
+      // Let the docs pane mount before the input can be found/scrolled to.
+      window.requestAnimationFrame(() => focusInput(inputId));
+      return;
+    }
+    focusInput(inputId);
   }
 
   async function handleGeneratePacket() {
     setGenerating(true);
     setDraft("");
     setSaved(false);
+    // Scroll the streaming result region into view so the user SEES output land
+    // (the draft block lives further down the preview column / actions stack).
+    if (!isDesktopWidth()) pane.go("docs");
+    scrollIntoView("buyer-draft-result", "start");
     await streamAi(
       {
         tool: "agreement",
@@ -523,7 +581,10 @@ export default function BuyerAgreementBuilder() {
   /* ── Pane bodies ──────────────────────────────────────────────────────── */
 
   const ListPane = (
-    <aside className="flex max-h-[720px] flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+    <aside
+      data-buyer-list
+      className="flex max-h-[720px] flex-col rounded-2xl border border-mist bg-cloud shadow-soft scroll-mt-20"
+    >
       <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3">
         <p className="eyebrow text-slate">Buyer agreements</p>
         <button
@@ -580,7 +641,7 @@ export default function BuyerAgreementBuilder() {
       </div>
 
       {/* List */}
-      <ul className="flex-1 overflow-y-auto">
+      <ul key={`${view}:${search}`} className="flex-1 overflow-y-auto motion-safe:animate-fade">
         {visible.length === 0 ? (
           <li className="px-4 py-10">
             <EmptyState
@@ -895,6 +956,10 @@ export default function BuyerAgreementBuilder() {
       {/* The REAL branded OREF C-565 document (ticket 1) */}
       <div>
         <p className="eyebrow pb-2 text-slate">Live document preview</p>
+        <div
+          key={`${buyer.id}:${template}`}
+          className="motion-safe:animate-fade"
+        >
         <BrandedDocument
           variant="agreement"
           formId={tmpl.formId}
@@ -918,6 +983,7 @@ export default function BuyerAgreementBuilder() {
               : undefined
           }
         />
+        </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -982,7 +1048,10 @@ export default function BuyerAgreementBuilder() {
 
       {/* Streamed AI packet language (Generate packet output) */}
       {(generating || draft) && (
-        <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft">
+        <div
+          id="buyer-draft-result"
+          className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft motion-safe:animate-fade scroll-mt-20"
+        >
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-ink-900 ring-1 ring-inset ring-ink-700">
               <MatinMark theme="white" className="h-3.5 w-3.5" />
@@ -1027,7 +1096,7 @@ export default function BuyerAgreementBuilder() {
         </div>
         <ul className="divide-y divide-mist">
           {fields.map((f) => (
-            <ChecklistItem key={f.inputId} field={f} onFix={() => focusInput(f.inputId)} />
+            <ChecklistItem key={f.inputId} field={f} onFix={() => fixField(f.inputId)} />
           ))}
         </ul>
       </div>
@@ -1142,7 +1211,7 @@ export default function BuyerAgreementBuilder() {
           action={
             <button
               type="button"
-              onClick={() => focusInput(missing[0].inputId)}
+              onClick={() => fixField(missing[0].inputId)}
               className="inline-flex min-h-9 items-center gap-1 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
             >
               Go to first gap
@@ -1198,7 +1267,7 @@ export default function BuyerAgreementBuilder() {
             value={kpis.out}
             icon={<FileSignature className="h-4 w-4" />}
             hint={`Avg term ${kpis.avgTerm} mo`}
-            onDrill={() => setView("all")}
+            onDrill={() => drillView("all")}
           />
           <KpiCard
             label="Awaiting signature"
@@ -1206,7 +1275,7 @@ export default function BuyerAgreementBuilder() {
             valueTone={kpis.awaiting > 0 ? "danger" : "ink"}
             icon={<Clock className="h-4 w-4" />}
             hint={`${compactUsd(kpis.pipeline)} pipeline`}
-            onDrill={() => setView("sent")}
+            onDrill={() => drillView("sent")}
           />
           <KpiCard
             label="Signed this week"
@@ -1214,7 +1283,7 @@ export default function BuyerAgreementBuilder() {
             valueTone="success"
             icon={<CircleCheck className="h-4 w-4" />}
             hint={`${compactUsd(kpis.signedVolume)} signed volume`}
-            onDrill={() => setView("signed")}
+            onDrill={() => drillView("signed")}
           />
           <KpiCard
             label="Expiring soon"
@@ -1222,7 +1291,7 @@ export default function BuyerAgreementBuilder() {
             valueTone={kpis.expiringSoon > 0 ? "danger" : "ink"}
             icon={<CalendarClock className="h-4 w-4" />}
             hint="Representation winding down"
-            onDrill={() => setView("expiring")}
+            onDrill={() => drillView("expiring")}
           />
           <KpiCard
             label="Missing-field flags"
@@ -1230,7 +1299,7 @@ export default function BuyerAgreementBuilder() {
             valueTone={kpis.missingFlags > 0 ? "danger" : "ink"}
             icon={<TriangleAlert className="h-4 w-4" />}
             hint="Cannot send until resolved"
-            onDrill={() => setView("draft")}
+            onDrill={() => drillView("draft")}
           />
         </KpiStrip>
       </div>
@@ -1242,23 +1311,32 @@ export default function BuyerAgreementBuilder() {
 
       {/* ── Below lg: ONE pane at a time ─────────────────────────────────── */}
       <div className="mt-4 space-y-4 lg:hidden">
-        {pane.is("list") ? ListPane : null}
+        {pane.is("list") ? <div className="motion-safe:animate-fade">{ListPane}</div> : null}
         {pane.is("docs") ? (
-          <div className="space-y-4">
+          <div
+            id="buyer-pane-docs"
+            className="scroll-mt-20 space-y-4 motion-safe:animate-fade"
+          >
             {FormColumn}
             {PreviewColumn}
           </div>
         ) : null}
-        {pane.is("actions") ? ActionsColumn : null}
+        {pane.is("actions") ? (
+          <div id="buyer-pane-actions" className="scroll-mt-20 motion-safe:animate-fade">
+            {ActionsColumn}
+          </div>
+        ) : null}
       </div>
 
       {/* ── lg+: full builder grid (record list + 3 columns) ─────────────── */}
-      <div className="mt-5 hidden gap-4 lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="mt-5 hidden gap-4 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
         {ListPane}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
           {FormColumn}
-          {PreviewColumn}
-          <div className="lg:col-span-2 2xl:col-span-1">{ActionsColumn}</div>
+          <div ref={desktopDocsRef} className="scroll-mt-20">
+            {PreviewColumn}
+          </div>
+          <div className="xl:col-span-2 2xl:col-span-1">{ActionsColumn}</div>
         </div>
       </div>
 

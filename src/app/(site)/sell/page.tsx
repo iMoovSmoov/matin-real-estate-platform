@@ -98,7 +98,7 @@ export default function SellPage() {
       </section>
 
       {/* ---------- INSTANT VALUE (LIVE AI) ---------- */}
-      <Section id="instant-value">
+      <Section id="instant-value" className="scroll-mt-20">
         <Container>
           <SectionHeading
             eyebrow="Instant home value · live AI"
@@ -138,7 +138,7 @@ export default function SellPage() {
       </Section>
 
       {/* ---------- CASH IS KING ---------- */}
-      <section id="cash-offer" className="relative overflow-hidden bg-ink py-16 text-white sm:py-20 md:py-28">
+      <section id="cash-offer" className="relative scroll-mt-20 overflow-hidden bg-ink py-16 text-white sm:py-20 md:py-28">
         <div className="absolute inset-0 grid-tech opacity-50" />
         <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
         <Container className="relative">

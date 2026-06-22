@@ -47,6 +47,7 @@ import {
   applyRetry,
 } from "./systemsModel";
 import { VendorMark } from "./VendorMark";
+import { scrollIdIntoView } from "./useScrollIntoView";
 import { SystemsDiagram } from "./SystemsDiagram";
 import { SyncActivityChart } from "./SyncActivityChart";
 import { WorkflowRunDrawer } from "./WorkflowRunDrawer";
@@ -447,7 +448,7 @@ export function SystemsHealthWorkspace({
   // ── Skeleton ──────────────────────────────────────────────────────────────
   if (!ready) {
     return (
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.62fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.62fr_1fr]">
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -467,9 +468,13 @@ export function SystemsHealthWorkspace({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.62fr_1fr]">
+    // Split only at xl: in the lg band (1024–1279) a 1.62fr/1fr split crams the
+    // 5-column integration table into ~600px. Below xl, stack to full width so
+    // the table (cards < lg, dense table at lg+) and the data-flow diagram both
+    // have room; the admin/Ask-Matin rail drops below.
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.62fr_1fr]">
       {/* ════════════ LEFT — the plumbing, inspectable ════════════ */}
-      <div className="order-2 min-w-0 space-y-5 lg:order-1">
+      <div className="order-2 min-w-0 space-y-5 xl:order-1">
         {/* KPI strip — scroll-snap rail on phone (R4), trend deltas (ticket 4) */}
         <KpiStrip cols={5} rail>
           <KpiCard
@@ -497,9 +502,7 @@ export function SystemsHealthWorkspace({
             onDrill={() => {
               const paused = automations.find((a) => a.status === "paused");
               if (paused) setSelectedAutomationId(paused.id);
-              document
-                .getElementById("automation-breakdown")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              scrollIdIntoView("automation-breakdown", "start");
             }}
           />
           <KpiCard
@@ -795,7 +798,7 @@ export function SystemsHealthWorkspace({
       </div>
 
       {/* ════════════ RIGHT — admin detail + Ask Matin ════════════ */}
-      <div className="order-1 min-w-0 space-y-5 lg:order-2">
+      <div className="order-1 min-w-0 space-y-5 xl:order-2">
         {/* Matin section lockup + grounding context line (ticket 6) */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-mist bg-cloud px-5 py-3.5 shadow-soft">
           <MatinMark theme="dark" className="!h-5 w-auto" />

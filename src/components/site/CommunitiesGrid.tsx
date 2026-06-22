@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { CommunityCard } from "@/components/site/CommunityCard";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 import { cn } from "@/lib/utils";
 import type { Community } from "@/lib/types";
 
@@ -36,6 +37,13 @@ interface Props {
 export function CommunitiesGrid({ communities }: Props) {
   const [query, setQuery]       = useState("");
   const [region, setRegion]     = useState<Region>("All");
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  function selectRegion(r: Region) {
+    setRegion(r);
+    // On narrow screens the grid sits below the sticky filter bar — reveal it.
+    scrollIntoViewSafe(resultsRef.current, { block: "start", onlyBelowLg: true });
+  }
 
   const filtered = useMemo(() => {
     let list = communities;
@@ -87,9 +95,11 @@ export function CommunitiesGrid({ communities }: Props) {
             {REGIONS.map((r) => (
               <button
                 key={r}
-                onClick={() => setRegion(r)}
+                type="button"
+                onClick={() => selectRegion(r)}
+                aria-pressed={region === r}
                 className={cn(
-                  "rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium ring-1 transition-all duration-150",
+                  "rounded-full px-3.5 py-2 text-[0.8rem] font-medium ring-1 transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/40",
                   region === r
                     ? "bg-ink text-white ring-ink shadow-soft"
                     : "bg-white text-ink/70 ring-ink/10 hover:bg-ink/[0.05] hover:text-ink",
@@ -103,7 +113,7 @@ export function CommunitiesGrid({ communities }: Props) {
       </div>
 
       {/* ---- Grid ---- */}
-      <div className="mx-auto max-w-7xl px-4 py-10 pb-24 sm:px-6 sm:py-14 sm:pb-14 lg:px-8">
+      <div ref={resultsRef} className="mx-auto max-w-7xl scroll-mt-40 px-4 py-10 pb-24 sm:px-6 sm:py-14 sm:pb-14 lg:px-8">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center py-24 text-center">
             <p className="font-display text-2xl text-ink">No communities found</p>
@@ -111,18 +121,24 @@ export function CommunitiesGrid({ communities }: Props) {
               Try a different search term or reset the region filter.
             </p>
             <button
+              type="button"
               onClick={() => { setQuery(""); setRegion("All"); }}
-              className="mt-5 rounded-full bg-ink px-5 py-2 text-[0.85rem] font-medium text-white shadow-soft transition hover:bg-ink/80"
+              className="mt-5 inline-flex min-h-[44px] items-center rounded-full bg-ink px-5 py-2 text-[0.85rem] font-medium text-white shadow-soft transition hover:bg-ink/80 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:ring-offset-2"
             >
               Reset filters
             </button>
           </div>
         ) : (
           <>
-            <p className="mb-6 text-[0.85rem] text-slate">
+            <p className="mb-6 text-[0.85rem] text-slate" aria-live="polite">
               {filtered.length} {filtered.length === 1 ? "community" : "communities"}{region !== "All" ? ` in ${region}` : ""}
             </p>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Keyed on the active filters so the grid gently re-reveals when
+                the result set changes — subtle "it updated" feedback. */}
+            <div
+              key={`${region}|${query}`}
+              className="grid grid-cols-1 gap-5 motion-safe:animate-[fade_0.35s_ease-out] sm:grid-cols-2 lg:grid-cols-3"
+            >
               {filtered.map((c, i) => (
                 <Reveal key={c.slug} delay={(i % 6) * 0.05}>
                   <CommunityCard community={c} />

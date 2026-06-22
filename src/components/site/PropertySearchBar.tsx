@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Loader2 } from "lucide-react";
 
 export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
   const router = useRouter();
@@ -67,11 +67,19 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
         type="submit"
         aria-label="Search properties"
         disabled={navigating}
-        className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-azure disabled:opacity-60 ${
+        className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-6 py-3 font-medium transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-azure disabled:opacity-70 disabled:cursor-wait ${
           dark ? "bg-white text-ink hover:bg-paper" : "bg-azure text-white hover:bg-azure-deep"
         }`}
       >
-        <Search className="h-4 w-4" aria-hidden="true" /> Search
+        {navigating ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Searching&hellip;
+          </>
+        ) : (
+          <>
+            <Search className="h-4 w-4" aria-hidden="true" /> Search
+          </>
+        )}
       </button>
     </form>
     {searchError && (

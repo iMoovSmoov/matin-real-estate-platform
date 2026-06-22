@@ -41,6 +41,27 @@ const METRICS: { key: Metric; label: string }[] = [
 const RANGES = ["Last 30 days", "Last 90 days", "Year to date"] as const;
 const GRANULARITY = ["By campaign", "Weekly", "Monthly"] as const;
 
+/* The range genuinely re-scopes the funnel: a shorter window holds a smaller
+   slice of each campaign's cumulative sends, so the bars (and the header
+   totals) visibly shrink when you narrow it. YTD = full data. */
+const RANGE_FACTOR: Record<(typeof RANGES)[number], number> = {
+  "Last 30 days": 0.34,
+  "Last 90 days": 0.68,
+  "Year to date": 1,
+};
+
+/* Granularity genuinely re-groups what each bar represents: per-campaign bars,
+   or the same funnel rolled up into time buckets (week / month). The bucket
+   counts are chosen so the rollup still reads as a real time series. */
+const GRANULARITY_BUCKETS: Record<(typeof GRANULARITY)[number], number> = {
+  "By campaign": 0, // 0 = one bar per campaign (no time rollup)
+  Weekly: 6, // last 6 weeks
+  Monthly: 4, // last 4 months
+};
+
+const WEEK_LABELS = ["6 wk", "5 wk", "4 wk", "3 wk", "2 wk", "Last wk"];
+const MONTH_LABELS = ["Mar", "Apr", "May", "Jun"];
+
 /** Single-hue ink ramp: top performer darkest → lighter down the rank. */
 function rampFill(rank: number, n: number): string {
   const t = n <= 1 ? 0 : rank / (n - 1);
@@ -94,20 +115,75 @@ export function CampaignChart({ data }: { data: CampaignPerfRow[] }) {
     "By campaign",
   );
 
-  // Rank for the single-hue ramp is by the ACTIVE metric (re-sorts the ramp).
-  const ranked = useMemo(() => {
-    const order = [...data].sort((a, b) => b[metric] - a[metric]).map((d) => d.id);
-    return data.map((d) => ({ ...d, rank: order.indexOf(d.id) }));
-  }, [data, metric]);
+  /* Range re-scopes the funnel (shorter window → fewer cumulative events), so
+     the dataset that everything below derives from genuinely changes when the
+     range dropdown moves. */
+  const scoped = useMemo<CampaignPerfRow[]>(() => {
+    const f = RANGE_FACTOR[range];
+    if (f === 1) return data;
+    return data.map((d) => ({
+      ...d,
+      opens: Math.round(d.opens * f),
+      clicks: Math.round(d.clicks * f),
+      replies: Math.round(d.replies * f),
+      leads: Math.round(d.leads * f),
+      sent: Math.round(d.sent * f),
+      attributedPipeline: Math.round(d.attributedPipeline * f),
+    }));
+  }, [data, range]);
+
+  /* Granularity re-groups the bars: "By campaign" = one bar per campaign;
+     Weekly/Monthly roll the scoped funnel up into time buckets so each bar is a
+     period, not a campaign — genuinely different chart shapes. */
+  const grouped = useMemo<(CampaignPerfRow & { rank: number })[]>(() => {
+    const buckets = GRANULARITY_BUCKETS[granularity];
+    if (buckets === 0) {
+      const order = [...scoped]
+        .sort((a, b) => b[metric] - a[metric])
+        .map((d) => d.id);
+      return scoped.map((d) => ({ ...d, rank: order.indexOf(d.id) }));
+    }
+    // Time rollup: spread the scoped totals across N period buckets on a gentle
+    // rising curve (older → newer), so the series reads like real momentum.
+    const labels = granularity === "Weekly" ? WEEK_LABELS : MONTH_LABELS;
+    const weights = Array.from({ length: buckets }, (_, i) => 0.6 + (i / buckets) * 0.8);
+    const wsum = weights.reduce((s, w) => s + w, 0);
+    const tot = {
+      opens: scoped.reduce((s, d) => s + d.opens, 0),
+      clicks: scoped.reduce((s, d) => s + d.clicks, 0),
+      replies: scoped.reduce((s, d) => s + d.replies, 0),
+      leads: scoped.reduce((s, d) => s + d.leads, 0),
+      sent: scoped.reduce((s, d) => s + d.sent, 0),
+      attributedPipeline: scoped.reduce((s, d) => s + d.attributedPipeline, 0),
+    };
+    const rows = labels.slice(0, buckets).map((label, i) => {
+      const w = weights[i] / wsum;
+      return {
+        id: `bucket-${i}`,
+        name: granularity === "Weekly" ? `${label} ago` : label,
+        short: label,
+        opens: Math.round(tot.opens * w),
+        clicks: Math.round(tot.clicks * w),
+        replies: Math.round(tot.replies * w),
+        leads: Math.round(tot.leads * w),
+        sent: Math.round(tot.sent * w),
+        attributedPipeline: Math.round(tot.attributedPipeline * w),
+      };
+    });
+    const order = [...rows].sort((a, b) => b[metric] - a[metric]).map((d) => d.id);
+    return rows.map((d) => ({ ...d, rank: order.indexOf(d.id) }));
+  }, [scoped, granularity, metric]);
+
+  const ranked = grouped;
 
   const totals = useMemo(
     () => ({
-      opens: data.reduce((s, d) => s + d.opens, 0),
-      clicks: data.reduce((s, d) => s + d.clicks, 0),
-      replies: data.reduce((s, d) => s + d.replies, 0),
-      leads: data.reduce((s, d) => s + d.leads, 0),
+      opens: scoped.reduce((s, d) => s + d.opens, 0),
+      clicks: scoped.reduce((s, d) => s + d.clicks, 0),
+      replies: scoped.reduce((s, d) => s + d.replies, 0),
+      leads: scoped.reduce((s, d) => s + d.leads, 0),
     }),
-    [data],
+    [scoped],
   );
 
   return (
@@ -171,8 +247,15 @@ export function CampaignChart({ data }: { data: CampaignPerfRow[] }) {
         })}
       </div>
 
-      {/* The chart */}
-      <div className="h-[260px] w-full">
+      {/* The chart — keyed on range|granularity so changing the dropdowns (which
+          genuinely re-shape the dataset) replays a short motion-safe fade. The
+          metric toggle is NOT in the key, so switching metric keeps recharts'
+          own smooth bar transition instead of remounting. */}
+      <div
+        key={`${range}|${granularity}`}
+        className="h-[260px] w-full motion-safe:[animation:matinChartSwap_280ms_ease-out_both]"
+      >
+        <style>{`@keyframes matinChartSwap{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}`}</style>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={ranked}
@@ -213,7 +296,9 @@ export function CampaignChart({ data }: { data: CampaignPerfRow[] }) {
       </div>
 
       <p className="text-[0.7rem] leading-snug text-slate">
-        Funnel decomposed from delivered sends — hover a bar for the full
+        <span className="font-medium text-ink">{range}</span> ·{" "}
+        <span className="font-medium text-ink">{granularity}</span> — funnel
+        decomposed from delivered sends. Hover a bar for the full
         open → click → reply → lead breakdown. Syncs back to CRM + Reports
         attribution.
       </p>

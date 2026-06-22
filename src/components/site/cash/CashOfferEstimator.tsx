@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BadgeCheck, Clock } from "lucide-react";
+import { prefersReducedMotion, scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 
 const fmt = (n: number) => "$" + Math.round(n).toLocaleString();
 
@@ -11,14 +12,25 @@ export function CashOfferEstimator() {
   const [shown, setShown] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const raf = useRef<number | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const low = value * 0.9;
   const high = value * 0.94;
 
   function getOffer() {
     if (submitting) return;
-    setSubmitting(true);
     setRevealed(true);
+    // On stacked (narrow) layouts the result sits below the button — bring it
+    // into view so the user actually SEES their number appear.
+    scrollIntoViewSafe(resultRef.current, { block: "center", onlyBelowLg: true });
+
+    // Honor reduced-motion: skip the count-up ramp, show the final number.
+    if (prefersReducedMotion()) {
+      setShown(high);
+      return;
+    }
+
+    setSubmitting(true);
     const start = performance.now();
     const from = 0;
     const to = high;
@@ -69,18 +81,22 @@ export function CashOfferEstimator() {
         <button
           onClick={getOffer}
           disabled={submitting}
-          className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(16,122,80,.4)] transition hover:bg-emerald-500 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="mt-6 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_30px_rgba(16,122,80,.4)] transition hover:bg-emerald-500 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
         >
           Get my cash offer <ArrowRight className="h-4 w-4" />
         </button>
       </div>
 
       {/* Result */}
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-900/40 to-ink-900/40 p-6 text-center">
+      <div
+        ref={resultRef}
+        aria-live="polite"
+        className="flex scroll-mt-24 flex-col items-center justify-center rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-900/40 to-ink-900/40 p-6 text-center"
+      >
         {revealed ? (
           <>
             <span className="eyebrow-light text-emerald-300/80">Your cash offer range</span>
-            <div className="mt-2 font-display text-4xl text-white tabular-nums [animation:countup-glow_2.4s_ease-in-out_infinite] md:text-5xl">
+            <div className="mt-2 font-display text-4xl text-white tabular-nums motion-safe:[animation:countup-glow_2.4s_ease-in-out_infinite] md:text-5xl">
               {fmt(shown)}
             </div>
             <div className="mt-1 text-[0.86rem] text-slate-300">

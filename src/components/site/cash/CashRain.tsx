@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { prefersReducedMotion } from "@/components/site/useScrollReveal";
+
 /**
  * Falling cash — detailed, realistic $100 banknotes drawn in SVG (no photos).
  * Correct 2.61:1 proportion, cream center panel + federal-green frame, Franklin
@@ -129,6 +132,39 @@ function Bill({ i }: { i: number }) {
 }
 
 export function CashRain({ count = 16 }: { count?: number }) {
+  // Reduced-motion: render a few static, gently-placed bills (no falling loop)
+  // so the brand visual survives without continuous motion.
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    setReduced(prefersReducedMotion());
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+
+  if (reduced) {
+    return (
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden opacity-40">
+        {Array.from({ length: 5 }).map((_, i) => {
+          const left = (i * 23 + 8) % 92;
+          const top = (i * 31 + 10) % 80;
+          const rot = ((i * 37) % 40) - 20;
+          return (
+            <div
+              key={i}
+              className="absolute drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)]"
+              style={{ left: `${left}%`, top: `${top}%`, transform: `rotate(${rot}deg) scale(0.85)` }}
+            >
+              <Banknote id={`static-${i}`} />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden [perspective:900px]">
       {Array.from({ length: count }).map((_, i) => (

@@ -81,9 +81,20 @@ import { campaignPerformance } from "@/components/command/marketing/marketing-br
  *  barrel so we declare it here). */
 type ActionStreamState = { running?: boolean; result?: ReactNode };
 
-/** Compose the pane visibility class (paneClass, active below lg) with grid spans. */
-function cnPane(paneClass: string, rest: string) {
-  return cn(paneClass, rest);
+/* Local pane visibility at the XL split (not lg).
+
+   The 3-pane studio (Templates / Preview / Controls) is too tight in the
+   1024–1279 "lg-but-not-xl" band: with the 280px sidebar, the workspace is only
+   ~700px wide at lg, so a 3/5/4 split crushes the full AssetPreview document
+   into a ~290px cell (the "never crowd a full document into a narrow grid cell"
+   rule). So we keep the single-pane PaneSwitcher all the way to xl and only open
+   the real 3-pane grid at xl+ where the workspace clears ~1000px.
+
+   The os `paneClass` helper is hardcoded to `lg`; we can't edit it, so this
+   local helper mirrors it at `xl`: show only the active pane below xl, show all
+   panes at xl and up. */
+function paneClassXl(active: boolean, rest: string) {
+  return cn(active ? "block xl:block" : "hidden xl:block", rest);
 }
 
 const CAMPAIGN_STATUS: Record<Campaign["status"], { tone: ChipTone; label: string }> = {
@@ -577,22 +588,28 @@ export default function MarketingStudioPage() {
         />
       </KpiStrip>
 
-      {/* Mobile pane switcher (R1) — Templates · Preview · Controls. Shows below
-          lg; the full 3-pane grid takes over at lg+ via paneClass. */}
-      <PaneSwitcher {...pane.switcherProps} ariaLabel="Marketing studio panes" />
+      {/* Pane switcher (R1) — Templates · Preview · Controls. Shows below XL
+          (the os switcher bakes in `lg:hidden`, so we re-show it at lg with
+          `lg:flex` and hide it only at xl); the full 3-pane grid takes over at
+          xl+ where the workspace is wide enough to not crush the preview. */}
+      <PaneSwitcher
+        {...pane.switcherProps}
+        ariaLabel="Marketing studio panes"
+        className="lg:flex xl:hidden"
+      />
 
-      {/* Three panes — split at lg (R1). Each pane keeps state via paneClass so
-          the form + preview persist when switching on phone. */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+      {/* Three panes — split at XL (R1/R-lg-band). Each pane keeps state via the
+          local xl pane-class so the form + preview persist when switching. */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         {/* Pane 1 — template library */}
-        <div className={cnPane(pane.paneClass("templates"), "lg:col-span-3")}>
+        <div className={paneClassXl(pane.is("templates"), "xl:col-span-3")}>
           <TemplateLibrary active={template} onSelect={selectTemplate} />
         </div>
 
         {/* Pane 2 — asset previews (channel tabs over one canvas). Visibility on
             the outer div; flex column on an inner wrapper so it applies whenever
             the pane is shown (block vs flex would otherwise collide). */}
-        <div className={cnPane(pane.paneClass("preview"), "lg:col-span-5")}>
+        <div className={paneClassXl(pane.is("preview"), "xl:col-span-5")}>
          <div className="flex flex-col gap-5">
           <AssetPreview
             headline={activeTemplate.headline}
@@ -637,7 +654,7 @@ export default function MarketingStudioPage() {
         </div>
 
         {/* Pane 3 — generation controls + real audience composition */}
-        <div className={cnPane(pane.paneClass("controls"), "lg:col-span-4")}>
+        <div className={paneClassXl(pane.is("controls"), "xl:col-span-4")}>
           <div className="flex flex-col gap-5">
             <GenerationControls
               state={controls}

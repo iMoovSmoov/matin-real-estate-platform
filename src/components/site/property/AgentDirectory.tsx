@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Search, X, ChevronDown, Users } from "lucide-react";
 import { AgentCard } from "@/components/site/AgentCard";
 import { Button } from "@/components/ui/button";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 import { cn } from "@/lib/utils";
 import { communities } from "@/lib/data";
 import type { Agent } from "@/lib/types";
@@ -16,6 +17,13 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
   const [specialty, setSpecialty] = useState("");
   const [community, setCommunity] = useState("");
   const [language, setLanguage] = useState("");
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // A dropdown selection should visibly move the user to the updated results
+  // on narrow screens where the grid is below the filter bar.
+  function revealResults() {
+    scrollIntoViewSafe(resultsRef.current, { block: "start", onlyBelowLg: true });
+  }
 
   // Derive filter options from the data
   const specialties = useMemo(
@@ -77,17 +85,29 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
           )}
         </div>
         <div className="grid grid-cols-2 gap-2 [&>*:last-child]:col-span-2 sm:grid-cols-3 sm:[&>*:last-child]:col-span-1 lg:flex">
-          <FilterSelect value={specialty} onChange={setSpecialty} placeholder="Any specialty">
+          <FilterSelect
+            value={specialty}
+            onChange={(v) => { setSpecialty(v); revealResults(); }}
+            placeholder="Any specialty"
+          >
             {specialties.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </FilterSelect>
-          <FilterSelect value={community} onChange={setCommunity} placeholder="Any community">
+          <FilterSelect
+            value={community}
+            onChange={(v) => { setCommunity(v); revealResults(); }}
+            placeholder="Any community"
+          >
             {communityOptions.map((c) => (
               <option key={c.slug} value={c.slug}>{c.name}</option>
             ))}
           </FilterSelect>
-          <FilterSelect value={language} onChange={setLanguage} placeholder="Any language">
+          <FilterSelect
+            value={language}
+            onChange={(v) => { setLanguage(v); revealResults(); }}
+            placeholder="Any language"
+          >
             {languages.map((l) => (
               <option key={l} value={l}>{l}</option>
             ))}
@@ -96,8 +116,8 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
       </div>
 
       {/* ---------- RESULT META ---------- */}
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.95rem] text-slate">
+      <div ref={resultsRef} className="mt-7 flex scroll-mt-24 flex-wrap items-center justify-between gap-3">
+        <p className="text-[0.95rem] text-slate" aria-live="polite">
           <span className="font-display text-2xl text-ink">{results.length}</span>{" "}
           {results.length === 1 ? "broker" : "brokers"}
         </p>
@@ -110,7 +130,10 @@ export function AgentDirectory({ agents }: { agents: Agent[] }) {
 
       {/* ---------- GRID ---------- */}
       {results.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        <div
+          key={`${query}|${specialty}|${community}|${language}`}
+          className="mt-6 grid grid-cols-1 gap-4 motion-safe:animate-[fade_0.35s_ease-out] sm:grid-cols-2 sm:gap-5 lg:grid-cols-3"
+        >
           {results.map((a) => (
             <AgentCard key={a.slug} agent={a} />
           ))}

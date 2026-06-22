@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Search, SlidersHorizontal, X, MapPinned, ChevronDown, Map, List } from "lucide-react";
 import { ListingCard } from "@/components/site/ListingCard";
 import { Button } from "@/components/ui/button";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 import { cn, compactUsd } from "@/lib/utils";
 import type { Listing, ListingStatus } from "@/lib/types";
 
@@ -44,6 +45,14 @@ export function SearchExperience({
   const [sort, setSort] = useState<Sort>("newest");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<View>("list");
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // After a filter/sort change, surface the updated results. Only fires below
+  // lg, where the list scrolls in the page flow beneath the filter accordion;
+  // at lg+ the list is its own scroll pane and already visible.
+  function revealResults() {
+    scrollIntoViewSafe(resultsRef.current, { block: "start", onlyBelowLg: true });
+  }
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -171,9 +180,9 @@ export function SearchExperience({
             {/* Property type */}
             <FilterGroup label="Property type">
               <div className="flex flex-wrap gap-2">
-                <Chip active={type === ""} onClick={() => setType("")}>Any</Chip>
+                <Chip active={type === ""} onClick={() => { setType(""); revealResults(); }}>Any</Chip>
                 {TYPES.map((t) => (
-                  <Chip key={t} active={type === t} onClick={() => setType(type === t ? "" : t)}>
+                  <Chip key={t} active={type === t} onClick={() => { setType(type === t ? "" : t); revealResults(); }}>
                     {t === "Acreage Estate" ? "Acreage" : t}
                   </Chip>
                 ))}
@@ -183,9 +192,9 @@ export function SearchExperience({
             {/* Status */}
             <FilterGroup label="Status">
               <div className="flex flex-wrap gap-2">
-                <Chip active={status === ""} onClick={() => setStatus("")}>Any</Chip>
+                <Chip active={status === ""} onClick={() => { setStatus(""); revealResults(); }}>Any</Chip>
                 {STATUSES.map((s) => (
-                  <Chip key={s} active={status === s} onClick={() => setStatus(status === s ? "" : s)}>
+                  <Chip key={s} active={status === s} onClick={() => { setStatus(status === s ? "" : s); revealResults(); }}>
                     {s}
                   </Chip>
                 ))}
@@ -195,9 +204,9 @@ export function SearchExperience({
             {/* Beds */}
             <FilterGroup label="Min bedrooms">
               <div className="flex flex-wrap gap-2">
-                <Chip active={minBeds === 0} onClick={() => setMinBeds(0)}>Any</Chip>
+                <Chip active={minBeds === 0} onClick={() => { setMinBeds(0); revealResults(); }}>Any</Chip>
                 {BEDS.map((b) => (
-                  <Chip key={b} active={minBeds === b} onClick={() => setMinBeds(minBeds === b ? 0 : b)}>
+                  <Chip key={b} active={minBeds === b} onClick={() => { setMinBeds(minBeds === b ? 0 : b); revealResults(); }}>
                     {b}+
                   </Chip>
                 ))}
@@ -207,9 +216,9 @@ export function SearchExperience({
             {/* Baths */}
             <FilterGroup label="Min bathrooms">
               <div className="flex flex-wrap gap-2">
-                <Chip active={minBaths === 0} onClick={() => setMinBaths(0)}>Any</Chip>
+                <Chip active={minBaths === 0} onClick={() => { setMinBaths(0); revealResults(); }}>Any</Chip>
                 {BATHS.map((b) => (
-                  <Chip key={b} active={minBaths === b} onClick={() => setMinBaths(minBaths === b ? 0 : b)}>
+                  <Chip key={b} active={minBaths === b} onClick={() => { setMinBaths(minBaths === b ? 0 : b); revealResults(); }}>
                     {b}+
                   </Chip>
                 ))}
@@ -239,10 +248,10 @@ export function SearchExperience({
         </div>
 
         {/* ── Results list ── */}
-        <div className="flex-1 overflow-y-auto px-4 pb-8">
+        <div ref={resultsRef} className="flex-1 scroll-mt-28 overflow-y-auto px-4 pb-8">
           {/* Results count + sort */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.08] py-4">
-            <p className="text-sm text-slate">
+            <p className="text-sm text-slate" aria-live="polite">
               Showing{" "}
               <span className="font-display text-2xl font-bold text-ink">{results.length}</span>{" "}
               <span className="font-medium text-ink/80">{results.length === 1 ? "home" : "homes"}</span>
@@ -334,11 +343,12 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium transition-all duration-150",
+        "min-h-[36px] rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium transition-all duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:ring-offset-1",
         active
-          ? "bg-azure text-white shadow-[0_4px_14px_rgba(46,144,224,.30)]"
-          : "bg-white text-ink/70 ring-1 ring-ink/[0.12] hover:ring-azure/40 hover:text-ink",
+          ? "bg-ink text-white shadow-[0_4px_14px_rgba(6,6,6,.25)]"
+          : "bg-white text-ink/70 ring-1 ring-ink/[0.12] hover:ring-ink/40 hover:text-ink",
       )}
     >
       {children}

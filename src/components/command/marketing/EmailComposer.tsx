@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Bold,
   Italic,
@@ -10,6 +10,7 @@ import {
   X,
   Loader2,
   Sparkle,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
@@ -69,11 +70,12 @@ const TEMPLATES: Template[] = [
   },
 ];
 
-const TOOLBAR = [
-  { icon: Bold, label: "Bold" },
-  { icon: Italic, label: "Italic" },
-  { icon: Link2, label: "Insert link" },
-  { icon: List, label: "Bulleted list" },
+type Fmt = "bold" | "italic" | "link" | "list";
+const TOOLBAR: { icon: LucideIcon; label: string; fmt: Fmt }[] = [
+  { icon: Bold, label: "Bold", fmt: "bold" },
+  { icon: Italic, label: "Italic", fmt: "italic" },
+  { icon: Link2, label: "Insert link", fmt: "link" },
+  { icon: List, label: "Bulleted list", fmt: "list" },
 ];
 
 export function EmailComposer({
@@ -91,6 +93,7 @@ export function EmailComposer({
   const [subject, setSubject] = useState(TEMPLATES[0].subject);
   const [body, setBody] = useState(TEMPLATES[0].body);
   const [activeTemplate, setActiveTemplate] = useState<string>("just-listed");
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const filteredTemplates = useMemo(() => {
     const q = templateQuery.trim().toLowerCase();
@@ -114,6 +117,51 @@ export function EmailComposer({
 
   function insertToken(token: string) {
     setBody((b) => (b.endsWith("\n") || b === "" ? b + token : `${b} ${token}`));
+  }
+
+  /* Real toolbar formatting: wrap/transform the current textarea selection with
+     markdown so Bold/Italic/Link/List actually change the body (and the preview
+     renders the markdown). Falls back to a sensible placeholder when nothing is
+     selected, and re-focuses the textarea so the result is immediately visible. */
+  function applyFormat(fmt: Fmt) {
+    const el = bodyRef.current;
+    const start = el?.selectionStart ?? body.length;
+    const end = el?.selectionEnd ?? body.length;
+    const sel = body.slice(start, end);
+    const before = body.slice(0, start);
+    const after = body.slice(end);
+    let next = body;
+    let caret = end;
+    if (fmt === "bold") {
+      const text = sel || "bold text";
+      next = `${before}**${text}**${after}`;
+      caret = start + text.length + 4;
+    } else if (fmt === "italic") {
+      const text = sel || "italic text";
+      next = `${before}*${text}*${after}`;
+      caret = start + text.length + 2;
+    } else if (fmt === "link") {
+      const text = sel || "link text";
+      next = `${before}[${text}](https://matinrealestate.com)${after}`;
+      caret = start + next.length - after.length;
+    } else {
+      // List: prefix each selected line (or the current line) with "- ".
+      const block = sel || "List item";
+      const listed = block
+        .split("\n")
+        .map((line) => (line.trim() ? `- ${line.replace(/^- /, "")}` : line))
+        .join("\n");
+      const lead = before && !before.endsWith("\n") ? "\n" : "";
+      next = `${before}${lead}${listed}${after}`;
+      caret = start + lead.length + listed.length;
+    }
+    setBody(next);
+    // Restore focus + caret on the next frame so the change is visible.
+    requestAnimationFrame(() => {
+      if (!bodyRef.current) return;
+      bodyRef.current.focus();
+      bodyRef.current.setSelectionRange(caret, caret);
+    });
   }
 
   function removeRecipient(r: string) {
@@ -235,13 +283,14 @@ export function EmailComposer({
 
           {/* Toolbar */}
           <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-mist bg-paper px-2 py-1.5">
-            {TOOLBAR.map(({ icon: Icon, label }) => (
+            {TOOLBAR.map(({ icon: Icon, label, fmt }) => (
               <button
                 key={label}
                 type="button"
                 aria-label={label}
                 title={label}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate transition-colors hover:bg-cloud hover:text-ink"
+                onClick={() => applyFormat(fmt)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate transition-colors hover:bg-cloud hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
               >
                 <Icon className="h-3.5 w-3.5" aria-hidden />
               </button>
@@ -282,6 +331,7 @@ export function EmailComposer({
 
           {/* Body */}
           <textarea
+            ref={bodyRef}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={9}

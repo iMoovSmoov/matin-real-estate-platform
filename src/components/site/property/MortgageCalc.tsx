@@ -115,8 +115,10 @@ export function MortgageCalc({ listingPrice }: Props) {
             {([30, 15] as Term[]).map((t) => (
               <button
                 key={t}
+                type="button"
                 onClick={() => setTerm(t)}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                aria-pressed={term === t}
+                className={`min-h-[44px] flex-1 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/40 ${
                   term === t
                     ? "bg-ink text-paper"
                     : "bg-cloud text-slate hover:bg-paper-200"
@@ -146,8 +148,8 @@ export function MortgageCalc({ listingPrice }: Props) {
         </div>
 
         <p className="text-[0.7rem] leading-relaxed text-slate">
-          Estimate only — 20% down, {rate.toFixed(1)}% rate, {term}-yr fixed. Taxes based on
-          1.1% annual. Consult a lender for exact figures.
+          Estimate only — {Math.round(Math.min(100, Math.max(0, downPct)))}% down, {rate.toFixed(1)}% rate, {term}-yr fixed.
+          Taxes based on 1.1% annual. Consult a lender for exact figures.
         </p>
       </div>
     </div>

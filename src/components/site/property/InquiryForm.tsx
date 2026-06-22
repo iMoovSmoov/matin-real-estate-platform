@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 
 export function InquiryForm({ agentName }: { agentName: string }) {
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const confirmRef = useRef<HTMLDivElement>(null);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -16,11 +18,17 @@ export function InquiryForm({ agentName }: { agentName: string }) {
     e.preventDefault();
     // Portfolio demo — no backend. Acknowledge optimistically.
     setSent(true);
+    // Surface the confirmation if the form was scrolled past on a small screen.
+    scrollIntoViewSafe(confirmRef.current, { block: "center", onlyBelowLg: true });
   }
 
   if (sent) {
     return (
-      <div className="flex flex-col items-center rounded-2xl bg-azure/[0.06] px-6 py-10 text-center ring-1 ring-azure/15">
+      <div
+        ref={confirmRef}
+        aria-live="polite"
+        className="flex scroll-mt-24 flex-col items-center rounded-2xl bg-azure/[0.06] px-6 py-10 text-center ring-1 ring-azure/15"
+      >
         <CheckCircle2 className="h-10 w-10 text-azure" />
         <h3 className="mt-4 font-display text-xl text-ink">Message sent</h3>
         <p className="mt-2 max-w-sm text-[0.9rem] text-slate">

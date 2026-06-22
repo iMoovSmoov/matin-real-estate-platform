@@ -21,7 +21,7 @@
    AI cards, KPI tiles, progress bars, or document previews.
    ────────────────────────────────────────────────────────────────────────── */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Rocket,
   AlertTriangle,
@@ -63,6 +63,7 @@ import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
 import { getAgent, roles, defaultListingCoordinator, listingPhoto } from "@/lib/data";
 import type { ListingPipeline } from "@/lib/types";
+import { prefersReducedMotion } from "./motion";
 
 /* Role-derived principal broker (no hardcoded "Broker Jordan Matin" — G-A #2). */
 const BROKER = getAgent(roles.principalBroker);
@@ -538,6 +539,41 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
   // Asset drawer.
   const [openAssetKey, setOpenAssetKey] = useState<AssetKey | null>(null);
   const openAsset = outputs.find((o) => o.key === openAssetKey) ?? null;
+  // Inline confirmation for the asset drawer's footer actions so no click is a
+  // no-op (mandate: "MUTATE → inline confirmation"). Cleared when the open
+  // asset changes.
+  const [assetAction, setAssetAction] = useState<string | null>(null);
+  function openAssetDrawer(k: AssetKey) {
+    setAssetAction(null);
+    setOpenAssetKey(k);
+  }
+
+  // lg+ action-drawer anchor — selecting a checklist track must scroll the
+  // context-sensitive action drawer into view (mandate: "checklist-track click
+  // updates the action drawer + scrolls to it"). On a tall left record card the
+  // drawer can sit below the fold, so a silent state change is invisible.
+  const actionRef = useRef<HTMLDivElement>(null);
+  function selectTrackDesktop(k: TrackKey) {
+    setActiveTrackKey(k);
+    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+    requestAnimationFrame(() =>
+      actionRef.current?.scrollIntoView({ behavior, block: "nearest" }),
+    );
+  }
+
+  // KPI drill — select the first listing matching the metric, focus the
+  // relevant track, jump the mobile pane to the record, and scroll the
+  // workspace into view so the tile click produces an immediate visible result.
+  function drillToListing(match: (l: ListingPipeline) => boolean, track: TrackKey) {
+    const target = listings.find(match) ?? selected;
+    setSelectedId(target.id);
+    setActiveTrackKey(track);
+    pane.go("record");
+    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+    requestAnimationFrame(() =>
+      document.getElementById("listing-workspace")?.scrollIntoView({ behavior, block: "start" }),
+    );
+  }
 
   // Mobile pane-switcher (R1): below lg show ONE pane at a time.
   const pane = usePaneSwitcher(
@@ -612,8 +648,10 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         Automated listing workflow: intake → docs → photos → MLS → marketing → seller updates.
       </p>
 
-      {/* KPI strip — explicit 2/3/6 so no tile orphans (R4) */}
-      <KpiStrip cols={6}>
+      {/* KPI strip — 2-up phone, 3-up sm + lg (the 1024–1279 'lg band' would
+          cram six tiles into ~120px each beside the 280px rail), 6-up only at
+          xl where there's room. No tile orphans at any width (6 = 2·3 = 3·2). */}
+      <KpiStrip cols={6} className="lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           label="Active launches"
           value={activeLaunches}
@@ -634,12 +672,16 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           value={photosPending}
           icon={<Camera className="h-4 w-4" />}
           hint="Media not yet delivered"
+          onDrill={() =>
+            drillToListing((l) => l.checklist.photos.some((i) => !i.done), "photos")
+          }
         />
         <KpiCard
           label="MLS drafts"
           value={mlsDrafts}
           icon={<FileText className="h-4 w-4" />}
           hint="Remarks awaiting approval"
+          onDrill={() => drillToListing((l) => l.stage === "MLS Draft", "mls")}
         />
         <KpiCard
           label="Awaiting broker"
@@ -647,33 +689,47 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           valueTone="danger"
           icon={<ShieldCheck className="h-4 w-4" />}
           hint="Sign-off blocks publish"
+          onDrill={() =>
+            drillToListing(
+              (l) => !l.brokerApproved && (l.stage === "Broker Review" || l.stage === "MLS Draft"),
+              "broker",
+            )
+          }
         />
         <KpiCard
           label="Launching this week"
           value={launchingThisWeek}
           icon={<CalendarClock className="h-4 w-4" />}
           hint="Targeted to go live ≤ 7 days"
+          onDrill={() =>
+            drillToListing((l) => l.stage === "MLS Draft" || l.stage === "Broker Review", "mls")
+          }
         />
       </KpiStrip>
 
-      {/* Selector — vertical list at lg+, horizontal chip row / dropdown
-          below lg (R1/R6). */}
-      <ListingSelectorBar
-        listings={listings}
-        selectedId={selected.id}
-        onSelect={(id) => {
-          setSelectedId(id);
-          setActiveTrackKey("disclosures");
-          setKitOutput(null);
-          pane.go("record");
-        }}
-      />
+      {/* Selector — horizontal scroll-snap rail at every width (R1/R6). The
+          wrapper `id` is the scroll target for KPI drilldowns. */}
+      <div id="listing-workspace" className="scroll-mt-20">
+        <ListingSelectorBar
+          listings={listings}
+          selectedId={selected.id}
+          onSelect={(id) => {
+            setSelectedId(id);
+            setActiveTrackKey("disclosures");
+            setKitOutput(null);
+            pane.go("record");
+          }}
+        />
+      </div>
 
       {/* Mobile pane-switcher (R1): below lg, ONE pane at a time. */}
       <PaneSwitcher {...pane.switcherProps} ariaLabel="Listing launch panes" />
 
-      {/* Below lg — single active pane. */}
-      <div className="space-y-5 lg:hidden">
+      {/* Below lg — single active pane. `key` on the active pane (+ record)
+          remounts so each pane-switch / record-switch fades in (reduced-motion
+          safe). Selecting a checklist track jumps straight to the Action pane
+          so the tap produces an immediate visible result. */}
+      <div key={`${selected.id}-${pane.active}`} className="space-y-5 motion-safe:animate-fade lg:hidden">
         {pane.is("record") ? (
           <ListingRecordCard
             listing={selected}
@@ -693,7 +749,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           <OutputPreviews
             outputs={outputs}
             heroPhoto={heroPhoto}
-            onView={(k) => setOpenAssetKey(k)}
+            onView={openAssetDrawer}
           />
         ) : null}
         {pane.is("action") ? (
@@ -702,14 +758,17 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
             kitLoading={kitLoading}
             kitOutput={kitOutput}
             onGenerateKit={handleGenerateKit}
-            onOpenDoc={() => setOpenAssetKey("seller-email")}
+            onOpenDoc={() => openAssetDrawer("seller-email")}
           />
         ) : null}
       </div>
 
       {/* lg+ — record (left) | outputs + action drawer (right). Tablet (md)
-          gets a 2-column intermediate via the selector bar being horizontal. */}
-      <div className="hidden gap-5 lg:grid lg:grid-cols-12">
+          gets a 2-column intermediate via the selector bar being horizontal.
+          `key={selected.id}` remounts the panes on a record switch so the whole
+          record fades in — a tasteful, reduced-motion-safe transition that
+          makes "the listing selector switches the whole record" visible. */}
+      <div key={selected.id} className="hidden gap-5 motion-safe:animate-fade lg:grid lg:grid-cols-12">
         <div className="lg:col-span-6 xl:col-span-5">
           <ListingRecordCard
             listing={selected}
@@ -718,7 +777,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
             overall={overall}
             agent={brandedAgent}
             heroPhoto={heroPhoto}
-            onSelectTrack={setActiveTrackKey}
+            onSelectTrack={selectTrackDesktop}
             onOpenAi={() => openAi(contextLine)}
           />
         </div>
@@ -726,15 +785,19 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           <OutputPreviews
             outputs={outputs}
             heroPhoto={heroPhoto}
-            onView={(k) => setOpenAssetKey(k)}
+            onView={openAssetDrawer}
           />
-          <ActionDrawerCard
-            track={activeTrack}
-            kitLoading={kitLoading}
-            kitOutput={kitOutput}
-            onGenerateKit={handleGenerateKit}
-            onOpenDoc={() => setOpenAssetKey("seller-email")}
-          />
+          {/* Anchor the context-sensitive action drawer so a track click scrolls
+              it into view + the active-track swap fades. */}
+          <div ref={actionRef} key={activeTrack.key} className="motion-safe:animate-fade scroll-mt-20">
+            <ActionDrawerCard
+              track={activeTrack}
+              kitLoading={kitLoading}
+              kitOutput={kitOutput}
+              onGenerateKit={handleGenerateKit}
+              onOpenDoc={() => openAssetDrawer("seller-email")}
+            />
+          </div>
         </div>
       </div>
 
@@ -757,43 +820,61 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         subtitle={`${selected.address} · ${selected.city}`}
         actions={
           openAsset ? (
-            <div className="flex w-full flex-wrap items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => setOpenAssetKey(null)}
-                className="min-h-[44px] rounded-lg px-3 py-2 text-[0.82rem] font-medium text-slate transition-colors hover:bg-paper-200"
-              >
-                Close
-              </button>
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="w-full">
+              {/* Inline confirmation so the footer actions are never no-ops */}
+              {assetAction ? (
+                <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-success/10 px-2.5 py-1.5 text-[0.76rem] font-medium text-success ring-1 ring-inset ring-success/25 motion-safe:animate-fade">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  {assetAction}
+                </p>
+              ) : null}
+              <div className="flex w-full flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
-                  className="min-h-[44px] rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
+                  onClick={() => setOpenAssetKey(null)}
+                  className="min-h-[44px] rounded-lg px-3 py-2 text-[0.82rem] font-medium text-slate transition-colors hover:bg-paper-200"
                 >
-                  Download PDF
+                  Close
                 </button>
-                {openAsset.previewStatusTone === "warn" ? (
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+                    onClick={() =>
+                      setAssetAction(`${openAsset.previewTitle} downloaded as PDF`)
+                    }
+                    className="min-h-[44px] rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
                   >
-                    Approve &amp; send
+                    Download PDF
                   </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
-                  >
-                    Send for signature
-                  </button>
-                )}
+                  {openAsset.previewStatusTone === "warn" ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAssetAction("Approved — sent for agent review · logged to ai_actions")
+                      }
+                      className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+                    >
+                      Approve &amp; send
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAssetAction("Sent for signature · envelope created, CRM timeline updated")
+                      }
+                      className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+                    >
+                      Send for signature
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ) : null
         }
       >
         {openAsset ? (
-          <div className="space-y-4">
+          <div key={openAsset.key} className="space-y-4 motion-safe:animate-fade">
             <AIInsightChip>Generated by Matin AI · saved as draft version</AIInsightChip>
             {/* Client-facing types render through BrandedDocument (G-B); the
                 internal checklist export keeps the gray-ruled DocumentPreview. */}
@@ -950,6 +1031,9 @@ function ListingRecordCard({
       : Math.max(2, 14 - listing.daysInStage);
   const ppsf = Math.round(listing.price / listing.sqft);
   const blockers = listing.blockers ?? [];
+  // Inline confirmation for "Forward to seller" so the click isn't a no-op
+  // (mandate: MUTATE → inline confirmation). Resets when the record changes.
+  const [forwarded, setForwarded] = useState(false);
 
   const stats = [
     { k: "Beds", v: String(listing.beds) },
@@ -1094,13 +1178,21 @@ function ListingRecordCard({
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               Refine with Matin AI
             </button>
-            <button
-              type="button"
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
-            >
-              <Forward className="h-3.5 w-3.5" />
-              Forward to seller
-            </button>
+            {forwarded ? (
+              <span className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-success/10 px-2.5 py-1.5 text-[0.78rem] font-semibold text-success ring-1 ring-inset ring-success/25 motion-safe:animate-fade">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                Forwarded to seller
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setForwarded(true)}
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+              >
+                <Forward className="h-3.5 w-3.5" />
+                Forward to seller
+              </button>
+            )}
           </div>
         </div>
       </div>

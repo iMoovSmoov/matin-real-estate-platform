@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   CircleCheck,
   StickyNote,
@@ -10,6 +10,7 @@ import {
   Copy,
   Receipt,
 } from "lucide-react";
+import { scrollToEl } from "./motion";
 import { streamAi } from "@/lib/ai/client";
 import { getAgent, listingPhoto } from "@/lib/data";
 import { cn, usd } from "@/lib/utils";
@@ -181,6 +182,9 @@ export function CashOfferMatrix() {
   const [copied, setCopied] = useState(false);
   /** Net sheet: quick summary card vs the printable branded document. */
   const [netView, setNetView] = useState<"summary" | "branded">("summary");
+  /** The streaming AI-verdict callout — scrolled into view when it runs so the
+   *  user SEES the result appear (the trigger is at the top of a tall table). */
+  const verdictRef = useRef<HTMLDivElement>(null);
 
   const netSheetOffer = useMemo(
     () => OFFERS.find((o) => o.id === accepted) ?? OFFERS.find((o) => o.recommended)!,
@@ -214,6 +218,9 @@ export function CashOfferMatrix() {
 
   async function runVerdict() {
     setVerdict({ text: "", running: true });
+    // Scroll the (now-mounting) verdict callout into view so the result is
+    // visible immediately rather than appearing below the fold.
+    scrollToEl(verdictRef.current, "nearest");
     await streamAi(
       {
         tool: "cash-offer-eval",
@@ -273,18 +280,18 @@ export function CashOfferMatrix() {
             type="button"
             onClick={runVerdict}
             disabled={verdict?.running}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-50"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-50"
           >
             <MatinMark theme="dark" className="h-3.5 w-3.5" />
             {verdict?.running ? "Evaluating…" : "AI verdict"}
           </button>
         </div>
 
-        {/* Accepted-offer confirmation banner (inline) */}
+        {/* Accepted-offer confirmation banner (inline mutation feedback) */}
         {acceptedOffer ? (
-          <div className="flex items-center gap-2 border-b border-success/25 bg-success/[0.07] px-5 py-2.5 text-[0.8rem]">
+          <div className="flex flex-wrap items-center gap-2 border-b border-success/25 bg-success/[0.07] px-5 py-2.5 text-[0.8rem] motion-safe:animate-fade">
             <CircleCheck className="h-4 w-4 shrink-0 text-success" aria-hidden />
-            <span className="text-ink">
+            <span className="min-w-0 flex-1 text-ink">
               Accepted <span className="font-semibold">{acceptedOffer.buyer}</span> at{" "}
               <span className="font-semibold tabular-nums">{usd(acceptedOffer.price)}</span> — other
               offers are on hold. Net sheet updated.
@@ -292,12 +299,19 @@ export function CashOfferMatrix() {
             <button
               type="button"
               onClick={() => setAccepted(null)}
-              className="ml-auto shrink-0 rounded-md px-2 py-1 text-[0.74rem] font-medium text-slate transition-colors hover:text-ink"
+              className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-md px-2 py-1 text-[0.74rem] font-medium text-slate transition-colors hover:text-ink"
             >
               Undo
             </button>
           </div>
         ) : null}
+
+        {/* Swipe affordance on narrow screens — the matrix keeps a frozen label
+            column and scrolls horizontally (SkySlope pattern); tell the phone
+            user there are more offer columns to the right. */}
+        <p className="px-5 pt-2 text-[0.7rem] text-slate sm:hidden">
+          Swipe the grid sideways to compare all {OFFERS.length} offers →
+        </p>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
@@ -359,7 +373,7 @@ export function CashOfferMatrix() {
                           disabled={disabled}
                           onClick={() => setAccepted(isAccepted ? null : o.id)}
                           className={cn(
-                            "inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-semibold transition-colors disabled:cursor-not-allowed",
+                            "inline-flex min-h-11 items-center gap-1 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-semibold transition-colors disabled:cursor-not-allowed",
                             isAccepted
                               ? "bg-success text-cloud hover:bg-success/90"
                               : "bg-ink text-cloud hover:bg-ink-800 disabled:bg-ink/30",
@@ -374,7 +388,7 @@ export function CashOfferMatrix() {
                             setNotesOpen((cur) => (cur === o.id ? null : o.id))
                           }
                           className={cn(
-                            "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
+                            "inline-flex min-h-11 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
                             notes[o.id]
                               ? "border-ink/20 bg-paper-200 text-ink"
                               : "border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
@@ -494,7 +508,7 @@ export function CashOfferMatrix() {
 
         {/* AI verdict — dark callout (AI surface) */}
         {verdict ? (
-          <div className="px-5 pb-5 pt-1">
+          <div ref={verdictRef} className="px-5 pb-5 pt-1 motion-safe:animate-fade">
             <CalloutCard
               tone="ai"
               title="AI offer verdict"
@@ -531,7 +545,7 @@ export function CashOfferMatrix() {
                   onClick={() => setNetView("summary")}
                   aria-pressed={netView === "summary"}
                   className={cn(
-                    "inline-flex min-h-[36px] items-center rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
+                    "inline-flex min-h-[40px] items-center rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
                     netView === "summary" ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
                   )}
                 >
@@ -542,7 +556,7 @@ export function CashOfferMatrix() {
                   onClick={() => setNetView("branded")}
                   aria-pressed={netView === "branded"}
                   className={cn(
-                    "inline-flex min-h-[36px] items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
+                    "inline-flex min-h-[40px] items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
                     netView === "branded" ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
                   )}
                 >
@@ -556,6 +570,10 @@ export function CashOfferMatrix() {
             {netSheetOffer.buyer} · {usd(netSheetOffer.price)}
           </p>
 
+          {/* `key` remounts on each Summary ↔ Branded swap AND on accept (the
+              net sheet recomputes to the accepted offer) so the change fades in
+              — visible feedback for both the toggle and the Accept action. */}
+          <div key={`${netView}::${netSheetOffer.id}`} className="motion-safe:animate-fade">
           {netView === "summary" ? (
             <>
               <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate">
@@ -614,6 +632,7 @@ export function CashOfferMatrix() {
               />
             </div>
           )}
+          </div>
         </div>
 
         {/* Share-link offer intake (realism must — §2.3) with a Matin-branded

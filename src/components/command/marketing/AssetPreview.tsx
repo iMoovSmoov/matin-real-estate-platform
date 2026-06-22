@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Mail,
   Camera,
@@ -71,6 +72,7 @@ function MatinFromBar({ metaLine, kicker }: { metaLine: string; kicker: string }
  *  "Email has not been opened — View" tile (S8 ticket 9). Numbers model a
  *  representative send so the panel reads like a real deliverability report. */
 function AssetTelemetry({ channel }: { channel: PreviewChannel }) {
+  const [resent, setResent] = useState(false);
   if (channel !== "Email" && channel !== "Ad" && channel !== "Web page") return null;
   const delivered = 1286;
   const opened = 494; // ~38.4% — the Spring Seller Nurture benchmark
@@ -102,16 +104,27 @@ function AssetTelemetry({ channel }: { channel: PreviewChannel }) {
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-cloud px-3 py-2">
         <span className="text-[0.74rem] text-slate">
-          <span className="font-semibold text-ink tabular-nums">
-            {unopened.toLocaleString("en-US")}
-          </span>{" "}
-          recipients have not opened this {channel.toLowerCase()} yet
+          {resent ? (
+            <span className="inline-flex items-center gap-1.5 font-medium text-success">
+              <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+              Re-send queued to {unopened.toLocaleString("en-US")} non-openers — routes to approval first.
+            </span>
+          ) : (
+            <>
+              <span className="font-semibold text-ink tabular-nums">
+                {unopened.toLocaleString("en-US")}
+              </span>{" "}
+              recipients have not opened this {channel.toLowerCase()} yet
+            </>
+          )}
         </span>
         <button
           type="button"
-          className="inline-flex min-h-9 items-center rounded-lg border border-mist bg-paper px-3 text-[0.74rem] font-semibold text-ink transition-colors hover:border-ink/20"
+          onClick={() => setResent((v) => !v)}
+          aria-pressed={resent}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.74rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
         >
-          View · resend
+          {resent ? "Undo re-send" : "View · resend"}
         </button>
       </div>
     </div>

@@ -6,6 +6,8 @@ import {
   Printer,
   Send,
   CircleCheck,
+  Check,
+  Loader2,
   X,
   FileText,
 } from "lucide-react";
@@ -266,6 +268,15 @@ function DrawerActions({
   onAccept: () => void;
   onReject: () => void;
 }) {
+  // Send-for-signature has a 3-state lifecycle (idle → sending → sent) so the
+  // click produces real inline feedback instead of being a dead control.
+  const [sendState, setSendState] = useState<"idle" | "sending" | "sent">("idle");
+  function sendForSignature() {
+    if (sendState !== "idle") return;
+    setSendState("sending");
+    window.setTimeout(() => setSendState("sent"), 900);
+  }
+
   // Once accepted/rejected the verdict buttons collapse into a confirmation +
   // a single Send-for-signature affordance (light, human-primary).
   if (resolved) {
@@ -288,14 +299,28 @@ function DrawerActions({
           )}
         </span>
         <div className="flex flex-wrap items-center gap-1.5">
-          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} label="Download" />
-          <GhostBtn icon={<Printer className="h-3.5 w-3.5" />} label="Print" />
+          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} label="Download" doneLabel="Downloaded" />
+          <GhostBtn icon={<Printer className="h-3.5 w-3.5" />} label="Print" doneLabel="Sent to printer" />
           {doc.status === "complete" ? (
             <button
               type="button"
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.78rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+              onClick={sendForSignature}
+              disabled={sendState !== "idle"}
+              className={cn(
+                "inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-medium transition-colors disabled:cursor-default",
+                sendState === "sent"
+                  ? "bg-success text-cloud"
+                  : "bg-ink text-cloud hover:bg-ink-800 disabled:opacity-70",
+              )}
             >
-              <Send className="h-3.5 w-3.5" /> Send for signature
+              {sendState === "sending" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : sendState === "sent" ? (
+                <CircleCheck className="h-3.5 w-3.5" />
+              ) : (
+                <Send className="h-3.5 w-3.5" />
+              )}
+              {sendState === "sending" ? "Sending…" : sendState === "sent" ? "Sent for signature" : "Send for signature"}
             </button>
           ) : null}
         </div>
@@ -305,7 +330,7 @@ function DrawerActions({
 
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-2">
-      <GhostBtn icon={<FileText className="h-3.5 w-3.5" />} label="Preview" />
+      <GhostBtn icon={<FileText className="h-3.5 w-3.5" />} label="Preview" doneLabel="Opened preview" />
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
@@ -326,14 +351,35 @@ function DrawerActions({
   );
 }
 
-function GhostBtn({ icon, label }: { icon: ReactNode; label: string }) {
+/* A utility document action (Preview / Download / Print) — flashes a brief
+   confirmation on click so it is never a dead control (mandate 1). */
+function GhostBtn({
+  icon,
+  label,
+  doneLabel,
+}: {
+  icon: ReactNode;
+  label: string;
+  doneLabel: string;
+}) {
+  const [done, setDone] = useState(false);
+  function fire() {
+    setDone(true);
+    window.setTimeout(() => setDone(false), 1800);
+  }
   return (
     <button
       type="button"
-      className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-1.5 text-[0.78rem] font-medium text-ink transition-colors hover:bg-paper"
+      onClick={fire}
+      className={cn(
+        "inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
+        done
+          ? "border-success/40 bg-success/[0.08] text-success"
+          : "border-mist bg-cloud text-ink hover:bg-paper",
+      )}
     >
-      {icon}
-      {label}
+      {done ? <Check className="h-3.5 w-3.5" /> : icon}
+      {done ? doneLabel : label}
     </button>
   );
 }

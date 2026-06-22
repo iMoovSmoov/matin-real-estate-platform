@@ -96,6 +96,22 @@ export default function CoachingPage() {
     setPlanState(null);
   }
 
+  // Edit the drafted plan → jump to the branded Document tab where the streamed
+  // text becomes the editable plan body (real "review before it ships" flow,
+  // never a dead Edit button). Honors reduced-motion via the drawer's own fade.
+  function editPlan() {
+    setDrawerTab("document");
+  }
+
+  // Reject → discard the generated draft so the card reverts to its
+  // pre-generated "Generate plan" state, and fall back to the grounded
+  // auto-created plan tab below (always a visible result, never a dead click).
+  function rejectPlan() {
+    if (planRunningRef.current) return;
+    setPlanState(null);
+    setDrawerTab("plan");
+  }
+
   // Stream the AI coaching plan INLINE (no sidecar) into the AIActionCard.
   async function runPlan(s: CoachingStanding) {
     if (planRunningRef.current) return;
@@ -440,6 +456,8 @@ export default function CoachingPage() {
                     running={planState?.running ?? false}
                     result={planState?.text ? planState.text : undefined}
                     onRun={() => runPlan(selected)}
+                    onEdit={editPlan}
+                    onReject={rejectPlan}
                   />
                 </div>
 

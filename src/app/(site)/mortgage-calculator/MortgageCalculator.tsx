@@ -165,8 +165,9 @@ export function MortgageCalculator() {
                   key={y}
                   type="button"
                   onClick={() => setTermYears(y)}
+                  aria-pressed={termYears === y}
                   className={cn(
-                    "h-11 flex-1 rounded-xl border text-[0.88rem] font-medium transition",
+                    "h-11 min-h-[44px] flex-1 rounded-xl border text-[0.88rem] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-1",
                     termYears === y
                       ? "border-ink bg-ink text-white"
                       : "border-ink/15 bg-paper text-ink/60 hover:border-ink/40 hover:text-ink",
@@ -208,15 +209,15 @@ export function MortgageCalculator() {
             aria-hidden="true"
           >
             <div
-              className="bg-azure transition-all duration-500"
+              className="bg-white transition-all duration-500 motion-reduce:transition-none"
               style={{ width: `${piPct}%` }}
             />
             <div
-              className="bg-white/40 transition-all duration-500"
+              className="bg-white/45 transition-all duration-500 motion-reduce:transition-none"
               style={{ width: `${taxPct}%` }}
             />
             <div
-              className="bg-white/20 transition-all duration-500"
+              className="bg-white/20 transition-all duration-500 motion-reduce:transition-none"
               style={{ width: `${insPct}%` }}
             />
           </div>
@@ -224,12 +225,12 @@ export function MortgageCalculator() {
           <div className="mt-5 space-y-3">
             {[
               {
-                dot: "bg-azure",
+                dot: "bg-white",
                 label: "Principal & interest",
                 value: fmtUSD2(monthlyPI),
               },
               {
-                dot: "bg-white/40",
+                dot: "bg-white/45",
                 label: "Property tax (est.)",
                 value: fmtUSD2(monthlyTax),
               },

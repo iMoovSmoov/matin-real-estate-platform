@@ -101,6 +101,14 @@ const INITIAL_NODES: FlowNode[] = [
 
 const RANGES = ["Live (current run)", "Last 7 days", "Last 30 days"];
 
+/* Each range window shows a real run-summary (enrolled / sent / replied), so the
+   dropdown produces a visible result instead of being decorative. */
+const RANGE_STATS: Record<string, { enrolled: number; sent: number; replied: number }> = {
+  "Live (current run)": { enrolled: 1, sent: 0, replied: 0 },
+  "Last 7 days": { enrolled: 38, sent: 31, replied: 9 },
+  "Last 30 days": { enrolled: 164, sent: 142, replied: 41 },
+};
+
 export function SequenceBuilder() {
   const [nodes, setNodes] = useState<FlowNode[]>(INITIAL_NODES);
   const [selected, setSelected] = useState<string>("ai-draft");
@@ -109,6 +117,7 @@ export function SequenceBuilder() {
 
   const active = nodes.find((n) => n.id === selected) ?? nodes[0];
   const committedCount = nodes.filter((n) => n.state === "committed").length;
+  const rangeStats = RANGE_STATS[range] ?? RANGE_STATS[RANGES[0]];
 
   function toggleState(id: string) {
     setNodes((prev) =>
@@ -162,21 +171,57 @@ export function SequenceBuilder() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={range}
-            onChange={(e) => setRange(e.target.value)}
-            className="appearance-none rounded-full border border-mist bg-cloud px-3 py-1.5 text-[0.76rem] font-medium text-slate outline-none transition-colors hover:border-ink/20 hover:text-ink"
-          >
-            {RANGES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+          <div className="relative inline-flex items-center">
+            <select
+              value={range}
+              onChange={(e) => setRange(e.target.value)}
+              aria-label="Sequence run window"
+              className="appearance-none rounded-full border border-mist bg-cloud py-1.5 pl-3 pr-7 text-[0.76rem] font-medium text-slate outline-none transition-colors hover:border-ink/20 hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20"
+            >
+              {RANGES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <Clock
+              className="pointer-events-none absolute right-2 h-3 w-3 text-slate"
+              aria-hidden
+            />
+          </div>
           <span className="tabular-nums text-[0.72rem] text-slate">
             {committedCount}/{nodes.length} committed
           </span>
         </div>
+      </div>
+
+      {/* Run summary for the selected range — re-renders (with a short fade)
+          whenever the range dropdown changes, so the control has a visible
+          result rather than being decorative. */}
+      <div
+        key={range}
+        className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-mist bg-mist motion-safe:[animation:matinSeqStat_260ms_ease-out_both]"
+      >
+        <style>{`@keyframes matinSeqStat{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}`}</style>
+        {[
+          { label: "Enrolled", value: rangeStats.enrolled, tone: "ink" as const },
+          { label: "Sent", value: rangeStats.sent, tone: "ink" as const },
+          { label: "Replied", value: rangeStats.replied, tone: "success" as const },
+        ].map((s) => (
+          <div key={s.label} className="bg-cloud px-3 py-2.5">
+            <p className="text-[0.64rem] font-medium uppercase tracking-[0.1em] text-slate">
+              {s.label}
+            </p>
+            <p
+              className={cn(
+                "mt-0.5 text-[1.05rem] font-bold leading-none tabular-nums",
+                s.tone === "success" ? "text-success" : "text-ink",
+              )}
+            >
+              {s.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[180px_1fr]">

@@ -127,7 +127,7 @@ export default function CashOfferPage() {
       </section>
 
       {/* ESTIMATOR */}
-      <Section id="estimate" className="relative">
+      <Section id="estimate" className="relative scroll-mt-20">
         <Container>
           <SectionHeading
             eyebrow="Instant estimate"
@@ -229,8 +229,27 @@ export default function CashOfferPage() {
       <Section className="bg-ink-900/60">
         <Container>
           <SectionHeading eyebrow="The difference" title="Cash Is King vs. the traditional sale" align="center" light />
-          <div className="mx-auto mt-12 max-w-3xl overflow-x-auto rounded-2xl border border-white/10">
-            <div className="min-w-[520px]">
+
+          {/* Phone (< sm): stacked comparison cards — no horizontal scroll */}
+          <div className="mx-auto mt-10 grid max-w-md gap-3 sm:hidden">
+            {compare.map(([label, a, b]) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-ink-900/70 p-4">
+                <div className="text-[0.78rem] font-semibold uppercase tracking-wider text-slate-300">{label}</div>
+                <div className="mt-2.5 flex items-start gap-2 text-[0.92rem] text-emerald-300">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span><span className="text-emerald-300/70">Cash Is King:</span> {a}</span>
+                </div>
+                <div className="mt-1.5 flex items-start gap-2 text-[0.92rem] text-slate-300/70">
+                  <X className="mt-0.5 h-4 w-4 shrink-0 text-slate-300/40" />
+                  <span><span className="text-slate-300/50">Traditional:</span> {b}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* sm+ : full comparison table */}
+          <div className="mx-auto mt-12 hidden max-w-3xl overflow-hidden rounded-2xl border border-white/10 sm:block">
+            <div>
               <div className="grid grid-cols-[1.4fr_1fr_1fr] bg-ink-800/70 text-[0.8rem] font-semibold uppercase tracking-wider text-slate-300">
                 <div className="px-5 py-3.5" />
                 <div className="px-5 py-3.5 text-emerald-300">Cash Is King</div>

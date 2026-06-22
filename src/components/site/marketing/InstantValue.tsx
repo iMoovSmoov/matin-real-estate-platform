@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Home, Loader2, ShieldCheck, ArrowRight, TrendingUp, AlertCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 
 // ── Shared field styles ───────────────────────────────────────────────────────
 const labelCls = "text-sm font-medium text-ink mb-1 block";
@@ -153,6 +154,8 @@ export function InstantValue() {
   const [errors, setErrors] = useState<FormErrors>({});
   // Track which fields have been blurred so we show inline errors only after touch
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  // On stacked layouts the result panel renders below the form — scroll to it.
+  const resultRef = useRef<HTMLDivElement>(null);
 
   function blurField(field: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -183,6 +186,9 @@ export function InstantValue() {
 
     setPhase("loading");
     setRange(null);
+    // Bring the analyzing/result panel into view on narrow (stacked) layouts so
+    // the user sees the estimate being generated instead of it happening below.
+    scrollIntoViewSafe(resultRef.current, { block: "center", onlyBelowLg: true });
 
     const computed = estimateRange(beds, sqft, yearBuilt, condition);
 
@@ -437,7 +443,11 @@ export function InstantValue() {
       </form>
 
       {/* ── Result panel ─────────────────────────────────────────────────── */}
-      <div className="relative flex flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-ink to-ink-700 p-1 shadow-lift">
+      <div
+        ref={resultRef}
+        aria-live="polite"
+        className="relative flex scroll-mt-24 flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-ink to-ink-700 p-1 shadow-lift"
+      >
         <div className="grid-tech pointer-events-none absolute inset-0 opacity-30" />
         <div className="relative flex flex-1 flex-col rounded-[1.35rem] bg-cloud p-7 md:p-8">
           <div className="flex items-center gap-2 border-b border-ink/[0.07] pb-4">

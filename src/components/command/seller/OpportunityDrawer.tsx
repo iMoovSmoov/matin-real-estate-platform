@@ -45,6 +45,7 @@ import {
 } from "./sellerView";
 import { ScoreGauges } from "./ScoreGauges";
 import { HomeValueSparkline } from "./SellerCharts";
+import { scrollToEl } from "./motion";
 
 /** Estimated seller net-proceeds lines derived from the record (typical
  *  Portland-metro cost stack): payoff (~26% of value), 5% commission, title/
@@ -142,9 +143,9 @@ export function OpportunityDrawer({
     if (!lead) return;
     setApproved(false);
     setDraft({ text: "", running: true });
-    requestAnimationFrame(() =>
-      draftRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }),
-    );
+    // Scroll the AI-draft section into the drawer's viewport (reduced-motion
+    // aware) so the streaming result is visible immediately.
+    scrollToEl(draftRef.current, "nearest");
     await streamAi(
       {
         tool: "seller-intel",
@@ -244,6 +245,10 @@ export function OpportunityDrawer({
         </div>
       }
     >
+      {/* `key` remounts on each tab change so the drawer body fades in — a
+          tasteful, reduced-motion-safe transition between Overview / Documents
+          / Activity rather than an instant snap. */}
+      <div key={tab} className="motion-safe:animate-fade">
       {tab === "overview" ? (
         <>
           {/* Real property photo hero (deterministic by record id — G-A #6) */}
@@ -512,6 +517,7 @@ export function OpportunityDrawer({
           <ActivityTimeline items={timeline} />
         </section>
       )}
+      </div>
     </RecordDrawer>
   );
 }

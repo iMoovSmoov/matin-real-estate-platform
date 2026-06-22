@@ -1017,6 +1017,16 @@ export function RoutingView() {
     setActionState((prev) => ({ ...prev, [key]: { running: false, result: "Dismissed — no change staged." } }));
   }
 
+  // Edit a proposed change → open the referenced rule in the Edit drawer so the
+  // human adjusts it manually instead of running the AI draft (never a dead Edit
+  // button). Parses the first RR-NNN id out of the advisory; falls back to the
+  // currently-selected rule when no id is referenced.
+  function editAction(a: AIAction) {
+    const match = `${a.title} ${a.evidence}`.match(/RR-\d{3}/);
+    const target = (match && rules.find((r) => r.id === match[0])) ?? selected;
+    if (target) openEdit(target);
+  }
+
   /* ── Table columns (responsive: cards < lg via DataTable.responsive) ──────── */
   const columns: Column<RoutingRule>[] = [
     {
@@ -1190,6 +1200,7 @@ export function RoutingView() {
             actions={aiActions}
             actionState={actionState}
             onRunAction={runAction}
+            onEditAction={editAction}
             onRejectAction={rejectAction}
           >
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-ink-700 bg-ink-800 px-3.5 py-3">

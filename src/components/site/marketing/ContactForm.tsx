@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Send, CheckCircle2, Loader2, ArrowRight, AlertCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 import { cn } from "@/lib/utils";
 
 // ── Shared field styles (spec-compliant) ─────────────────────────────────────
@@ -30,6 +31,7 @@ export function ContactForm() {
   const [message, setMessage] = useState("");
   const [touched, setTouched] = useState<Touched>({ name: false, email: false, message: false });
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const confirmRef = useRef<HTMLDivElement>(null);
 
   const nameErr =
     touched.name && name.trim() === ""
@@ -69,6 +71,8 @@ export function ContactForm() {
     await new Promise((r) => setTimeout(r, 900));
     // Simulate occasional success (always succeeds in this demo)
     setStatus("done");
+    // Reveal the confirmation if the form was scrolled past on a phone.
+    scrollIntoViewSafe(confirmRef.current, { block: "center", onlyBelowLg: true });
   }
 
   function resetForm() {
@@ -84,7 +88,11 @@ export function ContactForm() {
   // Success state — form replaced by confirmation
   if (status === "done") {
     return (
-      <div className="flex flex-col items-center rounded-3xl bg-cloud p-9 text-center shadow-lift ring-1 ring-ink/[0.06] md:p-12">
+      <div
+        ref={confirmRef}
+        aria-live="polite"
+        className="flex scroll-mt-24 flex-col items-center rounded-3xl bg-cloud p-9 text-center shadow-lift ring-1 ring-ink/[0.06] md:p-12"
+      >
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 text-green-600">
           <CheckCircle2 className="h-9 w-9" />
         </div>
@@ -193,9 +201,9 @@ export function ContactForm() {
                 onClick={() => setIntent(opt)}
                 aria-pressed={intent === opt}
                 className={cn(
-                  "h-11 rounded-xl text-[0.9rem] font-medium transition",
+                  "h-11 min-h-[44px] rounded-xl text-[0.9rem] font-medium transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-1",
                   intent === opt
-                    ? "bg-azure text-white shadow-[0_8px_24px_rgba(46,144,224,.28)]"
+                    ? "bg-ink text-white shadow-[0_8px_24px_rgba(6,6,6,.22)]"
                     : "bg-paper text-ink/75 ring-1 ring-ink/10 hover:ring-ink/25",
                 )}
               >

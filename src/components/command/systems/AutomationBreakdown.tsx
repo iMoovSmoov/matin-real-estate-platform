@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef } from "react";
 import {
   Workflow,
   Play,
@@ -17,6 +18,7 @@ import {
 import type { Automation } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { AUTOMATION_OWNER } from "./systemsModel";
+import { scrollElementIntoView } from "./useScrollIntoView";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Systems Health — AutomationBreakdown (ref §2.11 + §1.6 backend-logic)
@@ -50,6 +52,24 @@ export function AutomationBreakdown({
   const owner = selected ? AUTOMATION_OWNER[selected.id] : null;
   const isPaused = selected?.status === "paused";
 
+  // On a stacked (sub-lg) layout the detail pane renders below the list, so a
+  // selection updates content off-screen. Scroll the detail into view so the
+  // tap produces an immediate visible result (mandate: "selection updates the
+  // right panel" + visible feedback). At lg+ it's already beside the list, so
+  // block:"nearest" is a no-op when it's on-screen.
+  const detailRef = useRef<HTMLDivElement | null>(null);
+  const handleSelect = useCallback(
+    (id: string) => {
+      onSelect(id);
+      if (typeof window !== "undefined") {
+        window.requestAnimationFrame(() =>
+          scrollElementIntoView(detailRef.current, "nearest"),
+        );
+      }
+    },
+    [onSelect],
+  );
+
   return (
     <section className="space-y-3">
       <header>
@@ -72,7 +92,7 @@ export function AutomationBreakdown({
               <li key={a.id}>
                 <button
                   type="button"
-                  onClick={() => onSelect(a.id)}
+                  onClick={() => handleSelect(a.id)}
                   aria-pressed={active}
                   className={cn(
                     "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
@@ -114,9 +134,15 @@ export function AutomationBreakdown({
           })}
         </ul>
 
-        {/* RIGHT — detail of the selected automation */}
+        {/* RIGHT — detail of the selected automation. scroll-mt clears the
+            sticky command bar; keying on the id replays a motion-safe fade so
+            the selection swap is visibly felt. */}
         {selected ? (
-          <div className="space-y-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <div
+            ref={detailRef}
+            key={selected.id}
+            className="scroll-mt-24 space-y-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft motion-safe:animate-fade"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="eyebrow text-[0.64rem] text-slate">

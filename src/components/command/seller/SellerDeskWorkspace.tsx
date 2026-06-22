@@ -29,6 +29,7 @@ import { OpportunityDrawer } from "./OpportunityDrawer";
 import { NewOpportunityDrawer } from "./NewOpportunityDrawer";
 import { LikelySellersTable } from "./LikelySellersTable";
 import { CashOfferMatrix } from "./CashOfferMatrix";
+import { scrollToId } from "./motion";
 import {
   columnForStage,
   signalHeadline,
@@ -77,11 +78,6 @@ const BACKEND_TABLES = [
   "ai_actions",
 ];
 
-function scrollTo(id: string) {
-  if (typeof document === "undefined") return;
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 type ViewMode = "pipeline" | "list";
 
 export function SellerDeskWorkspace() {
@@ -128,11 +124,21 @@ export function SellerDeskWorkspace() {
     }));
   }, []);
 
-  // KPI drill → switch to the list view filtered to the matching pool.
+  // KPI drill → switch to the list view filtered to the matching pool, and
+  // smooth-scroll the pipeline section into view so the user SEES the result
+  // change (reduced-motion aware).
   const drillTo = useCallback((v: SellerViewKey) => {
     setView(v);
     setMode("list");
-    scrollTo("pipeline");
+    scrollToId("pipeline");
+  }, []);
+
+  // View toggle (Pipeline ↔ List) — swap content AND scroll the surface into
+  // view so the toggle produces an immediate visible result, not an off-screen
+  // change.
+  const switchMode = useCallback((next: ViewMode) => {
+    setMode(next);
+    scrollToId("pipeline");
   }, []);
 
   const likelyCount = useMemo(
@@ -244,10 +250,10 @@ export function SellerDeskWorkspace() {
           {/* View toggle — desktop only; phone/tablet default to the list
               (kanban needs horizontal room — S3 ticket 5). */}
           <div className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-mist bg-paper-200/60 p-0.5 lg:inline-flex">
-            <ToggleBtn active={mode === "pipeline"} onClick={() => setMode("pipeline")} icon={LayoutGrid}>
+            <ToggleBtn active={mode === "pipeline"} onClick={() => switchMode("pipeline")} icon={LayoutGrid}>
               Pipeline
             </ToggleBtn>
-            <ToggleBtn active={mode === "list"} onClick={() => setMode("list")} icon={Rows3}>
+            <ToggleBtn active={mode === "list"} onClick={() => switchMode("list")} icon={Rows3}>
               List
             </ToggleBtn>
           </div>
@@ -264,7 +270,10 @@ export function SellerDeskWorkspace() {
             onAddOpportunity={() => setCreateOpen(true)}
           />
         </div>
-        <div className="hidden lg:block">
+        {/* `key` on the mode swaps remounts the surface so the short fade plays
+            on every Pipeline ↔ List toggle — a tasteful, reduced-motion-safe
+            content transition so the change is visible (not an instant snap). */}
+        <div key={mode} className="hidden motion-safe:animate-fade lg:block">
           {mode === "pipeline" ? (
             <KanbanBoard
               columns={columns}

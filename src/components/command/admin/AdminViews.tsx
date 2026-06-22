@@ -185,23 +185,27 @@ export function UsersView() {
           onChange={setView}
         />
 
-        <DataTable<UserRow>
-          columns={columns}
-          rows={filtered}
-          getRowId={(u) => u.id}
-          selectable
-          responsive
-          onRowClick={(u) => setSelected(u)}
-          utilityRight={<span className="text-[0.78rem] text-slate">Bulk: assign role · deactivate</span>}
-          emptyState={
-            <EmptyState
-              title="No users in this view"
-              body="Invite a broker or operations teammate to populate this list."
-              actionLabel="Invite user"
-              onAction={() => setInviteOpen(true)}
-            />
-          }
-        />
+        {/* Key on the active saved-view so a filter change cross-fades the list
+            (motion-safe) — the tab click produces a visible content transition. */}
+        <div key={view} className="motion-safe:animate-fade">
+          <DataTable<UserRow>
+            columns={columns}
+            rows={filtered}
+            getRowId={(u) => u.id}
+            selectable
+            responsive
+            onRowClick={(u) => setSelected(u)}
+            utilityRight={<span className="text-[0.78rem] text-slate">Bulk: assign role · deactivate</span>}
+            emptyState={
+              <EmptyState
+                title="No users in this view"
+                body="Invite a broker or operations teammate to populate this list."
+                actionLabel="Invite user"
+                onAction={() => setInviteOpen(true)}
+              />
+            }
+          />
+        </div>
       </section>
 
       <section>
@@ -395,6 +399,7 @@ export function TeamsView() {
     {
       key: "lead",
       header: "Team lead",
+      cardLabel: "Team lead",
       render: (t) => (
         <span className="flex items-center gap-2">
           <Avatar name={t.lead} slug={t.leadSlug} size={26} ring />
@@ -402,13 +407,13 @@ export function TeamsView() {
         </span>
       ),
     },
-    { key: "markets", header: "Markets / territories", width: "34%", render: (t) => <span className="text-[0.8rem] text-slate">{t.markets}</span> },
-    { key: "members", header: "Members", align: "right", render: (t) => <span className="tabular-nums text-[0.84rem] font-semibold text-ink">{t.members}</span> },
+    { key: "markets", header: "Markets / territories", width: "34%", cardLabel: "Markets", render: (t) => <span className="text-[0.8rem] text-slate">{t.markets}</span> },
+    { key: "members", header: "Members", align: "right", primary: true, render: (t) => <span className="tabular-nums text-[0.84rem] font-semibold text-ink">{t.members}</span> },
   ];
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Teams &amp; offices</h2>
           <p className="mt-0.5 text-[0.78rem] text-slate">Click a team to view it · scope re-scopes every dashboard to the selected office.</p>
@@ -417,7 +422,7 @@ export function TeamsView() {
           Create team
         </InkButton>
       </div>
-      <DataTable columns={cols} rows={teams} getRowId={(t) => t.id} onRowClick={(t) => setSelected(t)} />
+      <DataTable columns={cols} rows={teams} getRowId={(t) => t.id} onRowClick={(t) => setSelected(t)} responsive />
 
       <RecordDrawer
         open={selected != null}
@@ -562,18 +567,19 @@ export function TemplatesView() {
 
   const cols: Column<TemplateRow>[] = [
     { key: "name", header: "Template", width: "32%", render: (t) => <TwoLineCell title={t.name} sub={`${t.kind} · ${t.version}`} /> },
-    { key: "kind", header: "Type", render: (t) => <StatusChip tone="info">{t.kind}</StatusChip> },
-    { key: "version", header: "Version", render: (t) => <span className="font-mono text-[0.78rem] text-slate">{t.version}</span> },
+    { key: "kind", header: "Type", cardLabel: "Type", render: (t) => <StatusChip tone="info">{t.kind}</StatusChip> },
+    { key: "version", header: "Version", cardLabel: "Version", render: (t) => <span className="font-mono text-[0.78rem] text-slate">{t.version}</span> },
     {
       key: "status",
       header: "Status",
+      primary: true,
       render: (t) => (
         <StatusChip tone={t.status === "published" ? "success" : "warn"}>
           {t.status === "published" ? "Published" : "Draft"}
         </StatusChip>
       ),
     },
-    { key: "updatedAt", header: "Last updated", align: "right", render: (t) => <span className="text-[0.8rem] text-slate">{t.updatedAt} · {t.updatedBy}</span> },
+    { key: "updatedAt", header: "Last updated", align: "right", cardLabel: "Last updated", render: (t) => <span className="text-[0.8rem] text-slate">{t.updatedAt} · {t.updatedBy}</span> },
   ];
 
   return (
@@ -588,7 +594,7 @@ export function TemplatesView() {
             New template
           </InkButton>
         </div>
-        <DataTable columns={cols} rows={templates} getRowId={(t) => t.id} onRowClick={(t) => setSelected(t)} />
+        <DataTable columns={cols} rows={templates} getRowId={(t) => t.id} onRowClick={(t) => setSelected(t)} responsive />
       </section>
 
       {/* AI checklist drafter — streams INLINE in this dark card, not the sidecar */}
@@ -955,11 +961,12 @@ export function AiPolicyView() {
 
   const cols: Column<AiPolicyRow>[] = [
     { key: "capability", header: "Capability", width: "30%", render: (p) => <TwoLineCell title={p.capability} sub={p.scope} /> },
-    { key: "risk", header: "Risk", render: (p) => <PriorityBadge level={p.risk} /> },
+    { key: "risk", header: "Risk", cardLabel: "Risk", render: (p) => <PriorityBadge level={p.risk} /> },
     {
       key: "mode",
       header: "Policy",
       align: "right",
+      primary: true,
       render: (p) => (
         <StatusChip tone={p.mode === "Off" ? "info" : p.mode === "Auto-safe" ? "success" : "warn"}>{p.mode}</StatusChip>
       ),
@@ -976,7 +983,7 @@ export function AiPolicyView() {
             Click a capability for an AI-written explanation. Client-facing, legal, and outbound require approval — enforced server-side.
           </p>
         </div>
-        <DataTable columns={cols} rows={aiPolicyRows} getRowId={(p) => p.id} onRowClick={openPolicy} />
+        <DataTable columns={cols} rows={aiPolicyRows} getRowId={(p) => p.id} onRowClick={openPolicy} responsive />
       </section>
 
       <CalloutCard tone="risk" title="Risky policy flagged">
@@ -1149,9 +1156,9 @@ export function AuditView() {
           </span>
         ),
     },
-    { key: "action", header: "Action", width: "24%", render: (a) => <span className="text-[0.84rem] text-ink">{a.action}</span> },
-    { key: "target", header: "Target", render: (a) => <span className="text-[0.8rem] text-slate">{a.target}</span> },
-    { key: "timeLabel", header: "Time", align: "right", render: (a) => <span className="text-[0.8rem] text-slate">{a.timeLabel}</span> },
+    { key: "action", header: "Action", width: "24%", cardLabel: "Action", render: (a) => <span className="text-[0.84rem] text-ink">{a.action}</span> },
+    { key: "target", header: "Target", cardLabel: "Target", render: (a) => <span className="text-[0.8rem] text-slate">{a.target}</span> },
+    { key: "timeLabel", header: "Time", align: "right", primary: true, render: (a) => <span className="text-[0.8rem] text-slate">{a.timeLabel}</span> },
   ];
 
   return (
@@ -1178,13 +1185,17 @@ export function AuditView() {
         onChange={setView}
       />
 
-      <DataTable
-        columns={cols}
-        rows={rows}
-        getRowId={(a) => a.id}
-        onRowClick={(a) => setSelected(a)}
-        emptyState={<EmptyState title="No audit events" body="Admin and system changes will appear here as they happen." />}
-      />
+      {/* Key on the active saved-view so the filter change cross-fades the log. */}
+      <div key={view} className="motion-safe:animate-fade">
+        <DataTable
+          columns={cols}
+          rows={rows}
+          getRowId={(a) => a.id}
+          onRowClick={(a) => setSelected(a)}
+          responsive
+          emptyState={<EmptyState title="No audit events" body="Admin and system changes will appear here as they happen." />}
+        />
+      </div>
 
       <RecordDrawer
         open={selected != null}

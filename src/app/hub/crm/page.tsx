@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import {
   Inbox,
   PhoneOff,
@@ -34,6 +34,8 @@ import {
   LeadScoreRing,
 } from "@/components/command/crm/LeadRowCells";
 import { ComposeDrawer, type ComposeMode, type ComposeResult } from "@/components/command/crm/ComposeDrawer";
+import { smoothScrollTo, useViewFade } from "@/components/command/crm/useViewTransition";
+import { cn } from "@/lib/utils";
 import {
   type SavedViewKey,
   filterLeads,
@@ -76,10 +78,36 @@ export default function CrmPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string>(CANONICAL_LEAD);
   const [addOpen, setAddOpen] = useState(false);
-  /** mobile master-detail slide-over (below xl) */
+  /** mobile master-detail slide-over (below the lg split breakpoint) */
   const [mobileOpen, setMobileOpen] = useState(false);
   /** quick-action compose target opened directly from a row */
   const [rowCompose, setRowCompose] = useState<{ lead: Lead; mode: ComposeMode } | null>(null);
+
+  /* The lead inbox sits well below the KPI strip; a KPI drill that re-filters it
+     must be VISIBLE, so we scroll the master-detail into view + fade the list on
+     every view change (MANDATE 1). The detail panel splits at lg (≥1024), so the
+     mobile slide-over only takes over below lg. */
+  const masterRef = useRef<HTMLDivElement>(null);
+  const appointmentsRef = useRef<HTMLElement>(null);
+  // Hold the `entering` flag for the full fade duration so the class isn't
+  // pulled mid-animation (animate-fade ≈ 1s).
+  const listFade = useViewFade(1000);
+  /** lg breakpoint — at/above this the inline detail panel is visible. */
+  const LG = 1024;
+
+  /** Switch the saved view AND make the re-filtered list visible (scroll + fade). */
+  const bumpList = listFade.bump;
+  const goToView = useCallback(
+    (next: SavedViewKey, scroll = true) => {
+      setView(next);
+      setSearch("");
+      bumpList();
+      if (scroll) {
+        requestAnimationFrame(() => smoothScrollTo(masterRef.current, "start"));
+      }
+    },
+    [bumpList],
+  );
 
   const kpis = useMemo(() => crmKpis(leads), [leads]);
 
@@ -124,12 +152,17 @@ export default function CrmPage() {
     setSearch("");
     setSelectedId(newLead.id);
     setAddOpen(false);
+    listFade.bump();
+    // Bring the new row (now at the top of "all") into view with feedback.
+    requestAnimationFrame(() => smoothScrollTo(masterRef.current, "start"));
   }
 
-  /** Row-tap selects the lead; below xl it also opens the mobile slide-over (R2). */
+  /** Row-tap selects the lead; below the lg split it opens the mobile slide-over
+      (R2) so the tap produces an immediate, on-screen detail — never a panel
+      updated off-screen. At lg+ the inline detail panel updates in place. */
   function selectLead(l: Lead, openMobile = true) {
     setSelectedId(l.id);
-    if (openMobile && typeof window !== "undefined" && window.innerWidth < 1280) {
+    if (openMobile && typeof window !== "undefined" && window.innerWidth < LG) {
       setMobileOpen(true);
     }
   }
@@ -240,7 +273,7 @@ export default function CrmPage() {
           hint="Created today"
           delta="vs 5 yest."
           deltaTone="up"
-          onDrill={() => setView("new-today")}
+          onDrill={() => goToView("new-today")}
         />
         <KpiCard
           label="Uncontacted"
@@ -248,7 +281,7 @@ export default function CrmPage() {
           valueTone={kpis.uncontacted > 0 ? "danger" : "ink"}
           icon={<PhoneOff className="h-4 w-4" />}
           hint="Open · no reply / new"
-          onDrill={() => setView("needs-call")}
+          onDrill={() => goToView("needs-call")}
         />
         <KpiCard
           label="Hot buyers"
@@ -256,7 +289,7 @@ export default function CrmPage() {
           valueTone="success"
           icon={<Flame className="h-4 w-4" />}
           hint="Score ≥ 80 buying"
-          onDrill={() => setView("hot")}
+          onDrill={() => goToView("hot")}
         />
         <KpiCard
           label="Hot sellers"
@@ -264,30 +297,40 @@ export default function CrmPage() {
           valueTone="success"
           icon={<Home className="h-4 w-4" />}
           hint="Score ≥ 80 selling"
-          onDrill={() => setView("seller-intent")}
+          onDrill={() => goToView("seller-intent")}
         />
         <KpiCard
           label="Avg first response"
           value={`${kpis.avgFirstResponse}m`}
           icon={<Timer className="h-4 w-4" />}
-          hint="Speed-to-lead"
+          hint="Speed-to-lead — tap to work uncalled"
           delta="−3m vs goal"
           deltaTone="up"
+          onDrill={() => goToView("needs-call")}
         />
         <KpiCard
           label="Appointments set"
           value={kpis.appointments}
           icon={<CalendarCheck className="h-4 w-4" />}
-          hint="Showings & offers"
+          hint="Showings & offers — tap to review"
           delta="this week"
           deltaTone="flat"
+          onDrill={() =>
+            requestAnimationFrame(() => smoothScrollTo(appointmentsRef.current, "start"))
+          }
         />
       </KpiStrip>
 
-      {/* Master–detail */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.7fr_1fr]">
-        {/* LEFT — lead inbox */}
-        <div className="min-w-0">
+      {/* Master–detail — splits at lg (≥1024) so the 1024–1279 band gets the real
+          two-pane workspace, not a cramped single column. Below lg the detail is
+          a full-width slide-over (R1/R2). */}
+      <div
+        ref={masterRef}
+        className="grid scroll-mt-20 grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr] xl:grid-cols-[1.7fr_1fr]"
+      >
+        {/* LEFT — lead inbox (view-swap fade; not re-keyed so DataTable keeps its
+            sort/selection state across filter changes) */}
+        <div className={cn("min-w-0", listFade.entering && "motion-safe:animate-fade")}>
           <DataTable
             rows={rows}
             getRowId={(l) => l.id}
@@ -311,7 +354,10 @@ export default function CrmPage() {
             savedViews={{
               views: allViews.map((v) => ({ ...v, count: viewCounts[v.key] })),
               active: view,
-              onChange: (k) => setView(k as SavedViewKey),
+              onChange: (k) => {
+                setView(k as SavedViewKey);
+                listFade.bump();
+              },
             }}
             emptyState={
               <EmptyState
@@ -322,14 +368,17 @@ export default function CrmPage() {
                     : "Switch smart lists or add a lead to start working this pool."
                 }
                 actionLabel={search ? "Clear search" : "View all leads"}
-                onAction={() => (search ? setSearch("") : setView("all"))}
+                onAction={() =>
+                  search ? (setSearch(""), listFade.bump()) : goToView("all", false)
+                }
               />
             }
           />
         </div>
 
-        {/* RIGHT — selected-lead detail panel (desktop xl+) */}
-        <div className="hidden min-w-0 xl:sticky xl:top-4 xl:block xl:h-[calc(100vh-9rem)]">
+        {/* RIGHT — selected-lead detail panel (inline at lg+; below lg it becomes
+            the full-width slide-over rendered at the end of the page) */}
+        <div className="hidden min-w-0 lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-9rem)]">
           {selected ? (
             <LeadDetailPanel lead={selected} aiActions={aiActions} onAssign={handleAssign} />
           ) : null}
@@ -337,7 +386,11 @@ export default function CrmPage() {
       </div>
 
       {/* Secondary desktop band — appointments / real office contact (S2.10) */}
-      <AppointmentsBand leads={leads} onOpen={(l) => selectLead(l, false)} />
+      <AppointmentsBand
+        ref={appointmentsRef}
+        leads={leads}
+        onOpen={(l) => selectLead(l)}
+      />
 
       {/* Lead source analysis (recharts) */}
       <LeadSourceAnalysis leads={leads} />
@@ -356,9 +409,13 @@ export default function CrmPage() {
         />
       ) : null}
 
-      {/* MOBILE master-detail — full-width slide-over below xl (R2) */}
+      {/* MOBILE master-detail — full-width slide-over below the lg split (R2) */}
       {mobileOpen && selected ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-cloud xl:hidden" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-cloud motion-safe:animate-rise lg:hidden"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-mist bg-ink-900 px-4 py-3">
             <span className="truncate font-display text-[1.05rem] text-cloud">{selected.name}</span>
             <button
@@ -380,7 +437,10 @@ export default function CrmPage() {
 }
 
 /* ── Appointments / office band (wide-screen secondary surface, S2.10) ─────── */
-function AppointmentsBand({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => void }) {
+const AppointmentsBand = forwardRef<
+  HTMLElement,
+  { leads: Lead[]; onOpen: (l: Lead) => void }
+>(function AppointmentsBand({ leads, onOpen }, ref) {
   // Real upcoming-touch candidates: leads that progressed to a showing/offer.
   const upcoming = leads
     .filter((l) => ["Showing", "Offer", "Under Contract"].includes(l.stage))
@@ -388,7 +448,7 @@ function AppointmentsBand({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) 
     .slice(0, 4);
 
   return (
-    <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section ref={ref} className="scroll-mt-20 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarClock className="h-4 w-4 text-slate" aria-hidden />
@@ -435,4 +495,4 @@ function AppointmentsBand({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) 
       </div>
     </section>
   );
-}
+});

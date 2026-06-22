@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -58,6 +58,10 @@ import { QueueDrawerBody } from "@/components/command/today/QueueDrawerBody";
 import { BrokerageVitalScore } from "@/components/command/today/BrokerageVitalScore";
 import { LivePipelineChart } from "@/components/command/today/TodayCharts";
 import { RecentActivityFeed } from "@/components/command/today/RecentActivityFeed";
+import {
+  smoothScrollTo,
+  useViewFade,
+} from "@/components/command/today/useViewTransition";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center  →  /hub   (build reference §2.1 · tickets S1.1–S1.9)
@@ -72,8 +76,10 @@ import { RecentActivityFeed } from "@/components/command/today/RecentActivityFee
        approve/retry) that works WITHOUT opening the drawer
      • risk alerts backed by real transactions / listing-pipeline / seller-leads
      • branded client-facing drafts rendered through BrandedDocument
-   Mobile (R1/R3/R4): AI summary + Vital + Risk float ABOVE the queue below xl;
-   3 hero KPI tiles + "More metrics" expander on phone; full-width rows.
+   Mobile (R1/R3/R4): AI summary + Vital + Risk float ABOVE the queue below lg
+   (the queue + rail split side-by-side at lg+, so the 1024–1279 band is a real
+   two-pane workspace, not a buried single column); 3 hero KPI tiles + "More
+   metrics" expander on phone; full-width rows.
    ────────────────────────────────────────────────────────────────────────── */
 
 /* ── Headline KPI numbers — every value DERIVED (G-A #7), none hardcoded ──── */
@@ -168,6 +174,28 @@ export default function TodayCommandCenter() {
   const [activeTab, setActiveTab] = useState<string>("My Work");
   const [query, setQuery] = useState("");
   const [showMoreKpis, setShowMoreKpis] = useState(false);
+
+  /* The Human Work Queue lives at the bottom of a long, single-column stack
+     below xl. A KPI drill / "Review drafts" / tab change that swaps its content
+     would otherwise be INVISIBLE off-screen — so we scroll it into view and
+     play a short content fade on every view change (MANDATE 1). */
+  const queueRef = useRef<HTMLDivElement>(null);
+  // animate-rise ≈ 0.8s; hold `entering` long enough not to cut it short.
+  const queueFade = useViewFade(800);
+
+  /** Switch the queue's saved view AND make the change visible (scroll + fade). */
+  const bumpQueue = queueFade.bump;
+  const goToTab = useCallback(
+    (tab: string, scroll = true) => {
+      setActiveTab(tab);
+      bumpQueue();
+      if (scroll) {
+        // Defer so the new rows have laid out before we scroll to them.
+        requestAnimationFrame(() => smoothScrollTo(queueRef.current, "start"));
+      }
+    },
+    [bumpQueue],
+  );
 
   const [selected, setSelected] = useState<WorkQueueItem | null>(null);
   const [drawerTab, setDrawerTab] = useState<"preview" | "draft">("preview");
@@ -315,7 +343,7 @@ export default function TodayCommandCenter() {
           delta={`${reportMetrics.automationImpact.aiDraftsApproved} approved`}
           deltaTone="up"
           hint="Need your approval to send"
-          onDrill={() => setActiveTab("AI Drafts")}
+          onDrill={() => goToTab("AI Drafts")}
         />
       ),
     },
@@ -349,8 +377,8 @@ export default function TodayCommandCenter() {
       action={
         <button
           type="button"
-          onClick={() => setActiveTab("AI Drafts")}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-semibold text-gold transition-colors hover:bg-ink-700"
+          onClick={() => goToTab("AI Drafts")}
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.78rem] font-semibold text-gold transition-colors hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
         >
           Review drafts
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -414,11 +442,13 @@ export default function TodayCommandCenter() {
       </div>
 
       {/* ── Mobile-first stack: AI summary + Vital + Risk float ABOVE the queue
-            below xl; the real two-column workspace returns at xl (R1) ─────── */}
-      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        {/* On < xl, render the rail context first so the user sees it before
-            scrolling a long queue. On xl it sits in the right column (order-2). */}
-        <div className="flex flex-col gap-5 xl:order-2">
+            below lg; the real two-column workspace returns at lg so the
+            1024–1279 band gets the queue + rail side-by-side, not a buried
+            single column (R1) ─────────────────────────────────────────────── */}
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        {/* On < lg, render the rail context first so the user sees it before
+            scrolling a long queue. At lg+ it sits in the right column (order-2). */}
+        <div className="flex flex-col gap-5 lg:order-2">
           {aiSummaryCard}
           <BrokerageVitalScore />
 
@@ -495,7 +525,11 @@ export default function TodayCommandCenter() {
         </div>
 
         {/* PRIMARY — Human Work Queue */}
-        <section className="rounded-2xl border border-mist bg-cloud shadow-soft xl:order-1">
+        <section
+          ref={queueRef}
+          id="human-work-queue"
+          className="scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft lg:order-1"
+        >
           <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
             <div className="min-w-0">
               <h2 className="font-display text-[1.2rem] font-normal leading-tight text-ink">
@@ -522,14 +556,21 @@ export default function TodayCommandCenter() {
           {/* Tabs + search + Showing N */}
           <div className="flex flex-wrap items-center gap-3 px-5 pb-3 pt-3.5">
             <div className="min-w-0 flex-1">
-              <SavedViewTabs views={VIEWS} active={activeTab} onChange={setActiveTab} />
+              <SavedViewTabs
+                views={VIEWS}
+                active={activeTab}
+                onChange={(t) => goToTab(t, false)}
+              />
             </div>
             <label className="inline-flex items-center gap-2 rounded-lg border border-mist bg-paper-200/60 px-2.5 py-1.5 focus-within:border-ink/30">
               <Search className="h-3.5 w-3.5 shrink-0 text-slate" aria-hidden />
               <input
                 type="search"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  queueFade.bump();
+                }}
                 placeholder="Filter queue…"
                 aria-label="Filter the work queue by subject"
                 className="w-32 bg-transparent text-[0.8rem] text-ink outline-none placeholder:text-slate sm:w-40"
@@ -537,7 +578,10 @@ export default function TodayCommandCenter() {
               {query ? (
                 <button
                   type="button"
-                  onClick={() => setQuery("")}
+                  onClick={() => {
+                    setQuery("");
+                    queueFade.bump();
+                  }}
                   aria-label="Clear filter"
                   className="shrink-0 text-slate transition-colors hover:text-ink"
                 >
@@ -566,11 +610,19 @@ export default function TodayCommandCenter() {
                       : "Nothing in this view needs human judgment right now. Automation is handling the rest — check back as new signals land."
                   }
                   actionLabel={query ? "Clear filter" : "View My Work"}
-                  onAction={() => (query ? setQuery("") : setActiveTab("My Work"))}
+                  onAction={() =>
+                    query
+                      ? (setQuery(""), queueFade.bump())
+                      : goToTab("My Work", false)
+                  }
                 />
               </div>
             ) : (
-              <div role="list">
+              <div
+                role="list"
+                key={queueFade.token}
+                className={cn(queueFade.entering && "motion-safe:animate-rise")}
+              >
                 {rows.map((item) => (
                   <QueueRow
                     key={item.id}

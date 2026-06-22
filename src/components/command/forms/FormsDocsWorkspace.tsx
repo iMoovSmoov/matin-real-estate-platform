@@ -52,6 +52,7 @@ import {
 import { DocumentDrawer } from "./DocumentDrawer";
 import { NewPacketDrawer } from "./NewPacketDrawer";
 import { FormsLibrary } from "./FormsLibrary";
+import { scrollIntoView } from "./interactions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Forms & Docs — packet center (build-reference §2.7; plan S7 1–8)
@@ -96,6 +97,26 @@ export function FormsDocsWorkspace() {
     ],
     "list",
   );
+
+  // Scroll-into-view (R1/R2). The list/docs/actions panes are mounted in both
+  // the mobile single-pane stack and the lg+ grid, so we scroll whichever
+  // instance is on screen via a data-attribute query rather than a single ref.
+  function isDesktopWidth() {
+    return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  }
+
+  /** Scroll the on-screen instance of a pane region (mobile or lg+ copy). The
+     query runs inside scrollIntoView's deferred (double-rAF) callback via a
+     getter, so a just-switched mobile pane is found AFTER it mounts. */
+  function scrollPaneIntoView(attr: string) {
+    if (typeof document === "undefined") return;
+    scrollIntoView(() => {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>(`[${attr}]`),
+      );
+      return nodes.find((n) => n.offsetParent !== null) ?? nodes[0] ?? null;
+    }, "start");
+  }
 
   // LIVE packet state — the single source of truth all panes + KPIs read from.
   const [packets, setPackets] = useState<Packet[]>(() =>
@@ -152,14 +173,20 @@ export function FormsDocsWorkspace() {
     setDocId(firstActionableDoc(next).id);
     setCheckOut("");
     setPaneConfirm(null);
-    pane.go("docs");
+    // Visible result of the tap (R1/R2): mobile jumps to the Documents pane;
+    // both layouts scroll the document stack into view.
+    if (!isDesktopWidth()) pane.go("docs");
+    scrollPaneIntoView("data-forms-docs");
   }
 
   function selectDoc(next: PacketDoc) {
     setDocId(next.id);
     setCheckOut("");
     setPaneConfirm(null);
-    pane.go("actions");
+    // Selecting a document surfaces its action panel — on a narrow screen that
+    // panel is off in another pane, so jump to it and scroll it into view.
+    if (!isDesktopWidth()) pane.go("actions");
+    scrollPaneIntoView("data-forms-actions");
   }
 
   function setView_(next: ViewKey) {
@@ -167,6 +194,10 @@ export function FormsDocsWorkspace() {
     const list = filterPackets(packets, next);
     if (list.length && !list.some((p) => p.id === packetId)) {
       selectPacket(list[0]);
+    } else {
+      // Filter changed but selection still valid — surface the filtered list.
+      if (!isDesktopWidth()) pane.go("list");
+      scrollPaneIntoView("data-forms-list");
     }
   }
 
@@ -471,6 +502,7 @@ export function FormsDocsWorkspace() {
         counts={savedViewCounts(packets)}
         showing={filteredPackets.length}
         selectedCount={selectedPackets.size}
+        confirm={paneConfirm}
         onBulkSend={bulkSend}
         onBulkDownload={bulkDownload}
         onClearSelection={() => setSelectedPackets(new Set())}
@@ -483,16 +515,48 @@ export function FormsDocsWorkspace() {
 
       {/* Below lg: ONE pane at a time */}
       <div className="space-y-4 lg:hidden">
-        {pane.is("list") ? listPane : null}
-        {pane.is("docs") ? docsPane : null}
-        {pane.is("actions") ? actionsPane : null}
+        {pane.is("list") ? (
+          <div data-forms-list className="scroll-mt-20 motion-safe:animate-fade">
+            {listPane}
+          </div>
+        ) : null}
+        {pane.is("docs") ? (
+          <div data-forms-docs className="scroll-mt-20 motion-safe:animate-fade">
+            {docsPane}
+          </div>
+        ) : null}
+        {pane.is("actions") ? (
+          <div data-forms-actions className="scroll-mt-20 motion-safe:animate-fade">
+            {actionsPane}
+          </div>
+        ) : null}
       </div>
 
-      {/* lg+: 3 panes */}
-      <div className="hidden gap-4 lg:grid lg:grid-cols-[260px_minmax(0,1fr)_340px] xl:grid-cols-[280px_minmax(0,1fr)_372px]">
-        {listPane}
-        {docsPane}
-        {actionsPane}
+      {/* lg band (1024–1279): 2 panes — list + documents — with the action
+          panel full-width BELOW so the branded document never gets crammed into
+          a narrow column. xl+: true 3-pane split. */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_372px]">
+        <div data-forms-list className="scroll-mt-20">
+          {listPane}
+        </div>
+        <div data-forms-docs className="scroll-mt-20 min-w-0">
+          {docsPane}
+        </div>
+        {/* lg band: the action panel spans both columns underneath the split.
+            Its inner card stack becomes a 2-up grid (capped, centered) so the
+            cards read at a comfortable width instead of stretching edge-to-edge.
+            xl: it returns to a single 372px third column (flex stack). */}
+        <div
+          data-forms-actions
+          className={cn(
+            "scroll-mt-20 min-w-0 lg:col-span-2 xl:col-span-1",
+            // lg-band only: turn the <section> flex-col into a 2-up grid.
+            "lg:[&>section]:mx-auto lg:[&>section]:grid lg:[&>section]:max-w-3xl lg:[&>section]:grid-cols-2 lg:[&>section]:items-start",
+            "xl:[&>section]:mx-0 xl:[&>section]:flex xl:[&>section]:max-w-none",
+          )}
+        >
+          {actionsPane}
+        </div>
       </div>
 
       {/* Document drawer — real "View" record inspection */}
@@ -586,6 +650,7 @@ function SavedViewBar({
   counts,
   showing,
   selectedCount,
+  confirm,
   onBulkSend,
   onBulkDownload,
   onClearSelection,
@@ -595,6 +660,7 @@ function SavedViewBar({
   counts: Record<ViewKey, number>;
   showing: number;
   selectedCount: number;
+  confirm: string | null;
   onBulkSend: () => void;
   onBulkDownload: () => void;
   onClearSelection: () => void;
@@ -654,6 +720,11 @@ function SavedViewBar({
             Clear
           </button>
         </div>
+      ) : confirm ? (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-[0.74rem] font-medium text-success ring-1 ring-inset ring-success/20 motion-safe:animate-fade">
+          <CircleCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {confirm}
+        </span>
       ) : (
         <span className="text-[0.76rem] text-slate tabular-nums">Showing {showing}</span>
       )}
@@ -915,7 +986,10 @@ function DocStackPane({
       ) : (
         /* SCROLLABLE branded-document grid — all docs reachable past the fold */
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="mx-auto grid max-w-[640px] grid-cols-1 gap-4">
+          <div
+            key={packet.id}
+            className="mx-auto grid max-w-[640px] grid-cols-1 gap-4 motion-safe:animate-fade"
+          >
             {packet.docs.map((d) => (
               <DocCard
                 key={d.id}
@@ -1185,7 +1259,10 @@ function ActionsPane({
   return (
     <section className="flex flex-col gap-4">
       {/* Selected-document header card */}
-      <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft">
+      <div
+        key={doc.id}
+        className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft motion-safe:animate-fade"
+      >
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[0.72rem] font-semibold text-slate">{doc.code}</span>
           <StatusChip tone={docStatusTone}>{docStatusLabel}</StatusChip>

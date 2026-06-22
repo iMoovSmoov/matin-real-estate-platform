@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   FileSignature,
   CalendarCheck,
@@ -55,6 +55,7 @@ import {
   type DealAction,
 } from "./deal-screen";
 import { DealDrawer, docStatusLabel, docStatusTone } from "./DealDrawer";
+import { scrollElementIntoView } from "./useScrollIntoView";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Transaction Timeline + Checklist — the one-deal cockpit (build ref §2.6).
@@ -114,6 +115,24 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewKey>("all");
   const [selectedId, setSelectedId] = useState<string>(DEFAULT_ID);
+
+  // The one-deal screen container — selecting a list row scrolls it into view
+  // so on a stacked (sub-lg) layout the detail isn't rendered off-screen below
+  // the full deals list (mandate: "Deal-list selection switches the 3-column
+  // deal screen + scrolls into view"). At lg+ it's already beside the list, so
+  // block:"nearest" is a no-op when it's on-screen.
+  const dealScreenRef = useRef<HTMLDivElement | null>(null);
+
+  // Select a deal AND bring its screen into view on the next frame (after the
+  // new deal content has rendered).
+  const selectDeal = useCallback((id: string) => {
+    setSelectedId(id);
+    if (typeof window !== "undefined") {
+      window.requestAnimationFrame(() =>
+        scrollElementIntoView(dealScreenRef.current, "start"),
+      );
+    }
+  }, []);
 
   /* ── KPI roll-ups from real data (count + attributed $) ───────────────── */
   const kpis = useMemo(() => {
@@ -281,7 +300,7 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
                 <li key={t.id}>
                   <button
                     type="button"
-                    onClick={() => setSelectedId(t.id)}
+                    onClick={() => selectDeal(t.id)}
                     aria-current={on}
                     className={cn(
                       "block w-full px-3 py-3 text-left transition-colors",
@@ -350,15 +369,21 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
         </aside>
 
         {/* ── Right: one-deal screen ─────────────────────────────────────── */}
-        {selected ? (
-          <DealScreen key={selected.id} tx={selected} onOpenAi={openAi} />
-        ) : (
-          <EmptyState
-            title="Select a deal"
-            body="Pick a transaction to see its deadlines, milestone timeline, checklist, documents, and AI risk note on one screen."
-            icon={<FileSignature className="h-5 w-5" />}
-          />
-        )}
+        {/* scroll-mt clears the sticky top command bar when scrolled into view;
+            the keyed inner div replays a short motion-safe fade on deal swap. */}
+        <div ref={dealScreenRef} className="min-w-0 scroll-mt-20">
+          {selected ? (
+            <div key={selected.id} className="motion-safe:animate-fade">
+              <DealScreen tx={selected} onOpenAi={openAi} />
+            </div>
+          ) : (
+            <EmptyState
+              title="Select a deal"
+              body="Pick a transaction to see its deadlines, milestone timeline, checklist, documents, and AI risk note on one screen."
+              icon={<FileSignature className="h-5 w-5" />}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -988,8 +1013,10 @@ function DealScreen({
           {docComplete}/{documents.length} cleared
         </span>
       </div>
-      {/* Doc-tree grouped by requirement (left) */}
-      <div className="grid gap-3 p-5 sm:grid-cols-2">
+      {/* Doc-tree grouped by requirement. 1-col on phone (full-width pane) and
+          in the cramped lg band (docsPane shares the narrow deal column); 2-up
+          at sm/md (wide phone pane) and again at xl (docs+activity split). */}
+      <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         {documents.map((d) => (
           <DocCard key={d.id} doc={d} onView={() => setOpenDocId(d.id)} />
         ))}
@@ -1030,15 +1057,24 @@ function DealScreen({
       </div>
 
       {/* Mobile in-deal tab nav (R1) — one pane at a time below lg */}
-      <PaneSwitcher {...pane.switcherProps} ariaLabel="Deal sections" />
+      <PaneSwitcher
+        panes={pane.panes}
+        active={pane.active}
+        onChange={pane.go}
+        ariaLabel="Deal sections"
+      />
 
-      {/* Below lg: render only the active pane */}
+      {/* Below lg: render only the active pane. Keying on the active pane key
+          replays a short motion-safe fade so the swap is visibly felt (R-mandate
+          "swap content with a tasteful fade"). */}
       <div className="space-y-5 lg:hidden">
-        {pane.is("summary") && summaryPane}
-        {pane.is("timeline") && timelinePane}
-        {pane.is("checklist") && checklistPane}
-        {pane.is("docs") && docsPane}
-        {pane.is("activity") && activityPane}
+        <div key={pane.active} className="space-y-5 motion-safe:animate-fade">
+          {pane.is("summary") && summaryPane}
+          {pane.is("timeline") && timelinePane}
+          {pane.is("checklist") && checklistPane}
+          {pane.is("docs") && docsPane}
+          {pane.is("activity") && activityPane}
+        </div>
       </div>
 
       {/* lg+: the full multi-pane deal screen */}
@@ -1048,7 +1084,10 @@ function DealScreen({
           {timelinePane}
           {checklistPane}
         </div>
-        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        {/* Docs + activity split only at xl — in the lg band the deal-screen
+            column is already narrow (it's the 1fr of a 20rem+1fr page split), so
+            a second 1fr+22rem split here would cram the doc cards. Stack until xl. */}
+        <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
           {docsPane}
           {activityPane}
         </div>

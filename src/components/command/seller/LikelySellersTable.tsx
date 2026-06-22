@@ -146,6 +146,10 @@ export function LikelySellersTable({
   ];
 
   return (
+    // `key` on the active filter remounts the list so a short fade plays on
+    // every saved-view / search change — visible feedback that the data
+    // changed (reduced-motion-safe via the motion-safe: variant).
+    <div key={`${view}::${query.trim().length > 0}`} className="motion-safe:animate-fade">
     <DataTable<Row>
       columns={columns}
       rows={rows}
@@ -154,7 +158,9 @@ export function LikelySellersTable({
       responsive
       savedViews={{ views: savedViews, active: view, onChange: (k) => onView(k as SellerViewKey) }}
       utilityLeft={
-        <div className="relative">
+        // Full-width on phone (R6 — no fixed-narrow search in a flex-wrap
+        // header), capping at a comfortable width on larger screens.
+        <div className="relative w-full sm:w-56">
           <Search
             className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate"
             aria-hidden
@@ -164,7 +170,7 @@ export function LikelySellersTable({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search owner, address, agent…"
             className={cn(
-              "w-56 rounded-lg border border-mist bg-paper-200/60 py-1.5 pl-8 pr-3 text-[0.78rem] text-ink outline-none transition-colors",
+              "w-full rounded-lg border border-mist bg-paper-200/60 py-1.5 pl-8 pr-3 text-[0.78rem] text-ink outline-none transition-colors",
               "placeholder:text-slate/60 focus:border-ink/30 focus:bg-cloud",
             )}
           />
@@ -184,5 +190,6 @@ export function LikelySellersTable({
         />
       }
     />
+    </div>
   );
 }

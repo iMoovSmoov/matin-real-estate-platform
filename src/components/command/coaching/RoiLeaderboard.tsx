@@ -197,18 +197,22 @@ export function RoiLeaderboard({
   ];
 
   return (
-    <DataTable<CoachingStanding>
-      columns={columns}
-      rows={rows}
-      getRowId={(r) => r.slug}
-      onRowClick={onSelectAgent}
-      responsive
-      savedViews={savedViews}
-      utilityLeft={
-        <span className="text-[0.78rem] text-slate">
-          Conversion target {CONVERSION_TARGET}% · click a row for the coaching plan
-        </span>
-      }
-    />
+    // Key the table on the active saved-view so switching a filter cross-fades
+    // the leaderboard (motion-safe) — the pill click yields a visible transition.
+    <div key={view} className="motion-safe:animate-fade">
+      <DataTable<CoachingStanding>
+        columns={columns}
+        rows={rows}
+        getRowId={(r) => r.slug}
+        onRowClick={onSelectAgent}
+        responsive
+        savedViews={savedViews}
+        utilityLeft={
+          <span className="text-[0.78rem] text-slate">
+            Conversion target {CONVERSION_TARGET}% · click a row for the coaching plan
+          </span>
+        }
+      />
+    </div>
   );
 }
