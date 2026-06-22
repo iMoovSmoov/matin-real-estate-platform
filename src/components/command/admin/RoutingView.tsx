@@ -161,8 +161,8 @@ export function AlertsAutomationGrid() {
             i < rows.length - 1 && "border-b border-mist/70",
           )}
         >
-          <div className="flex items-center justify-between gap-2 px-4 py-3.5 md:justify-start">
-            <span className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center justify-between gap-2 px-4 py-3.5 md:justify-start">
+            <span className="flex min-w-0 items-center gap-2">
               <Dot tone={r.statusTone} />
               <span className="text-[0.84rem] font-semibold text-ink">{r.status}</span>
             </span>
@@ -173,7 +173,7 @@ export function AlertsAutomationGrid() {
             </span>
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-mist/70 px-4 py-3.5 md:border-l md:border-t-0">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-mist/70 px-4 py-3.5 md:border-l md:border-t-0">
             <span className="flex items-center gap-2">
               <span className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-slate/60 md:hidden">
                 Notify
@@ -190,7 +190,7 @@ export function AlertsAutomationGrid() {
             <MiniToggle on={r.notify.on} onChange={(v) => setNotify(r.id, v)} label={`Notify — ${r.status}`} />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-mist/70 px-4 py-3.5 md:border-l md:border-t-0">
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-mist/70 px-4 py-3.5 md:border-l md:border-t-0">
             <span className="min-w-0 flex-1">
               <span className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-slate/60 md:hidden">
                 System
@@ -1109,7 +1109,7 @@ export function RoutingView() {
     <>
       <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
         {/* Left: rules table + territory map + leads-routed chart + alerts */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -1172,7 +1172,7 @@ export function RoutingView() {
 
         {/* Right: selected-rule ownership + LIVE recipient editor + AI panel.
             scroll-target so a row tap surfaces the detail on stacked layouts. */}
-        <div ref={detailRef} className="scroll-mt-20 space-y-5">
+        <div ref={detailRef} className="min-w-0 scroll-mt-20 space-y-5">
           {/* Re-fade the two detail cards when the selected rule changes so the
               swap is visibly confirmed even when already on-screen (xl+). */}
           <div key={selected.id} className="space-y-5 motion-safe:animate-fade">

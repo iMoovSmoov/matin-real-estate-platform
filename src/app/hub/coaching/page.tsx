@@ -246,7 +246,7 @@ export default function CoachingPage() {
           below xl they stack full-width (each readable on its own row). */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)]">
         {/* Goal pacing (leadership view) + real recharts pacing chart */}
-        <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+        <section className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="font-display text-[1rem] font-normal text-ink">Team practice goal</h2>
             <StatusChip tone={teamPace >= teamExpected ? "success" : "danger"} variant="soft">
@@ -308,7 +308,7 @@ export default function CoachingPage() {
         </section>
 
         {/* ROI leaderboard (Sisu color-as-data) */}
-        <section className="space-y-2">
+        <section className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <h2 className="font-display text-[1.15rem] font-normal text-ink">Team Coaching ROI</h2>
             <span className="text-[0.72rem] text-slate">Closings · conversion · GCI by agent</span>

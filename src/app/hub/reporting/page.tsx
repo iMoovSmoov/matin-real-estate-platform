@@ -834,20 +834,20 @@ export default function ReportingPage() {
 
                   {/* GRID — leaderboard (wide) + source ROI + pipeline + funnel */}
                   <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                    <div className="lg:col-span-2">{leaderboardCard}</div>
-                    <div className="lg:col-span-1">
+                    <div className="min-w-0 lg:col-span-2">{leaderboardCard}</div>
+                    <div className="min-w-0 lg:col-span-1">
                       <SourceRoiPanel
                         sources={sourceRoi}
                         onDrill={(s) => setDrawer({ kind: "source", source: s })}
                       />
                     </div>
-                    <div className="lg:col-span-2">
+                    <div className="min-w-0 lg:col-span-2">
                       <PipelineRamp
                         stages={pipeline}
                         onDrill={(s) => setDrawer({ kind: "pipeline", stage: s })}
                       />
                     </div>
-                    <div className="lg:col-span-1">
+                    <div className="min-w-0 lg:col-span-1">
                       <FunnelRamp
                         stages={funnel}
                         onDrill={(s) => setDrawer({ kind: "stage", stage: s })}
@@ -871,8 +871,8 @@ export default function ReportingPage() {
                   />
                   {timeSeries}
                   <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                    <div className="lg:col-span-2">{leaderboardCard}</div>
-                    <div className="lg:col-span-1">
+                    <div className="min-w-0 lg:col-span-2">{leaderboardCard}</div>
+                    <div className="min-w-0 lg:col-span-1">
                       <SourceRoiPanel
                         sources={sourceRoi}
                         onDrill={(s) => setDrawer({ kind: "source", source: s })}
@@ -963,7 +963,7 @@ function RecentClosings() {
                 <span className="text-[0.92rem] font-bold text-success tabular-nums">
                   {compactUsd(c.price)}
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex min-w-0 items-center gap-1.5">
                   <Avatar name={c.agent} slug={c.slug} size={20} />
                   <span className="truncate text-[0.7rem] text-slate">{c.agent}</span>
                 </span>

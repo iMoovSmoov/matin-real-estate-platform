@@ -694,7 +694,7 @@ export default function BuyerAgreementBuilder() {
   );
 
   const FormColumn = (
-    <section className="flex flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="flex min-w-0 flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* Identity header with real agent avatar */}
       <div className="flex items-center gap-3 border-b border-mist px-5 py-4">
         <Avatar name={form.buyerName || buyer.name} size={36} ring />
@@ -922,7 +922,7 @@ export default function BuyerAgreementBuilder() {
   );
 
   const PreviewColumn = (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-w-0 flex-col gap-4">
       {/* Branded template picker row (ticket 7) */}
       <div className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TEMPLATES.map((t) => {
@@ -1073,7 +1073,7 @@ export default function BuyerAgreementBuilder() {
   );
 
   const ActionsColumn = (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-w-0 flex-col gap-4">
       {/* Per-field completion checklist (ticket 2) — scroll-to-fix */}
       <div className="rounded-2xl border border-mist bg-cloud shadow-soft">
         <div className="flex items-center justify-between gap-2 border-b border-mist px-5 py-4">
@@ -1332,12 +1332,12 @@ export default function BuyerAgreementBuilder() {
       {/* ── lg+: full builder grid (record list + 3 columns) ─────────────── */}
       <div className="mt-5 hidden gap-4 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)]">
         {ListPane}
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
           {FormColumn}
-          <div ref={desktopDocsRef} className="scroll-mt-20">
+          <div ref={desktopDocsRef} className="min-w-0 scroll-mt-20">
             {PreviewColumn}
           </div>
-          <div className="xl:col-span-2 2xl:col-span-1">{ActionsColumn}</div>
+          <div className="min-w-0 xl:col-span-2 2xl:col-span-1">{ActionsColumn}</div>
         </div>
       </div>
 

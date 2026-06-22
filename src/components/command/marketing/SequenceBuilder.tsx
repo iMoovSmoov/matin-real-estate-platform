@@ -261,7 +261,7 @@ export function SequenceBuilder() {
         </ol>
 
         {/* Flow canvas + inspector */}
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           {/* Horizontally scrollable node/connector flow */}
           <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex min-w-max items-stretch gap-0">

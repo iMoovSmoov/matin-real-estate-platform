@@ -769,7 +769,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           record fades in — a tasteful, reduced-motion-safe transition that
           makes "the listing selector switches the whole record" visible. */}
       <div key={selected.id} className="hidden gap-5 motion-safe:animate-fade lg:grid lg:grid-cols-12">
-        <div className="lg:col-span-6 xl:col-span-5">
+        <div className="min-w-0 lg:col-span-6 xl:col-span-5">
           <ListingRecordCard
             listing={selected}
             tracks={tracks}
@@ -781,7 +781,7 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
             onOpenAi={() => openAi(contextLine)}
           />
         </div>
-        <div className="space-y-5 lg:col-span-6 xl:col-span-7">
+        <div className="min-w-0 space-y-5 lg:col-span-6 xl:col-span-7">
           <OutputPreviews
             outputs={outputs}
             heroPhoto={heroPhoto}
@@ -1136,11 +1136,11 @@ function ListingRecordCard({
                   }
                 />
                 <div className="mt-1.5 flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[0.7rem] text-slate">
+                  <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.7rem] text-slate">
                     <Avatar name={m.owner} slug={m.ownerSlug} size={16} ring />
                     <span className="truncate" title={m.owner}>{m.owner}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[0.68rem] text-slate">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-[0.68rem] text-slate">
                     <CalendarClock className="h-3 w-3" aria-hidden />
                     {m.due}
                   </span>
@@ -1278,7 +1278,7 @@ function OutputPreviews({
               key={o.key}
               type="button"
               onClick={() => onView(o.key)}
-              className="group flex flex-col gap-2.5 rounded-xl border border-mist bg-paper p-3 text-left transition-all hover:border-ink/20 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+              className="group flex min-w-0 flex-col gap-2.5 rounded-xl border border-mist bg-paper p-3 text-left transition-all hover:border-ink/20 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             >
               <AssetProxy asset={o} heroPhoto={heroPhoto} />
               <div className="flex items-start justify-between gap-2">

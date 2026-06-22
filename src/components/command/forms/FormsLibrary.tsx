@@ -167,7 +167,7 @@ export function FormsLibrary() {
           <button
             key={action.code}
             onClick={() => openByCode(action.code)}
-            className="group flex flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white p-3 text-left transition-all hover:border-ink/20 hover:shadow-sm sm:gap-3 sm:p-4"
+            className="group flex min-w-0 flex-col gap-2.5 rounded-xl border border-ink/[0.08] bg-white p-3 text-left transition-all hover:border-ink/20 hover:shadow-sm sm:gap-3 sm:p-4"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-paper ring-1 ring-inset ring-ink/[0.06] transition-colors group-hover:bg-ink group-hover:text-white sm:h-9 sm:w-9">
               <FilePlus className="h-4 w-4 text-ink transition-colors group-hover:text-white" />

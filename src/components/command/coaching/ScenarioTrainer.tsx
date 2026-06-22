@@ -448,7 +448,7 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
               </span>
               <div
                 className={cn(
-                  "max-w-[80%] rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
+                  "max-w-[80%] break-words rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
                   m.role === "user"
                     ? "rounded-tr-sm bg-ink text-white"
                     : isGradeBubble

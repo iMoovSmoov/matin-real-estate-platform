@@ -278,7 +278,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1 block text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate">
         {label}
         {required ? <span className="ml-0.5 text-danger">*</span> : null}

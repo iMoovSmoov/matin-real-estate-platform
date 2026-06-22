@@ -84,7 +84,7 @@ export function AutomationBreakdown({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* LEFT — selectable list */}
-        <ul className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+        <ul className="min-w-0 overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
           {automations.map((a, i) => {
             const active = a.id === selected?.id;
             const paused = a.status === "paused";
@@ -141,7 +141,7 @@ export function AutomationBreakdown({
           <div
             ref={detailRef}
             key={selected.id}
-            className="scroll-mt-24 space-y-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft motion-safe:animate-fade"
+            className="min-w-0 scroll-mt-24 space-y-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft motion-safe:animate-fade"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

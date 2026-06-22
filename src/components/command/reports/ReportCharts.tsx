@@ -83,7 +83,7 @@ export function TimeSeriesChart({
   const tipLeftPct = (hoverX / W) * 100;
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="flex min-w-0 flex-col gap-3 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
@@ -273,7 +273,7 @@ export function PipelineRamp({
   const interactive = typeof onDrill === "function";
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="flex min-w-0 flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">

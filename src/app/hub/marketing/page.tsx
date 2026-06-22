@@ -602,14 +602,14 @@ export default function MarketingStudioPage() {
           local xl pane-class so the form + preview persist when switching. */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         {/* Pane 1 — template library */}
-        <div className={paneClassXl(pane.is("templates"), "xl:col-span-3")}>
+        <div className={paneClassXl(pane.is("templates"), "min-w-0 xl:col-span-3")}>
           <TemplateLibrary active={template} onSelect={selectTemplate} />
         </div>
 
         {/* Pane 2 — asset previews (channel tabs over one canvas). Visibility on
             the outer div; flex column on an inner wrapper so it applies whenever
             the pane is shown (block vs flex would otherwise collide). */}
-        <div className={paneClassXl(pane.is("preview"), "xl:col-span-5")}>
+        <div className={paneClassXl(pane.is("preview"), "min-w-0 xl:col-span-5")}>
          <div className="flex flex-col gap-5">
           <AssetPreview
             headline={activeTemplate.headline}
@@ -654,7 +654,7 @@ export default function MarketingStudioPage() {
         </div>
 
         {/* Pane 3 — generation controls + real audience composition */}
-        <div className={paneClassXl(pane.is("controls"), "xl:col-span-4")}>
+        <div className={paneClassXl(pane.is("controls"), "min-w-0 xl:col-span-4")}>
           <div className="flex flex-col gap-5">
             <GenerationControls
               state={controls}
@@ -674,9 +674,9 @@ export default function MarketingStudioPage() {
 
       {/* Branded deliverables — flyer (BrandedDocument) + email composer */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <div className="flex flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3">
           <div className="flex items-baseline justify-between gap-3 px-1">
-            <h2 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
+            <h2 className="min-w-0 font-display text-[1.05rem] font-normal leading-tight text-ink">
               Print flyer
             </h2>
             <span className="text-[0.72rem] text-slate">

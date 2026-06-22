@@ -166,7 +166,7 @@ export function UsersView() {
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-      <section className="space-y-3">
+      <section className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Users</h2>
@@ -208,7 +208,7 @@ export function UsersView() {
         </div>
       </section>
 
-      <section>
+      <section className="min-w-0">
         <h2 className="mb-3 font-display text-[1.1rem] font-normal leading-tight text-ink">Roles</h2>
         <div className="divide-y divide-mist overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
           {roleDefs.map((r) => (
@@ -794,7 +794,7 @@ export function BrandKitView() {
     <>
     <div className="grid gap-5 lg:grid-cols-2">
       {/* ── Wordmark lockups (real Matin marks — white-on-dark + dark-on-light) ── */}
-      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft lg:col-span-2">
+      <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft lg:col-span-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="eyebrow text-slate">Logo lockups</p>
@@ -834,7 +834,7 @@ export function BrandKitView() {
       </div>
 
       {/* ── Identity + palette ──────────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow text-slate">Identity</p>
         <h2 className="mt-1 font-display text-[1.1rem] font-normal text-ink">Matin Real Estate</h2>
         <p className="mt-0.5 text-[0.8rem] text-slate">Portland &amp; SW Washington&apos;s most advanced brokerage.</p>
@@ -854,7 +854,7 @@ export function BrandKitView() {
         </dl>
       </div>
 
-      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow text-slate">Palette</p>
         {/* responsive 2/3 cols so hex labels never clip (S12 ticket 12) */}
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -881,7 +881,7 @@ export function BrandKitView() {
       </div>
 
       {/* ── Branded letterhead preview ──────────────────────────────────────── */}
-      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow mb-3 text-slate">Letterhead preview</p>
         <BrandedDocument
           variant="letter"
@@ -920,7 +920,7 @@ export function BrandKitView() {
       </div>
 
       {/* ── Branded email-header preview ────────────────────────────────────── */}
-      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow mb-3 text-slate">Email header preview</p>
         <BrandedDocument
           variant="email"
@@ -977,7 +977,7 @@ export function AiPolicyView() {
   return (
     <>
     <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
-      <section className="space-y-3">
+      <section className="min-w-0 space-y-3">
         <div>
           <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">AI approval policies</h2>
           <p className="mt-0.5 text-[0.78rem] text-slate">
@@ -987,7 +987,7 @@ export function AiPolicyView() {
         <DataTable columns={cols} rows={aiPolicyRows} getRowId={(p) => p.id} onRowClick={openPolicy} responsive />
       </section>
 
-      <CalloutCard tone="risk" title="Risky policy flagged">
+      <CalloutCard tone="risk" title="Risky policy flagged" className="min-w-0">
         Turning <span className="text-cloud">Automated outbound send</span> from <span className="text-cloud">Off</span> to{" "}
         <span className="text-cloud">Auto-safe</span> would let AI send client messages with no one reviewing them first — a compliance
         and chargeback risk. Requires owner sign-off and is recorded in the activity log.

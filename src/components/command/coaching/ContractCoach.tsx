@@ -98,7 +98,7 @@ export function ContractCoach() {
 
       <div className="grid grid-cols-1 gap-4 p-5 lg:grid-cols-2">
         {/* Editor side */}
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/80">
               Your draft
@@ -151,7 +151,7 @@ export function ContractCoach() {
         </div>
 
         {/* Critique side */}
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate/80">
               Coaching critique

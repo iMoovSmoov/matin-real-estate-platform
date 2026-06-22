@@ -448,7 +448,7 @@ export default function TodayCommandCenter() {
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         {/* On < lg, render the rail context first so the user sees it before
             scrolling a long queue. At lg+ it sits in the right column (order-2). */}
-        <div className="flex flex-col gap-5 lg:order-2">
+        <div className="flex min-w-0 flex-col gap-5 lg:order-2">
           {aiSummaryCard}
           <BrokerageVitalScore />
 
@@ -528,7 +528,7 @@ export default function TodayCommandCenter() {
         <section
           ref={queueRef}
           id="human-work-queue"
-          className="scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft lg:order-1"
+          className="min-w-0 scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft lg:order-1"
         >
           <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
             <div className="min-w-0">

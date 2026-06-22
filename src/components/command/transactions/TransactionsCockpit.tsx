@@ -650,7 +650,7 @@ function DealScreen({
   /* ── Pane bodies (reused by the mobile switcher and the lg+ grid) ──────── */
 
   const summaryPane = (
-    <section className="flex flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* Property hero — real listing imagery keyed to the address */}
       <div className="relative">
         <PropertyThumb src={heroPhoto} ratio="video" alt={tx.address} rounded={false} />
@@ -777,7 +777,7 @@ function DealScreen({
   );
 
   const timelinePane = (
-    <section className="flex flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       <div className="flex items-center justify-between gap-3 border-b border-mist px-5 py-4">
         <p className="eyebrow text-slate">Milestone timeline</p>
         <StatusChip tone={tx.stage === "Closed" ? "success" : "info"}>
@@ -794,7 +794,7 @@ function DealScreen({
   );
 
   const checklistPane = (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-w-0 flex-col gap-4">
       {/* Contextual deal-action bar (§2.6 ticket 5) */}
       <div className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
         <div className="border-b border-mist px-5 py-3">
@@ -1000,7 +1000,7 @@ function DealScreen({
   );
 
   const docsPane = (
-    <section className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-mist px-5 py-4">
         <div>
           <p className="eyebrow text-slate">Documents · Compliance review</p>
@@ -1024,7 +1024,7 @@ function DealScreen({
   );
 
   const activityPane = (
-    <section className="flex flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       <div className="border-b border-mist px-5 py-4">
         <p className="eyebrow text-slate">Activity · Audit trail</p>
         <p className="mt-1 text-[0.74rem] text-slate">

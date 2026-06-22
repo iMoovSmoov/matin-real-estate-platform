@@ -326,7 +326,7 @@ export default function CrmPage() {
           a full-width slide-over (R1/R2). */}
       <div
         ref={masterRef}
-        className="grid scroll-mt-20 grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr] xl:grid-cols-[1.7fr_1fr]"
+        className="grid scroll-mt-20 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]"
       >
         {/* LEFT — lead inbox (view-swap fade; not re-keyed so DataTable keeps its
             sort/selection state across filter changes) */}
@@ -462,7 +462,7 @@ const AppointmentsBand = forwardRef<
       {upcoming.length > 0 ? (
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {upcoming.map((l) => (
-            <li key={l.id}>
+            <li key={l.id} className="min-w-0">
               <button
                 type="button"
                 onClick={() => onOpen(l)}

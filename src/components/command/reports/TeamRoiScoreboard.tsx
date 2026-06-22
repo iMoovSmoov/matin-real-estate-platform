@@ -44,7 +44,7 @@ export function TeamRoiScoreboard({
   const ranked = [...sources].sort((a, b) => roiPct(b).raw - roiPct(a).raw);
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="flex min-w-0 flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
           Team ROI by Lead Source

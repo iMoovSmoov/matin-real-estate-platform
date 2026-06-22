@@ -77,7 +77,7 @@ export function SystemsDiagram({ integrations }: { integrations: Integration[] }
       <div className="px-3 py-4">
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="h-auto w-full"
+          className="h-auto w-full max-w-full"
           role="img"
           aria-label="MatinOS data-flow diagram: sources into the MatinOS core into systems"
         >

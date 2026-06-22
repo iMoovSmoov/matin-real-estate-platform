@@ -536,7 +536,7 @@ export function FormsDocsWorkspace() {
           panel full-width BELOW so the branded document never gets crammed into
           a narrow column. xl+: true 3-pane split. */}
       <div className="hidden gap-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_372px]">
-        <div data-forms-list className="scroll-mt-20">
+        <div data-forms-list className="min-w-0 scroll-mt-20">
           {listPane}
         </div>
         <div data-forms-docs className="scroll-mt-20 min-w-0">
@@ -550,6 +550,9 @@ export function FormsDocsWorkspace() {
           data-forms-actions
           className={cn(
             "scroll-mt-20 min-w-0 lg:col-span-2 xl:col-span-1",
+            // Each direct child of the actions <section> must be able to shrink
+            // below its content width (lg-band 2-up grid + xl flex column).
+            "[&>section>*]:min-w-0",
             // lg-band only: turn the <section> flex-col into a 2-up grid.
             "lg:[&>section]:mx-auto lg:[&>section]:grid lg:[&>section]:max-w-3xl lg:[&>section]:grid-cols-2 lg:[&>section]:items-start",
             "xl:[&>section]:mx-0 xl:[&>section]:flex xl:[&>section]:max-w-none",

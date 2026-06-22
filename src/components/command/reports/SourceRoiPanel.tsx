@@ -41,7 +41,7 @@ export function SourceRoiPanel({
   const blendedRoas = totalSpend ? (totalGci / totalSpend).toFixed(1) : "∞";
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="flex min-w-0 flex-col gap-4 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
           Marketing ROI + Source Quality

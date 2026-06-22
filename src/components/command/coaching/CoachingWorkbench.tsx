@@ -511,7 +511,7 @@ export function CoachingWorkbench({
     // roleplay full-width beneath) which stays readable across the lg band.
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[240px_minmax(0,1fr)_320px]">
       {/* ── Pane 1 — Scenario library ──────────────────────────────────── */}
-      <section className="rounded-2xl border border-mist bg-cloud shadow-soft md:self-start">
+      <section className="min-w-0 rounded-2xl border border-mist bg-cloud shadow-soft md:self-start">
         <div className="flex items-center gap-2 border-b border-mist px-4 py-3.5">
           <GraduationCap className="h-4 w-4 text-slate" aria-hidden />
           <h2 className="font-display text-[1rem] font-normal text-ink">Scenario library</h2>
@@ -574,7 +574,7 @@ export function CoachingWorkbench({
       {/* ── Pane 2 — Roleplay transcript (spans both cols at md→lg) ─────── */}
       <section
         ref={transcriptRef}
-        className="flex min-h-[30rem] scroll-mt-20 flex-col rounded-2xl border border-mist bg-cloud shadow-soft md:order-3 md:col-span-2 xl:order-none xl:col-span-1"
+        className="flex min-h-[30rem] min-w-0 scroll-mt-20 flex-col rounded-2xl border border-mist bg-cloud shadow-soft md:order-3 md:col-span-2 xl:order-none xl:col-span-1"
       >
         <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
           <div className="flex items-center gap-2">
@@ -640,7 +640,7 @@ export function CoachingWorkbench({
                 </p>
                 <div
                   className={cn(
-                    "rounded-2xl px-3.5 py-2.5 text-[0.84rem] leading-relaxed ring-1 ring-inset",
+                    "break-words rounded-2xl px-3.5 py-2.5 text-[0.84rem] leading-relaxed ring-1 ring-inset",
                     turn.speaker === "agent"
                       ? "rounded-tr-sm bg-paper-200 text-ink ring-mist"
                       : "rounded-tl-sm bg-cloud text-ink ring-mist",
@@ -740,7 +740,7 @@ export function CoachingWorkbench({
       </section>
 
       {/* ── Pane 3 — Scorecard ─────────────────────────────────────────── */}
-      <section className="flex flex-col gap-4 md:order-2 md:self-start xl:order-none">
+      <section className="flex min-w-0 flex-col gap-4 md:order-2 md:self-start xl:order-none">
         <div key={`score-${swapKey}`} className="rounded-2xl border border-mist bg-cloud shadow-soft motion-safe:animate-fade">
           <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
             <div className="flex items-center gap-2">

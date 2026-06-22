@@ -181,7 +181,7 @@ export function EmailComposer({
   }
 
   return (
-    <section className="flex flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-mist px-5 py-4">
         <div className="flex items-center gap-2">
@@ -235,7 +235,7 @@ export function EmailComposer({
         </div>
 
         {/* Compose surface */}
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex min-w-0 flex-col gap-3 p-4">
           {/* To: recipient pills */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate">
