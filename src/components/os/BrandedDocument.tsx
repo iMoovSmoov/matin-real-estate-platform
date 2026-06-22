@@ -1,9 +1,10 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { CheckCircle2, Printer } from "lucide-react";
+import { CheckCircle2, Printer, Download } from "lucide-react";
 import { Logo, MatinMark } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
+import { downloadTextFile } from "@/lib/download";
 import company from "@/lib/data/company.json";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -132,6 +133,136 @@ function isFilled(f: BrandedDocumentField): boolean {
   if (f.value == null) return false;
   if (typeof f.value === "string") return f.value.trim().length > 0;
   return true;
+}
+
+/* ── Plain-text assembly (for the "Save copy" .txt download) ─────────────────
+   The branded artifact's primary download is the scoped Save-as-PDF print, but
+   we ALSO assemble the document's serializable props (letterhead → title →
+   field grid → variant payload → signature) into a real .txt so there is a
+   tangible file even without printing. Free-form `body` ReactNode can't be
+   reliably serialized, so the structured props carry the content. */
+
+function fieldValueText(f: BrandedDocumentField): string {
+  if (!isFilled(f)) return "Missing";
+  const v = f.value;
+  if (typeof v === "string" || typeof v === "number") return String(v);
+  return "(see document)";
+}
+
+function slugifyTitle(s: string): string {
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "document"
+  );
+}
+
+function assembleDocumentText(props: BrandedDocumentProps): string {
+  const {
+    formId,
+    title,
+    recipient,
+    agent,
+    fields = [],
+    variant,
+    emailSubject,
+    fromName,
+    mergeTokens = [],
+    netSheetLines = [],
+    salePrice = 0,
+    listing,
+  } = props;
+
+  const out: string[] = [];
+  const rule = "─".repeat(48);
+  const push = (s = "") => out.push(s);
+
+  // Letterhead
+  push(company.name.toUpperCase());
+  push(OFFICE_LINE);
+  if (formId) push(`Form: ${formId}`);
+  push();
+
+  // Title + recipient
+  push(title);
+  if (recipient) push(`Prepared for: ${recipient}`);
+  push();
+
+  // Structured field grid
+  if (fields.length > 0) {
+    push("DETAILS");
+    push(rule);
+    for (const f of fields) push(`${f.label}: ${fieldValueText(f)}`);
+    push();
+  }
+
+  // Variant-specific structured payload
+  if (variant === "email") {
+    push("EMAIL");
+    push(rule);
+    if (emailSubject) push(`Subject: ${emailSubject}`);
+    if (fromName) push(`From: ${fromName}`);
+    push(`To: ${recipient ?? "{{recipient_email}}"}`);
+    if (mergeTokens.length > 0) push(`Merge tokens: ${mergeTokens.join(", ")}`);
+    push();
+  } else if (variant === "netsheet") {
+    const costs = netSheetLines.filter((l) => l.amount < 0);
+    const totalCosts = costs.reduce((s, l) => s + Math.abs(l.amount), 0);
+    push("ESTIMATED SELLER NET PROCEEDS");
+    push(rule);
+    push(`Gross sale price: ${usd0(salePrice)}`);
+    for (const l of netSheetLines) {
+      const amt = l.amount < 0 ? `(${usd0(Math.abs(l.amount))})` : usd0(l.amount);
+      push(`${l.label}: ${amt}${l.note ? ` — ${l.note}` : ""}`);
+    }
+    push(`Estimated net to seller: ${usd0(salePrice - totalCosts)}`);
+    push();
+  } else if (variant === "flyer" && listing) {
+    const addr = [
+      listing.address,
+      [listing.city, listing.state, listing.zip].filter(Boolean).join(" "),
+    ]
+      .filter(Boolean)
+      .join(", ");
+    const specs = [
+      listing.beds != null ? `${listing.beds} bd` : null,
+      listing.baths != null ? `${listing.baths} ba` : null,
+      listing.sqft != null ? `${listing.sqft} sqft` : null,
+      listing.lot ? `lot ${listing.lot}` : null,
+      listing.year != null ? `built ${listing.year}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    push("LISTING");
+    push(rule);
+    if (addr) push(`Address: ${addr}`);
+    if (listing.price) push(`Price: ${listing.price}`);
+    if (specs) push(`Specs: ${specs}`);
+    if (listing.blurb) push(listing.blurb);
+    push();
+  }
+
+  // Signature block
+  if (agent) {
+    push("PREPARED BY");
+    push(rule);
+    push(agent.name);
+    const titleLic = [
+      agent.title,
+      agent.license ? `License #${agent.license}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    if (titleLic) push(titleLic);
+    const contact = [agent.phone, agent.email].filter(Boolean).join(" · ");
+    if (contact) push(contact);
+    push();
+  }
+
+  push(FOOTER_LINE);
+  return out.join("\n");
 }
 
 /* ── Letterhead band ───────────────────────────────────────────────────────── */
@@ -542,8 +673,17 @@ export function BrandedDocument(props: BrandedDocumentProps) {
   const printId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const printClass = `matindoc-print-${printId}`;
 
+  // Primary: scoped Save-as-PDF. The per-instance print stylesheet below
+  // isolates THIS document, so the browser print/PDF carries only the branded
+  // letterhead — no app chrome, no toolbar.
   function handlePrint() {
     if (typeof window !== "undefined") window.print();
+  }
+
+  // Secondary: a real .txt download of the document's text content, so even
+  // without printing there is a tangible file (assembled from the props).
+  function handleSaveCopy() {
+    downloadTextFile(`matin-${slugifyTitle(title)}.txt`, assembleDocumentText(props));
   }
 
   /* The print stylesheet: when printing, hide everything except THIS document
@@ -578,14 +718,26 @@ export function BrandedDocument(props: BrandedDocumentProps) {
           <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-slate">
             {variant} preview
           </span>
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-paper transition-colors hover:bg-ink-800"
-          >
-            <Printer className="h-3.5 w-3.5" aria-hidden />
-            Download / Print
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Secondary — a real .txt file even without printing (ink outline, no gold) */}
+            <button
+              type="button"
+              onClick={handleSaveCopy}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:border-ink/25 hover:bg-paper"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              Save copy
+            </button>
+            {/* Primary — scoped print → Save as PDF of just the branded artifact */}
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-paper transition-colors hover:bg-ink-800"
+            >
+              <Printer className="h-3.5 w-3.5" aria-hidden />
+              Download PDF
+            </button>
+          </div>
         </div>
       ) : null}
 

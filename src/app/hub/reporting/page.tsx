@@ -35,6 +35,7 @@ import {
 } from "@/components/os";
 import { MatinMark } from "@/components/brand/Logo";
 import { cn, compactUsd, num, usd } from "@/lib/utils";
+import { downloadCsv } from "@/lib/download";
 import {
   ReportsScorecard,
   type ScorecardMetric,
@@ -413,20 +414,34 @@ export default function ReportingPage() {
     });
   }
 
-  /* ── real CSV export of the current leaderboard scope ────────────────────── */
+  /* ── real CSV export of the current scoped report ─────────────────────────
+     One downloadable .csv carrying the three rendered datasets — company
+     scorecard, agent leaderboard, and source ROI — with the active scope in a
+     header band. downloadCsv handles RFC-4180 escaping + the real file click. */
   function exportCsv() {
-    const header = ["Agent", "Leads", "Appointments", "Signed", "GCI"];
-    const lines = leaderRows.map((r) => [r.agent, r.leads, r.appts, r.signed, r.gci].join(","));
-    const csv = [header.join(","), ...lines].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `matin-leaderboard-${range}-${team.replace(/\s+/g, "-").toLowerCase()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    const rows: (string | number)[][] = [
+      ["Matin Real Estate — Brokerage Accountability Report"],
+      ["Reporting period", RANGE_LABEL[range]],
+      ["Team / office", team],
+      ["Lead source scope", source],
+      [],
+      ["Company scorecard"],
+      ["Metric", "Value"],
+      ["Annual volume", companyScorecard.annualVolume],
+      ["Properties sold", companyScorecard.propertiesSold],
+      ["GCI", companyScorecard.gci],
+      ["Active listings", companyScorecard.activeListings],
+      ["Avg sale price", companyScorecard.avgSalePrice],
+      [],
+      ["Agent leaderboard"],
+      ["Agent", "Leads", "Appointments", "Signed", "GCI"],
+      ...leaderRows.map((r) => [r.agent, r.leads, r.appts, r.signed, r.gci]),
+      [],
+      ["Marketing ROI by lead source"],
+      ["Source", "Leads", "Closed", "Revenue", "Spend", "Cost per lead"],
+      ...sourceRoi.map((s) => [s.source, s.leads, s.closed, s.revenue, s.spend, s.cpl]),
+    ];
+    downloadCsv("matin-report-2026.csv", rows);
   }
 
   const leaderColumns: Column<ReportAgentLeaderboardRow>[] = [
