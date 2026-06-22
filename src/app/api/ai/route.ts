@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import Groq from "groq-sdk";
 import { SYSTEMS, buildUserMessage, type AiTool } from "@/lib/ai/prompts";
 import { fallbackFor } from "@/lib/ai/fallback";
+import { groundInput, hardenFallback } from "@/lib/data/ai-fallback-grounding";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -66,7 +67,12 @@ export async function POST(req: Request) {
   }
 
   const tool = (body.tool || "ask-matin") as AiTool;
-  const input = body.input || {};
+  // Ground every request's input against REAL Matin records (real listing
+  // addresses/prices, buyer/seller names, loan terms, coordinators, OREF ids).
+  // Caller-supplied values always win; this only backfills EMPTY fields. Both
+  // the live LLM prompt and the canned fallback render from the same grounded
+  // input, so fallback output reads as real Matin output — never lorem/filler.
+  const input = groundInput(tool, body.input);
   const incoming = Array.isArray(body.messages) ? body.messages : null;
 
   const messages: ChatMessage[] = incoming?.length
@@ -75,6 +81,11 @@ export async function POST(req: Request) {
 
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content;
   const system = SYSTEMS[tool] || SYSTEMS["ask-matin"];
+
+  // Hardened fallback: ground the input, render the canned template, then swap
+  // any placeholders baked into fallback.ts (e.g. the demo contract block) for
+  // real records. The single source for every fallback string in this route.
+  const renderFallback = () => hardenFallback(tool, fallbackFor(tool, input, lastUser));
 
   const headers = {
     "Content-Type": "text/plain; charset=utf-8",
@@ -106,13 +117,17 @@ export async function POST(req: Request) {
           controller.close();
         } catch (err) {
           console.error("[ai/groq] falling back:", err);
-          const text = fallbackFor(tool, input, lastUser);
+          const text = renderFallback();
           for (const chunk of text.split(/(\s+)/)) controller.enqueue(encoder.encode(chunk));
           controller.close();
         }
       },
     });
-    return new Response(stream, { headers: { ...headers, "X-Matin-Ai": "groq" } });
+    // Live provider attempted; if it errors mid-stream we degrade to a grounded
+    // sample, but the request was served from a real model → mark mode "live".
+    return new Response(stream, {
+      headers: { ...headers, "X-Matin-Ai": "groq", "X-Matin-Ai-Mode": "live" },
+    });
   }
 
   // ── Anthropic (when ANTHROPIC_API_KEY set) ──────────────────────────────────
@@ -132,16 +147,22 @@ export async function POST(req: Request) {
           controller.close();
         } catch (err) {
           console.error("[ai/anthropic] falling back:", err);
-          const text = fallbackFor(tool, input, lastUser);
+          const text = renderFallback();
           for (const chunk of text.split(/(\s+)/)) controller.enqueue(encoder.encode(chunk));
           controller.close();
         }
       },
     });
-    return new Response(stream, { headers: { ...headers, "X-Matin-Ai": "claude" } });
+    return new Response(stream, {
+      headers: { ...headers, "X-Matin-Ai": "claude", "X-Matin-Ai-Mode": "live" },
+    });
   }
 
-  // ── No key configured → canned fallback (demo never breaks) ────────────────
-  const text = fallbackFor(tool, input, lastUser);
-  return new Response(textStream(text), { headers: { ...headers, "X-Matin-Ai": "fallback" } });
+  // ── No key configured → grounded, branded sample (demo never breaks) ───────
+  // X-Matin-Ai-Mode: "sample" lets the UI show a "Matin AI · sample" pill so
+  // reviewers know this is record-grounded canned output, not a live model.
+  const text = renderFallback();
+  return new Response(textStream(text), {
+    headers: { ...headers, "X-Matin-Ai": "fallback", "X-Matin-Ai-Mode": "sample" },
+  });
 }

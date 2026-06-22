@@ -8,7 +8,13 @@ import {
   Download,
   ChevronDown,
 } from "lucide-react";
-import { reportMetrics, getAgent, metrics } from "@/lib/data";
+import {
+  reportMetrics,
+  getAgent,
+  metrics,
+  realListings,
+  listingPhoto,
+} from "@/lib/data";
 import type {
   ReportAgentLeaderboardRow,
   ReportSourceRoi,
@@ -16,7 +22,6 @@ import type {
   ReportPipelineStage,
 } from "@/lib/types";
 import {
-  SegmentedKpis,
   SavedViewTabs,
   DataTable,
   Avatar,
@@ -45,6 +50,10 @@ import {
   AiExplainPanel,
   type ExplainScope,
 } from "@/components/command/reports/AiExplainPanel";
+import { ReportFinancialStrip } from "@/components/command/reports/ReportFinancialStrip";
+import { TeamRoiScoreboard } from "@/components/command/reports/TeamRoiScoreboard";
+import { ActivityGauges, type ActivityGauge } from "@/components/command/reports/ActivityGauges";
+import { ReportExport } from "@/components/command/reports/ReportExport";
 
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — Reports + Accountability  (build-ref §2.10, source/10_reports.md)
@@ -67,6 +76,13 @@ type Team = "All teams" | "Oregon" | "SW Washington";
 type SourceFilter = "All sources" | "Paid" | "Organic" | "Referral";
 
 type LeaderTab = "gci" | "signed" | "appts" | "leads";
+type DatasetTab = "overview" | "performance" | "funnel";
+
+const DATASET_TABS: { key: DatasetTab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "performance", label: "Performance Table" },
+  { key: "funnel", label: "Funnel Table" },
+];
 
 const DATE_RANGES: DateRange[] = ["MTD", "QTD", "YTD"];
 const TEAMS: Team[] = ["All teams", "Oregon", "SW Washington"];
@@ -120,21 +136,46 @@ type Drawer =
   | { kind: "pipeline"; stage: ReportPipelineStage }
   | null;
 
-/* Recent closings strip — real addresses + photos (PropertyThumb wiring) */
-const RECENT_CLOSINGS = [
-  { address: "7428 SW Maple Ave", city: "Lake Oswego", price: 1180000, agent: "Lexa Brice", slug: "lexa-brice", seed: 4 },
-  { address: "215 NW Skyline Blvd", city: "Portland", price: 925000, agent: "Chase Bright", slug: "chase-bright", seed: 9 },
-  { address: "3390 Riverview Dr", city: "West Linn", price: 1340000, agent: "Joshua Rose", slug: "joshua-rose", seed: 13 },
-  { address: "1102 Iron Mountain Rd", city: "Lake Oswego", price: 760000, agent: "Karen Tse", slug: "karen-tse", seed: 17 },
-];
+/* Recent closings strip — REAL Matin listings (real address / city / price /
+   agent) with the real listing hero via listingPhoto(). We take the 4 highest-
+   value real listings whose agent has a headshot on disk, so every card shows a
+   real property photo + a real agent face (no hardcoded addresses, no seeds). */
+const AGENTS_WITH_PHOTOS = new Set([
+  "alicia-smith","amanda-conlon","amy-mead","andy-wilcox","benjamin-fabian","boston-bate",
+  "charles-corbett","chase-bright","chris-zurita-orozco","christopher-young","edmar-martinez",
+  "ellen-morehead","eric-leuschner","erin-martin","finch-myburgh","janae-chaves","jason-veith",
+  "joe-bothe","jordan-matin","jose-lettenmaier","joshua-rose","karen-tse","kimberly-ilosvay",
+  "leona-mullen","lexa-brice","maleigha-martinez","michelle-mcfadden","miguel-contreras",
+  "nancy-alhayek","nick-chamberlin","ocean-chau","paris-vollstedt","reed-bright","russell-xay",
+  "sierra-lockwood","sierra-palmeri","sophia-freiling","vince-kinney","william-carrell","zach-hosford",
+]);
+
+const RECENT_CLOSINGS = [...realListings]
+  .filter((l) => l.agentSlug && AGENTS_WITH_PHOTOS.has(l.agentSlug))
+  .sort((a, b) => b.price - a.price)
+  .slice(0, 4)
+  .map((l) => {
+    const a = getAgent(l.agentSlug);
+    return {
+      id: l.id,
+      address: l.address,
+      city: `${l.city}, ${l.state}`,
+      price: l.price,
+      agent: a?.name ?? "Matin Real Estate",
+      slug: l.agentSlug,
+      photo: listingPhoto(l),
+    };
+  });
 
 export default function ReportingPage() {
   const [range, setRange] = useState<DateRange>("YTD");
   const [team, setTeam] = useState<Team>("All teams");
   const [source, setSource] = useState<SourceFilter>("All sources");
   const [leaderTab, setLeaderTab] = useState<LeaderTab>("gci");
+  const [dataset, setDataset] = useState<DatasetTab>("overview");
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [explain, setExplain] = useState<ExplainScope | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Brief skeleton on first paint (and whenever scope changes, to mimic a
   // recompute against report_snapshots) — preserves layout stability. The
@@ -256,6 +297,27 @@ export default function ReportingPage() {
 
   const totalGci = agentLeaderboard.reduce((s, a) => s + a.gci, 0);
   const totalSigned = agentLeaderboard.reduce((s, a) => s + a.signed, 0);
+  const totalLeads = agentLeaderboard.reduce((s, a) => s + a.leads, 0);
+  const totalAppts = agentLeaderboard.reduce((s, a) => s + a.appts, 0);
+
+  // Per-row leaderboard GCI bar scale (relative to the top performer).
+  const maxGci = Math.max(1, ...agentLeaderboard.map((a) => a.gci));
+
+  /* Activity donut gauges — derived from the scoped leaderboard + automation
+     impact so they reconcile to the same data the rest of the report shows.
+     Calls/emails/texts are modelled off lead volume (the team's outbound touch
+     cadence); appts are the real summed appointment count vs a pacing target. */
+  const gauges: ActivityGauge[] = useMemo(() => {
+    const calls = Math.round(totalLeads * 2.4);
+    const emails = Math.round(totalLeads * 3.1);
+    const texts = Math.round(totalLeads * 1.7);
+    return [
+      { key: "calls", label: "Calls", kind: "calls", value: calls, target: Math.round(calls / 0.86) },
+      { key: "emails", label: "Emails", kind: "emails", value: emails, target: Math.round(emails / 0.92) },
+      { key: "texts", label: "Texts", kind: "texts", value: texts, target: Math.round(texts / 0.78) },
+      { key: "appts", label: "Appts set", kind: "appts", value: totalAppts, target: Math.round(totalAppts / 0.9) },
+    ];
+  }, [totalLeads, totalAppts]);
 
   /* ── Ask Matin — stream an explanation INLINE (never the global sidecar) ── */
   function askMatin(context: string, drivers: string[], action: ExplainScope["action"]) {
@@ -323,18 +385,37 @@ export default function ReportingPage() {
       header: "Signed",
       align: "right",
       sortable: true,
+      cardHidden: true,
       render: (r) => (
         <span className="font-semibold tabular-nums text-ink">{num(r.signed)}</span>
       ),
+    },
+    {
+      // Per-row data-viz (S10 ticket 5): a Lofty stacked activity bar showing the
+      // agent's Leads → Appts → Signed conversion at a glance.
+      key: "activity",
+      header: "Activity",
+      cardLabel: "Leads · Appts · Signed",
+      render: (r) => <LeaderboardActivityBar row={r} maxLeads={Math.max(1, ...leaderRows.map((x) => x.leads))} />,
     },
     {
       key: "gci",
       header: "GCI",
       align: "right",
       sortable: true,
+      primary: true,
       // Color-as-data: positive money prints green (Sisu scoreboard), no badge.
+      // A per-row GCI bar underneath shows production relative to the leader.
       render: (r) => (
-        <span className="font-bold tabular-nums text-success">{compactUsd(r.gci)}</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="font-bold tabular-nums text-success">{compactUsd(r.gci)}</span>
+          <span className="block h-1 w-20 overflow-hidden rounded-full bg-paper-200">
+            <span
+              className="block h-full rounded-full bg-success"
+              style={{ width: `${Math.max(6, Math.round((r.gci / maxGci) * 100))}%` }}
+            />
+          </span>
+        </div>
       ),
     },
   ];
@@ -357,18 +438,29 @@ export default function ReportingPage() {
           scoped live to <span className="font-semibold text-ink">{RANGE_LABEL[range]}</span>,{" "}
           {team}, {source.toLowerCase()}.
         </p>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className={cn(chip, "border-ink/15 text-ink")}
-        >
-          <Download className="h-3.5 w-3.5" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setExportOpen(true)}
+            className={cn(chip, "min-h-9 border-ink/15 text-ink")}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export report
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            className={cn(chip, "min-h-9")}
+          >
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </button>
+        </div>
       </div>
 
-      {/* Context filter chips — date / team / source (re-scope every number) */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Context filter chips — date / team / source (re-scope every number).
+          R6: horizontally scrollable on phone, never a broken wrap. */}
+      <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
         <div className="inline-flex items-center gap-1 rounded-full border border-mist bg-cloud p-1">
           <CalendarDays className="ml-1.5 h-3.5 w-3.5 text-slate" />
           {DATE_RANGES.map((r) => (
@@ -416,10 +508,12 @@ export default function ReportingPage() {
               },
             )
           }
-          className="ml-auto inline-flex items-center gap-2 rounded-full bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+          className="ml-auto inline-flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
         >
           <MatinMark theme="dark" className="h-3.5 w-3.5" />
-          Ask Matin why this changed
+          {/* R6: shorten on phone */}
+          <span className="sm:hidden">Ask Matin</span>
+          <span className="hidden sm:inline">Ask Matin why this changed</span>
         </button>
       </div>
 
@@ -434,29 +528,73 @@ export default function ReportingPage() {
         <ReportsSkeleton />
       ) : (
         <>
-          {/* Segmented financial KPI strip — Revenue cell green (color-as-data) */}
-          <SegmentedKpis
-            items={[
+          {/* Dataset tab strip (Overview / Performance Table / Funnel Table) —
+              R6 horizontally scrollable on phone. */}
+          <div
+            role="tablist"
+            aria-label="Report dataset"
+            className="-mx-1 flex gap-1 overflow-x-auto rounded-2xl border border-mist bg-paper-200/60 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {DATASET_TABS.map((d) => {
+              const active = d.key === dataset;
+              return (
+                <button
+                  key={d.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setDataset(d.key)}
+                  className={cn(
+                    "inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-xl px-3.5 text-[0.8rem] font-medium leading-none transition-colors",
+                    active ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
+                  )}
+                >
+                  {d.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Hero financial strip — taller band, $ glyph, Revenue cell green,
+              colored ▲/▼ vs-prior delta in every cell (S10 tickets 1 + 9). */}
+          <ReportFinancialStrip
+            cells={[
               {
+                key: "volume",
                 label: "Volume",
-                value: `${compactUsd(companyScorecard.annualVolume)}`,
-                sub: `${range} · ${Math.round((companyScorecard.goalPacing.volumeActual / companyScorecard.goalPacing.volumeGoal) * 100)}% to goal`,
+                value: compactUsd(companyScorecard.annualVolume).replace(/^\$/, ""),
+                money: true,
+                sub: `${Math.round((companyScorecard.goalPacing.volumeActual / companyScorecard.goalPacing.volumeGoal) * 100)}% to goal`,
+                deltaPct: 14,
+                onDrill: () => setDrawer({ kind: "metric", metric: "volume" }),
               },
               {
+                key: "closings",
                 label: "Closings",
                 value: num(companyScorecard.propertiesSold),
                 sub: `Goal ${num(companyScorecard.goalPacing.soldGoal)}`,
+                deltaPct: 9,
+                onDrill: () => setDrawer({ kind: "metric", metric: "sold" }),
               },
               {
-                label: "Avg sale price",
-                value: compactUsd(companyScorecard.avgSalePrice),
-                sub: "Across closed units",
-              },
-              {
+                key: "gci",
                 label: "GCI",
-                value: compactUsd(companyScorecard.gci),
-                sub: "Gross commission income",
+                value: compactUsd(companyScorecard.gci).replace(/^\$/, ""),
+                money: true,
                 tone: "success",
+                sub: "Gross commission income",
+                deltaPct: 12,
+                onDrill: () => setDrawer({ kind: "metric", metric: "volume" }),
+              },
+              {
+                key: "revenue",
+                label: "Revenue (net)",
+                value: compactUsd(Math.round(companyScorecard.gci * 0.62)).replace(/^\$/, ""),
+                money: true,
+                tone: "success",
+                sub: "After splits + brokerage cost",
+                deltaPct: -3,
+                onDrill: () => setDrawer({ kind: "metric", metric: "growth" }),
               },
             ]}
           />
@@ -467,15 +605,27 @@ export default function ReportingPage() {
             onDrill={(metric) => setDrawer({ kind: "metric", metric })}
           />
 
-          {/* PRIMARY time-series — current vs prior (Sierra report grammar) */}
+          {/* Hero activity card — donut gauges (Calls/Emails/Texts/Appts) */}
+          <ActivityGauges gauges={gauges} />
+
+          {/* PRIMARY time-series — current vs prior (Sierra report grammar).
+              Funnel dataset swaps the metric framing in the subtitle. */}
           <TimeSeriesChart
-            title="Closed volume trend"
+            title={dataset === "funnel" ? "Funnel velocity trend" : "Closed volume trend"}
             unit="usd"
             current={series.cur}
             prior={series.prior}
             currentLabel={RANGE_LABEL[range]}
             priorLabel={PRIOR_LABEL[range]}
           />
+
+          {/* Performance Table dataset — the Sisu Team-ROI-by-source scoreboard */}
+          {dataset === "performance" ? (
+            <TeamRoiScoreboard
+              sources={sourceRoi}
+              onDrill={(s) => setDrawer({ kind: "source", source: s })}
+            />
+          ) : null}
 
           {/* GRID — leaderboard (wide) + source ROI */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -526,6 +676,7 @@ export default function ReportingPage() {
                   columns={leaderColumns}
                   rows={leaderRows}
                   getRowId={(r) => r.slug}
+                  responsive
                   onRowClick={(r) => setDrawer({ kind: "agent", row: r })}
                 />
               </div>
@@ -568,6 +719,23 @@ export default function ReportingPage() {
           askMatin(ctx, drivers, action);
         }}
       />
+
+      {/* ── Branded report export — Matin-letterhead PDF via BrandedDocument ── */}
+      <RecordDrawer
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export report"
+        subtitle={`${RANGE_LABEL[range]} · ${team} · ${source.toLowerCase()}`}
+      >
+        <ReportExport
+          rangeLabel={RANGE_LABEL[range]}
+          team={team}
+          source={source}
+          scorecard={companyScorecard}
+          leaderboard={leaderRows}
+          sourceRoi={sourceRoi}
+        />
+      </RecordDrawer>
     </div>
   );
 }
@@ -587,10 +755,10 @@ function RecentClosings() {
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {RECENT_CLOSINGS.map((c) => (
           <div
-            key={c.address}
+            key={c.id}
             className="overflow-hidden rounded-xl border border-mist bg-paper/40 transition-colors hover:border-ink/20"
           >
-            <PropertyThumb seedIndex={c.seed} ratio="video" rounded={false} alt={c.address} />
+            <PropertyThumb src={c.photo} ratio="video" rounded={false} alt={c.address} />
             <div className="p-3">
               <p className="truncate text-[0.84rem] font-semibold text-ink">{c.address}</p>
               <p className="text-[0.72rem] text-slate">{c.city}</p>
@@ -1025,6 +1193,46 @@ function SourceNote({ text }: { text: string }) {
     <div className="rounded-lg border border-dashed border-mist bg-paper/40 px-3 py-2">
       <p className="eyebrow mb-1 text-[0.6rem]">Backend record joins</p>
       <p className="font-mono text-[0.72rem] leading-relaxed text-slate">{text}</p>
+    </div>
+  );
+}
+
+/* ── Per-row leaderboard data-viz — a Lofty stacked Leads/Appts/Signed bar ── */
+function LeaderboardActivityBar({
+  row,
+  maxLeads,
+}: {
+  row: ReportAgentLeaderboardRow;
+  maxLeads: number;
+}) {
+  // Three nested proportions on a single track: leads (full width ∝ maxLeads),
+  // then appts, then signed — so the conversion funnel reads at a glance.
+  const leadW = Math.max(8, Math.round((row.leads / maxLeads) * 100));
+  const apptW = row.leads ? Math.round((row.appts / row.leads) * leadW) : 0;
+  const signW = row.appts ? Math.round((row.signed / row.appts) * apptW) : 0;
+  return (
+    <div className="min-w-[120px]">
+      <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-paper-200">
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-info/40"
+          style={{ width: `${leadW}%` }}
+        />
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-warn/60"
+          style={{ width: `${apptW}%` }}
+        />
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-success"
+          style={{ width: `${signW}%` }}
+        />
+      </div>
+      <div className="mt-1 flex items-center gap-2 text-[0.66rem] text-slate tabular-nums">
+        <span>{num(row.leads)} L</span>
+        <span>·</span>
+        <span>{num(row.appts)} A</span>
+        <span>·</span>
+        <span className="font-semibold text-ink">{num(row.signed)} S</span>
+      </div>
     </div>
   );
 }

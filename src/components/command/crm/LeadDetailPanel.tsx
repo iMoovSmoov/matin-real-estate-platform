@@ -12,9 +12,10 @@ import {
   CircleCheck,
 } from "lucide-react";
 import type { Lead, AIAction } from "@/lib/types";
-import { getAgent } from "@/lib/data";
+import { getAgent, company } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { BrandedLeadDraft, matchedHomesFor } from "./BrandedLeadDraft";
 import {
   Avatar,
   StatusChip,
@@ -22,9 +23,10 @@ import {
   ActivityTimeline,
   AIActionCard,
   AIInsightChip,
+  RecordDrawer,
   useAiSidecar,
 } from "@/components/os";
-import { MatinMark } from "@/components/brand/Logo";
+import { MatinMark, Logo } from "@/components/brand/Logo";
 import {
   leadTypeLabel,
   leadTypeTone,
@@ -32,6 +34,8 @@ import {
   tempLabel,
   budgetLabel,
   leadTimeline,
+  isSellerIntent,
+  engagementStats,
 } from "./leadView";
 import { ComposeDrawer, type ComposeMode, type ComposeResult, telHref } from "./ComposeDrawer";
 import { LeadFullDrawer } from "./LeadFullDrawer";
@@ -82,6 +86,8 @@ export function LeadDetailPanel({
   const [compose, setCompose] = useState<ComposeMode | null>(null);
   const [full, setFull] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  /** key of the draft currently shown as a Matin-branded artifact (S2.6). */
+  const [branded, setBranded] = useState<string | null>(null);
   const draftAnchor = useRef<HTMLDivElement>(null);
 
   const agent = getAgent(lead.assignedAgent);
@@ -93,6 +99,7 @@ export function LeadDetailPanel({
     setDrafts({});
     setCompose(null);
     setFull(false);
+    setBranded(null);
   }, [lead.id]);
 
   function flash(msg: string) {
@@ -104,26 +111,52 @@ export function LeadDetailPanel({
     (a) => a.sourceType === "lead" && a.sourceId === lead.id && a.context.startsWith("CRM"),
   );
 
-  const cards: Card[] = [
-    {
-      key: "first-text",
-      title: seeded[0]?.title ?? `Send first reply to ${lead.firstName} with 3 matched homes`,
-      evidence:
-        seeded[0]?.evidence ??
-        `${lead.firstName} viewed ${lead.community} homes and saved searches, then asked about availability. Matched active ${lead.community} listings inside ${budgetLabel(lead)} budget.`,
-      risk: seeded[0]?.riskTag ?? "Approval required",
-      conf: seeded[0]?.confidence ?? "High",
-      channel: "text",
-    },
-    {
-      key: "send-homes",
-      title: `Email ${lead.firstName} 3 matching ${lead.community} homes`,
-      evidence: `Buyer band ${budgetLabel(lead)} with ${lead.propertyViews?.length ?? 0} tracked viewing signals. Pull 3 active matches and draft a personalized intro email.`,
-      risk: "Approval required",
-      conf: lead.score >= 75 ? "High" : "Medium",
-      channel: "email",
-    },
-  ];
+  const seller = isSellerIntent(lead);
+  // REAL matched listings (same community + budget) — citations for the cards.
+  const matches = matchedHomesFor(lead);
+  const matchCite = matches.length
+    ? matches.map((m) => `${m.address} (${`$${Math.round(m.price / 1000)}k`})`).join(", ")
+    : `${lead.community} homes in ${budgetLabel(lead)}`;
+
+  const cards: Card[] = seller
+    ? [
+        {
+          key: "cma-draft",
+          title: `Send ${lead.firstName} a home-value / CMA touch`,
+          evidence: `${lead.firstName} is showing seller intent in ${lead.community} (${lead.source}). Draft a branded CMA + cash-offer comparison from recent ${lead.community} comps and the home's estimated value band.`,
+          risk: "Approval required",
+          conf: lead.score >= 75 ? "High" : "Medium",
+          channel: "email",
+        },
+        {
+          key: "value-text",
+          title: `Text ${lead.firstName} their estimated value range`,
+          evidence: `Likely-seller signal with ${budgetLabel(lead)} estimated equity band. Send a short, personal value-range text and offer a no-obligation valuation walkthrough.`,
+          risk: "Approval required",
+          conf: "Medium",
+          channel: "text",
+        },
+      ]
+    : [
+        {
+          key: "first-text",
+          title: seeded[0]?.title ?? `Send first reply to ${lead.firstName} with ${matches.length || 3} matched homes`,
+          evidence:
+            seeded[0]?.evidence ??
+            `${lead.firstName} viewed ${lead.community} homes and saved searches, then asked about availability. Matched active ${lead.community} listings inside ${budgetLabel(lead)}: ${matchCite}.`,
+          risk: seeded[0]?.riskTag ?? "Approval required",
+          conf: seeded[0]?.confidence ?? "High",
+          channel: "text",
+        },
+        {
+          key: "send-homes",
+          title: `Email ${lead.firstName} ${matches.length || 3} matching ${lead.community} homes`,
+          evidence: `Buyer band ${budgetLabel(lead)} with ${lead.propertyViews?.length ?? 0} tracked viewing signals. Real active matches ready to send: ${matchCite}.`,
+          risk: "Approval required",
+          conf: lead.score >= 75 ? "High" : "Medium",
+          channel: "email",
+        },
+      ];
 
   async function runDraft(card: Card) {
     setDrafts((d) => ({
@@ -171,15 +204,12 @@ export function LeadDetailPanel({
       return next;
     });
   }
-  async function approveDraft(key: string) {
-    const text = drafts[key]?.text ?? "";
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      /* clipboard unavailable — still mark approved */
-    }
+  function approveDraft(key: string) {
     setDrafts((d) => (d[key] ? { ...d, [key]: { ...d[key], approved: true } } : d));
-    flash("Draft approved & copied — review, then send");
+    // S2.6 — Approve produces the BRANDED artifact (not a raw clipboard copy):
+    // open the Matin-branded document preview the client would actually receive.
+    setBranded(key);
+    flash("Draft approved — opening branded preview");
   }
 
   function handleComposeComplete(result: ComposeResult) {
@@ -205,7 +235,14 @@ export function LeadDetailPanel({
           </div>
           <p className="mt-1 flex items-center gap-1 text-[0.78rem] text-slate">
             <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {lead.community} · {budgetLabel(lead)}
+            {lead.community}
+          </p>
+          {/* Hero value — large tabular budget band (FUB "$1M" pattern, S2.8) */}
+          <p className="mt-1.5 font-sans text-[1.5rem] font-bold leading-none tabular-nums text-ink">
+            {budgetLabel(lead)}
+            <span className="ml-2 align-middle text-[0.72rem] font-medium uppercase tracking-[0.12em] text-gold-ink">
+              {isSellerIntent(lead) ? "Est. equity band" : "Buyer budget"}
+            </span>
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <StatusChip tone={leadTypeTone(lead)} variant="soft">
@@ -241,6 +278,9 @@ export function LeadDetailPanel({
             valueTone={lead.lastContactDaysAgo >= 7 ? "danger" : "ink"}
           />
         </dl>
+
+        {/* Engagement strip — Real-Geeks behavioral compact (S2.3) */}
+        <EngagementStrip lead={lead} />
 
         {/* Recency nudge */}
         {lead.lastContactDaysAgo >= 7 ? (
@@ -316,6 +356,14 @@ export function LeadDetailPanel({
           <p className="eyebrow pb-1 text-slate">Recent activity</p>
           <ActivityTimeline items={timeline} />
         </section>
+
+        {/* Quiet Matin brand footer + real office contact (S2.10) */}
+        <div className="flex items-center gap-2 border-t border-mist pt-3">
+          <Logo variant="full" theme="dark" className="h-3.5" />
+          <span className="text-[0.68rem] text-slate">
+            {company.name} · {company.address.city}, {company.address.state} · {company.phone}
+          </span>
+        </div>
       </div>
 
       {/* Bottom action bar — Call ink-filled primary (tel:), rest open ComposeDrawer */}
@@ -374,7 +422,78 @@ export function LeadDetailPanel({
           setCompose("email");
         }}
       />
+
+      {/* Branded artifact preview — what the client receives after Approve (S2.6) */}
+      <RecordDrawer
+        open={branded !== null}
+        onClose={() => setBranded(null)}
+        title="Branded draft preview"
+        subtitle={`Matin Real Estate · ${lead.name}`}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={async () => {
+                const text = branded ? drafts[branded]?.text ?? "" : "";
+                try {
+                  await navigator.clipboard.writeText(text);
+                  flash("Copied — review, then send");
+                } catch {
+                  flash("Draft ready to send");
+                }
+              }}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+            >
+              Copy & send
+            </button>
+            <button
+              type="button"
+              onClick={() => setBranded(null)}
+              className="inline-flex items-center justify-center rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
+            >
+              Close
+            </button>
+          </>
+        }
+      >
+        <BrandedLeadDraft
+          lead={lead}
+          mode={isSellerIntent(lead) ? "seller" : "buyer"}
+          draft={branded ? drafts[branded]?.text : undefined}
+        />
+      </RecordDrawer>
     </div>
+  );
+}
+
+/* ── Engagement strip — compact behavioral metrics (S2.3) ──────────────────── */
+function EngagementStrip({ lead }: { lead: Lead }) {
+  const e = engagementStats(lead);
+  const stats = [
+    { label: "Searches", value: e.searches },
+    { label: "Props", value: e.props },
+    { label: "Visits", value: e.visits },
+    { label: "Favs", value: e.favs },
+  ];
+  return (
+    <section className="rounded-xl border border-mist bg-paper-200/40 px-3.5 py-3">
+      <div className="grid grid-cols-4 gap-2">
+        {stats.map((s) => (
+          <div key={s.label} className="text-center">
+            <p className="text-[1.05rem] font-bold leading-none tabular-nums text-ink">{s.value}</p>
+            <p className="mt-0.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-slate">
+              {s.label}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-mist/70 pt-2 text-[0.72rem]">
+        <span className="min-w-0 truncate text-slate">
+          Last search: <span className="font-medium text-ink">{e.lastSearch}</span>
+        </span>
+        <span className="shrink-0 font-medium text-slate tabular-nums">{e.lastActive}</span>
+      </div>
+    </section>
   );
 }
 
@@ -414,20 +533,19 @@ function DraftBlock({
         <p className="whitespace-pre-wrap text-[0.8rem] leading-relaxed text-slate-300">{state.text}</p>
       )}
       {!state.loading && state.text ? (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onApprove}
-            disabled={state.approved}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
           >
             <CircleCheck className="h-3.5 w-3.5" aria-hidden />
-            {state.approved ? "Approved" : "Approve & copy"}
+            {state.approved ? "View branded" : "Approve & preview"}
           </button>
           <button
             type="button"
             onClick={onDiscard}
-            className="rounded-lg px-2.5 py-1.5 text-[0.76rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            className="min-h-9 rounded-lg px-2.5 py-1.5 text-[0.76rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
           >
             Discard
           </button>

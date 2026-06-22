@@ -15,6 +15,7 @@ import {
 import {
   RecordDrawer,
   DocumentPreview,
+  BrandedDocument,
   ActivityTimeline,
   StatusChip,
   AIActionCard,
@@ -23,12 +24,39 @@ import {
 } from "@/components/os";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { rosterOption } from "@/lib/data/agreement-roster";
 import {
   STATUS_META,
   isSendBlocked,
+  docFields,
+  docCompletion,
   type Packet,
   type PacketDoc,
 } from "./packets";
+
+/** Real OREF/form legal blurbs for the branded center-pane preview (per code). */
+const FORM_BLURB: Record<string, string> = {
+  "OREF-001":
+    "Residential Real Estate Sale Agreement — the core Oregon purchase contract: price, terms, contingencies, earnest money, and closing timelines.",
+  "OREF-015":
+    "Exclusive Right to Sell Listing Agreement engaging Matin Real Estate to market and sell the property on the terms below.",
+  "C-565":
+    "Buyer Representation Agreement (OREF C-565), mandatory in Oregon per HB 4058, establishing exclusive buyer agency and compensation.",
+  "C-530":
+    "Initial Agency Disclosure Pamphlet describing the duties a real estate licensee owes — required before representation begins.",
+  SPDS:
+    "Seller's Property Disclosure Statement — the seller's written disclosure of the property's known condition under ORS 105.464.",
+  LBP:
+    "Lead-Based Paint Disclosure required for homes built before 1978 under federal law (42 U.S.C. 4852d).",
+  "OREF-040":
+    "Disclosed Limited Agency agreement consenting to in-company representation of both parties with informed written consent.",
+  EMR: "Earnest Money Receipt evidencing the buyer's good-faith deposit held in trust pending closing.",
+  CDA: "Commission Disbursement Authorization directing the settlement agent to pay commissions at closing.",
+  "OREF-026":
+    "Repair / Inspection Addendum documenting requested repairs following the inspection contingency period.",
+  "OREF-002": "Counter Offer responding to the prior offer with revised terms for acceptance.",
+  "OREF-005": "Addendum / Amendment modifying an executed agreement (e.g. a revised closing date).",
+};
 
 /* ──────────────────────────────────────────────────────────────────────────
    DocumentDrawer — the real "View" experience for a single document.
@@ -95,6 +123,18 @@ export function DocumentDrawer({
   if (!packet || !doc) return null;
 
   const meta = STATUS_META[doc.status];
+  // Real coordinator identity for the branded signature block + footer.
+  const ownerOpt = rosterOption(packet.ownerSlug);
+  const brandedAgent = ownerOpt
+    ? {
+        name: ownerOpt.name,
+        title: ownerOpt.title,
+        license: ownerOpt.license,
+        phone: ownerOpt.phone,
+        email: ownerOpt.email,
+        slug: ownerOpt.slug,
+      }
+    : { name: packet.ownerName, slug: packet.ownerSlug };
   const blocked = isSendBlocked(doc.status);
   const missing = doc.missing ?? [];
   const missingCount = missing.length;
@@ -229,6 +269,25 @@ export function DocumentDrawer({
               <span>{confirm}</span>
             </div>
           ) : null}
+
+          {/* REAL branded Matin letterhead document (center-pane, ticket 1) */}
+          <BrandedDocument
+            variant="letter"
+            formId={doc.code}
+            title={doc.title}
+            recipient={packet.subject}
+            agent={brandedAgent}
+            fields={docFields(packet, doc)}
+            completion={docCompletion(packet, doc)}
+            page={doc.page}
+            pages={doc.pages}
+            body={
+              <p className="text-[0.84rem] leading-relaxed text-ink/90">
+                {FORM_BLURB[doc.code] ??
+                  `${doc.title} — prepared by ${packet.ownerName} for ${packet.subject}. All fields are bound to the live record; complete the flagged items before sending for signature.`}
+              </p>
+            }
+          />
 
           {/* Paginated preview — real page navigation across the doc */}
           <DocumentPreview

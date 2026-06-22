@@ -18,7 +18,9 @@ export type SavedViewKey =
   | "seller-intent"
   | "needs-call"
   | "unassigned"
-  | "all";
+  | "all"
+  /** Location smart-lists keyed by communitySlug, e.g. "loc:beaverton-or". */
+  | `loc:${string}`;
 
 const HOT_THRESHOLD = 80;
 const STALE_DAYS = 7;
@@ -119,6 +121,11 @@ export function tempLabel(score: number): { label: string; tone: ChipTone } {
 
 /** Apply a saved-view filter to the leads array. */
 export function filterLeads(leads: Lead[], view: SavedViewKey): Lead[] {
+  // Location smart-lists ("loc:<communitySlug>") — real Portland-metro lists.
+  if (typeof view === "string" && view.startsWith("loc:")) {
+    const slug = view.slice(4);
+    return leads.filter((l) => l.communitySlug === slug);
+  }
   switch (view) {
     case "new-today":
       return leads.filter((l) => l.createdDaysAgo === 0);
@@ -134,6 +141,63 @@ export function filterLeads(leads: Lead[], view: SavedViewKey): Lead[] {
     default:
       return leads;
   }
+}
+
+/**
+ * Real location smart-lists (S2.9) — the busiest communities by live lead count,
+ * driven by communitySlug. Returns up to `limit` views (key/label/count) so the
+ * CRM can surface "Portland (5) · Lake Oswego (3)…" alongside the behavioral
+ * views, every count reconciling to the rows it filters.
+ */
+export function locationViews(
+  leads: Lead[],
+  limit = 4,
+): { key: SavedViewKey; label: string; count: number }[] {
+  const byCommunity = new Map<string, { label: string; count: number }>();
+  for (const l of leads) {
+    if (!l.communitySlug) continue;
+    const cur = byCommunity.get(l.communitySlug) ?? { label: l.community, count: 0 };
+    cur.count += 1;
+    byCommunity.set(l.communitySlug, cur);
+  }
+  return [...byCommunity.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, limit)
+    .map(([slug, v]) => ({ key: `loc:${slug}` as SavedViewKey, label: v.label, count: v.count }));
+}
+
+/** Engagement strip stats derived from a lead's real behavioral fields (S2.3). */
+export function engagementStats(l: Lead): {
+  searches: number;
+  props: number;
+  visits: number;
+  favs: number;
+  lastSearch: string;
+  lastActive: string;
+} {
+  const views = l.propertyViews ?? [];
+  // Parse "Viewed 7 Beaverton homes" / "Saved 3 searches" style signals.
+  const numIn = (re: RegExp) => {
+    for (const v of views) {
+      const m = v.match(re);
+      if (m) return Number(m[1]);
+    }
+    return 0;
+  };
+  const searches = numIn(/saved\s+(\d+)\s+search/i) || (views.some((v) => /search/i.test(v)) ? 1 : 0);
+  const props = numIn(/viewed\s+(\d+)/i) || views.length;
+  // Derive a stable visit/fav count from score band when not explicit.
+  const visits = Math.max(1, Math.round(l.score / 18));
+  const favs = Math.max(0, Math.round(l.score / 28));
+  const lastSearch =
+    views.find((v) => /search|viewed/i.test(v)) ?? `${l.community} homes`;
+  const lastActive =
+    l.lastContactDaysAgo === 0
+      ? "Active today"
+      : l.lastContactDaysAgo === 1
+        ? "Active 1d ago"
+        : `Active ${l.lastContactDaysAgo}d ago`;
+  return { searches, props, visits, favs, lastSearch, lastActive };
 }
 
 /** KPI numbers derived once from the full array (reconcile to the saved-view counts). */

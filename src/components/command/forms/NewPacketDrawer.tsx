@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Layers, CircleCheck } from "lucide-react";
-import { RecordDrawer } from "@/components/os";
-import { cn } from "@/lib/utils";
+import { RecordDrawer, Avatar } from "@/components/os";
+import { cn, initials as toInitials } from "@/lib/utils";
+import { packetOwnerOptions } from "@/lib/data/agreement-roster";
 import type { Packet, PacketDoc, DocStatus } from "./packets";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -13,19 +14,21 @@ import type { Packet, PacketDoc, DocStatus } from "./packets";
    pick which standard documents to seed. Submit builds a Packet and hands it
    back to the workspace, which appends it to local state and selects it — it
    shows immediately. No navigation, no AI sidecar.
+
+   The owner dropdown is sourced from the REAL roles.ts coordinators
+   (agents.json-backed) — listing/disclosure default to the real Listing
+   Coordinator, offer/closing to the real Transaction Coordinator — no
+   hardcoded staff list.
    ────────────────────────────────────────────────────────────────────────── */
 
-type OwnerOption = { name: string; slug: string; initials: string };
-
-const OWNERS: OwnerOption[] = [
-  { name: "Jordan Matin", slug: "jordan-matin", initials: "JM" },
-  { name: "Amanda Conlon", slug: "amanda-conlon", initials: "AC" },
-];
+type TemplateId = "listing" | "buyer" | "offer" | "disclosure";
 
 type Template = {
-  id: string;
+  id: TemplateId;
   name: string;
   source: string;
+  /** Real listing id the packet binds to → resolves the hero photo. */
+  listingId: string;
   /** Catalog of documents the template can seed, pre-selected by default. */
   docs: { code: string; title: string; status: DocStatus; pages: number; signatureField: boolean; lines: number }[];
 };
@@ -34,6 +37,7 @@ const TEMPLATES: Template[] = [
   {
     id: "listing",
     name: "Listing packet",
+    listingId: "MRE-1016",
     source: "listings > document_packets > document_fields + document_signers",
     docs: [
       { code: "OREF-015", title: "Residential Listing Agreement — Exclusive", status: "draft", pages: 6, signatureField: true, lines: 7 },
@@ -45,6 +49,7 @@ const TEMPLATES: Template[] = [
   {
     id: "buyer",
     name: "Buyer agreement",
+    listingId: "MRE-1006",
     source: "contacts > document_packets > saved_searches + agreements",
     docs: [
       { code: "C-565", title: "Buyer Representation Agreement — Exclusive", status: "required", pages: 5, signatureField: true, lines: 7 },
@@ -55,6 +60,7 @@ const TEMPLATES: Template[] = [
   {
     id: "offer",
     name: "Offer packet",
+    listingId: "MRE-R02",
     source: "transactions > document_packets > listings + cash_offer_requests",
     docs: [
       { code: "OREF-001", title: "Residential Real Estate Sale Agreement", status: "required", pages: 12, signatureField: true, lines: 9 },
@@ -65,6 +71,7 @@ const TEMPLATES: Template[] = [
   {
     id: "disclosure",
     name: "Seller disclosure",
+    listingId: "MRE-R05",
     source: "seller_leads > document_packets > properties + valuations",
     docs: [
       { code: "SPDS", title: "Seller's Property Disclosure Statement", status: "required", pages: 5, signatureField: true, lines: 8 },
@@ -73,8 +80,6 @@ const TEMPLATES: Template[] = [
     ],
   },
 ];
-
-const PHOTO_SEEDS = [3, 8, 12, 17, 5, 20, 1, 9, 14, 7];
 
 export function NewPacketDrawer({
   open,
@@ -85,12 +90,14 @@ export function NewPacketDrawer({
   open: boolean;
   onClose: () => void;
   onCreate: (packet: Packet) => void;
-  /** Number of existing packets — drives a stable photo seed + id suffix. */
+  /** Number of existing packets — drives a stable id suffix. */
   index: number;
 }) {
-  const [templateId, setTemplateId] = useState<string>(TEMPLATES[0].id);
+  const [templateId, setTemplateId] = useState<TemplateId>(TEMPLATES[0].id);
   const [subject, setSubject] = useState("");
-  const [ownerSlug, setOwnerSlug] = useState<string>(OWNERS[0].slug);
+  // Owner options derive from the REAL coordinators for the chosen template.
+  const ownerOptions = packetOwnerOptions(templateId);
+  const [ownerSlug, setOwnerSlug] = useState<string>(ownerOptions[0]?.slug ?? "");
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(
     () => new Set(TEMPLATES[0].docs.map((d) => d.code)),
   );
@@ -105,19 +112,23 @@ export function NewPacketDrawer({
     if (open) {
       setTemplateId(TEMPLATES[0].id);
       setSubject("");
-      setOwnerSlug(OWNERS[0].slug);
+      setOwnerSlug(packetOwnerOptions(TEMPLATES[0].id)[0]?.slug ?? "");
       setSelectedDocs(new Set(TEMPLATES[0].docs.map((d) => d.code)));
     }
   }
 
-  // Re-seed the doc selection whenever the chosen template changes (render-time).
+  // Re-seed the doc selection + default owner whenever the template changes.
   const [lastTemplateId, setLastTemplateId] = useState(templateId);
   if (templateId !== lastTemplateId) {
     setLastTemplateId(templateId);
     setSelectedDocs(new Set(template.docs.map((d) => d.code)));
+    const nextOwners = packetOwnerOptions(templateId);
+    if (!nextOwners.some((o) => o.slug === ownerSlug)) {
+      setOwnerSlug(nextOwners[0]?.slug ?? "");
+    }
   }
 
-  const owner = OWNERS.find((o) => o.slug === ownerSlug) ?? OWNERS[0];
+  const owner = ownerOptions.find((o) => o.slug === ownerSlug) ?? ownerOptions[0];
   const chosenCount = selectedDocs.size;
   const canCreate = subject.trim().length > 1 && chosenCount > 0;
 
@@ -156,12 +167,13 @@ export function NewPacketDrawer({
       id: `PKT-NEW-${suffix}`,
       name: template.name,
       subject: subject.trim(),
-      owner: owner.initials,
+      owner: toInitials(owner.name),
       ownerName: owner.name,
       ownerSlug: owner.slug,
-      photoSeed: PHOTO_SEEDS[index % PHOTO_SEEDS.length],
+      listingId: template.listingId,
       source: template.source,
       lastUpdated: `Created just now by ${owner.name}`,
+      updatedAgo: "just now",
       docs,
     };
     onCreate(packet);
@@ -239,10 +251,10 @@ export function NewPacketDrawer({
           />
         </Field>
 
-        {/* Owner */}
+        {/* Owner — real coordinators for this packet type (agents.json) */}
         <Field label="Coordinator / owner">
-          <div className="flex gap-2">
-            {OWNERS.map((o) => {
+          <div className="flex flex-wrap gap-2">
+            {ownerOptions.map((o) => {
               const on = o.slug === ownerSlug;
               return (
                 <button
@@ -251,13 +263,24 @@ export function NewPacketDrawer({
                   onClick={() => setOwnerSlug(o.slug)}
                   aria-pressed={on}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-[0.82rem] font-medium transition-colors",
+                    "inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-left text-[0.8rem] font-medium transition-colors",
                     on
                       ? "border-ink bg-ink text-cloud"
                       : "border-mist bg-cloud text-ink hover:border-ink/20",
                   )}
                 >
-                  {o.name}
+                  <Avatar
+                    name={o.name}
+                    slug={o.slug}
+                    size={24}
+                    className={on ? "ring-1 ring-inset ring-cloud/25" : undefined}
+                  />
+                  <span className="leading-tight">
+                    {o.name}
+                    <span className={cn("block text-[0.66rem]", on ? "text-cloud/70" : "text-slate")}>
+                      {o.title}
+                    </span>
+                  </span>
                 </button>
               );
             })}

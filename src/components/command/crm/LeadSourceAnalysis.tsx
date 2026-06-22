@@ -1,18 +1,76 @@
+"use client";
+
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  LabelList,
+} from "recharts";
 import type { Lead } from "@/lib/types";
 import { leadSourceAnalysis } from "./leadView";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   CRM & Leads Workbench — "Lead source analysis" mini-chart
+   CRM & Leads — "Lead source analysis" (S2.7)
 
-   Compact horizontal-bar breakdown of leads grouped by source, with a hot
-   overlay (score ≥ 80). Light card, hairline rows, tabular numbers. Each row
-   is a real provenance count; no decorative chart-for-vibes. The header count
-   reconciles to the table (sum of bar values = total leads).
+   Rebuilt from hand-rolled flat bars into a REAL recharts horizontal stacked
+   bar chart: per-source HOT (gold, score ≥ 80) stacked over the remaining warm/
+   cold volume (ink), with value labels and a dark decomposing tooltip (hot vs
+   total). Every row is a real provenance count; the header reconciles to the
+   table (sum of bars = total leads). Colors from the §1.1 palette — gold is
+   sanctioned here as the lead-temperature signal.
    ────────────────────────────────────────────────────────────────────────── */
 
+const GRID = "#ebebea";
+const AXIS = "#8a8a90";
+const INK = "#3a3a40";
+const GOLD = "#d2a050";
+
+type Row = { source: string; hot: number; rest: number; count: number };
+
+function SourceTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload?: Row }[];
+}) {
+  const row = active && payload && payload.length > 0 ? payload[0]?.payload : undefined;
+  if (!row) return null;
+  const pct = row.count ? Math.round((row.hot / row.count) * 100) : 0;
+  return (
+    <div className="rounded-lg border border-ink-700 bg-ink-900/95 px-3 py-2 text-[0.76rem] shadow-xl backdrop-blur">
+      <p className="mb-1 font-semibold text-cloud">{row.source}</p>
+      <div className="space-y-0.5 text-slate-300">
+        <div className="flex items-center justify-between gap-5">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm" style={{ background: GOLD }} /> Hot (80+)
+          </span>
+          <span className="font-semibold tabular-nums text-cloud">
+            {row.hot} · {pct}%
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-5">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm" style={{ background: INK }} /> Total
+          </span>
+          <span className="font-semibold tabular-nums text-cloud">{row.count}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LeadSourceAnalysis({ leads }: { leads: Lead[] }) {
-  const rows = leadSourceAnalysis(leads);
-  const max = Math.max(1, ...rows.map((r) => r.count));
+  const rows: Row[] = leadSourceAnalysis(leads).map((r) => ({
+    source: r.source,
+    hot: r.hot,
+    rest: Math.max(0, r.count - r.hot),
+    count: r.count,
+  }));
   const total = leads.length;
 
   return (
@@ -29,41 +87,43 @@ export function LeadSourceAnalysis({ leads }: { leads: Lead[] }) {
         Volume by channel; the gold segment is hot leads (score ≥ 80).
       </p>
 
-      <ul className="mt-4 space-y-2.5">
-        {rows.map((r) => {
-          const pct = Math.round((r.count / max) * 100);
-          const hotPct = r.count ? Math.round((r.hot / r.count) * 100) : 0;
-          return (
-            <li key={r.source} className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-3">
-              <span className="truncate text-[0.78rem] font-medium text-ink" title={r.source}>
-                {r.source}
-              </span>
-              <span className="relative h-3.5 overflow-hidden rounded-full bg-paper-200">
-                <span
-                  className="absolute inset-y-0 left-0 rounded-full bg-ink/70"
-                  style={{ width: `${pct}%` }}
-                />
-                {r.hot > 0 ? (
-                  <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-gold-bright"
-                    style={{ width: `${Math.round((r.hot / max) * 100)}%` }}
-                  />
-                ) : null}
-              </span>
-              <span className="flex items-center gap-2 text-[0.76rem] tabular-nums">
-                <span className="font-semibold text-ink">{r.count}</span>
-                {r.hot > 0 ? (
-                  <span className="text-gold-ink">
-                    {r.hot} hot · {hotPct}%
-                  </span>
-                ) : (
-                  <span className="text-slate/60">—</span>
-                )}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="mt-3 w-full" style={{ height: Math.max(180, rows.length * 38) }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={rows}
+            layout="vertical"
+            margin={{ top: 4, right: 36, left: 4, bottom: 4 }}
+            barCategoryGap="28%"
+          >
+            <CartesianGrid stroke={GRID} horizontal={false} />
+            <XAxis
+              type="number"
+              tick={{ fill: AXIS, fontSize: 11 }}
+              axisLine={{ stroke: GRID }}
+              tickLine={false}
+              allowDecimals={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="source"
+              tick={{ fill: AXIS, fontSize: 11 }}
+              axisLine={{ stroke: GRID }}
+              tickLine={false}
+              width={108}
+            />
+            <Tooltip cursor={{ fill: "#00000008" }} content={<SourceTooltip />} />
+            <Bar dataKey="hot" stackId="s" fill={GOLD} radius={[3, 0, 0, 3]} maxBarSize={18} isAnimationActive={false} />
+            <Bar dataKey="rest" stackId="s" fill={INK} radius={[0, 3, 3, 0]} maxBarSize={18} isAnimationActive={false}>
+              <LabelList
+                dataKey="count"
+                position="right"
+                fill="#161617"
+                style={{ fontSize: 11, fontWeight: 600 }}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

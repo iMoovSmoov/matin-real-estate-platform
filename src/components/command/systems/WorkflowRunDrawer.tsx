@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, RotateCcw, Loader2, MapPin, CalendarClock } from "lucide-react";
+import { CheckCircle2, RotateCcw, Loader2, MapPin, CalendarClock, FileWarning } from "lucide-react";
 import {
   RecordDrawer,
   StatusChip,
@@ -9,6 +9,9 @@ import {
   AIActionCard,
   type ChipTone,
 } from "@/components/os";
+import { BrandedDocument } from "@/components/os/BrandedDocument";
+import { getAgent } from "@/lib/data";
+import { roles } from "@/lib/data/roles";
 import type { WorkflowRun } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -17,6 +20,14 @@ import {
   STEP_LABEL,
   RUN_OWNER,
 } from "./systemsModel";
+
+/* A run that produces a client-facing document gets a Matin-branded preview of
+   exactly what it was rendering (§2.11 ticket 7) — most importantly the FAILED
+   "Render branded PDF" CMA run (WR-007), so the operator sees the real artifact
+   the pipeline was trying to produce, not just a step name. */
+function isDocProducingRun(run: WorkflowRun): boolean {
+  return /pdf|cma|branded|report|seller/i.test(`${run.name} ${run.subject} ${run.steps.map((s) => s.name).join(" ")}`);
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    Systems Health — WorkflowRunDrawer (ref §2.11)
@@ -132,6 +143,52 @@ export function WorkflowRunDrawer({
               {failedDetail ? (
                 <p className="mt-0.5 text-[0.74rem] leading-snug text-danger/80">
                   {failedDetail}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Branded-doc thumbnail — what this run was rendering (ticket 7) */}
+          {isDocProducingRun(run) ? (
+            <div>
+              <p className="eyebrow mb-2 flex items-center gap-1.5 text-[0.64rem] text-slate">
+                {isFailed ? (
+                  <>
+                    <FileWarning className="h-3 w-3 text-danger" /> Artifact this run failed to render
+                  </>
+                ) : (
+                  "Artifact this run produced"
+                )}
+              </p>
+              <div className={cn("rounded-xl", isFailed && "ring-1 ring-inset ring-danger/30")}>
+                <BrandedDocument
+                  variant="report"
+                  formId="Matin CMA"
+                  title="Comparative Market Analysis"
+                  recipient={run.subject.replace(/\s*—.*$/, "")}
+                  completion={isFailed ? 60 : 100}
+                  page={1}
+                  pages={4}
+                  hideToolbar
+                  fields={[
+                    { label: "Prepared for", value: run.subject.replace(/\s*—.*$/, "") },
+                    { label: "Comps pulled", value: "4 active · 6 sold" },
+                    { label: "Render status", value: isFailed ? undefined : "Rendered", filled: !isFailed },
+                    { label: "Delivery", value: isFailed ? undefined : "Emailed", filled: !isFailed },
+                  ]}
+                  agent={(() => {
+                    const owner = RUN_OWNER[run.id];
+                    const a = getAgent(owner?.slug ?? roles.marketingLead);
+                    return a
+                      ? { name: a.name, slug: a.slug, title: a.title, license: a.licenseRaw, phone: a.phone }
+                      : undefined;
+                  })()}
+                />
+              </div>
+              {isFailed ? (
+                <p className="mt-2 text-[0.72rem] leading-snug text-slate">
+                  The branded PDF service timed out before this CMA could render. Retry the run to
+                  re-render and deliver it.
                 </p>
               ) : null}
             </div>

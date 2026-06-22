@@ -26,6 +26,7 @@ import {
   type AIAction,
 } from "@/components/os";
 import type { ReactNode } from "react";
+import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import type {
   Integration,
@@ -35,6 +36,8 @@ import type {
   IntegrationHealth,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import company from "@/lib/data/company.json";
+import { KPI_SPARKS, sparkDelta } from "@/lib/data/systems-series";
 import {
   HEALTH_TONE,
   SEVERITY_TONE,
@@ -43,6 +46,9 @@ import {
   fmtRecords,
   applyRetry,
 } from "./systemsModel";
+import { VendorMark } from "./VendorMark";
+import { SystemsDiagram } from "./SystemsDiagram";
+import { SyncActivityChart } from "./SyncActivityChart";
 import { WorkflowRunDrawer } from "./WorkflowRunDrawer";
 import { IntegrationDrawer, type ProbeState } from "./IntegrationDrawer";
 import { DataQualityDrawer } from "./DataQualityDrawer";
@@ -140,7 +146,41 @@ export function SystemsHealthWorkspace({
   const automationsRunning = automations.filter((a) => a.status === "active").length;
   const webhookErrors = integrations.reduce((s, i) => s + (i.errors ?? 0), 0);
   const dqFlags = Object.values(dqRemaining).reduce((s, n) => s + n, 0);
+  const maxDqCount = Math.max(1, ...dataQualityIssues.map((d) => d.count));
   const failedRuns = runs.filter((r) => r.status === "failed");
+
+  // Derive "last sync" from the freshest connector's lastSync (§2.11 ticket 4)
+  // — the smallest "N min ago" among healthy connectors, not a hardcoded "2 min".
+  const freshest = useMemo(() => {
+    const parse = (s?: string): number => {
+      if (!s) return Number.POSITIVE_INFINITY;
+      const m = s.match(/(\d+)\s*min/i);
+      if (m) return Number(m[1]);
+      if (/live/i.test(s) || /just now/i.test(s)) return 0;
+      const h = s.match(/(\d+)\s*hr/i);
+      if (h) return Number(h[1]) * 60;
+      return Number.POSITIVE_INFINITY;
+    };
+    let best: { name: string; mins: number; label: string } | null = null;
+    for (const i of integrations) {
+      if (i.status !== "Healthy") continue;
+      const mins = parse(i.lastSync);
+      if (!best || mins < best.mins) best = { name: i.name, mins, label: i.lastSync ?? "Live" };
+    }
+    return best;
+  }, [integrations]);
+
+  const lastSyncValue = freshest
+    ? freshest.mins === 0
+      ? "Live"
+      : `${freshest.mins} min`
+    : "—";
+
+  // KPI trend deltas from the sparkline series (§2.11 ticket 4)
+  const connDelta = sparkDelta(KPI_SPARKS.connected);
+  const autoDelta = sparkDelta(KPI_SPARKS.automations);
+  const errDelta = sparkDelta(KPI_SPARKS.errors);
+  const dqDelta = sparkDelta(KPI_SPARKS.dataQuality);
 
   const sortedIntegrations = useMemo(() => {
     const order: Record<IntegrationHealth, number> = {
@@ -347,9 +387,8 @@ export function SystemsHealthWorkspace({
       sortable: true,
       render: (row) => (
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-[0.62rem] font-bold uppercase leading-none text-slate ring-1 ring-inset ring-mist">
-            {row.name.slice(0, 2)}
-          </span>
+          {/* Real vendor mark in a white chip (ticket 1) */}
+          <VendorMark provider={row.provider ?? row.name} name={row.name} size={22} />
           <div className="min-w-0">
             <div className="truncate text-[0.84rem] font-semibold leading-tight text-ink">
               {row.name}
@@ -372,6 +411,7 @@ export function SystemsHealthWorkspace({
       key: "status",
       header: "Status",
       sortable: true,
+      primary: true,
       render: (row) => (
         <StatusChip tone={HEALTH_TONE[row.status]}>
           <Dot tone={HEALTH_TONE[row.status]} />
@@ -407,7 +447,7 @@ export function SystemsHealthWorkspace({
   // ── Skeleton ──────────────────────────────────────────────────────────────
   if (!ready) {
     return (
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.62fr_1fr]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.62fr_1fr]">
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -427,18 +467,18 @@ export function SystemsHealthWorkspace({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.62fr_1fr]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.62fr_1fr]">
       {/* ════════════ LEFT — the plumbing, inspectable ════════════ */}
-      <div className="min-w-0 space-y-5">
-        {/* KPI strip */}
-        <KpiStrip className="xl:grid-cols-5">
+      <div className="order-2 min-w-0 space-y-5 lg:order-1">
+        {/* KPI strip — scroll-snap rail on phone (R4), trend deltas (ticket 4) */}
+        <KpiStrip cols={5} rail>
           <KpiCard
             label="Integrations connected"
             value={connected}
             icon={<Plug className="h-3.5 w-3.5" />}
             delta={`${needsAttention} need attention`}
             deltaTone={needsAttention > 0 ? "down" : "flat"}
-            hint={`of ${integrations.length} connectors`}
+            hint={`of ${integrations.length} connectors · ${connDelta.delta >= 0 ? "+" : ""}${connDelta.delta} vs 7d`}
             onDrill={() =>
               setActiveIntegrationName(
                 sortedIntegrations.find((i) => i.status !== "Healthy")?.name ??
@@ -451,6 +491,8 @@ export function SystemsHealthWorkspace({
             label="Automations running"
             value={automationsRunning}
             icon={<Workflow className="h-3.5 w-3.5" />}
+            delta={`${autoDelta.delta >= 0 ? "+" : ""}${autoDelta.delta} vs 7d`}
+            deltaTone={autoDelta.dir === "up" ? "up" : autoDelta.dir === "down" ? "down" : "flat"}
             hint={`${automations.length - automationsRunning} paused`}
             onDrill={() => {
               const paused = automations.find((a) => a.status === "paused");
@@ -467,7 +509,7 @@ export function SystemsHealthWorkspace({
             icon={<TriangleAlert className="h-3.5 w-3.5" />}
             delta={`${failedRuns.length} failed runs`}
             deltaTone={webhookErrors > 0 ? "down" : "flat"}
-            hint="across all connectors"
+            hint={`across all connectors · ${errDelta.delta >= 0 ? "+" : ""}${errDelta.delta} vs 7d`}
             onDrill={() => setActiveRunId(failedRuns[0]?.id ?? orderedRuns[0]?.id ?? null)}
           />
           <KpiCard
@@ -475,6 +517,8 @@ export function SystemsHealthWorkspace({
             value={dqFlags}
             valueTone={dqFlags > 0 ? "danger" : "ink"}
             icon={<ShieldAlert className="h-3.5 w-3.5" />}
+            delta={`${dqDelta.delta >= 0 ? "+" : ""}${dqDelta.delta} vs 7d`}
+            deltaTone={dqDelta.dir === "down" ? "up" : dqDelta.dir === "up" ? "down" : "flat"}
             hint={`${dataQualityIssues.length} rule types`}
             onDrill={() =>
               setActiveDqId(
@@ -486,12 +530,16 @@ export function SystemsHealthWorkspace({
           />
           <KpiCard
             label="Last sync"
-            value="2 min"
+            value={lastSyncValue}
             icon={<RefreshCw className="h-3.5 w-3.5" />}
-            hint="MatinRealEstate.com IDX"
-            onDrill={() => setActiveIntegrationName("MatinRealEstate.com IDX")}
+            hint={freshest ? `freshest: ${freshest.name}` : "no live connector"}
+            onDrill={() => freshest && setActiveIntegrationName(freshest.name)}
           />
         </KpiStrip>
+
+        {/* Data-flow diagram (hero) + sync/error time-series (tickets 2 & 3) */}
+        <SystemsDiagram integrations={integrations} />
+        <SyncActivityChart totalRuns={runs.length} failedToday={failedRuns.length} />
 
         {/* Integrations status grid */}
         <section className="space-y-3">
@@ -525,6 +573,7 @@ export function SystemsHealthWorkspace({
             columns={integrationColumns}
             rows={sortedIntegrations}
             getRowId={(r) => r.name}
+            responsive
             onRowClick={(r) => setActiveIntegrationName(r.name)}
             utilityRight={
               <span className="inline-flex items-center gap-3 text-[0.74rem] tabular-nums">
@@ -560,18 +609,29 @@ export function SystemsHealthWorkspace({
             {dataQualityIssues.map((dq, i) => {
               const remaining = dqRemaining[dq.id] ?? dq.count;
               const cleared = remaining === 0;
+              // Flagged-vs-total proportion bar relative to the noisiest rule.
+              const proportion = maxDqCount > 0 ? Math.round((remaining / maxDqCount) * 100) : 0;
+              const sevColor =
+                dq.severity === "high" ? "bg-danger" : dq.severity === "med" ? "bg-warn" : "bg-info";
               return (
                 <button
                   key={dq.id}
                   type="button"
                   onClick={() => setActiveDqId(dq.id)}
                   className={cn(
-                    "flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-paper",
+                    "flex w-full items-center justify-between gap-4 border-l-[3px] px-4 py-3 text-left transition-colors hover:bg-paper",
+                    cleared
+                      ? "border-l-success/50"
+                      : dq.severity === "high"
+                        ? "border-l-danger"
+                        : dq.severity === "med"
+                          ? "border-l-warn"
+                          : "border-l-info",
                     i !== dataQualityIssues.length - 1 && "border-b border-mist/70",
                   )}
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <Dot tone={cleared ? "success" : SEVERITY_TONE[dq.severity]} />
+                    <VendorMark provider={dq.source} size={20} />
                     <div className="min-w-0">
                       <div className="truncate text-[0.84rem] font-medium text-ink">
                         {dq.issue}
@@ -579,6 +639,14 @@ export function SystemsHealthWorkspace({
                       <div className="truncate text-[0.74rem] text-slate">
                         Source <span className="font-semibold text-ink">{dq.source}</span>
                       </div>
+                      {!cleared ? (
+                        <div className="mt-1.5 h-1 w-28 overflow-hidden rounded-full bg-paper-200">
+                          <div
+                            className={cn("h-full rounded-full", sevColor)}
+                            style={{ width: `${Math.max(8, proportion)}%` }}
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -672,27 +740,8 @@ export function SystemsHealthWorkspace({
                             {run.subject} · started {run.startedLabel}
                           </span>
                         </div>
-                        {/* compact step trail */}
-                        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 pl-4">
-                          {run.steps.map((step, si) => (
-                            <span key={`${step.name}-${si}`} className="inline-flex items-center gap-1.5">
-                              <span
-                                className={cn(
-                                  "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.68rem] font-medium ring-1 ring-inset",
-                                  step.status === "failed" && "bg-danger/10 text-danger ring-danger/25",
-                                  step.status === "succeeded" && "bg-success/10 text-success ring-success/20",
-                                  step.status === "running" && "bg-info/10 text-info ring-info/25",
-                                  step.status === "waiting" && "bg-paper-200 text-slate ring-mist",
-                                )}
-                              >
-                                {step.name}
-                              </span>
-                              {si !== run.steps.length - 1 ? (
-                                <ArrowRight className="h-3 w-3 text-slate/40" />
-                              ) : null}
-                            </span>
-                          ))}
-                        </div>
+                        {/* compact step trail — full at sm+, truncated "+N" on phone (R8) */}
+                        <StepTrail steps={run.steps} />
                         {isFailed && run.failedStep ? (
                           <p className="mt-2 pl-4 text-[0.74rem] font-medium text-danger">
                             Failed at: {run.failedStep}
@@ -746,7 +795,16 @@ export function SystemsHealthWorkspace({
       </div>
 
       {/* ════════════ RIGHT — admin detail + Ask Matin ════════════ */}
-      <div className="min-w-0 space-y-5">
+      <div className="order-1 min-w-0 space-y-5 lg:order-2">
+        {/* Matin section lockup + grounding context line (ticket 6) */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-mist bg-cloud px-5 py-3.5 shadow-soft">
+          <MatinMark theme="dark" className="!h-5 w-auto" />
+          <p className="text-[0.74rem] leading-snug text-slate">
+            {company.name} · {company.address.city}, {company.address.state} ·{" "}
+            {company.stats?.agents ?? 40} agents · primary store: Supabase Postgres
+          </p>
+        </div>
+
         {/* Ask Matin — the ONLY explicit global-AI affordance on this page */}
         <AiPanel
           context="Systems Health / live status"
@@ -872,6 +930,48 @@ export function SystemsHealthWorkspace({
         onDraftPlan={draftDqPlan}
       />
     </div>
+  );
+}
+
+/* Step trail: shows every step at sm+, but truncates to the first two + a
+   "+N" pill on phone so a 6-step trail never wraps to four lines (R8/ticket 8). */
+function StepTrail({ steps }: { steps: WorkflowRun["steps"] }) {
+  const pill = (step: WorkflowRun["steps"][number], si: number, last: boolean) => (
+    <span key={`${step.name}-${si}`} className="inline-flex items-center gap-1.5">
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[0.68rem] font-medium ring-1 ring-inset",
+          step.status === "failed" && "bg-danger/10 text-danger ring-danger/25",
+          step.status === "succeeded" && "bg-success/10 text-success ring-success/20",
+          step.status === "running" && "bg-info/10 text-info ring-info/25",
+          step.status === "waiting" && "bg-paper-200 text-slate ring-mist",
+        )}
+      >
+        {step.name}
+      </span>
+      {!last ? <ArrowRight className="h-3 w-3 text-slate/40" /> : null}
+    </span>
+  );
+  const extra = Math.max(0, steps.length - 2);
+  return (
+    <>
+      {/* Phone: first two + "+N" */}
+      <div className="mt-2 flex flex-nowrap items-center gap-x-1.5 overflow-hidden pl-4 sm:hidden">
+        {steps.slice(0, 2).map((s, si) => pill(s, si, si === 1 && extra === 0))}
+        {extra > 0 ? (
+          <span className="inline-flex items-center gap-1.5">
+            <ArrowRight className="h-3 w-3 text-slate/40" />
+            <span className="rounded-md bg-paper-200 px-1.5 py-0.5 text-[0.68rem] font-medium text-slate ring-1 ring-inset ring-mist">
+              +{extra}
+            </span>
+          </span>
+        ) : null}
+      </div>
+      {/* sm+: full trail */}
+      <div className="mt-2 hidden flex-wrap items-center gap-x-1.5 gap-y-1 pl-4 sm:flex">
+        {steps.map((s, si) => pill(s, si, si === steps.length - 1))}
+      </div>
+    </>
   );
 }
 

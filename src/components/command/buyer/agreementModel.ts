@@ -152,6 +152,123 @@ export function previewStatus(s: BuyerAgreementStatus): {
   };
 }
 
+/* ── Per-field completion model (drives the BrandedDocument field grid +
+   the live checklist that scrolls to the missing input) ─────────────────────
+   Every required field on the OREF C-565 packet is checked against the LIVE
+   intake form (not a static string), so green ✓ / red-outline state and the
+   completion % always reconcile to what the operator has actually entered. The
+   `inputId` lets the checklist focus/scroll the exact source input (§2.5). */
+
+export type CompletionField = {
+  /** Stable id of the source input in the builder (for scroll-to-focus). */
+  inputId: string;
+  /** Letterhead grid label. */
+  label: string;
+  /** Live value to display in the grid (already formatted). */
+  value: string;
+  /** True when the field satisfies the requirement. */
+  filled: boolean;
+  /** Plain-English instruction when missing (e.g. "Buyer email · page 1"). */
+  hint: string;
+};
+
+const moneyOk = (raw: string) => parseMoney(raw) > 0;
+const emailOk = (raw: string) => /.+@.+\..+/.test(raw.trim());
+
+/** Build the full per-field completion checklist from the live intake form. */
+export function completionFields(form: IntakeForm): CompletionField[] {
+  const months = parseInt(form.termMonths, 10) || 0;
+  const areaList = form.areas
+    .split(",")
+    .map((a) => a.trim())
+    .filter(Boolean);
+  const budgetMin = parseMoney(form.budgetMin);
+  const budgetMax = parseMoney(form.budgetMax);
+  const budgetOk = moneyOk(form.budgetMin) && moneyOk(form.budgetMax) && budgetMax >= budgetMin;
+
+  return [
+    {
+      inputId: "f-buyer",
+      label: "Buyer name",
+      value: form.buyerName || "—",
+      filled: form.buyerName.trim().length > 1,
+      hint: "Buyer legal name · page 1",
+    },
+    {
+      inputId: "f-email",
+      label: "Buyer email",
+      value: form.email || "—",
+      filled: emailOk(form.email),
+      hint: "Valid buyer email for e-sign delivery · page 1",
+    },
+    {
+      inputId: "f-agent",
+      label: "Representing agent",
+      value: form.agentName || "—",
+      filled: form.agentName.trim().length > 1,
+      hint: "Licensed Matin agent · page 1",
+    },
+    {
+      inputId: "f-areas",
+      label: "Representation area",
+      value: areaList.join(" · ") || "—",
+      filled: areaList.length > 0,
+      hint: "At least one representation area · page 2",
+    },
+    {
+      inputId: "f-budget",
+      label: "Budget band",
+      value:
+        budgetOk
+          ? `$${form.budgetMin} – $${form.budgetMax}`
+          : "—",
+      filled: budgetOk,
+      hint: "Min and max budget (max ≥ min) · page 2",
+    },
+    {
+      inputId: "f-term",
+      label: "Representation period",
+      value: months ? `${months} months` : "—",
+      filled: months > 0 && months <= 12,
+      hint: "Term 1–12 months (Matin BIC cap) · page 2",
+    },
+    {
+      inputId: "f-expiration",
+      label: "Expiration",
+      value: form.expiration || "—",
+      filled: form.expiration.trim().length > 0,
+      hint: "Agreement expiration date · page 2",
+    },
+    {
+      inputId: "f-compensation",
+      label: "Compensation clause",
+      value:
+        COMPENSATION_OPTIONS.find((o) => o.value === form.compensation)?.label ?? "—",
+      filled: form.compensation.trim().length > 0,
+      hint: "Broker compensation selection · page 3",
+    },
+    {
+      inputId: "f-agency",
+      label: "Agency disclosure",
+      value: form.clauses.some((c) => /agency/i.test(c)) ? "Attached" : "—",
+      filled: form.clauses.some((c) => /agency/i.test(c)),
+      hint: "OREF Initial Agency disclosure clause · page 4",
+    },
+  ];
+}
+
+/** Completion percent (0–100) reconciled to the live field checklist. */
+export function completionPercent(form: IntakeForm): number {
+  const fields = completionFields(form);
+  const done = fields.filter((f) => f.filled).length;
+  return Math.round((done / fields.length) * 100);
+}
+
+/** The subset of fields still missing (drives red-outline + the blocker list). */
+export function missingFields(form: IntakeForm): CompletionField[] {
+  return completionFields(form).filter((f) => !f.filled);
+}
+
 /** Saved-view filter keys for the record list. */
 export type ViewKey = "all" | "draft" | "sent" | "signed" | "expiring";
 

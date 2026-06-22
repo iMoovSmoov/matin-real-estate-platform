@@ -12,23 +12,13 @@
 
 import { marketingAssets } from "@/lib/data";
 import type { Campaign, MarketingAsset } from "@/lib/types";
+import { STUDIO_LISTING, campaignOwner } from "./marketing-branding";
 
-/* The canonical listing this studio composes a launch kit for. */
-export const STUDIO_LISTING = {
-  address: "1248 NW Cedar Hills Dr",
-  city: "Beaverton, OR",
-  cityShort: "Beaverton",
-  beds: "4",
-  baths: "3",
-  sqft: "2,580",
-  yearBuilt: "2016",
-  price: "$845,000",
-  features: "primary on main, quartz chef's kitchen, 3-car garage",
-  highlights: "backs to greenspace, top-rated schools, walk to trails",
-  campaignId: "CMP-001",
-  /** Stable seed so every PropertyThumb of this listing renders the same photo. */
-  seedIndex: 7,
-};
+/* The real listing + owner resolvers live in marketing-branding.ts (bound to
+   the Wave-0 data layer). Re-exported here so existing pane imports keep
+   working from a single module surface. */
+export { STUDIO_LISTING, campaignOwner } from "./marketing-branding";
+export type { CampaignPerfRow, AudienceSegment } from "./marketing-branding";
 
 export const PREVIEW_CHANNELS = [
   "Email",
@@ -38,25 +28,6 @@ export const PREVIEW_CHANNELS = [
   "Web page",
 ] as const;
 export type PreviewChannel = (typeof PREVIEW_CHANNELS)[number];
-
-/* ── Campaign owners — each campaign is run by a real Matin person. Marketing
-   is owned by Kimberly (marketing lead); listing launches pair the listing
-   agent; recruiting sits with the broker. Avatar resolves these slugs to real
-   headshots, falling back to initials for synthetic names. ──────────────── */
-export const CAMPAIGN_OWNER: Record<string, { name: string; slug: string }> = {
-  "CMP-001": { name: "Chase Bright", slug: "chase-bright" }, // Cedar Hills listing agent
-  "CMP-002": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
-  "CMP-003": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
-  "CMP-004": { name: "Chase Bright", slug: "chase-bright" },
-  "CMP-005": { name: "Sierra Seggerman", slug: "sierra-palmeri" },
-  "CMP-006": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
-  "CMP-007": { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" },
-  "CMP-008": { name: "Jordan Matin", slug: "jordan-matin" },
-};
-
-export function campaignOwner(id: string) {
-  return CAMPAIGN_OWNER[id] ?? { name: "Kimberly Ilosvay", slug: "kimberly-ilosvay" };
-}
 
 /* Deterministic property photo per campaign so cards/drawers stay consistent. */
 export function campaignSeed(id: string): number {
@@ -99,7 +70,7 @@ export const TEMPLATES: MarketingTemplate[] = [
     assetCount: 11,
     popular: true,
     seedIndex: 7,
-    headline: "Just Listed in Beaverton",
+    headline: `Just Listed in ${STUDIO_LISTING.cityShort}`,
   },
   {
     key: "open-house",
@@ -188,7 +159,7 @@ const TEMPLATE_SEEDS: Record<TemplateKey, Record<PreviewChannel, string>> = {
     Email: cedar("Email"),
     Social: cedar("Social"),
     Flyer: cedar("Flyer"),
-    Ad: "Just listed in Beaverton — 4BR on Cedar Hills Dr, primary on main, backs to greenspace. Tour this week before it's gone. Tap to book a private showing.",
+    Ad: `Just listed in ${STUDIO_LISTING.cityShort} — ${STUDIO_LISTING.beds}BR at ${STUDIO_LISTING.address}, ${STUDIO_LISTING.price}. Primary on main, quartz kitchen, oversized lot. Tour this week before it's gone. Tap to book a private showing.`,
     "Web page": cedar("Web"),
   },
   "open-house": {

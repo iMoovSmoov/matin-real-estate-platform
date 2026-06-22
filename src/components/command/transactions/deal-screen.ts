@@ -6,6 +6,22 @@ import type {
   ActivityChannel,
   ActivityTagTone,
 } from "@/components/os";
+import { getAgent, listings, listingPhoto } from "@/lib/data";
+import { defaultTransactionCoordinator, roles } from "@/lib/data/roles";
+
+/* ── Real listing imagery keyed to the deal address (§2.6 ticket 10) ───────────
+   Match a transaction's street address to a real `listings.json` record so the
+   deal hero shows that property's real hero photo when we have one; otherwise a
+   deterministic exterior keyed by the deal id (never a random seed). */
+function streetOf(address: string): string {
+  return address.replace(/, .*$/, "").trim().toLowerCase();
+}
+export function dealPhoto(tx: Transaction): string {
+  const street = streetOf(tx.address);
+  const match = listings.find((l) => l.address.trim().toLowerCase() === street);
+  if (match) return listingPhoto(match);
+  return listingPhoto(tx.id);
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    Transactions — one-deal screen content model.
@@ -88,8 +104,28 @@ export type DealActivitySeed = {
   group: string;
 };
 
+/** One label:value cell in the 8+ field transaction metadata band (§2.6). */
+export type MetaField = { label: string; value: string };
+
+/** A named party on the deal (Buyer / Seller / Co-op agent / Lender / Title). */
+export type DealContact = {
+  role: string;
+  name: string;
+  detail?: string;
+  /** Real agent slug when the contact is a Matin agent (drives Avatar). */
+  slug?: string;
+};
+
+/** A contextual deal-action above the checklist (§2.6 ticket 5). */
+export type DealAction = {
+  id: string;
+  label: string;
+  /** When set, the action streams an AI draft via streamAi with this prompt. */
+  draftPrompt?: string;
+};
+
 export type DealScreen = {
-  /** "Buyer side · Under Contract · Close Jul 22" line under the address. */
+  /** "Listing side · Clear to Close · Close Jun 26" line under the address. */
   sideLine: string;
   statusRows: StatusRow[];
   milestones: DealMilestone[];
@@ -98,78 +134,136 @@ export type DealScreen = {
   activity: DealActivitySeed[];
   /** Null when the deal carries no open risk. */
   risk: RiskNote | null;
+  /** 8+ field transaction metadata band (§2.6 ticket 3). */
+  meta: MetaField[];
+  /** Named parties on the deal (Buyer/Seller/Co-op/Lender/Title). */
+  contacts: DealContact[];
+  /** Real transaction-coordinator slug for the coordinator slot (§2.6 ticket 3). */
+  coordinatorSlug: string;
+  /** Real lead-agent slug (the deal's listing/buyer agent). */
+  leadAgentSlug: string;
+  /** Contextual deal-action bar items (§2.6 ticket 5). */
+  actions: DealAction[];
 };
 
 /* ── Canonical scripted deals ─────────────────────────────────────────────── */
 
+/* TX-3999 — 1274 NW Everett St · Sale (Listing) for Melissa Grant · Clear to
+   Close · $689,000 · closes in 8 days. (Plain LISTING-side deal, not buyer-side
+   — the scripted contradiction the S6 ticket calls out is fixed here.) */
 const EVERETT: DealScreen = {
-  sideLine: "Buyer side · Under Contract · Close Jul 22",
+  sideLine: "Listing side · Clear to Close · Close Jun 26",
+  meta: [
+    { label: "Buyer", value: "Aaron & Lía Delgado" },
+    { label: "Seller", value: "Melissa Grant" },
+    { label: "Co-op agent", value: "Priya Anand · Premiere Property Group" },
+    { label: "Lender", value: "Summit Mortgage · Kara Wells" },
+    { label: "Title / Escrow", value: "Fidelity National · J. Okonkwo" },
+    { label: "Escrow #", value: "FID-118-44907" },
+    { label: "Acceptance date", value: "May 22, 2026" },
+    { label: "Close of escrow", value: "Jun 26, 2026" },
+    { label: "Price / SF", value: "$417 / SF" },
+  ],
+  contacts: [
+    { role: "Seller", name: "Melissa Grant", detail: "1274 NW Everett St, Portland" },
+    { role: "Buyer", name: "Aaron & Lía Delgado", detail: "Relocating from Bend" },
+    { role: "Co-op agent", name: "Priya Anand", detail: "Premiere Property Group · (503) 555-0142" },
+    { role: "Lender", name: "Kara Wells", detail: "Summit Mortgage · NMLS 218844" },
+    { role: "Title / Escrow", name: "Joy Okonkwo", detail: "Fidelity National Title" },
+  ],
   statusRows: [
-    { label: "Inspection", value: "2 days left", tone: "warn" },
-    { label: "Appraisal", value: "Scheduled", tone: "info" },
-    { label: "Loan", value: "Conditional", tone: "gold" },
+    { label: "Inspection", value: "Cleared", tone: "success" },
+    { label: "Appraisal", value: "At value", tone: "success" },
+    { label: "Loan", value: "Approved", tone: "success" },
     { label: "Title", value: "Clear", tone: "success" },
   ],
   milestones: [
-    { id: "m1", title: "Offer accepted", dateLabel: "Jun 18", tone: "success" },
-    { id: "m2", title: "Earnest money due", dateLabel: "Jun 20", tone: "success" },
-    { id: "m3", title: "Inspection period ends", dateLabel: "Jun 23", tone: "warn" },
-    { id: "m4", title: "Appraisal due", dateLabel: "Jul 02", tone: "info" },
-    { id: "m5", title: "Loan approval", dateLabel: "Jul 10", tone: "warn" },
-    { id: "m6", title: "Closing", dateLabel: "Jul 22", tone: "ink", terminal: true },
+    { id: "m1", title: "Offer accepted", dateLabel: "May 22", tone: "success" },
+    { id: "m2", title: "Earnest money received", dateLabel: "May 25", tone: "success" },
+    { id: "m3", title: "Inspection cleared", dateLabel: "Jun 02", tone: "success" },
+    { id: "m4", title: "Appraisal at value", dateLabel: "Jun 10", tone: "success" },
+    { id: "m5", title: "Final loan approval", dateLabel: "Jun 18", tone: "success" },
+    { id: "m6", title: "Closing", dateLabel: "Jun 26", tone: "ink", terminal: true },
   ],
   checklist: [
-    { id: "c1", label: "Signed purchase agreement", status: "done", meta: "OREF-001 · executed Jun 18" },
-    { id: "c2", label: "Seller disclosure uploaded", status: "done", meta: "Property & lead-based paint · Jun 19" },
-    { id: "c3", label: "Inspection addendum needed", status: "issue", meta: "Roof concern raised — no addendum on file" },
-    { id: "c4", label: "Lender approval letter", status: "done", meta: "Conditional approval · Summit Mortgage" },
-    { id: "c5", label: "HOA docs pending", status: "pending", meta: "Requested from Cedar Hills HOA · Jun 19" },
-    { id: "c6", label: "Final walkthrough schedule", status: "pending", meta: "Targeting Jul 21" },
+    { id: "c1", label: "Signed listing agreement", status: "done", meta: "OREF-001 · executed May 22" },
+    { id: "c2", label: "Seller's property disclosure", status: "done", meta: "Property & lead-based paint · May 22" },
+    { id: "c3", label: "Inspection contingency cleared", status: "done", meta: "No repair addendum requested" },
+    { id: "c4", label: "Appraisal received", status: "done", meta: "At contract price · Jun 10" },
+    { id: "c5", label: "Final loan approval letter", status: "done", meta: "Clear to close · Summit Mortgage" },
+    { id: "c6", label: "Closing disclosure to seller", status: "pending", meta: "Prepared — awaiting seller review" },
+    { id: "c7", label: "Final walkthrough", status: "scheduled", meta: "Scheduled Jun 25, 4:00 PM" },
   ],
   documents: [
     {
       id: "d1", name: "OREF-001 Residential Sale Agreement", requirement: "Contract",
-      status: "complete", pages: 9, meta: "Executed Jun 18 · all initials present", signature: true,
+      status: "complete", pages: 9, meta: "Executed May 22 · all initials present", signature: true,
     },
     {
       id: "d2", name: "Seller's Property Disclosure", requirement: "Disclosures",
-      status: "complete", pages: 6, meta: "Property & lead-based paint · uploaded Jun 19",
+      status: "complete", pages: 6, meta: "Property & lead-based paint · uploaded May 22",
     },
     {
-      id: "d3", name: "Inspection Repair Addendum", requirement: "Contingencies",
-      status: "missing", pages: 2, meta: "Roof concern raised — not yet generated",
-      missing: ["addendum body not drafted", "buyer & seller signatures · pages 1–2"], signature: true,
+      id: "d3", name: "Appraisal Report", requirement: "Contingencies",
+      status: "complete", pages: 11, meta: "At contract price · received Jun 10",
     },
     {
-      id: "d4", name: "Lender Conditional Approval", requirement: "Financing",
-      status: "needs-review", pages: 3, meta: "Summit Mortgage · received Jun 17",
-      missing: ["verify rate-lock expiration · page 2"],
+      id: "d4", name: "Lender Clear-to-Close Letter", requirement: "Financing",
+      status: "complete", pages: 2, meta: "Summit Mortgage · issued Jun 18",
     },
     {
-      id: "d5", name: "Earnest Money Receipt", requirement: "Escrow",
-      status: "complete", pages: 1, meta: "$10,000 wired to escrow · Jun 20",
+      id: "d5", name: "Closing Disclosure (Seller)", requirement: "Closing",
+      status: "needs-review", pages: 5, meta: "Prepared by escrow — awaiting seller review",
+      missing: ["confirm net proceeds with seller · page 3"], signature: true,
     },
   ],
   activity: [
-    { id: "a1", channel: "system", name: "AI Risk Note generated", tag: "needs action", tagTone: "danger", meta: "Roof concern vs. missing addendum · inspection ends Jun 23", timeLabel: "12m", group: "Today" },
-    { id: "a2", channel: "email", name: "Buyer email received", tag: "roof concern", tagTone: "warn", meta: "Daniel Cho asked about shingle condition", timeLabel: "1h", group: "Today" },
-    { id: "a3", channel: "system", name: "Conditional approval logged", tag: "financing", tagTone: "info", meta: "Summit Mortgage · auto-filed to deal", timeLabel: "Jun 19", group: "This week" },
-    { id: "a4", channel: "note", name: "Seller disclosure uploaded", tag: "disclosures", tagTone: "success", meta: "Property + lead-based paint", timeLabel: "Jun 19", group: "This week" },
-    { id: "a5", channel: "system", name: "Earnest money received", tag: "escrow", tagTone: "success", meta: "$10,000 wired · receipt on file", timeLabel: "Jun 20", group: "This week" },
-    { id: "a6", channel: "text", name: "Offer accepted", tag: "milestone", tagTone: "success", meta: "Sale agreement executed by both parties", timeLabel: "Jun 18", group: "Earlier" },
+    { id: "a1", channel: "system", name: "Clear to Close issued", tag: "financing", tagTone: "success", meta: "Summit Mortgage · final approval logged", timeLabel: "2d", group: "This week" },
+    { id: "a2", channel: "system", name: "Closing disclosure prepared", tag: "closing", tagTone: "info", meta: "Escrow sent seller CD for review", timeLabel: "1d", group: "This week" },
+    { id: "a3", channel: "note", name: "Final walkthrough scheduled", tag: "milestone", tagTone: "info", meta: "Jun 25, 4:00 PM with buyer's agent", timeLabel: "1d", group: "This week" },
+    { id: "a4", channel: "email", name: "Appraisal received at value", tag: "contingency", tagTone: "success", meta: "No appraisal gap — full contract price", timeLabel: "Jun 10", group: "Earlier" },
+    { id: "a5", channel: "system", name: "Earnest money received", tag: "escrow", tagTone: "success", meta: "$10,000 wired · receipt on file", timeLabel: "May 25", group: "Earlier" },
+    { id: "a6", channel: "text", name: "Offer accepted", tag: "milestone", tagTone: "success", meta: "Sale agreement executed by both parties", timeLabel: "May 22", group: "Earlier" },
   ],
-  risk: {
-    title: "AI Risk Note",
-    body:
-      "Inspection period expires in 2 days. Email thread mentions roof concern but no addendum exists. Suggest drafting inspection response.",
-    actionLabel: "Draft inspection response",
-    draftPrompt:
-      "Draft a buyer-side inspection response and repair addendum for the purchase of 1274 NW Everett St, Portland. The home inspection raised a roof concern (aging shingles / possible end-of-life). The inspection contingency period expires in 2 days. Request the seller either repair the roof or provide a credit at closing, preserve the buyer's right to terminate, and keep it professional and firm. Reference the executed OREF purchase agreement.",
-  },
+  risk: null,
+  coordinatorSlug: defaultTransactionCoordinator,
+  leadAgentSlug: "chase-bright",
+  actions: [
+    { id: "warranty", label: "Order home warranty" },
+    { id: "nhd", label: "Order NHD report" },
+    {
+      id: "seller-update",
+      label: "Generate seller update",
+      draftPrompt:
+        "Draft a warm, concise listing-side seller update email from Matin Real Estate to Melissa Grant about her home sale at 1274 NW Everett St, Portland. The deal is Clear to Close and on track to close June 26. The appraisal came in at full contract price, the buyer's loan has final approval, and the final walkthrough is scheduled for June 25. Confirm next steps: review the seller closing disclosure, sign at escrow, and hand over keys at closing. Keep it reassuring and professional, signed from the Matin listings team.",
+    },
+    { id: "update-agent", label: "Update co-op agent" },
+  ],
 };
 
+/* TX-3998 — 8912 SE Hawthorne Blvd · Purchase (Buyer) for Daniel Cho ·
+   Inspection · $829,000 · closes in 19 days · AT RISK (inspection deadline
+   tomorrow, repair addendum unsigned). */
 const HAWTHORNE: DealScreen = {
-  sideLine: "Buyer side · Under Contract · Close Jul 08",
+  sideLine: "Buyer side · Inspection · Close Jul 08",
+  meta: [
+    { label: "Buyer", value: "Daniel Cho" },
+    { label: "Seller", value: "R. & M. Whitfield" },
+    { label: "Co-op agent", value: "Sam Reyes · Keller Williams PDX" },
+    { label: "Lender", value: "WaFd Bank · T. Nakamura" },
+    { label: "Title / Escrow", value: "First American · D. Brennan" },
+    { label: "Escrow #", value: "FA-2026-77310" },
+    { label: "Acceptance date", value: "Jun 02, 2026" },
+    { label: "Close of escrow", value: "Jul 08, 2026" },
+    { label: "Price / SF", value: "$406 / SF" },
+  ],
+  contacts: [
+    { role: "Buyer", name: "Daniel Cho", detail: "First-time move-up buyer · Beaverton" },
+    { role: "Seller", name: "R. & M. Whitfield", detail: "8912 SE Hawthorne Blvd, Portland" },
+    { role: "Co-op agent", name: "Sam Reyes", detail: "Keller Williams PDX · (503) 555-0188" },
+    { role: "Lender", name: "Tom Nakamura", detail: "WaFd Bank · NMLS 401993" },
+    { role: "Title / Escrow", name: "Dana Brennan", detail: "First American Title" },
+  ],
   statusRows: [
     { label: "Inspection", value: "Due tomorrow", tone: "danger" },
     { label: "Appraisal", value: "Not ordered", tone: "warn" },
@@ -233,6 +327,24 @@ const HAWTHORNE: DealScreen = {
     draftPrompt:
       "Draft a buyer-side repair addendum for the purchase of 8912 SE Hawthorne Blvd, Portland. The inspection (Pillar To Post) flagged two items the buyer wants addressed. The inspection contingency deadline is tomorrow. Request the seller complete the repairs prior to closing or provide a closing credit, keep the buyer's contingency rights intact, and make it ready to send for signature today. Reference the executed OREF purchase agreement.",
   },
+  coordinatorSlug: defaultTransactionCoordinator,
+  leadAgentSlug: "chase-bright",
+  actions: [
+    {
+      id: "repair-addendum",
+      label: "Draft repair addendum",
+      draftPrompt:
+        "Draft a buyer-side repair addendum for the purchase of 8912 SE Hawthorne Blvd, Portland for buyer Daniel Cho. The Pillar To Post inspection flagged roof flashing and two GFCI outlets. The inspection contingency deadline is tomorrow. Request the seller complete the repairs prior to closing or provide a closing credit, preserve the buyer's contingency rights, and make it ready to send for signature today. Reference the executed OREF purchase agreement.",
+    },
+    { id: "warranty", label: "Order home warranty" },
+    {
+      id: "buyer-update",
+      label: "Generate buyer update",
+      draftPrompt:
+        "Draft a concise buyer update email from Matin Real Estate to Daniel Cho about his purchase of 8912 SE Hawthorne Blvd, Portland. The inspection is complete and the contingency deadline is tomorrow. Two items were flagged (roof flashing, two GFCI outlets); we are sending the seller a repair addendum today requesting repairs or a closing credit. Reassure him his earnest money and contingency rights are protected, and that we will not waive the inspection without his approval. Keep it clear and professional, signed from the Matin team.",
+    },
+    { id: "update-lender", label: "Update lender + title" },
+  ],
 };
 
 const SCRIPTED: Record<string, DealScreen> = {
@@ -404,17 +516,115 @@ function deriveRisk(tx: Transaction): RiskNote | null {
   };
 }
 
+/* Deterministic but plausible third-party contacts (co-op agent, lender,
+   title) so every selected deal carries a real-looking 8-field metadata band.
+   Keyed off the deal id so the same deal always shows the same parties. */
+const COOP_AGENTS = [
+  "Priya Anand · Premiere Property Group",
+  "Sam Reyes · Keller Williams PDX",
+  "Marcus Webb · Cascade Hasson SIR",
+  "Dana Liu · Living Room Realty",
+  "Owen Park · Windermere Realty Trust",
+];
+const LENDERS = [
+  "Summit Mortgage · Kara Wells",
+  "WaFd Bank · T. Nakamura",
+  "Guild Mortgage · R. Okafor",
+  "OnPoint Community CU · M. Diaz",
+  "Cross Country Mortgage · L. Tran",
+];
+const TITLES = [
+  "Fidelity National · J. Okonkwo",
+  "First American · D. Brennan",
+  "WFG National Title · S. Park",
+  "Ticor Title · A. Romero",
+  "Chicago Title · P. Hughes",
+];
+
+function pick<T>(arr: T[], id: string): T {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return arr[h % arr.length];
+}
+
+function addDays(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
+
+function deriveMeta(tx: Transaction): MetaField[] {
+  const buyerSide = /purchase|buyer/i.test(tx.type);
+  const ppsfBand = Math.round(tx.price / 2050); // plausible $/SF for the price band
+  const coop = pick(COOP_AGENTS, tx.id);
+  const lender = pick(LENDERS, tx.id);
+  const title = pick(TITLES, tx.id);
+  const acceptOffset = -Math.max(20, 60 - tx.closeDateDaysOut);
+  return [
+    { label: "Buyer", value: buyerSide ? tx.client : pick(["Aaron & Lía Delgado", "The Nguyen Family", "J. & R. Sterling", "Maya & Theo Holt"], tx.id) },
+    { label: "Seller", value: buyerSide ? pick(["R. & M. Whitfield", "The Calloway Trust", "S. & E. Brooks", "Hartley Family"], tx.id) : tx.client },
+    { label: "Co-op agent", value: coop },
+    { label: "Lender", value: lender },
+    { label: "Title / Escrow", value: title },
+    { label: "Escrow #", value: `ESC-${tx.id.replace(/\D/g, "")}-${(tx.price % 9000) + 1000}` },
+    { label: "Acceptance date", value: addDays(acceptOffset) },
+    { label: "Close of escrow", value: addDays(tx.closeDateDaysOut) },
+    { label: "Price / SF", value: `$${ppsfBand} / SF` },
+  ];
+}
+
+function deriveContacts(tx: Transaction): DealContact[] {
+  const buyerSide = /purchase|buyer/i.test(tx.type);
+  const meta = deriveMeta(tx);
+  const find = (l: string) => meta.find((m) => m.label === l)?.value ?? "";
+  const city = tx.address.replace(/^.*?, /, "");
+  return [
+    buyerSide
+      ? { role: "Buyer", name: find("Buyer"), detail: tx.address }
+      : { role: "Seller", name: find("Seller"), detail: tx.address },
+    buyerSide
+      ? { role: "Seller", name: find("Seller"), detail: city }
+      : { role: "Buyer", name: find("Buyer"), detail: `Purchasing in ${city}` },
+    { role: "Co-op agent", name: find("Co-op agent").split(" · ")[0], detail: find("Co-op agent").split(" · ")[1] },
+    { role: "Lender", name: find("Lender").split(" · ")[1] ?? find("Lender"), detail: find("Lender").split(" · ")[0] },
+    { role: "Title / Escrow", name: find("Title / Escrow").split(" · ")[1] ?? find("Title / Escrow"), detail: find("Title / Escrow").split(" · ")[0] },
+  ];
+}
+
+function deriveActions(tx: Transaction): DealAction[] {
+  const buyerSide = /purchase|buyer/i.test(tx.type);
+  const role = buyerSide ? "buyer" : "seller";
+  const Role = buyerSide ? "Buyer" : "Seller";
+  return [
+    { id: "warranty", label: "Order home warranty" },
+    { id: "nhd", label: "Order NHD report" },
+    { id: "update-agent", label: "Update co-op agent" },
+    {
+      id: `${role}-update`,
+      label: `Generate ${role} update`,
+      draftPrompt: `Draft a concise ${role} update email from Matin Real Estate to ${tx.client} about the ${role === "buyer" ? "purchase" : "sale"} at ${tx.address}. The deal is in the ${tx.stage} stage and on track to close in ${tx.closeDateDaysOut} days.${tx.riskFlag ? ` Note this open item and how we are handling it: ${tx.riskFlag}.` : " Confirm the remaining steps and that everything is progressing on schedule."} Keep it reassuring and professional, signed from the Matin team. (${Role} update)`,
+    },
+  ];
+}
+
 /** Resolve the full one-deal screen content for a selected transaction. */
 export function dealScreenFor(tx: Transaction): DealScreen {
   const scripted = SCRIPTED[tx.id];
   if (scripted) return scripted;
+  // Resolve the deal's lead agent + a real TC for the coordinator slot.
+  const leadAgentSlug = getAgent(tx.agentSlug) ? tx.agentSlug : roles.principalBroker;
   return {
-    sideLine: `${sideOf(tx)} · ${tx.stage}`,
+    sideLine: `${sideOf(tx)} · ${tx.stage} · Close ${addDays(tx.closeDateDaysOut).replace(/, \d{4}$/, "")}`,
     statusRows: deriveStatusRows(tx),
     milestones: deriveMilestones(tx),
     checklist: deriveChecklist(tx),
     documents: deriveDocuments(tx),
     activity: deriveActivity(tx),
     risk: deriveRisk(tx),
+    meta: deriveMeta(tx),
+    contacts: deriveContacts(tx),
+    coordinatorSlug: defaultTransactionCoordinator,
+    leadAgentSlug,
+    actions: deriveActions(tx),
   };
 }

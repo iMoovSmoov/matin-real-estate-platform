@@ -27,11 +27,12 @@ import {
 } from "./AdminViews";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   MatinOS — Admin Settings workspace (§2.12)
+   MatinOS — Admin Settings workspace (§2.12 · S12 tickets 8 & 11)
 
-   Category settings sidebar → content. Each item switches the content pane via
-   local state. AI presence is the Matin mark (no Sparkles). Composes the
-   section view components; reuses ONLY @/components/os primitives inside them.
+   Category settings sidebar → content. The active category can be CONTROLLED
+   by the parent (the settings page wires KPI onDrill to switch it — S12 #8) or
+   left uncontrolled. Mobile (S12 #11): the sidebar collapses to a horizontally
+   scrollable pill row < lg. AI presence is the Matin mark (no Sparkles).
    ────────────────────────────────────────────────────────────────────────── */
 
 const CATEGORY_ICON: Record<CategoryKey, typeof Users> = {
@@ -45,8 +46,20 @@ const CATEGORY_ICON: Record<CategoryKey, typeof Users> = {
   audit: ScrollText,
 };
 
-export function AdminWorkspace() {
-  const [active, setActive] = useState<CategoryKey>("routing");
+export function AdminWorkspace({
+  active: controlled,
+  onActiveChange,
+}: {
+  active?: CategoryKey;
+  onActiveChange?: (key: CategoryKey) => void;
+} = {}) {
+  const [internal, setInternal] = useState<CategoryKey>("routing");
+  const active = controlled ?? internal;
+
+  function setActive(key: CategoryKey) {
+    if (onActiveChange) onActiveChange(key);
+    else setInternal(key);
+  }
 
   const content = useMemo(() => {
     switch (active) {
@@ -73,8 +86,54 @@ export function AdminWorkspace() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[224px_1fr]">
-      {/* Category settings sidebar */}
-      <nav aria-label="Settings categories" className="lg:sticky lg:top-4 lg:self-start">
+      {/* Mobile category pill row (R1/R6) — horizontally scrollable < lg */}
+      <nav
+        aria-label="Settings categories (mobile)"
+        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden"
+      >
+        {settingsCategories.map((c) => {
+          const Icon = CATEGORY_ICON[c.key];
+          const isActive = c.key === active;
+          const isAi = c.key === "ai-policies";
+          return (
+            <button
+              key={c.key}
+              type="button"
+              onClick={() => setActive(c.key)}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[0.82rem] font-medium transition-colors",
+                isActive
+                  ? "border-ink bg-ink text-cloud"
+                  : "border-mist bg-cloud text-slate hover:text-ink",
+              )}
+            >
+              {isAi ? (
+                <MatinMark theme={isActive ? "white" : "dark"} className="h-3.5 w-3.5" />
+              ) : (
+                <Icon className="h-3.5 w-3.5" />
+              )}
+              {c.label}
+              {c.count != null ? (
+                <span
+                  className={cn(
+                    "tabular-nums text-[0.7rem] font-semibold",
+                    isActive ? "text-cloud/70" : "text-slate/60",
+                  )}
+                >
+                  {c.count}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Desktop category settings sidebar */}
+      <nav
+        aria-label="Settings categories"
+        className="hidden lg:sticky lg:top-4 lg:block lg:self-start"
+      >
         <p className="eyebrow mb-2 px-2 text-slate">Settings</p>
         <ul className="space-y-0.5">
           {settingsCategories.map((c) => {

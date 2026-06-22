@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/os";
 import { MatinMark } from "@/components/brand/Logo";
+import { leads, sellerLeads } from "@/lib/data";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Marketing Studio — GenerationControls  (pane 3, ref §2.8 / wireframe 11)
@@ -96,11 +97,21 @@ export const AUDIENCES = [
 export const TONES = ["Luxury", "Direct", "Local", "Warm"];
 export const GEN_CHANNELS = ["Email", "Instagram", "Facebook", "Google retargeting"];
 
+/* Reach grounded in real CRM rows where a segment maps to recorded data, scaled
+   to a plausible database size (the demo CRM holds a sample of the full book). */
+const SELLER_BASE = Math.max(1, sellerLeads.length) * 90;
+const PAST_CLIENT_BASE =
+  Math.max(1, leads.filter((l) => /past client/i.test(l.source ?? "")).length) * 90;
+const LO_BUYER_BASE =
+  Math.max(1, leads.filter((l) => /lake oswego/i.test(l.community ?? "")).length) * 90 + 320;
+const SAVED_SEARCH_BASE =
+  Math.max(1, leads.filter((l) => (l.propertyViews?.length ?? 0) > 0).length) * 24;
+
 const AUDIENCE_REACH: Record<string, number> = {
-  "Seller database": 1286,
-  "Lake Oswego buyers": 410,
-  "Past clients": 540,
-  "Saved-search matches": 288,
+  "Seller database": SELLER_BASE,
+  "Lake Oswego buyers": LO_BUYER_BASE,
+  "Past clients": PAST_CLIENT_BASE,
+  "Saved-search matches": SAVED_SEARCH_BASE,
 };
 
 export type Approver = { slug: string; name: string; role: string; approved: boolean };

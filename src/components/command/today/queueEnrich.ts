@@ -6,6 +6,8 @@ import {
   agents,
   aiActions,
   failedWorkflowRuns,
+  listings,
+  listingPhoto,
 } from "@/lib/data";
 import type { WorkQueueItem } from "@/lib/types";
 import type { ActivityItem } from "@/components/os";
@@ -37,6 +39,9 @@ export type QueueRecord = {
   personName?: string;
   /** stable seed into the exteriors pool for a consistent PropertyThumb */
   thumbSeed?: number;
+  /** REAL hero photo for the property (real listing photo or deterministic
+   *  exterior keyed by the record id) — preferred over thumbSeed (S1.9 / G-A #6). */
+  thumbSrc?: string;
   /** lead / seller-intent score → gold ScoreChip */
   score?: number;
   scoreLabel?: string;
@@ -64,6 +69,23 @@ function seedFromId(id: string): number {
 
 const agentName = (slug: string) =>
   agents.find((a) => a.slug === slug)?.name ?? slug;
+
+/** Normalize a street address for loose matching (strip case + punctuation). */
+function normAddr(s: string): string {
+  return s.toLowerCase().replace(/[.,].*$/, "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * REAL hero photo for a property record: match the address against the canonical
+ * listings collection (real photos win), else a deterministic exterior keyed by
+ * the record id. Never a random seed (G-A #6).
+ */
+function photoFor(address: string, recordId: string): string {
+  const target = normAddr(address);
+  const hit = listings.find((l) => normAddr(l.address) === target);
+  if (hit) return listingPhoto(hit);
+  return listingPhoto(recordId);
+}
 
 /** Resolve a queue item to its real underlying record. */
 export function enrich(item: WorkQueueItem): QueueRecord {
@@ -107,6 +129,7 @@ export function enrich(item: WorkQueueItem): QueueRecord {
         ...base,
         personName: sl.sellerName,
         thumbSeed: seedFromId(sl.id),
+        thumbSrc: photoFor(`${sl.address}, ${sl.city}`, sl.id),
         score: sl.sellerScore,
         scoreLabel: "seller",
         address: `${sl.address}, ${sl.city}`,
@@ -128,6 +151,7 @@ export function enrich(item: WorkQueueItem): QueueRecord {
         ...base,
         personName: lp.agentName,
         thumbSeed: seedFromId(lp.id),
+        thumbSrc: photoFor(`${lp.address}, ${lp.city}`, lp.id),
         address: `${lp.address}, ${lp.city}`,
         provenance: `${lp.stage} · ${lp.city}`,
         facts: [
@@ -150,6 +174,7 @@ export function enrich(item: WorkQueueItem): QueueRecord {
         ...base,
         personName: tx.client,
         thumbSeed: seedFromId(tx.id),
+        thumbSrc: photoFor(tx.address, tx.id),
         address: tx.address,
         provenance: `${tx.type} · ${tx.stage}`,
         facts: [

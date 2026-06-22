@@ -139,6 +139,8 @@ export function LikelySellersTable({
       header: "Intent",
       align: "right",
       sortable: true,
+      primary: true,
+      cardLabel: "Intent",
       render: (r) => <ScoreChip score={r._score} suffix="" />,
     },
   ];
@@ -149,6 +151,7 @@ export function LikelySellersTable({
       rows={rows}
       getRowId={(r) => r.id}
       onRowClick={onRowClick}
+      responsive
       savedViews={{ views: savedViews, active: view, onChange: (k) => onView(k as SellerViewKey) }}
       utilityLeft={
         <div className="relative">

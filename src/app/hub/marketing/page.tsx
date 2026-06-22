@@ -8,11 +8,14 @@ import {
   Reply,
   Banknote,
   Plus,
+  PanelsTopLeft,
+  Eye,
+  SlidersHorizontal,
 } from "lucide-react";
-import { campaigns as seedCampaigns } from "@/lib/data";
+import { campaigns as seedCampaigns, roles, getAgent } from "@/lib/data";
 import type { Campaign } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
-import { compactUsd, num } from "@/lib/utils";
+import { cn, compactUsd, num } from "@/lib/utils";
 import {
   KpiStrip,
   KpiCard,
@@ -24,6 +27,8 @@ import {
   AiPanel,
   type AIAction,
   RecordDrawer,
+  PaneSwitcher,
+  usePaneSwitcher,
   useAiSidecar,
 } from "@/components/os";
 import { TemplateLibrary } from "@/components/command/marketing/TemplateLibrary";
@@ -38,6 +43,11 @@ import {
   CreateCampaignForm,
   type NewCampaignDraft,
 } from "@/components/command/marketing/CreateCampaignForm";
+import { CampaignChart } from "@/components/command/marketing/CampaignChart";
+import { CampaignFlyer } from "@/components/command/marketing/CampaignFlyer";
+import { EmailComposer } from "@/components/command/marketing/EmailComposer";
+import { SequenceBuilder } from "@/components/command/marketing/SequenceBuilder";
+import { AudiencePanel } from "@/components/command/marketing/AudiencePanel";
 import {
   templateByKey,
   campaignOwner,
@@ -48,6 +58,7 @@ import {
   type PreviewChannel,
   type TemplateKey,
 } from "@/components/command/marketing/marketing-data";
+import { campaignPerformance } from "@/components/command/marketing/marketing-branding";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Marketing Studio  → /hub/marketing   (ref §2.8 / wireframe 11)
@@ -70,6 +81,11 @@ import {
  *  barrel so we declare it here). */
 type ActionStreamState = { running?: boolean; result?: ReactNode };
 
+/** Compose the pane visibility class (paneClass, active below lg) with grid spans. */
+function cnPane(paneClass: string, rest: string) {
+  return cn(paneClass, rest);
+}
+
 const CAMPAIGN_STATUS: Record<Campaign["status"], { tone: ChipTone; label: string }> = {
   live: { tone: "success", label: "Live" },
   scheduled: { tone: "info", label: "Scheduled" },
@@ -91,6 +107,9 @@ export default function MarketingStudioPage() {
   const [kit, setKit] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  // Email-composer AI draft state (separate from the kit generate).
+  const [composing, setComposing] = useState(false);
+
   const [sentState, setSentState] = useState<"idle" | "sending" | "sent">("idle");
 
   const [controls, setControls] = useState<GenControlsState>({
@@ -99,10 +118,35 @@ export default function MarketingStudioPage() {
     channels: ["Email", "Instagram", "Facebook", "Google retargeting"],
   });
 
-  const [approvers, setApprovers] = useState<Approver[]>([
-    { slug: "jordan-matin", name: "Jordan Matin", role: "Broker", approved: false },
-    { slug: "chase-bright", name: "Chase Bright", role: "Listing agent", approved: false },
-  ]);
+  const [approvers, setApprovers] = useState<Approver[]>(() => {
+    const broker = getAgent(roles.principalBroker);
+    const listingAgent = getAgent(STUDIO_LISTING.agentSlug);
+    return [
+      {
+        slug: roles.principalBroker,
+        name: broker?.name ?? "Jordan Matin",
+        role: "Principal broker",
+        approved: false,
+      },
+      {
+        slug: STUDIO_LISTING.agentSlug,
+        name: listingAgent?.name ?? "Listing agent",
+        role: "Listing agent",
+        approved: false,
+      },
+    ];
+  });
+
+  /* Mobile pane switcher (R1) — Templates · Preview · Controls (one at a time
+     below lg; the full 3-pane grid takes over at lg+). */
+  const pane = usePaneSwitcher(
+    [
+      { key: "templates", label: "Templates", icon: <PanelsTopLeft className="h-3.5 w-3.5" /> },
+      { key: "preview", label: "Preview", icon: <Eye className="h-3.5 w-3.5" /> },
+      { key: "controls", label: "Controls", icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },
+    ],
+    "preview",
+  );
 
   /* ── Campaigns (mutable local copy so + New / pause shows immediately) ── */
   const [campaignRows, setCampaignRows] = useState<Campaign[]>(seedCampaigns);
@@ -125,16 +169,22 @@ export default function MarketingStudioPage() {
   const studioContext = studioContextFor(activeTemplate.label);
 
   const kpi = useMemo(() => studioKpis(campaignRows), [campaignRows]);
+  const perf = useMemo(() => campaignPerformance(campaignRows), [campaignRows]);
 
   /* ── Template select: load it, reset any generated kit + send state ── */
-  const selectTemplate = useCallback((key: TemplateKey) => {
-    setTemplate(key);
-    setKit(null);
-    setSentState("idle");
-    // Snap the channel to one this template actually carries.
-    const t = templateByKey(key);
-    setChannel((prev) => (t.channels.includes(prev) ? prev : t.channels[0]));
-  }, []);
+  const selectTemplate = useCallback(
+    (key: TemplateKey) => {
+      setTemplate(key);
+      setKit(null);
+      setSentState("idle");
+      // Snap the channel to one this template actually carries.
+      const t = templateByKey(key);
+      setChannel((prev) => (t.channels.includes(prev) ? prev : t.channels[0]));
+      // R1: on phone, selecting a template jumps to the preview pane.
+      pane.go("preview");
+    },
+    [pane],
+  );
 
   function selectChannel(c: PreviewChannel) {
     setChannel(c);
@@ -177,6 +227,31 @@ export default function MarketingStudioPage() {
     } finally {
       setGenerating(false);
     }
+  }
+
+  /* ── Email composer → stream an on-brand draft body via Matin AI ── */
+  async function composeEmailDraft(): Promise<{ body: string }> {
+    setComposing(true);
+    let full = "";
+    try {
+      await streamAi(
+        {
+          tool: "lead-responder",
+          input: {
+            ...STUDIO_LISTING,
+            task: `Write a warm, on-brand home-value outreach email for the seller database about ${STUDIO_LISTING.address} in ${STUDIO_LISTING.cityShort}. Use the merge tokens {{first_name}}, {{address}}, {{community}}, {{agent_name}}, {{agent_phone}} naturally. Keep it under 120 words.`,
+            channel: "Email",
+            tone: controls.tones.join(", "),
+          },
+        },
+        (_chunk, acc) => {
+          full = acc;
+        },
+      );
+    } finally {
+      setComposing(false);
+    }
+    return { body: full };
   }
 
   /* ── Send test → real inline send simulation with confirmation ── */
@@ -413,6 +488,7 @@ export default function MarketingStudioPage() {
       header: "Reply",
       align: "right",
       sortable: true,
+      cardHidden: true,
       render: (c) => (
         <span className="tabular-nums text-ink">
           {c.replyRate ? `${c.replyRate.toFixed(1)}%` : "—"}
@@ -420,10 +496,13 @@ export default function MarketingStudioPage() {
       ),
     },
     {
+      // R3: the single most important column — pinned top-right on mobile cards
+      // so attributed $ is always visible without horizontal scroll.
       key: "attributedPipeline",
       header: "Attributed $",
       align: "right",
       sortable: true,
+      primary: true,
       render: (c) => (
         <span className="tabular-nums font-semibold text-success">
           {c.attributedPipeline ? compactUsd(c.attributedPipeline) : "—"}
@@ -440,8 +519,9 @@ export default function MarketingStudioPage() {
         seller-update assets.
       </p>
 
-      {/* KPI strip — every tile drills into the campaigns table or a record */}
-      <KpiStrip>
+      {/* KPI strip — every tile drills into the campaigns table or a record.
+          R4: scroll-snap rail on phone so 6 tiles never orphan. */}
+      <KpiStrip cols={6} rail>
         <KpiCard
           label="Campaigns live"
           value={kpi.liveCount}
@@ -497,15 +577,23 @@ export default function MarketingStudioPage() {
         />
       </KpiStrip>
 
-      {/* Three panes */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+      {/* Mobile pane switcher (R1) — Templates · Preview · Controls. Shows below
+          lg; the full 3-pane grid takes over at lg+ via paneClass. */}
+      <PaneSwitcher {...pane.switcherProps} ariaLabel="Marketing studio panes" />
+
+      {/* Three panes — split at lg (R1). Each pane keeps state via paneClass so
+          the form + preview persist when switching on phone. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         {/* Pane 1 — template library */}
-        <div className="xl:col-span-3">
+        <div className={cnPane(pane.paneClass("templates"), "lg:col-span-3")}>
           <TemplateLibrary active={template} onSelect={selectTemplate} />
         </div>
 
-        {/* Pane 2 — asset previews (channel tabs over one canvas) */}
-        <div className="flex flex-col gap-5 xl:col-span-5">
+        {/* Pane 2 — asset previews (channel tabs over one canvas). Visibility on
+            the outer div; flex column on an inner wrapper so it applies whenever
+            the pane is shown (block vs flex would otherwise collide). */}
+        <div className={cnPane(pane.paneClass("preview"), "lg:col-span-5")}>
+         <div className="flex flex-col gap-5">
           <AssetPreview
             headline={activeTemplate.headline}
             subhead={`${activeTemplate.label} · ${STUDIO_LISTING.address}, ${STUDIO_LISTING.city}`}
@@ -530,8 +618,8 @@ export default function MarketingStudioPage() {
             onRunAction={runProducerAction}
             onRejectAction={rejectProducerAction}
           >
-            <div className="flex items-start justify-between gap-3 rounded-xl bg-ink-800 px-3.5 py-3 ring-1 ring-inset ring-ink-700">
-              <p className="text-[0.82rem] leading-relaxed text-slate-300">
+            <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-ink-800 px-3.5 py-3 ring-1 ring-inset ring-ink-700">
+              <p className="min-w-0 flex-1 text-[0.82rem] leading-relaxed text-slate-300">
                 Brand kit is locked: Matin logo lockup, ink/paper palette, and the
                 Oregon fair-housing disclosure apply to every channel. Drafts stay
                 drafts until the broker and listing agent approve.
@@ -539,26 +627,52 @@ export default function MarketingStudioPage() {
               <button
                 type="button"
                 onClick={() => openAi(`Context: ${studioContext}`)}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
               >
                 Ask Matin
               </button>
             </div>
           </AiPanel>
+         </div>
         </div>
 
-        {/* Pane 3 — generation controls */}
-        <div className="flex flex-col gap-5 xl:col-span-4">
-          <GenerationControls
-            state={controls}
-            onToggle={toggle}
-            approvers={approvers}
-            onToggleApprover={toggleApprover}
-            generating={generating}
-            onGenerate={handleGenerate}
-          />
+        {/* Pane 3 — generation controls + real audience composition */}
+        <div className={cnPane(pane.paneClass("controls"), "lg:col-span-4")}>
+          <div className="flex flex-col gap-5">
+            <GenerationControls
+              state={controls}
+              onToggle={toggle}
+              approvers={approvers}
+              onToggleApprover={toggleApprover}
+              generating={generating}
+              onGenerate={handleGenerate}
+            />
+            <AudiencePanel />
+          </div>
         </div>
       </div>
+
+      {/* Campaign performance — recharts bar chart with decomposing tooltip */}
+      <CampaignChart data={perf} />
+
+      {/* Branded deliverables — flyer (BrandedDocument) + email composer */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-3 px-1">
+            <h2 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
+              Print flyer
+            </h2>
+            <span className="text-[0.72rem] text-slate">
+              {STUDIO_LISTING.address} · Matin-branded · print-ready
+            </span>
+          </div>
+          <CampaignFlyer />
+        </div>
+        <EmailComposer onGenerate={composeEmailDraft} generating={composing} />
+      </div>
+
+      {/* Sequence / automation builder — node + connector flow */}
+      <SequenceBuilder />
 
       {/* Campaigns table */}
       <div
@@ -588,6 +702,7 @@ export default function MarketingStudioPage() {
           rows={filteredCampaigns}
           getRowId={(c) => c.id}
           selectable
+          responsive
           savedViews={{ views: savedViews, active: view, onChange: setView }}
           onRowClick={(c) => setOpenCampaign(c)}
           emptyState={

@@ -18,25 +18,32 @@ import {
   Pencil,
   Copy,
   Trash2,
+  ListChecks,
 } from "lucide-react";
 import {
   KpiStrip,
   KpiCard,
   StatusChip,
-  DocumentPreview,
+  BrandedDocument,
   CalloutCard,
   EmptyState,
   Avatar,
-  PropertyThumb,
+  PaneSwitcher,
+  usePaneSwitcher,
   useAiSidecar,
 } from "@/components/os";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { rosterOption } from "@/lib/data/agreement-roster";
 import {
   PACKETS,
   STATUS_META,
   packetMetrics,
+  packetHero,
+  packetProgress,
+  docFields,
+  docCompletion,
   isSendBlocked,
   isOpenDoc,
   type Packet,
@@ -44,31 +51,51 @@ import {
 } from "./packets";
 import { DocumentDrawer } from "./DocumentDrawer";
 import { NewPacketDrawer } from "./NewPacketDrawer";
+import { FormsLibrary } from "./FormsLibrary";
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Forms & Docs — packet center (build-reference §2.7)
+   Forms & Docs — packet center (build-reference §2.7; plan S7 1–8)
 
-   Three panes inside the global app shell:
+   Two top-level tabs: PACKETS (the loop workspace) and TEMPLATES (the SkySlope
+   OREF/Matin library, wiring the previously-orphaned FormsLibrary/FormTemplate).
+
+   PACKETS workspace — three panes inside the global app shell:
      (1) Packet list   — reusable templates as rows; selected = dark-filled;
-         owner Avatar + live open-count; "+ New packet" appends to state.
-     (2) Document preview stack — SCROLLABLE 2-col grid of DocumentPreview cards.
-         Card click selects (drives the detail pane); "View" opens the doc in a
-         paginated RecordDrawer; per-card kebab renames / duplicates / deletes.
-     (3) Selected document actions — Preview / Download / Print (real inline
-         confirmations), Send for signature (ink primary, mutates state),
-         Request correction; an AI missing-field check streamed inline; and a
-         bordered monospace "Automation after send" note.
+         owner Avatar + per-row progress bar + doc count + relative time;
+         saved-view pill tabs + bulk multi-select Send/Download.
+     (2) Document preview stack — SCROLLABLE grid of REAL branded Matin
+         documents (BrandedDocument letterhead, live field grids, green/red
+         completion). Card click selects; "View" opens the paginated
+         DocumentDrawer; per-card kebab renames / duplicates / deletes.
+     (3) Selected document actions — Preview / Download / Print render the
+         branded artifact (window.print of the BrandedDocument), Send for
+         signature (ink primary, mutates state) shows a Matin e-sign envelope;
+         an AI missing-field check streamed inline.
 
-   THE #1 RULE: every click does its real job. The global AI sidecar opens ONLY
-   from an explicit "Ask AI" affordance. KPIs FILTER the list. Gold is rationed
-   to AI; the primary human action (Send) is ink-filled.
+   Mobile (R1): below lg a PaneSwitcher (List · Documents · Actions) shows ONE
+   pane at a time; selecting a packet jumps to Documents, selecting a doc jumps
+   to Actions. Every click does its real job; the global AI sidecar opens ONLY
+   from an explicit "Ask AI" affordance. Gold is rationed to AI.
    ────────────────────────────────────────────────────────────────────────── */
 
-/** KPI-driven saved views — clicking a KPI filters the packet list. */
+/** KPI-driven saved views — clicking a KPI/pill filters the packet list. */
 type ViewKey = "all" | "in-progress" | "awaiting" | "missing" | "completed";
+type TopTab = "packets" | "templates";
 
 export function FormsDocsWorkspace() {
   const { openAi } = useAiSidecar();
+
+  const [topTab, setTopTab] = useState<TopTab>("packets");
+
+  // Mobile pane switcher (R1) — List / Documents / Actions.
+  const pane = usePaneSwitcher(
+    [
+      { key: "list", label: "List", icon: <ListChecks className="h-3.5 w-3.5" /> },
+      { key: "docs", label: "Documents", icon: <FileText className="h-3.5 w-3.5" /> },
+      { key: "actions", label: "Actions", icon: <Send className="h-3.5 w-3.5" /> },
+    ],
+    "list",
+  );
 
   // LIVE packet state — the single source of truth all panes + KPIs read from.
   const [packets, setPackets] = useState<Packet[]>(() =>
@@ -82,6 +109,9 @@ export function FormsDocsWorkspace() {
     () => filterPackets(packets, view),
     [packets, view],
   );
+
+  // Bulk multi-select (packets) — drives the bulk Send/Download cluster.
+  const [selectedPackets, setSelectedPackets] = useState<Set<string>>(new Set());
 
   // Selected packet + document (kept valid as state mutates).
   const [packetId, setPacketId] = useState<string>(packets[0].id);
@@ -122,29 +152,62 @@ export function FormsDocsWorkspace() {
     setDocId(firstActionableDoc(next).id);
     setCheckOut("");
     setPaneConfirm(null);
+    pane.go("docs");
   }
 
   function selectDoc(next: PacketDoc) {
     setDocId(next.id);
     setCheckOut("");
     setPaneConfirm(null);
+    pane.go("actions");
   }
 
   function setView_(next: ViewKey) {
     setView(next);
-    // Keep the selected packet valid against the new filter.
     const list = filterPackets(packets, next);
     if (list.length && !list.some((p) => p.id === packetId)) {
       selectPacket(list[0]);
     }
   }
 
+  /* ── Bulk selection ────────────────────────────────────────────────────── */
+  function togglePacketSelect(id: string) {
+    setSelectedPackets((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function bulkSend() {
+    const ids = [...selectedPackets];
+    setPackets((prev) =>
+      prev.map((p) =>
+        selectedPackets.has(p.id)
+          ? {
+              ...p,
+              docs: p.docs.map((d) =>
+                isSendBlocked(d.status) ? d : { ...d, status: "sent" as const },
+              ),
+            }
+          : p,
+      ),
+    );
+    flashPane(`Sent ${ids.length} packet${ids.length === 1 ? "" : "s"} for signature · envelopes created.`);
+    setSelectedPackets(new Set());
+  }
+
+  function bulkDownload() {
+    const n = selectedPackets.size;
+    flashPane(`Generated branded PDFs for ${n} packet${n === 1 ? "" : "s"}.`);
+    if (typeof window !== "undefined") window.print();
+    setSelectedPackets(new Set());
+  }
+
   /* ── Mutations (all local state; every action is real) ─────────────────── */
 
-  function mutateDoc(
-    targetId: string,
-    fn: (d: PacketDoc) => PacketDoc,
-  ) {
+  function mutateDoc(targetId: string, fn: (d: PacketDoc) => PacketDoc) {
     setPackets((prev) =>
       prev.map((p) => ({
         ...p,
@@ -248,7 +311,7 @@ export function FormsDocsWorkspace() {
   function paneSend() {
     if (isSendBlocked(doc.status)) return;
     sendDoc(doc.id);
-    flashPane(`${doc.code} sent for signature · envelope created.`);
+    flashPane(`${doc.code} sent for signature · Matin e-sign envelope created.`);
   }
 
   function paneCorrection() {
@@ -264,29 +327,94 @@ export function FormsDocsWorkspace() {
   const docMeta = STATUS_META[doc.status];
   const sendBlocked = isSendBlocked(doc.status);
 
+  /* ── Templates tab (wires the orphaned FormsLibrary) ───────────────────── */
+  if (topTab === "templates") {
+    return (
+      <div className="space-y-5 px-4 pb-10 pt-4 md:px-6">
+        <TopTabs topTab={topTab} onTab={setTopTab} templatesCount={m.templates} />
+        <p className="max-w-2xl text-[0.82rem] leading-snug text-slate">
+          The OREF + Matin template library. Pick a form to open the branded,
+          editable document — auto-fill from a real listing or lead, generate
+          clause language with AI, and send for e-signature.
+        </p>
+        <FormsLibrary />
+      </div>
+    );
+  }
+
+  /* ── Pane bodies ──────────────────────────────────────────────────────── */
+
+  const listPane = (
+    <PacketListPane
+      packets={filteredPackets}
+      activeId={packet.id}
+      selected={selectedPackets}
+      onToggleSelect={togglePacketSelect}
+      onSelect={selectPacket}
+      onNew={() => setNewOpen(true)}
+    />
+  );
+
+  const docsPane = (
+    <DocStackPane
+      packet={packet}
+      activeDocId={doc.id}
+      onSelect={selectDoc}
+      onView={(d) => setDrawerDocId(d.id)}
+      onNew={() => setNewOpen(true)}
+      onRename={(d) => {
+        const next = window.prompt("Rename document", d.title);
+        if (next && next.trim()) renameDoc(d.id, next.trim());
+      }}
+      onDuplicate={(d) => duplicateDoc(packet.id, d)}
+      onDelete={(d) => deleteDoc(packet.id, d.id)}
+    />
+  );
+
+  const actionsPane = (
+    <ActionsPane
+      packet={packet}
+      doc={doc}
+      docStatusLabel={docMeta.label}
+      docStatusTone={docMeta.tone}
+      sendBlocked={sendBlocked}
+      checkOut={checkOut}
+      checkBusy={checkBusy}
+      confirm={paneConfirm}
+      onRunCheck={runFieldCheck}
+      onSend={paneSend}
+      onCorrection={paneCorrection}
+      onResolve={paneResolve}
+      onView={() => setDrawerDocId(doc.id)}
+      onAskAi={() =>
+        openAi(`Context: Forms & Docs / ${packet.name} · ${doc.code}`)
+      }
+    />
+  );
+
   return (
     <div className="space-y-5 px-4 pb-10 pt-4 md:px-6">
+      <TopTabs topTab={topTab} onTab={setTopTab} templatesCount={m.templates} />
+
       {/* Subtitle / eyebrow + create */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <p className="max-w-2xl text-[0.82rem] leading-snug text-slate">
-          Document packets, templates, e-signature, and compliance — replacing
-          scattered PDFs and Google Forms. Pick a packet, inspect a document,
+          Document packets, e-signature, and compliance — replacing scattered
+          PDFs and Google Forms. Pick a packet, inspect a real branded document,
           and send it for signature when it&apos;s clean.
         </p>
         <button
           type="button"
           onClick={() => setNewOpen(true)}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3.5 py-2 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3.5 py-2 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
         >
           <Plus className="h-4 w-4" />
           New packet
         </button>
       </div>
 
-      {/* KPI strip — each tile FILTERS the packet list (saved-view drilldown).
-          The active filter's tile gets an ink ring so the drilldown reads as a
-          selectable view, not just a stat. */}
-      <KpiStrip className="xl:grid-cols-5">
+      {/* KPI strip — each tile FILTERS the packet list (saved-view drilldown). */}
+      <KpiStrip cols={5} rail>
         <KpiCard
           label="Packets in progress"
           value={m.inProgress}
@@ -332,73 +460,39 @@ export function FormsDocsWorkspace() {
           icon={<FileText className="h-4 w-4" />}
           hint="OREF + Matin packet library"
           className={activeKpiClass(view === "all")}
-          onDrill={() => setView_("all")}
+          onDrill={() => setTopTab("templates")}
         />
       </KpiStrip>
 
-      {/* Active-filter row */}
-      {view !== "all" ? (
-        <div className="flex items-center gap-2 text-[0.78rem]">
-          <span className="text-slate">Filtered:</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1 font-medium text-cloud">
-            {VIEW_LABEL[view]} · {filteredPackets.length} packet
-            {filteredPackets.length === 1 ? "" : "s"}
-            <button
-              type="button"
-              onClick={() => setView_("all")}
-              className="-mr-0.5 rounded-full p-0.5 text-slate-300 transition-colors hover:text-cloud"
-              aria-label="Clear filter"
-            >
-              <ChevronRight className="h-3 w-3 rotate-45" />
-            </button>
-          </span>
-        </div>
-      ) : null}
+      {/* Saved-view pill tabs + utility row (ticket 4) */}
+      <SavedViewBar
+        view={view}
+        onView={setView_}
+        counts={savedViewCounts(packets)}
+        showing={filteredPackets.length}
+        selectedCount={selectedPackets.size}
+        onBulkSend={bulkSend}
+        onBulkDownload={bulkDownload}
+        onClearSelection={() => setSelectedPackets(new Set())}
+      />
 
-      {/* 3 panes */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)_340px] xl:grid-cols-[280px_minmax(0,1fr)_372px]">
-        {/* Pane 1 — Packet list */}
-        <PacketListPane
-          packets={filteredPackets}
-          activeId={packet.id}
-          onSelect={selectPacket}
-          onNew={() => setNewOpen(true)}
-        />
+      {/* Mobile pane switcher (R1) */}
+      <div className="lg:hidden">
+        <PaneSwitcher {...pane.switcherProps} />
+      </div>
 
-        {/* Pane 2 — Document preview stack (scrollable) */}
-        <DocStackPane
-          packet={packet}
-          activeDocId={doc.id}
-          onSelect={selectDoc}
-          onView={(d) => setDrawerDocId(d.id)}
-          onNew={() => setNewOpen(true)}
-          onRename={(d) => {
-            const next = window.prompt("Rename document", d.title);
-            if (next && next.trim()) renameDoc(d.id, next.trim());
-          }}
-          onDuplicate={(d) => duplicateDoc(packet.id, d)}
-          onDelete={(d) => deleteDoc(packet.id, d.id)}
-        />
+      {/* Below lg: ONE pane at a time */}
+      <div className="space-y-4 lg:hidden">
+        {pane.is("list") ? listPane : null}
+        {pane.is("docs") ? docsPane : null}
+        {pane.is("actions") ? actionsPane : null}
+      </div>
 
-        {/* Pane 3 — Selected document actions */}
-        <ActionsPane
-          packet={packet}
-          doc={doc}
-          docStatusLabel={docMeta.label}
-          docStatusTone={docMeta.tone}
-          sendBlocked={sendBlocked}
-          checkOut={checkOut}
-          checkBusy={checkBusy}
-          confirm={paneConfirm}
-          onRunCheck={runFieldCheck}
-          onSend={paneSend}
-          onCorrection={paneCorrection}
-          onResolve={paneResolve}
-          onView={() => setDrawerDocId(doc.id)}
-          onAskAi={() =>
-            openAi(`Context: Forms & Docs / ${packet.name} · ${doc.code}`)
-          }
-        />
+      {/* lg+: 3 panes */}
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[260px_minmax(0,1fr)_340px] xl:grid-cols-[280px_minmax(0,1fr)_372px]">
+        {listPane}
+        {docsPane}
+        {actionsPane}
       </div>
 
       {/* Document drawer — real "View" record inspection */}
@@ -407,9 +501,7 @@ export function FormsDocsWorkspace() {
         onClose={() => setDrawerDocId(null)}
         packet={packet}
         doc={drawerDoc}
-        onSend={(id) => {
-          sendDoc(id);
-        }}
+        onSend={(id) => sendDoc(id)}
         onRequestCorrection={(id) => requestCorrection(id)}
         onResolveFields={(id) => resolveFields(id)}
       />
@@ -425,13 +517,149 @@ export function FormsDocsWorkspace() {
   );
 }
 
-const VIEW_LABEL: Record<ViewKey, string> = {
-  all: "All packets",
-  "in-progress": "Packets in progress",
-  awaiting: "Awaiting signature",
-  missing: "Missing fields",
-  completed: "Has completed docs",
-};
+/* ── Top tabs (Packets / Templates) ──────────────────────────────────────── */
+
+function TopTabs({
+  topTab,
+  onTab,
+  templatesCount,
+}: {
+  topTab: TopTab;
+  onTab: (t: TopTab) => void;
+  templatesCount: number;
+}) {
+  const tabs: { key: TopTab; label: string; count?: number }[] = [
+    { key: "packets", label: "Packets" },
+    { key: "templates", label: "Templates", count: templatesCount },
+  ];
+  return (
+    <div className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {tabs.map((t) => {
+        const on = t.key === topTab;
+        return (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => onTab(t.key)}
+            aria-pressed={on}
+            className={cn(
+              "inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 text-[0.84rem] font-semibold transition-colors",
+              on ? "bg-ink text-cloud" : "border border-mist bg-cloud text-ink hover:bg-paper",
+            )}
+          >
+            {t.label}
+            {typeof t.count === "number" ? (
+              <span className={cn("tabular-nums text-[0.74rem]", on ? "text-cloud/70" : "text-slate")}>
+                {t.count}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Saved-view pill tabs + bulk-action cluster ──────────────────────────── */
+
+const VIEW_PILLS: { key: ViewKey; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "in-progress", label: "In progress" },
+  { key: "awaiting", label: "Awaiting" },
+  { key: "missing", label: "Missing fields" },
+  { key: "completed", label: "Completed" },
+];
+
+function savedViewCounts(packets: Packet[]): Record<ViewKey, number> {
+  return {
+    all: packets.length,
+    "in-progress": filterPackets(packets, "in-progress").length,
+    awaiting: filterPackets(packets, "awaiting").length,
+    missing: filterPackets(packets, "missing").length,
+    completed: filterPackets(packets, "completed").length,
+  };
+}
+
+function SavedViewBar({
+  view,
+  onView,
+  counts,
+  showing,
+  selectedCount,
+  onBulkSend,
+  onBulkDownload,
+  onClearSelection,
+}: {
+  view: ViewKey;
+  onView: (v: ViewKey) => void;
+  counts: Record<ViewKey, number>;
+  showing: number;
+  selectedCount: number;
+  onBulkSend: () => void;
+  onBulkDownload: () => void;
+  onClearSelection: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Saved-view pills (horizontally scrollable on phone, R6) */}
+      <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {VIEW_PILLS.map((p) => {
+          const on = view === p.key;
+          return (
+            <button
+              key={p.key}
+              type="button"
+              onClick={() => onView(p.key)}
+              className={cn(
+                "inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full px-3 py-1 text-[0.74rem] font-semibold transition-colors",
+                on ? "bg-ink text-cloud" : "border border-mist bg-cloud text-ink hover:bg-paper",
+              )}
+            >
+              {p.label}
+              <span className={cn("tabular-nums", on ? "text-cloud/70" : "text-slate")}>
+                {counts[p.key]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Right: showing count OR bulk-action cluster when rows selected */}
+      {selectedCount > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[0.76rem] font-medium text-ink tabular-nums">
+            {selectedCount} selected
+          </span>
+          <button
+            type="button"
+            onClick={onBulkSend}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.76rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+          >
+            <Send className="h-3.5 w-3.5" />
+            Send all
+          </button>
+          <button
+            type="button"
+            onClick={onBulkDownload}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-1.5 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </button>
+          <button
+            type="button"
+            onClick={onClearSelection}
+            className="inline-flex min-h-9 items-center rounded-lg px-2 py-1.5 text-[0.76rem] font-medium text-slate transition-colors hover:text-ink"
+          >
+            Clear
+          </button>
+        </div>
+      ) : (
+        <span className="text-[0.76rem] text-slate tabular-nums">Showing {showing}</span>
+      )}
+    </div>
+  );
+}
 
 function filterPackets(packets: Packet[], view: ViewKey): Packet[] {
   switch (view) {
@@ -452,25 +680,27 @@ function filterPackets(packets: Packet[], view: ViewKey): Packet[] {
   }
 }
 
-/* ── Pane 1: Packet list ─────────────────────────────────────────────────── */
+/* ── Pane 1: Packet list (densified + multi-select) ──────────────────────── */
 
 function PacketListPane({
   packets,
   activeId,
+  selected,
+  onToggleSelect,
   onSelect,
   onNew,
 }: {
   packets: Packet[];
   activeId: string;
+  selected: Set<string>;
+  onToggleSelect: (id: string) => void;
   onSelect: (p: Packet) => void;
   onNew: () => void;
 }) {
   return (
     <section className="flex flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft lg:max-h-[calc(100vh-15.5rem)]">
       <header className="flex items-center justify-between border-b border-mist px-4 py-3">
-        <h2 className="font-display text-[0.98rem] font-normal text-ink">
-          Packet list
-        </h2>
+        <h2 className="font-display text-[0.98rem] font-normal text-ink">Packet list</h2>
         <span className="text-[0.7rem] font-medium uppercase tracking-[0.16em] text-slate">
           {packets.length}
         </span>
@@ -491,70 +721,117 @@ function PacketListPane({
           {packets.map((p) => {
             const active = p.id === activeId;
             const open = p.docs.filter((d) => isOpenDoc(d.status)).length;
+            const prog = packetProgress(p);
+            const pct = prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
+            const isChecked = selected.has(p.id);
             return (
               <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(p)}
-                  aria-pressed={active}
+                <div
                   className={cn(
-                    "group mb-1 flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                    "group mb-1 flex w-full items-start gap-2.5 rounded-xl px-2.5 py-2.5 transition-colors",
                     active ? "bg-ink text-cloud" : "hover:bg-paper-200",
                   )}
                 >
-                  {/* Owner identity — real headshot Avatar */}
-                  <Avatar
-                    name={p.ownerName}
-                    slug={p.ownerSlug}
-                    size={32}
-                    ring
-                    className={cn("mt-0.5", active && "ring-cloud/25")}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className={cn(
-                        "block truncate text-[0.86rem] font-semibold leading-tight",
-                        active ? "text-cloud" : "text-ink",
-                      )}
-                    >
-                      {p.name}
-                    </span>
-                    <span
-                      className={cn(
-                        "mt-0.5 block truncate text-[0.72rem] leading-tight",
-                        active ? "text-slate-300" : "text-slate",
-                      )}
-                    >
-                      {p.subject}
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[0.66rem] font-semibold tabular-nums",
-                      open === 0
-                        ? active
-                          ? "bg-cloud/15 text-slate-300"
-                          : "bg-success/12 text-success ring-1 ring-inset ring-success/25"
-                        : active
-                          ? "bg-cloud/15 text-cloud"
-                          : "bg-warn/15 text-warn ring-1 ring-inset ring-warn/30",
-                    )}
+                  {/* Multi-select checkbox (≥44px tap zone) */}
+                  <label
+                    className="mt-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {open === 0 ? "Done" : `${open} open`}
-                  </span>
-                </button>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${p.name}`}
+                      checked={isChecked}
+                      onChange={() => onToggleSelect(p.id)}
+                      className={cn(
+                        "h-4 w-4 cursor-pointer rounded",
+                        active ? "accent-cloud" : "accent-ink",
+                      )}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelect(p)}
+                    aria-pressed={active}
+                    className="flex min-w-0 flex-1 items-start gap-2.5 text-left"
+                  >
+                    <Avatar
+                      name={p.ownerName}
+                      slug={p.ownerSlug}
+                      size={32}
+                      ring
+                      className={cn("mt-0.5", active && "ring-cloud/25")}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className={cn(
+                          "block truncate text-[0.86rem] font-semibold leading-tight",
+                          active ? "text-cloud" : "text-ink",
+                        )}
+                      >
+                        {p.name}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-0.5 block truncate text-[0.72rem] leading-tight",
+                          active ? "text-slate-300" : "text-slate",
+                        )}
+                      >
+                        {p.subject}
+                      </span>
+                      {/* Per-row progress bar + doc count + relative time */}
+                      <span className="mt-1.5 flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "h-1 flex-1 overflow-hidden rounded-full",
+                            active ? "bg-cloud/20" : "bg-paper-200",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "block h-full rounded-full",
+                              pct >= 100 ? "bg-success" : active ? "bg-cloud" : "bg-ink",
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </span>
+                        <span
+                          className={cn(
+                            "shrink-0 text-[0.66rem] tabular-nums",
+                            active ? "text-slate-300" : "text-slate",
+                          )}
+                        >
+                          {prog.done}/{prog.total} · {p.updatedAgo}
+                        </span>
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[0.66rem] font-semibold tabular-nums",
+                        open === 0
+                          ? active
+                            ? "bg-cloud/15 text-slate-300"
+                            : "bg-success/12 text-success ring-1 ring-inset ring-success/25"
+                          : active
+                            ? "bg-cloud/15 text-cloud"
+                            : "bg-warn/15 text-warn ring-1 ring-inset ring-warn/30",
+                      )}
+                    >
+                      {open === 0 ? "Done" : `${open} open`}
+                    </span>
+                  </button>
+                </div>
               </li>
             );
           })}
         </ul>
       )}
 
-      {/* Footer create affordance */}
       <div className="border-t border-mist p-2">
         <button
           type="button"
           onClick={onNew}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-mist px-3 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:border-ink/25 hover:text-ink"
+          className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-mist px-3 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:border-ink/25 hover:text-ink"
         >
           <Plus className="h-3.5 w-3.5" />
           New packet
@@ -564,7 +841,7 @@ function PacketListPane({
   );
 }
 
-/* ── Pane 2: Document preview stack ──────────────────────────────────────── */
+/* ── Pane 2: Document preview stack (real branded documents) ─────────────── */
 
 function DocStackPane({
   packet,
@@ -585,43 +862,39 @@ function DocStackPane({
   onDuplicate: (d: PacketDoc) => void;
   onDelete: (d: PacketDoc) => void;
 }) {
-  const total = packet.docs.length;
-  const done = packet.docs.filter(
-    (d) => d.status === "complete" || d.status === "sent",
-  ).length;
+  const prog = packetProgress(packet);
+  const ownerOpt = rosterOption(packet.ownerSlug);
+  const hero = packetHero(packet);
 
   return (
     <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft lg:max-h-[calc(100vh-15.5rem)]">
-      {/* Packet hero header — real property photo + owner identity */}
+      {/* Packet hero header — REAL property photo (packetHero) + owner identity */}
       <header className="flex items-stretch gap-3 border-b border-mist p-3">
-        <PropertyThumb
-          seedIndex={packet.photoSeed}
-          ratio="square"
+        {/* eslint-disable-next-line @next/next/no-img-element -- real listing hero / deterministic exterior */}
+        <img
+          src={hero}
           alt={packet.subject}
-          className="h-16 w-16 shrink-0"
+          className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-mist"
+          loading="lazy"
         />
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <h2 className="truncate font-display text-[1rem] font-normal leading-tight text-ink">
             {packet.name}
           </h2>
-          <p className="mt-0.5 truncate text-[0.76rem] text-slate">
-            {packet.subject}
-          </p>
+          <p className="mt-0.5 truncate text-[0.76rem] text-slate">{packet.subject}</p>
           <div className="mt-1.5 flex items-center gap-2">
             <Avatar name={packet.ownerName} slug={packet.ownerSlug} size={18} />
-            <span className="truncate text-[0.72rem] text-slate">
-              {packet.lastUpdated}
-            </span>
+            <span className="truncate text-[0.72rem] text-slate">{packet.lastUpdated}</span>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end justify-center gap-1.5">
           <span className="text-[0.74rem] font-semibold text-ink tabular-nums">
-            {done}/{total} done
+            {prog.done}/{prog.total} done
           </span>
           <button
             type="button"
             onClick={onNew}
-            className="inline-flex items-center gap-1 rounded-lg border border-mist px-2 py-1 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/20"
+            className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-mist px-2 py-1 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/20"
           >
             <Plus className="h-3 w-3" />
             Doc
@@ -640,80 +913,129 @@ function DocStackPane({
           />
         </div>
       ) : (
-        /* SCROLLABLE 2-col grid — all docs reachable past the fold */
+        /* SCROLLABLE branded-document grid — all docs reachable past the fold */
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {packet.docs.map((d) => {
-              const meta = STATUS_META[d.status];
-              const active = d.id === activeDocId;
-              return (
-                <div
-                  key={d.id}
-                  className={cn(
-                    "group/card relative rounded-xl transition-shadow",
-                    active
-                      ? "ring-2 ring-ink ring-offset-2 ring-offset-cloud"
-                      : "hover:shadow-lift",
-                  )}
-                >
-                  {/* Card kebab — rename / duplicate / delete */}
-                  <DocKebab
-                    onRename={() => onRename(d)}
-                    onDuplicate={() => onDuplicate(d)}
-                    onDelete={() => onDelete(d)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => onSelect(d)}
-                    aria-pressed={active}
-                    className="w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
-                  >
-                    <DocumentPreview
-                      title={
-                        <span className="flex items-baseline gap-2 pr-7">
-                          <span className="font-mono text-[0.7rem] font-semibold text-slate">
-                            {d.code}
-                          </span>
-                          <span className="truncate">{d.title}</span>
-                        </span>
-                      }
-                      status={meta.label}
-                      statusTone={meta.tone}
-                      lines={d.lines}
-                      signatureField={d.signatureField}
-                      page={d.page}
-                      pages={d.pages}
-                      missing={d.missing}
-                      actions={
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onView(d);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              onView(d);
-                            }
-                          }}
-                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          View
-                        </span>
-                      }
-                    />
-                  </button>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {packet.docs.map((d) => (
+              <DocCard
+                key={d.id}
+                packet={packet}
+                doc={d}
+                active={d.id === activeDocId}
+                ownerName={ownerOpt?.name ?? packet.ownerName}
+                ownerSlug={packet.ownerSlug}
+                onSelect={() => onSelect(d)}
+                onView={() => onView(d)}
+                onRename={() => onRename(d)}
+                onDuplicate={() => onDuplicate(d)}
+                onDelete={() => onDelete(d)}
+              />
+            ))}
           </div>
         </div>
       )}
     </section>
+  );
+}
+
+/** A single document card — a REAL compact branded Matin document. */
+function DocCard({
+  packet,
+  doc,
+  active,
+  ownerName,
+  ownerSlug,
+  onSelect,
+  onView,
+  onRename,
+  onDuplicate,
+  onDelete,
+}: {
+  packet: Packet;
+  doc: PacketDoc;
+  active: boolean;
+  ownerName: string;
+  ownerSlug: string;
+  onSelect: () => void;
+  onView: () => void;
+  onRename: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  const meta = STATUS_META[doc.status];
+  const ownerOpt = rosterOption(ownerSlug);
+  return (
+    <div
+      className={cn(
+        "group/card relative flex flex-col rounded-xl transition-shadow",
+        active ? "ring-2 ring-ink ring-offset-2 ring-offset-cloud" : "hover:shadow-lift",
+      )}
+    >
+      <DocKebab onRename={onRename} onDuplicate={onDuplicate} onDelete={onDelete} />
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={active}
+        className="flex-1 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      >
+        {/* Status + title strip above the branded mini-doc */}
+        <div className="flex items-center justify-between gap-2 px-1 pb-2 pr-8">
+          <span className="min-w-0 truncate font-mono text-[0.7rem] font-semibold text-slate">
+            {doc.code}
+          </span>
+          <StatusChip tone={meta.tone}>{meta.label}</StatusChip>
+        </div>
+        {/* REAL branded Matin document (compact, no toolbar) */}
+        <BrandedDocument
+          variant="letter"
+          formId={doc.code}
+          title={doc.title}
+          recipient={packet.subject}
+          hideToolbar
+          agent={
+            ownerOpt
+              ? {
+                  name: ownerOpt.name,
+                  title: ownerOpt.title,
+                  license: ownerOpt.license,
+                  phone: ownerOpt.phone,
+                  slug: ownerOpt.slug,
+                }
+              : { name: ownerName, slug: ownerSlug }
+          }
+          fields={docFields(packet, doc).slice(0, 4)}
+          completion={docCompletion(packet, doc)}
+          page={doc.page}
+          pages={doc.pages}
+          className="[&_article]:min-h-0"
+        />
+      </button>
+      {/* Card action row */}
+      <div className="flex items-center justify-between gap-2 px-1 pt-2">
+        {doc.missing?.length ? (
+          <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-danger">
+            <TriangleAlert className="h-3 w-3" />
+            {doc.missing.length} to fix
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-success">
+            <CircleCheck className="h-3 w-3" />
+            Send-ready
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onView();
+          }}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+        >
+          <Eye className="h-3.5 w-3.5" />
+          View
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -729,7 +1051,7 @@ function DocKebab({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="absolute right-2 top-2.5 z-10">
+    <div className="absolute right-1 top-0 z-10">
       <button
         type="button"
         onClick={(e) => {
@@ -739,7 +1061,7 @@ function DocKebab({
         aria-label="Document options"
         aria-expanded={open}
         className={cn(
-          "flex h-7 w-7 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-200 hover:text-ink",
+          "flex h-9 w-9 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-200 hover:text-ink",
           open && "bg-paper-200 text-ink",
         )}
       >
@@ -747,7 +1069,6 @@ function DocKebab({
       </button>
       {open ? (
         <>
-          {/* Click-away */}
           <button
             type="button"
             aria-hidden
@@ -758,7 +1079,7 @@ function DocKebab({
             }}
             className="fixed inset-0 z-0 cursor-default"
           />
-          <div className="absolute right-0 top-8 z-10 w-40 overflow-hidden rounded-xl border border-mist bg-cloud py-1 shadow-lift">
+          <div className="absolute right-0 top-9 z-10 w-40 overflow-hidden rounded-xl border border-mist bg-cloud py-1 shadow-lift">
             <KebabItem
               icon={<Pencil className="h-3.5 w-3.5" />}
               onClick={() => {
@@ -813,10 +1134,8 @@ function KebabItem({
         onClick();
       }}
       className={cn(
-        "flex w-full items-center gap-2 px-3 py-2 text-left text-[0.8rem] font-medium transition-colors",
-        danger
-          ? "text-danger hover:bg-danger/[0.06]"
-          : "text-ink hover:bg-paper-200",
+        "flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-[0.8rem] font-medium transition-colors",
+        danger ? "text-danger hover:bg-danger/[0.06]" : "text-ink hover:bg-paper-200",
       )}
     >
       {icon}
@@ -860,15 +1179,15 @@ function ActionsPane({
 }) {
   const missing = doc.missing ?? [];
   const missingCount = missing.length;
+  const [envelopeOpen, setEnvelopeOpen] = useState(false);
+  const ownerOpt = rosterOption(packet.ownerSlug);
 
   return (
     <section className="flex flex-col gap-4">
       {/* Selected-document header card */}
       <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-mono text-[0.72rem] font-semibold text-slate">
-            {doc.code}
-          </span>
+          <span className="font-mono text-[0.72rem] font-semibold text-slate">{doc.code}</span>
           <StatusChip tone={docStatusTone}>{docStatusLabel}</StatusChip>
         </div>
         <h2 className="mt-1.5 font-display text-[1.02rem] font-normal leading-snug text-ink">
@@ -878,7 +1197,6 @@ function ActionsPane({
           {packet.name} · Page {doc.page} of {doc.pages}
         </p>
 
-        {/* Inline confirmation toast */}
         {confirm ? (
           <div className="mt-3 flex items-start gap-2 rounded-xl bg-success/10 px-3 py-2 text-[0.76rem] leading-snug text-success ring-1 ring-inset ring-success/20">
             <CircleCheck className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -886,15 +1204,12 @@ function ActionsPane({
           </div>
         ) : null}
 
-        {/* Light actions — open the real record drawer / utilities */}
+        {/* Light actions — Preview / branded PDF / Print */}
         <div className="mt-3.5 grid grid-cols-3 gap-2">
           <GhostBtn icon={<Eye className="h-3.5 w-3.5" />} onClick={onView}>
             View
           </GhostBtn>
-          <GhostBtn
-            icon={<Download className="h-3.5 w-3.5" />}
-            onClick={onView}
-          >
+          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} onClick={onView}>
             PDF
           </GhostBtn>
           <GhostBtn
@@ -913,10 +1228,8 @@ function ActionsPane({
           onClick={onSend}
           disabled={sendBlocked}
           className={cn(
-            "mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[0.84rem] font-semibold transition-colors",
-            sendBlocked
-              ? "cursor-not-allowed bg-paper-200 text-slate"
-              : "bg-ink text-cloud hover:bg-ink-800",
+            "mt-2.5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[0.84rem] font-semibold transition-colors",
+            sendBlocked ? "cursor-not-allowed bg-paper-200 text-slate" : "bg-ink text-cloud hover:bg-ink-800",
           )}
         >
           <Send className="h-4 w-4" />
@@ -926,7 +1239,7 @@ function ActionsPane({
           <button
             type="button"
             onClick={onResolve}
-            className="mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-danger/[0.06] px-3 py-1.5 text-[0.74rem] font-medium text-danger ring-1 ring-inset ring-danger/20 transition-colors hover:bg-danger/[0.1]"
+            className="mt-1.5 flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-danger/[0.06] px-3 py-1.5 text-[0.74rem] font-medium text-danger ring-1 ring-inset ring-danger/20 transition-colors hover:bg-danger/[0.1]"
           >
             <TriangleAlert className="h-3 w-3 shrink-0" />
             {missingCount > 0
@@ -935,22 +1248,48 @@ function ActionsPane({
           </button>
         ) : null}
 
-        <button
-          type="button"
-          onClick={onCorrection}
-          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-mist bg-cloud px-4 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:border-ink/20"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Request correction
-        </button>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onCorrection}
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-mist bg-cloud px-4 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:border-ink/20"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Request correction
+          </button>
+          <button
+            type="button"
+            onClick={() => setEnvelopeOpen((v) => !v)}
+            className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-mist bg-cloud px-3 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:border-ink/20"
+          >
+            <PenLine className="h-3.5 w-3.5" />
+            {envelopeOpen ? "Hide envelope" : "E-sign envelope"}
+          </button>
+        </div>
+
+        {/* Branded e-sign envelope preview (ticket 8) */}
+        {envelopeOpen ? (
+          <div className="mt-3">
+            <p className="eyebrow pb-2 text-slate">Matin e-sign envelope</p>
+            <BrandedDocument
+              variant="email"
+              hideToolbar
+              fromName={`Matin Real Estate · ${ownerOpt?.name ?? packet.ownerName}`}
+              emailSubject={`Signature requested — ${doc.code} ${doc.title}`}
+              recipient={packet.subject}
+              agent={ownerOpt ? { name: ownerOpt.name, title: ownerOpt.title, phone: ownerOpt.phone } : undefined}
+              mergeTokens={["{{signer_name}}", "{{esign_link}}", "{{doc_code}}"]}
+              title="Document ready for signature"
+              className="[&_article]:min-h-0"
+            />
+          </div>
+        ) : null}
       </div>
 
       {/* AI missing-field check — gold AI affordance; streams inline */}
       <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="font-display text-[0.92rem] font-normal text-ink">
-            Missing-field check
-          </h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-display text-[0.92rem] font-normal text-ink">Missing-field check</h3>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-soft px-2 py-0.5 text-[0.7rem] font-semibold text-gold-ink ring-1 ring-inset ring-gold/25">
             <MatinMark theme="dark" className="h-3 w-3" />
             Matin AI
@@ -964,10 +1303,7 @@ function ActionsPane({
         {missingCount > 0 ? (
           <ul className="mt-2.5 space-y-1">
             {missing.map((mi, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-1.5 text-[0.76rem] text-danger"
-              >
+              <li key={i} className="flex items-start gap-1.5 text-[0.76rem] text-danger">
                 <ChevronRight className="mt-0.5 h-3 w-3 shrink-0" />
                 {mi}
               </li>
@@ -985,14 +1321,10 @@ function ActionsPane({
           onClick={onRunCheck}
           disabled={checkBusy}
           aria-busy={checkBusy}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
+          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
         >
           <MatinMark theme="dark" className="h-3.5 w-3.5" />
-          {checkBusy
-            ? "Checking fields…"
-            : checkOut
-              ? "Re-run AI field check"
-              : "Run AI field check"}
+          {checkBusy ? "Checking fields…" : checkOut ? "Re-run AI field check" : "Run AI field check"}
         </button>
 
         {checkBusy && !checkOut ? (
@@ -1018,7 +1350,7 @@ function ActionsPane({
           <button
             type="button"
             onClick={onAskAi}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
           >
             <MatinMark theme="dark" className="h-3.5 w-3.5" />
             Ask AI
@@ -1051,7 +1383,7 @@ function GhostBtn({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-mist bg-cloud px-2 py-2 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20"
+      className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg border border-mist bg-cloud px-2 py-2 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20"
     >
       {icon}
       {children}

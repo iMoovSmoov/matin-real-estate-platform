@@ -3,10 +3,15 @@
 
    Reusable document PACKETS (templates) and the DOCUMENTS inside each, modeled
    on SkySlope/Dotloop loops. Grounded in the real OREF form library (codes from
-   src/lib/forms.ts) and the canonical MatinOS demo records so the storyline
-   flows: listing 1248 NW Cedar Hills Dr / 7428 SW Maple Ave, transaction
-   8912 SE Hawthorne Blvd / 1274 NW Everett St, seller Sarah Mitchell, lead
-   Daniel Cho, broker Jordan Matin.
+   src/lib/forms.ts), REAL Matin records (real listings/leads/seller-leads/
+   transactions), and REAL coordinators from roles.ts:
+     - Listing / Seller-disclosure packets → real Listing Coordinator
+       (sierra-palmeri / Sierra Seggerman)
+     - Offer / Closing / Lead-intake packets → real Transaction Coordinator
+       (paris-vollstedt / Paris Vollstedt)
+     - Broker-review only → principal broker (jordan-matin)
+   Each packet binds to a real `listingId` so its hero photo resolves via the
+   shared deterministic `listingPhoto` resolver (real photos[0] when present).
 
    Status taxonomy (carried by chip color per build-reference §1.10):
      complete       → success (green)  "Complete"
@@ -18,6 +23,15 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 import type { ChipTone } from "@/components/os";
+import type { BrandedDocumentField } from "@/components/os/BrandedDocument";
+import { listingPhoto } from "@/lib/data/listing-photo";
+import { rosterOption } from "@/lib/data/agreement-roster";
+import { roles } from "@/lib/data/roles";
+
+/** Resolve a real agent's name from a slug (fallback to the slug if unknown). */
+function ownerName(slug: string): string {
+  return rosterOption(slug)?.name ?? slug;
+}
 
 export type DocStatus =
   | "complete"
@@ -52,13 +66,27 @@ export type Packet = {
   /** Real coordinator/agent identity for the Avatar (slug → headshot). */
   ownerName: string;
   ownerSlug: string;
-  /** Deterministic exterior photo seed so the packet always shows one home. */
-  photoSeed: number;
+  /** Real listing id this packet binds to → resolves the real hero photo. */
+  listingId: string;
   /** Source-record join, shown as a mono backend note. */
   source: string;
   lastUpdated: string;
+  /** Relative-time label for the packet row (densification). */
+  updatedAgo: string;
   docs: PacketDoc[];
 };
+
+/** The real hero photo for a packet (real listings[].photos[0] else exterior). */
+export function packetHero(p: Packet): string {
+  return listingPhoto(p.listingId);
+}
+
+/** Done/total document progress for a packet (densification). */
+export function packetProgress(p: Packet): { done: number; total: number } {
+  const total = p.docs.length;
+  const done = p.docs.filter((d) => d.status === "complete" || d.status === "sent").length;
+  return { done, total };
+}
 
 /** Chip tone + label for a document status (single source of truth). */
 export const STATUS_META: Record<DocStatus, { tone: ChipTone; label: string }> = {
@@ -80,17 +108,23 @@ export function isOpenDoc(status: DocStatus): boolean {
   return status !== "complete" && status !== "sent";
 }
 
+/** Real coordinator slugs (from roles.ts) used as packet owners. */
+const LC = roles.listingCoordinators[0]; // sierra-palmeri (Listing Coordinator)
+const TC = roles.transactionCoordinators[0]; // paris-vollstedt (Transaction Coordinator)
+const BROKER = roles.principalBroker; // jordan-matin
+
 export const PACKETS: Packet[] = [
   {
     id: "PKT-LIST-001",
     name: "Listing packet",
-    subject: "7428 SW Maple Ave · Lake Oswego",
-    owner: "JM",
-    ownerName: "Jordan Matin",
-    ownerSlug: "jordan-matin",
-    photoSeed: 3,
+    subject: "7750 Iron Mountain Blvd · Lake Oswego",
+    owner: "SS",
+    ownerName: ownerName(LC),
+    ownerSlug: LC,
+    listingId: "MRE-1016",
     source: "listings > document_packets > document_fields + document_signers",
-    lastUpdated: "Updated 2h ago by Jordan Matin",
+    lastUpdated: `Updated 2h ago by ${ownerName(LC)}`,
+    updatedAgo: "2h ago",
     docs: [
       {
         id: "DOC-1001",
@@ -150,12 +184,13 @@ export const PACKETS: Packet[] = [
     id: "PKT-BUYER-001",
     name: "Buyer agreement",
     subject: "Daniel Cho · Beaverton search",
-    owner: "AC",
-    ownerName: "Amanda Conlon",
-    ownerSlug: "amanda-conlon",
-    photoSeed: 8,
-    source: "contacts > document_packets > saved_searches + agreements",
-    lastUpdated: "Updated 38m ago by Amanda Conlon",
+    owner: "PV",
+    ownerName: ownerName(TC),
+    ownerSlug: TC,
+    listingId: "MRE-1006",
+    source: "contacts[LD-1999] > document_packets > saved_searches + agreements",
+    lastUpdated: `Updated 38m ago by ${ownerName(TC)}`,
+    updatedAgo: "38m ago",
     docs: [
       {
         id: "DOC-2001",
@@ -193,13 +228,14 @@ export const PACKETS: Packet[] = [
   {
     id: "PKT-OFFER-001",
     name: "Offer packet",
-    subject: "Daniel Cho → 1248 NW Cedar Hills Dr",
-    owner: "AC",
-    ownerName: "Amanda Conlon",
-    ownerSlug: "amanda-conlon",
-    photoSeed: 12,
-    source: "transactions > document_packets > listings + cash_offer_requests",
-    lastUpdated: "Updated 1h ago by Amanda Conlon",
+    subject: "Daniel Cho → 8912 SE Hawthorne Blvd",
+    owner: "PV",
+    ownerName: ownerName(TC),
+    ownerSlug: TC,
+    listingId: "MRE-R02",
+    source: "transactions[TX-3998] > document_packets > listings + cash_offer_requests",
+    lastUpdated: `Updated 1h ago by ${ownerName(TC)}`,
+    updatedAgo: "1h ago",
     docs: [
       {
         id: "DOC-3001",
@@ -248,13 +284,14 @@ export const PACKETS: Packet[] = [
   {
     id: "PKT-DISC-001",
     name: "Seller disclosure",
-    subject: "Sarah Mitchell · 14920 SW Greenway",
-    owner: "JM",
-    ownerName: "Jordan Matin",
-    ownerSlug: "jordan-matin",
-    photoSeed: 17,
-    source: "seller_leads > document_packets > properties + valuations",
-    lastUpdated: "Updated 4h ago by Jordan Matin",
+    subject: "Sarah Mitchell · 5127 SW Cedar Hills Blvd",
+    owner: "SS",
+    ownerName: ownerName(LC),
+    ownerSlug: LC,
+    listingId: "MRE-R05",
+    source: "seller_leads[SL-000] > document_packets > properties + valuations",
+    lastUpdated: `Updated 4h ago by ${ownerName(LC)}`,
+    updatedAgo: "4h ago",
     docs: [
       {
         id: "DOC-4001",
@@ -293,13 +330,14 @@ export const PACKETS: Packet[] = [
   {
     id: "PKT-CLOSE-001",
     name: "Closing packet",
-    subject: "8912 SE Hawthorne Blvd · Close Jul 22",
-    owner: "JM",
-    ownerName: "Jordan Matin",
-    ownerSlug: "jordan-matin",
-    photoSeed: 5,
-    source: "transactions > document_packets > broker_reviews + signature_envelopes",
-    lastUpdated: "Updated 25m ago by Jordan Matin",
+    subject: "1274 NW Everett St · Close Jul 22",
+    owner: "PV",
+    ownerName: ownerName(TC),
+    ownerSlug: TC,
+    listingId: "MRE-R02",
+    source: "transactions[TX-3999] > document_packets > broker_reviews + signature_envelopes",
+    lastUpdated: `Updated 25m ago by ${ownerName(TC)}`,
+    updatedAgo: "25m ago",
     docs: [
       {
         id: "DOC-5001",
@@ -349,12 +387,13 @@ export const PACKETS: Packet[] = [
     id: "PKT-INTAKE-001",
     name: "Lead intake",
     subject: "Melissa Grant · re-activated client",
-    owner: "AC",
-    ownerName: "Amanda Conlon",
-    ownerSlug: "amanda-conlon",
-    photoSeed: 20,
-    source: "contacts > document_packets > activity_events",
-    lastUpdated: "Updated 6h ago by Amanda Conlon",
+    owner: "PV",
+    ownerName: ownerName(TC),
+    ownerSlug: TC,
+    listingId: "MRE-1001",
+    source: "contacts[SL-000B] > document_packets > activity_events",
+    lastUpdated: `Updated 6h ago by ${ownerName(TC)}`,
+    updatedAgo: "6h ago",
     docs: [
       {
         id: "DOC-6001",
@@ -379,6 +418,53 @@ export const PACKETS: Packet[] = [
     ],
   },
 ];
+
+/* ── Branded-document field grids (real values bound per document) ─────────── */
+
+/**
+ * The structured field grid for a document, bound to the packet subject + the
+ * doc's own status. Filled fields show green ✓, missing show red-outline — and
+ * the `missing[]` on the doc maps to red fields so the branded preview matches
+ * the field-check exactly. Used by the doc-card preview and the drawer center.
+ */
+export function docFields(packet: Packet, doc: PacketDoc): BrandedDocumentField[] {
+  const subject = packet.subject;
+  const party = subject.split("·")[0].trim();
+  const blocked = isSendBlocked(doc.status);
+  const missing = doc.missing ?? [];
+  const hasInitialsGap = missing.some((m) => /initial/i.test(m));
+  const hasSigGap = missing.some((m) => /signature|sign/i.test(m));
+
+  const base: BrandedDocumentField[] = [
+    { label: "Form", value: `${doc.code} · ${doc.title}`, filled: true },
+    { label: "Subject / property", value: subject, filled: true },
+    { label: "Prepared by", value: packet.ownerName, filled: true },
+    { label: "Party", value: party, filled: party.length > 1 },
+    {
+      label: "Initials",
+      value: hasInitialsGap ? undefined : "All pages",
+      filled: !hasInitialsGap,
+    },
+    {
+      label: "Signature",
+      value: doc.signatureField ? (hasSigGap || blocked ? undefined : "Executed") : "Not required",
+      filled: doc.signatureField ? !(hasSigGap || blocked) : true,
+    },
+    {
+      label: "Broker review",
+      value: doc.status === "complete" || doc.status === "sent" ? "Cleared" : undefined,
+      filled: doc.status === "complete" || doc.status === "sent",
+    },
+  ];
+  return base;
+}
+
+/** Completion percent for a single document, reconciled to its field grid. */
+export function docCompletion(packet: Packet, doc: PacketDoc): number {
+  const fields = docFields(packet, doc);
+  const done = fields.filter((f) => f.filled).length;
+  return Math.round((done / fields.length) * 100);
+}
 
 /**
  * Aggregate counters reconciled from the packet/doc records (KPI strip).

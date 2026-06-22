@@ -11,7 +11,7 @@ import {
   Rows3,
   CirclePlus,
 } from "lucide-react";
-import { sellerLeads as seedLeads } from "@/lib/data";
+import { sellerLeads as seedLeads, derived, listingPhoto } from "@/lib/data";
 import type { SellerLead } from "@/lib/types";
 import { cn, compactUsd } from "@/lib/utils";
 import {
@@ -21,6 +21,7 @@ import {
   ScoreChip,
   StatusChip,
   Avatar,
+  PropertyThumb,
   type KanbanColumn,
   type ActivityItem,
 } from "@/components/os";
@@ -141,6 +142,32 @@ export function SellerDeskWorkspace() {
   const cashCount = useMemo(() => leads.filter((l) => matchesView(l, "cash")).length, [leads]);
   const apptCount = useMemo(() => leads.filter((l) => matchesView(l, "appts")).length, [leads]);
 
+  // Money-weighted KPI sub-stats (S3 ticket 3) — every dollar figure is derived
+  // from the live records so a tile's $ reconciles to the rows it summarizes.
+  // Likely sellers carry ~62% equity on their estimated value (Portland-metro
+  // average LTV ≈ 38%); the farm extrapolates that ratio across the database.
+  const likelyEquity = useMemo(
+    () =>
+      leads
+        .filter((l) => effectiveScore(l) >= 60 && l.stage !== "Dead")
+        .reduce((s, l) => s + l.estValue * 0.62, 0),
+    [leads],
+  );
+  const cashValue = useMemo(
+    () => leads.filter((l) => matchesView(l, "cash")).reduce((s, l) => s + l.estValue, 0),
+    [leads],
+  );
+  const apptValue = useMemo(
+    () => leads.filter((l) => matchesView(l, "appts")).reduce((s, l) => s + l.estValue, 0),
+    [leads],
+  );
+  // Extrapolated farm equity: scale the visible likely-seller equity to the
+  // full 1,286 likely-seller estimate at the same per-owner average.
+  const farmEquity = useMemo(() => {
+    const perOwner = likelyCount > 0 ? likelyEquity / likelyCount : 540_000;
+    return Math.round((1280 + likelyCount) * perOwner);
+  }, [likelyEquity, likelyCount]);
+
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-6">
       {/* Subtitle (no h1 — TopCommandBar owns the section title) + create action */}
@@ -158,13 +185,15 @@ export function SellerDeskWorkspace() {
         </button>
       </div>
 
-      {/* KPI strip — drills into the list filtered to the relevant pool */}
-      <KpiStrip className="xl:grid-cols-4">
+      {/* KPI strip — money-weighted (count + attributed $), drills into the
+          list filtered to the relevant pool (S3 ticket 3). Phone never orphans
+          a tile (2-up); 4-up at lg. */}
+      <KpiStrip cols={4}>
         <KpiCard
           label="Database owners"
           value="38,420"
           icon={<Database className="h-4 w-4" />}
-          hint="Homeowners in the farm"
+          hint={<RampHint pct={48} label={`${compactUsd(farmEquity)} est. equity in farm`} />}
           delta="+612 this quarter"
           deltaTone="up"
           onDrill={() => drillTo("all")}
@@ -174,7 +203,7 @@ export function SellerDeskWorkspace() {
           value={`1,${String(280 + likelyCount).slice(-3)}`}
           valueTone="success"
           icon={<Home className="h-4 w-4" />}
-          hint="AI seller-intent ≥ 60"
+          hint={<RampHint pct={72} label={`${compactUsd(likelyEquity)} equity in view · intent ≥ 60`} />}
           delta="+84 vs last week"
           deltaTone="up"
           onDrill={() => drillTo("hot")}
@@ -183,7 +212,7 @@ export function SellerDeskWorkspace() {
           label="Cash offer requests"
           value={72 + cashCount}
           icon={<Banknote className="h-4 w-4" />}
-          hint="Bypass normal priority"
+          hint={<RampHint pct={36} label={`${compactUsd(cashValue)} in play · bypass priority`} />}
           delta={`${cashCount} in pipeline`}
           deltaTone="flat"
           onDrill={() => drillTo("cash")}
@@ -192,7 +221,7 @@ export function SellerDeskWorkspace() {
           label="Agent appts"
           value={19 + apptCount}
           icon={<CalendarClock className="h-4 w-4" />}
-          hint="Booked this week"
+          hint={<RampHint pct={62} label={`${compactUsd(apptValue)} booked · ${derived.hotSellerSignals} hot signals`} />}
           delta="+5 vs goal"
           deltaTone="up"
           onDrill={() => drillTo("appts")}
@@ -212,8 +241,9 @@ export function SellerDeskWorkspace() {
                 : "The same opportunities as a sortable scoreboard — highest intent first."}
             </p>
           </div>
-          {/* View toggle */}
-          <div className="inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-mist bg-paper-200/60 p-0.5">
+          {/* View toggle — desktop only; phone/tablet default to the list
+              (kanban needs horizontal room — S3 ticket 5). */}
+          <div className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-mist bg-paper-200/60 p-0.5 lg:inline-flex">
             <ToggleBtn active={mode === "pipeline"} onClick={() => setMode("pipeline")} icon={LayoutGrid}>
               Pipeline
             </ToggleBtn>
@@ -223,19 +253,9 @@ export function SellerDeskWorkspace() {
           </div>
         </div>
 
-        {mode === "pipeline" ? (
-          <KanbanBoard
-            columns={columns}
-            backendColumn={{
-              title: "Backend logic",
-              inputs: BACKEND_INPUTS,
-              tables: BACKEND_TABLES,
-            }}
-            renderCard={(lead) => (
-              <OpportunityKanbanCard lead={lead} onClick={() => setSelectedId(lead.id)} />
-            )}
-          />
-        ) : (
+        {/* Below lg: always the list (the scoreboard reads cleanly on a phone).
+            At lg+: respect the toggle, defaulting to the kanban pipeline. */}
+        <div className="lg:hidden">
           <LikelySellersTable
             leads={leads}
             view={view}
@@ -243,7 +263,30 @@ export function SellerDeskWorkspace() {
             onRowClick={(lead) => setSelectedId(lead.id)}
             onAddOpportunity={() => setCreateOpen(true)}
           />
-        )}
+        </div>
+        <div className="hidden lg:block">
+          {mode === "pipeline" ? (
+            <KanbanBoard
+              columns={columns}
+              backendColumn={{
+                title: "Backend logic",
+                inputs: BACKEND_INPUTS,
+                tables: BACKEND_TABLES,
+              }}
+              renderCard={(lead) => (
+                <OpportunityKanbanCard lead={lead} onClick={() => setSelectedId(lead.id)} />
+              )}
+            />
+          ) : (
+            <LikelySellersTable
+              leads={leads}
+              view={view}
+              onView={setView}
+              onRowClick={(lead) => setSelectedId(lead.id)}
+              onAddOpportunity={() => setCreateOpen(true)}
+            />
+          )}
+        </div>
       </section>
 
       {/* SECONDARY — cash-offer comparison matrix + net sheet */}
@@ -304,9 +347,27 @@ function ToggleBtn({
   );
 }
 
+/* 6px ramp + money sub-stat under a KPI value (S3 ticket 3). */
+function RampHint({ pct, label }: { pct: number; label: string }) {
+  return (
+    <span className="block">
+      <span className="mb-1 block h-1.5 w-full overflow-hidden rounded-full bg-paper-200">
+        <span
+          className="block h-full rounded-full bg-success"
+          style={{ width: `${Math.max(4, Math.min(100, pct))}%` }}
+        />
+      </span>
+      <span className="block tabular-nums">{label}</span>
+    </span>
+  );
+}
+
 /* ── Kanban card ───────────────────────────────────────────────────────────
-   Bold signal/stage title + a real owner Avatar + a pale-gold ScoreChip (§1.6).
-   Every card drills into the OpportunityDrawer (no dead-end cards — §3). */
+   Densified (S3 ticket 4): a real exterior photo thumb, bold signal title +
+   inline score ring (pale-gold ScoreChip), an estimated-value bar relative to
+   a $1.5M ceiling, a source chip, the last-touch relative time, and the real
+   owner Avatar. Persistent chevron (no hover-only reveal — R5). Every card
+   drills into the OpportunityDrawer (no dead-end cards — §3). */
 function OpportunityKanbanCard({
   lead,
   onClick,
@@ -317,51 +378,74 @@ function OpportunityKanbanCard({
   const score = effectiveScore(lead);
   const { action } = nextAction(lead);
   const stale = lead.daysInStage > 7;
+  // Estimated-value bar relative to a $1.5M column ceiling.
+  const valuePct = Math.max(8, Math.min(100, Math.round((lead.estValue / 1_500_000) * 100)));
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group w-full rounded-xl border border-mist bg-cloud p-3 text-left shadow-soft transition-all hover:border-ink/20 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      className="group w-full overflow-hidden rounded-xl border border-mist bg-cloud text-left shadow-soft transition-all hover:border-ink/20 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
     >
-      <div className="flex items-start justify-between gap-2">
+      {/* Real exterior photo (deterministic by record id — G-A #6) */}
+      <div className="relative">
+        <PropertyThumb
+          src={listingPhoto({ id: lead.id })}
+          ratio="wide"
+          rounded={false}
+          alt={`${lead.address}, ${lead.city}`}
+          className="h-16"
+        />
+        <span className="absolute right-1.5 top-1.5">
+          <ScoreChip score={score} suffix="" />
+        </span>
+      </div>
+
+      <div className="p-3">
         <p className="line-clamp-2 text-[0.84rem] font-semibold leading-snug text-ink">
           {signalHeadline(lead)}
         </p>
-        <ScoreChip score={score} suffix="" className="shrink-0" />
-      </div>
 
-      <p className="mt-1.5 truncate text-[0.8rem] font-medium text-ink">{lead.sellerName}</p>
-      <p className="truncate text-[0.74rem] text-slate">
-        {lead.city} · {compactUsd(lead.estValue)}
-      </p>
+        <p className="mt-1.5 truncate text-[0.8rem] font-medium text-ink">{lead.sellerName}</p>
 
-      <p className="mt-2 line-clamp-1 text-[0.74rem] text-slate">
-        <span className="font-medium text-slate">Next:</span> {action}
-      </p>
-
-      <div className="mt-2.5 flex items-center justify-between gap-2">
-        <StatusChip tone={stale ? "danger" : "info"} variant="soft">
-          {lead.daysInStage}d in stage
-        </StatusChip>
-        <span className="flex min-w-0 items-center gap-1.5 text-[0.72rem] text-slate">
-          <Avatar
-            name={agentName(lead.assignedAgent)}
-            slug={lead.assignedAgent}
-            size={20}
-            ring
-          />
-          <span className="truncate" title={agentName(lead.assignedAgent)}>
-            {agentName(lead.assignedAgent)}
+        {/* Estimated-value bar */}
+        <div className="mt-1.5 flex items-center gap-2">
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper-200">
+            <span className="block h-full rounded-full bg-success" style={{ width: `${valuePct}%` }} />
           </span>
-          <ChevronRight
-            className={cn(
-              "h-3.5 w-3.5 shrink-0 text-slate/40 transition-opacity",
-              "opacity-0 group-hover:opacity-100",
-            )}
-            aria-hidden
-          />
-        </span>
+          <span className="shrink-0 text-[0.72rem] font-semibold tabular-nums text-success">
+            {compactUsd(lead.estValue)}
+          </span>
+        </div>
+
+        {/* Source chip + last-touch relative time */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <StatusChip tone="info" variant="soft">
+            {lead.source ?? "Database"}
+          </StatusChip>
+          <StatusChip tone={stale ? "danger" : "info"} variant="soft">
+            {lead.daysInStage}d since touch
+          </StatusChip>
+        </div>
+
+        <p className="mt-2 line-clamp-1 text-[0.74rem] text-slate">
+          <span className="font-medium text-slate">Next:</span> {action}
+        </p>
+
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-mist/70 pt-2.5">
+          <span className="flex min-w-0 items-center gap-1.5 text-[0.72rem] text-slate">
+            <Avatar
+              name={agentName(lead.assignedAgent)}
+              slug={lead.assignedAgent}
+              size={20}
+              ring
+            />
+            <span className="truncate" title={agentName(lead.assignedAgent)}>
+              {agentName(lead.assignedAgent)}
+            </span>
+          </span>
+          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate/50" aria-hidden />
+        </div>
       </div>
     </button>
   );

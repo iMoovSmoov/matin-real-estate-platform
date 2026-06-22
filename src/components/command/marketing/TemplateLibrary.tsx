@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusChip, PropertyThumb } from "@/components/os";
+import { exteriorFallback } from "@/lib/data";
 import {
   TEMPLATES,
   type TemplateKey,
@@ -66,10 +67,11 @@ function TemplateRow({
             : "border-mist bg-cloud hover:border-ink/20 hover:bg-paper",
         )}
       >
-        {/* Real property thumbnail — stable per template */}
+        {/* Real exterior thumbnail — deterministic per template (not a random
+            pool seed): a real /matin/exteriors photo keyed by the template key. */}
         <span className="relative shrink-0">
           <PropertyThumb
-            seedIndex={t.seedIndex}
+            src={exteriorFallback(t.key)}
             ratio="square"
             alt={t.label}
             className="h-12 w-12 rounded-lg"

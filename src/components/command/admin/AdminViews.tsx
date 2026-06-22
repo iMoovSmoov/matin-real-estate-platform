@@ -23,10 +23,11 @@ import {
   EmptyState,
   Avatar,
   SavedViewTabs,
+  BrandedDocument,
   type Column,
 } from "@/components/os";
-import { MatinMark } from "@/components/brand/Logo";
-import { auditLogs } from "@/lib/data";
+import { Logo, MatinMark } from "@/components/brand/Logo";
+import { auditLogs, company, roles, getAgent } from "@/lib/data";
 import type { AuditLog } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -35,7 +36,11 @@ import {
   teamRows as seedTeams,
   templateRows as seedTemplates,
   aiPolicyRows,
+  assignableAgents,
+  brandCoreSwatches,
+  brandGoldSwatches,
   type UserRow,
+  type TemplateRow,
   type AiPolicyRow,
 } from "./adminData";
 import {
@@ -75,7 +80,7 @@ export function UsersView() {
   const [view, setView] = useState("all");
   const [selected, setSelected] = useState<UserRow | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [invite, setInvite] = useState({ name: "", email: "", role: "Agent — Licensed Broker", team: "Oregon" });
+  const [invite, setInvite] = useState({ slug: "", name: "", email: "", role: "Agent — Licensed Broker", team: "Oregon" });
 
   const filtered = useMemo(() => {
     if (view === "active") return users.filter((u) => u.status === "active");
@@ -91,16 +96,32 @@ export function UsersView() {
     leadership: users.filter((u) => u.team === "Leadership").length,
   };
 
+  // Real agents not already in the table — the only people you can invite.
+  const inviteCandidates = useMemo(
+    () => assignableAgents.filter((a) => !users.some((u) => u.slug === a.slug)),
+    [users],
+  );
+
   function submitInvite() {
-    if (!invite.name.trim()) return;
+    if (!invite.slug) return;
+    const agent = getAgent(invite.slug);
+    if (!agent) return;
     const id = `U-${String(users.length + 1).padStart(3, "0")}`;
-    const email = invite.email.trim() || `${invite.name.split(" ")[0].toLowerCase()}@matinrealestate.com`;
     setUsers((prev) => [
       ...prev,
-      { id, name: invite.name.trim(), email, role: invite.role, team: invite.team, status: "invited", lastActive: "Invite sent just now" },
+      {
+        id,
+        slug: agent.slug,
+        name: agent.name,
+        email: invite.email.trim() || agent.email,
+        role: invite.role,
+        team: invite.team,
+        status: "invited",
+        lastActive: "Invite sent just now",
+      },
     ]);
     setInviteOpen(false);
-    setInvite({ name: "", email: "", role: "Agent — Licensed Broker", team: "Oregon" });
+    setInvite({ slug: "", name: "", email: "", role: "Agent — Licensed Broker", team: "Oregon" });
   }
 
   function deactivate(id: string) {
@@ -119,7 +140,7 @@ export function UsersView() {
       width: "30%",
       render: (u) => (
         <span className="flex items-center gap-2.5">
-          <Avatar name={u.name} slug={slugForName(u.name)} size={32} ring />
+          <Avatar name={u.name} slug={u.slug} size={32} ring />
           <TwoLineCell title={u.name} sub={u.email} />
         </span>
       ),
@@ -130,6 +151,7 @@ export function UsersView() {
       key: "status",
       header: "Status",
       width: "14%",
+      primary: true,
       render: (u) => (
         <StatusChip tone={userStatusTone(u.status)}>
           <Dot tone={userStatusTone(u.status)} />
@@ -143,11 +165,11 @@ export function UsersView() {
   return (
     <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-[1.1rem] font-normal leading-tight text-ink">Users</h2>
             <p className="mt-0.5 text-[0.78rem] text-slate">
-              43 members · {counts.invited} pending invites · recently active shown · server-side authorization
+              40 brokerage members · {counts.invited} pending invites · recently active shown · server-side authorization
             </p>
           </div>
           <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={() => setInviteOpen(true)}>
@@ -166,6 +188,7 @@ export function UsersView() {
           rows={filtered}
           getRowId={(u) => u.id}
           selectable
+          responsive
           onRowClick={(u) => setSelected(u)}
           utilityRight={<span className="text-[0.78rem] text-slate">Bulk: assign role · deactivate</span>}
           emptyState={
@@ -225,7 +248,7 @@ export function UsersView() {
         {selected ? (
           <div className="space-y-5">
             <div className="flex items-center gap-3">
-              <Avatar name={selected.name} slug={slugForName(selected.name)} size={56} ring />
+              <Avatar name={selected.name} slug={selected.slug} size={56} ring />
               <div>
                 <p className="font-display text-[1.05rem] text-ink">{selected.name}</p>
                 <p className="text-[0.8rem] text-slate">{selected.email}</p>
@@ -282,11 +305,29 @@ export function UsersView() {
         }
       >
         <div className="space-y-4">
-          <Field label="Full name">
-            <TextInput value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} placeholder="Taylor Reed" autoFocus />
+          <Field label="Agent" hint="from the Matin roster">
+            <SelectInput
+              value={invite.slug}
+              onChange={(e) => {
+                const a = getAgent(e.target.value);
+                setInvite({ ...invite, slug: e.target.value, name: a?.name ?? "", email: a?.email ?? "" });
+              }}
+              autoFocus
+            >
+              <option value="">Select an agent…</option>
+              {inviteCandidates.map((a) => (
+                <option key={a.slug} value={a.slug}>
+                  {a.name}
+                </option>
+              ))}
+            </SelectInput>
           </Field>
-          <Field label="Email" hint="defaults to @matinrealestate.com">
-            <TextInput value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} placeholder="taylor@matinrealestate.com" />
+          <Field label="Email" hint="defaults to the roster email">
+            <TextInput
+              value={invite.email}
+              onChange={(e) => setInvite({ ...invite, email: e.target.value })}
+              placeholder={invite.slug ? getAgent(invite.slug)?.email : "name@matinrealestate.com"}
+            />
           </Field>
           <Field label="Role">
             <SelectInput value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value })}>
@@ -318,18 +359,33 @@ export function UsersView() {
 
 type TeamRow = (typeof seedTeams)[number];
 
+/** Real agents eligible to lead a team (leadership + operations leads). */
+const TEAM_LEADS = ["alicia-smith", "amy-mead", "sierra-palmeri", "jordan-matin"];
+
 export function TeamsView() {
   const [teams, setTeams] = useState<TeamRow[]>(seedTeams);
   const [selected, setSelected] = useState<TeamRow | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [draft, setDraft] = useState({ name: "", office: "West Linn HQ", lead: "Alicia Smith", markets: "" });
+  const [draft, setDraft] = useState({ name: "", office: "West Linn HQ", leadSlug: "alicia-smith", markets: "" });
 
   function submit() {
     if (!draft.name.trim()) return;
+    const lead = getAgent(draft.leadSlug);
     const id = `T-${String(teams.length + 1).padStart(3, "0")}`;
-    setTeams((prev) => [...prev, { id, name: draft.name.trim(), office: draft.office, lead: draft.lead, members: 0, markets: draft.markets || "—" }]);
+    setTeams((prev) => [
+      ...prev,
+      {
+        id,
+        name: draft.name.trim(),
+        office: draft.office,
+        lead: lead?.name ?? "",
+        leadSlug: draft.leadSlug,
+        members: 0,
+        markets: draft.markets || "—",
+      },
+    ]);
     setCreateOpen(false);
-    setDraft({ name: "", office: "West Linn HQ", lead: "Alicia Smith", markets: "" });
+    setDraft({ name: "", office: "West Linn HQ", leadSlug: "alicia-smith", markets: "" });
   }
 
   const cols: Column<TeamRow>[] = [
@@ -339,7 +395,7 @@ export function TeamsView() {
       header: "Team lead",
       render: (t) => (
         <span className="flex items-center gap-2">
-          <Avatar name={t.lead} slug={slugForName(t.lead)} size={26} ring />
+          <Avatar name={t.lead} slug={t.leadSlug} size={26} ring />
           <span className="text-[0.84rem] text-ink">{t.lead}</span>
         </span>
       ),
@@ -370,7 +426,7 @@ export function TeamsView() {
         {selected ? (
           <div className="space-y-4">
             <div className="flex items-center gap-3 rounded-xl border border-mist bg-paper p-4">
-              <Avatar name={selected.lead} slug={slugForName(selected.lead)} size={44} ring />
+              <Avatar name={selected.lead} slug={selected.leadSlug} size={44} ring />
               <div>
                 <p className="text-[0.74rem] text-slate">Team lead</p>
                 <p className="font-semibold text-ink">{selected.lead}</p>
@@ -428,9 +484,11 @@ export function TeamsView() {
             </SelectInput>
           </Field>
           <Field label="Team lead">
-            <SelectInput value={draft.lead} onChange={(e) => setDraft({ ...draft, lead: e.target.value })}>
-              {["Alicia Smith", "Amy Mead", "Sierra Seggerman", "Jordan Matin"].map((l) => (
-                <option key={l}>{l}</option>
+            <SelectInput value={draft.leadSlug} onChange={(e) => setDraft({ ...draft, leadSlug: e.target.value })}>
+              {TEAM_LEADS.map((slug) => (
+                <option key={slug} value={slug}>
+                  {getAgent(slug)?.name ?? slug}
+                </option>
               ))}
             </SelectInput>
           </Field>
@@ -443,9 +501,7 @@ export function TeamsView() {
   );
 }
 
-/* ── Templates ─────────────────────────────────────────────────────────────── */
-
-type TemplateRow = (typeof seedTemplates)[number];
+/* ── Templates (TemplateRow is the canonical type imported from adminData) ──── */
 
 export function TemplatesView() {
   const [templates, setTemplates] = useState<TemplateRow[]>(seedTemplates);
@@ -600,17 +656,15 @@ export function TemplatesView() {
               </StatusChip>
               <span className="font-mono text-[0.78rem] text-slate">{selected.id}</span>
             </div>
-            <div className="rounded-xl border border-mist bg-paper p-4">
-              <p className="eyebrow mb-2 text-slate">Template body (preview)</p>
-              <div className="space-y-1.5">
-                {[88, 72, 94, 60, 80].map((w, i) => (
-                  <div key={i} className="h-2.5 rounded bg-mist" style={{ width: `${w}%` }} />
-                ))}
-              </div>
-            </div>
+
+            {/* Real branded preview (S12 ticket 10) — letterhead + ruled fields
+                + boxed signature + green completion checks + Page X of N. */}
+            <TemplatePreviewDoc template={selected} />
+
             <dl className="space-y-2.5 text-[0.84rem]">
               {[
                 ["Type", selected.kind],
+                ["Form ID", selected.formId ?? "—"],
                 ["Version", selected.version],
                 ["Last updated", `${selected.updatedAt} · ${selected.updatedBy}`],
               ].map(([k, v]) => (
@@ -627,18 +681,122 @@ export function TemplatesView() {
   );
 }
 
-/* ── Brand Kit ─────────────────────────────────────────────────────────────── */
+/* ── Branded template preview (S12 ticket 10) ──────────────────────────────── */
+
+function TemplatePreviewDoc({ template }: { template: TemplateRow }) {
+  const broker = getAgent(roles.principalBroker);
+  const coordinator = getAgent(roles.listingCoordinators[0]);
+  const isEmail = template.kind === "Email";
+
+  // A real BrandedDocument so even the template preview is a Matin artifact,
+  // not gray bars. Email templates render the branded email shell; document /
+  // checklist templates render the letterhead with a completion-checked grid.
+  if (isEmail) {
+    return (
+      <BrandedDocument
+        variant="email"
+        title={template.name}
+        emailSubject="Your Matin home search — first homes inside"
+        fromName={`Matin Real Estate · ${coordinator?.name ?? "Listings Team"}`}
+        mergeTokens={["{{first_name}}", "{{search_area}}", "{{agent_name}}"]}
+        hideToolbar
+      />
+    );
+  }
+
+  return (
+    <BrandedDocument
+      variant={template.kind === "Checklist" ? "report" : "agreement"}
+      formId={template.formId}
+      title={template.name}
+      completion={template.status === "published" ? 100 : 60}
+      page={1}
+      pages={template.kind === "Checklist" ? 1 : 4}
+      agent={
+        broker
+          ? {
+              name: broker.name,
+              title: broker.title,
+              license: broker.licenseNumbers?.OR,
+              phone: broker.phone,
+              email: broker.email,
+              slug: broker.slug,
+              photo: broker.photo,
+            }
+          : undefined
+      }
+      fields={[
+        { label: "Template ID", value: template.id },
+        { label: "Version", value: template.version },
+        { label: "Maintained by", value: template.updatedBy },
+        { label: "Status", value: template.status === "published" ? "Published" : "Draft", filled: template.status === "published" },
+      ]}
+    />
+  );
+}
+
+/* ── Brand Kit (S12 ticket 3) ──────────────────────────────────────────────── */
+
+function Swatch({ name, hex, cls, note }: { name: string; hex: string; cls: string; note?: string }) {
+  return (
+    <div>
+      <span
+        className={cn(
+          "block h-12 w-full rounded-lg ring-1 ring-inset ring-mist",
+          cls,
+        )}
+      />
+      <p className="mt-1.5 truncate text-[0.72rem] font-medium text-ink">{name}</p>
+      <p className="font-mono text-[0.64rem] text-slate">{hex}</p>
+      {note ? <p className="mt-0.5 truncate text-[0.62rem] leading-tight text-slate/70">{note}</p> : null}
+    </div>
+  );
+}
 
 export function BrandKitView() {
-  const swatches: { name: string; hex: string; cls: string }[] = [
-    { name: "Ink", hex: "#060606", cls: "bg-ink" },
-    { name: "Paper", hex: "#F6F6F5", cls: "bg-paper" },
-    { name: "Success", hex: "#56A07D", cls: "bg-success" },
-    { name: "Warn", hex: "#C1934A", cls: "bg-warn" },
-    { name: "Danger", hex: "#C0584A", cls: "bg-danger" },
-  ];
+  const broker = getAgent(roles.principalBroker);
+  const marketing = getAgent(roles.marketingLead);
+
   return (
     <div className="grid gap-5 lg:grid-cols-2">
+      {/* ── Wordmark lockups (real Matin marks — white-on-dark + dark-on-light) ── */}
+      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft lg:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="eyebrow text-slate">Logo lockups</p>
+            <h2 className="mt-1 font-display text-[1.1rem] font-normal text-ink">Matin Real Estate marks</h2>
+          </div>
+          <GhostButton ariaLabel="Download brand assets">
+            <Pencil className="h-3.5 w-3.5" />
+            Download assets
+          </GhostButton>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {/* white wordmark on dark */}
+          <div className="flex flex-col">
+            <div className="flex flex-1 items-center justify-center rounded-xl bg-ink px-4 py-6">
+              <Logo variant="full" theme="white" className="h-8" />
+            </div>
+            <p className="mt-1.5 text-[0.72rem] text-slate">Wordmark · on dark</p>
+          </div>
+          {/* dark-context wordmark on light (ink-chip lockup) */}
+          <div className="flex flex-col">
+            <div className="flex flex-1 items-center justify-center rounded-xl border border-mist bg-paper px-4 py-6">
+              <Logo variant="full" theme="dark" className="h-8" />
+            </div>
+            <p className="mt-1.5 text-[0.72rem] text-slate">Wordmark · on light</p>
+          </div>
+          {/* M-mark */}
+          <div className="flex flex-col">
+            <div className="flex flex-1 items-center justify-center rounded-xl border border-mist bg-paper px-4 py-6">
+              <MatinMark theme="dark" className="h-9" />
+            </div>
+            <p className="mt-1.5 text-[0.72rem] text-slate">M-mark · favicon</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Identity + palette ──────────────────────────────────────────────── */}
       <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow text-slate">Identity</p>
         <h2 className="mt-1 font-display text-[1.1rem] font-normal text-ink">Matin Real Estate</h2>
@@ -648,7 +806,8 @@ export function BrandKitView() {
             ["Display font", "Fraunces"],
             ["Body / numbers", "Inter (tabular)"],
             ["Brand voice", "Confident · precise · no hype"],
-            ["Reply-to", "info@matinrealestate.com"],
+            ["Office", `${company.address.city}, ${company.address.state}`],
+            ["Reply-to", company.email],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between gap-4">
               <dt className="text-slate">{k}</dt>
@@ -656,26 +815,84 @@ export function BrandKitView() {
             </div>
           ))}
         </dl>
-        <GhostButton ariaLabel="Edit brand kit" className="mt-4">
-          <Pencil className="h-3.5 w-3.5" />
-          Edit brand kit
-        </GhostButton>
       </div>
 
       <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow text-slate">Palette</p>
-        <div className="mt-3 grid grid-cols-5 gap-2">
-          {swatches.map((s) => (
-            <div key={s.name} className="text-center">
-              <span className={cn("block h-12 w-full rounded-lg ring-1 ring-inset ring-mist", s.cls)} />
-              <p className="mt-1.5 text-[0.72rem] font-medium text-ink">{s.name}</p>
-              <p className="font-mono text-[0.64rem] text-slate">{s.hex}</p>
-            </div>
+        {/* responsive 2/3 cols so hex labels never clip (S12 ticket 12) */}
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {brandCoreSwatches.map((s) => (
+            <Swatch key={s.name} {...s} />
           ))}
         </div>
+
+        {/* Gold AI-accent tokens — rationed to AI/active only (S12 ticket 3) */}
+        <div className="mt-4 border-t border-mist pt-3.5">
+          <p className="flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
+            <MatinMark theme="dark" className="h-3.5 w-3.5" />
+            AI accent · gold (rationed)
+          </p>
+          <div className="mt-2.5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {brandGoldSwatches.map((s) => (
+              <Swatch key={s.name} {...s} />
+            ))}
+          </div>
+        </div>
         <p className="mt-4 text-[0.74rem] text-slate">
-          Used in every generated marketing asset and email. Changes propagate to the Marketing Studio template library.
+          Used in every generated marketing asset and email. Gold appears only on AI/active affordances.
         </p>
+      </div>
+
+      {/* ── Branded letterhead preview ──────────────────────────────────────── */}
+      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+        <p className="eyebrow mb-3 text-slate">Letterhead preview</p>
+        <BrandedDocument
+          variant="letter"
+          title="Matin Real Estate letterhead"
+          completion={100}
+          page={1}
+          pages={1}
+          agent={
+            broker
+              ? {
+                  name: broker.name,
+                  title: broker.title,
+                  license: broker.licenseNumbers?.OR,
+                  phone: broker.phone,
+                  email: broker.email,
+                  slug: broker.slug,
+                  photo: broker.photo,
+                }
+              : undefined
+          }
+          fields={[
+            { label: "Office", value: `${company.address.street}` },
+            { label: "City", value: `${company.address.city}, ${company.address.state} ${company.address.zip}` },
+            { label: "Phone", value: company.phone },
+            { label: "Web", value: "matinrealestate.com" },
+          ]}
+          body={
+            <p className="text-[0.82rem] leading-relaxed text-ink/85">
+              Every client-facing artifact — agreements, disclosures, net sheets, flyers, and emails —
+              renders on this Matin letterhead with the real West Linn office line and an Equal Housing
+              footer. This is the shell the Marketing Studio and Forms sections compose.
+            </p>
+          }
+          hideToolbar
+        />
+      </div>
+
+      {/* ── Branded email-header preview ────────────────────────────────────── */}
+      <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+        <p className="eyebrow mb-3 text-slate">Email header preview</p>
+        <BrandedDocument
+          variant="email"
+          title="Matin branded email"
+          emailSubject="A quick note from Matin Real Estate"
+          fromName={`Matin Real Estate · ${marketing?.name ?? "Marketing"}`}
+          mergeTokens={["{{first_name}}", "{{address}}", "{{community}}"]}
+          hideToolbar
+        />
       </div>
     </div>
   );

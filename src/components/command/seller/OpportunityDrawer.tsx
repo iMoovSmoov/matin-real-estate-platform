@@ -10,9 +10,12 @@ import {
   CircleCheck,
   Banknote,
   CalendarClock,
+  Sparkles,
+  FileText,
+  Receipt,
 } from "lucide-react";
 import type { SellerLead } from "@/lib/types";
-import { getAgent } from "@/lib/data";
+import { getAgent, listingPhoto } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { cn, usd } from "@/lib/utils";
 import {
@@ -24,9 +27,12 @@ import {
   ActivityTimeline,
   Avatar,
   PropertyThumb,
+  BrandedDocument,
+  useAiSidecar,
   type ActivityItem,
   type DrawerTab,
 } from "@/components/os";
+import type { NetSheetLine } from "@/components/os/BrandedDocument";
 import {
   conditionTone,
   timelineTone,
@@ -35,16 +41,36 @@ import {
   lostReason,
   agentName,
   outreachTimeline,
-  leadPhotoSeed,
   equityBand,
 } from "./sellerView";
+import { ScoreGauges } from "./ScoreGauges";
+import { HomeValueSparkline } from "./SellerCharts";
+
+/** Estimated seller net-proceeds lines derived from the record (typical
+ *  Portland-metro cost stack): payoff (~26% of value), 5% commission, title/
+ *  escrow + tax proration. Reconciles to the BrandedDocument netsheet waterfall. */
+function netSheetLinesFor(lead: SellerLead): NetSheetLine[] {
+  const payoff = Math.round(lead.estValue * 0.26);
+  const commission = Math.round(lead.estValue * 0.05);
+  const titleEscrow = Math.round(lead.estValue * 0.011);
+  const taxProration = Math.round(lead.estValue * 0.004);
+  return [
+    { label: "Estimated mortgage payoff", amount: -payoff, note: "Pending lender statement" },
+    { label: "Brokerage commission (5%)", amount: -commission, note: "Fully negotiable" },
+    { label: "Title, escrow & recording", amount: -titleEscrow },
+    { label: "Property-tax proration", amount: -taxProration },
+  ];
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    Seller / Cash Offers — opportunity drawer (right-side RecordDrawer)
 
    Opens on kanban-card / table-row click. Composes shared primitives only:
-     • a real PropertyThumb hero (stable seedIndex) + estimate hero number
-       with an intent ScoreRing
+     • a real PropertyThumb hero via listingPhoto (deterministic by record id)
+       + a 12-month estimated-value sparkline + Equity/Timeline/Engagement
+       intensity gauges + estimate hero number with an intent ScoreRing
+     • branded home-value email + Net Sheet via BrandedDocument (Documents tab)
+     • an explicit "Ask Matin" button that docks the AISidecar to this record
      • the assigned agent shown as a real Avatar (initials fallback)
      • signal explanation as AIInsightChip list (Fello signal-chip pattern)
      • a tabbed body (Overview / Activity) driven by local state
@@ -68,9 +94,12 @@ export function OpportunityDrawer({
   /** Parent-held activity already logged for this lead (approved drafts, etc.). */
   extraActivity?: ActivityItem[];
 }) {
+  const { openAi } = useAiSidecar();
   const [draft, setDraft] = useState<DraftState>(null);
   const [tab, setTab] = useState<string>("overview");
   const [approved, setApproved] = useState(false);
+  /** Which branded deliverable is previewed in the Documents tab. */
+  const [docKind, setDocKind] = useState<"email" | "netsheet">("email");
   const draftRef = useRef<HTMLElement>(null);
 
   // Reset the open draft + tab whenever a different opportunity is selected.
@@ -78,6 +107,7 @@ export function OpportunityDrawer({
     setDraft(null);
     setTab("overview");
     setApproved(false);
+    setDocKind("email");
   }, [lead?.id]);
 
   if (!lead) {
@@ -94,7 +124,19 @@ export function OpportunityDrawer({
   const lost = lostReason(lead);
   const signals = lead.signals ?? [];
   const equity = equityBand(lead);
-  const photoSeed = leadPhotoSeed(lead);
+  // Real hero photo, deterministic by record id (G-A #6 — no random seed).
+  const heroPhoto = listingPhoto({ id: lead.id });
+  // Real agent identity for branded signatures (no hardcoded names — §S3.9).
+  const agentLicense = agent?.licenseNumbers?.OR ?? agent?.licenses?.[0];
+  const brandedAgent = {
+    name: agentName(lead.assignedAgent),
+    title: agent?.title ?? "Real Estate Broker",
+    license: agentLicense,
+    phone: agent?.phone,
+    email: agent?.email,
+    slug: lead.assignedAgent,
+  };
+  const netLines = netSheetLinesFor(lead);
 
   async function runDraft() {
     if (!lead) return;
@@ -146,6 +188,7 @@ export function OpportunityDrawer({
 
   const tabs: DrawerTab[] = [
     { key: "overview", label: "Overview" },
+    { key: "documents", label: "Documents" },
     {
       key: "activity",
       label: (
@@ -174,25 +217,39 @@ export function OpportunityDrawer({
       activeTab={tab}
       onTab={setTab}
       actions={
-        <div className="flex w-full items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2">
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
           >
             <Phone className="h-4 w-4" aria-hidden />
             Call seller
           </button>
           <ActionPill icon={Mail} label="Email" />
           <ActionPill icon={CalendarPlus} label="Book appt" />
+          {/* Dock the seller-intel sidecar to THIS record (S3 ticket 8 — the
+              global AI sidecar opens only from an explicit Ask-AI button). */}
+          <button
+            type="button"
+            onClick={() =>
+              openAi(
+                `Context: Cash Offer / ${lead.sellerName} · ${lead.address}, ${lead.city}`,
+              )
+            }
+            className="ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+          >
+            <Sparkles className="h-4 w-4" aria-hidden />
+            Ask Matin
+          </button>
         </div>
       }
     >
       {tab === "overview" ? (
         <>
-          {/* Real property photo hero */}
+          {/* Real property photo hero (deterministic by record id — G-A #6) */}
           <div className="overflow-hidden rounded-2xl border border-mist">
             <PropertyThumb
-              seedIndex={photoSeed}
+              src={heroPhoto}
               ratio="video"
               rounded={false}
               alt={`${lead.address}, ${lead.city}`}
@@ -215,6 +272,25 @@ export function OpportunityDrawer({
               </p>
             </div>
             <ScoreRing value={score} size={64} label="Intent" />
+          </section>
+
+          {/* 12-month estimated-value sparkline (recharts — S3 ticket 2) */}
+          <section className="mt-3 rounded-2xl border border-mist bg-cloud px-4 pb-3 pt-3.5">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="eyebrow text-slate">Estimated value · 12 mo</p>
+              <span className="text-[0.72rem] font-medium text-success">
+                trending up to {usd(lead.estValue)}
+              </span>
+            </div>
+            <div className="mt-1.5">
+              <HomeValueSparkline estValue={lead.estValue} id={lead.id} />
+            </div>
+          </section>
+
+          {/* Score intensity gauges — Equity / Timeline / Engagement (S3 ticket 1) */}
+          <section className="mt-4 rounded-2xl border border-mist bg-cloud px-4 py-3.5">
+            <p className="eyebrow pb-2.5 text-slate">Seller-intent drivers</p>
+            <ScoreGauges lead={lead} />
           </section>
 
           {/* Signal explanation — AI insight chips */}
@@ -270,7 +346,8 @@ export function OpportunityDrawer({
                   {agentName(lead.assignedAgent)}
                 </p>
                 <p className="truncate text-[0.74rem] text-slate">
-                  Assigned agent · {agent?.phone ?? "(503) 622-9624"}
+                  {agent?.title ?? "Assigned agent"}
+                  {agent?.phone ? ` · ${agent.phone}` : ""}
                 </p>
               </div>
             </div>
@@ -357,6 +434,77 @@ export function OpportunityDrawer({
             />
           </section>
         </>
+      ) : tab === "documents" ? (
+        /* Documents tab — branded deliverables via BrandedDocument (S3 ticket 7) */
+        <section className="space-y-3">
+          <div className="inline-flex items-center gap-0.5 rounded-lg border border-mist bg-paper-200/60 p-0.5">
+            <DocToggle
+              active={docKind === "email"}
+              onClick={() => setDocKind("email")}
+              icon={FileText}
+            >
+              Home-value email
+            </DocToggle>
+            <DocToggle
+              active={docKind === "netsheet"}
+              onClick={() => setDocKind("netsheet")}
+              icon={Receipt}
+            >
+              Net sheet
+            </DocToggle>
+          </div>
+
+          {docKind === "email" ? (
+            <BrandedDocument
+              variant="email"
+              title={`Your ${lead.city} home value`}
+              recipient={lead.sellerName}
+              emailSubject={`${lead.sellerName.split(" ")[0]}, here's what ${lead.address} could sell for`}
+              fromName={`Matin Real Estate · ${brandedAgent.name}`}
+              agent={brandedAgent}
+              mergeTokens={["{{first_name}}", "{{address}}", "{{est_value}}"]}
+              body={
+                <>
+                  <p>
+                    Hi <MergeTok>{"{{first_name}}"}</MergeTok>,
+                  </p>
+                  <p>
+                    Thanks for requesting a home-value estimate on{" "}
+                    <MergeTok>{"{{address}}"}</MergeTok>. Based on recent {lead.city} sales of
+                    comparable {lead.beds}-bed homes, your property is currently estimated around{" "}
+                    <span className="font-semibold tabular-nums">{usd(lead.estValue)}</span> —
+                    and values in your area have been trending up over the last year.
+                  </p>
+                  <p>
+                    On a {lead.timeline.toLowerCase()} timeline, now is a smart moment to review
+                    your options — including a no-obligation cash offer and a full market
+                    valuation. I&rsquo;d be glad to walk you through both.
+                  </p>
+                  <p>
+                    Reply here or reach me directly at {brandedAgent.phone ?? company_phone}.
+                  </p>
+                  <p>
+                    Warmly,
+                    <br />
+                    {brandedAgent.name}
+                    {brandedAgent.title ? `, ${brandedAgent.title}` : ""}
+                  </p>
+                </>
+              }
+            />
+          ) : (
+            <BrandedDocument
+              variant="netsheet"
+              title="Estimated Seller Net Proceeds"
+              recipient={lead.sellerName}
+              agent={brandedAgent}
+              salePrice={lead.estValue}
+              netSheetLines={netLines}
+              page={1}
+              pages={1}
+            />
+          )}
+        </section>
       ) : (
         /* Activity tab */
         <section>
@@ -365,6 +513,43 @@ export function OpportunityDrawer({
         </section>
       )}
     </RecordDrawer>
+  );
+}
+
+const company_phone = "(503) 622-9624";
+
+function MergeTok({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-sm bg-gold-soft px-1.5 py-0.5 font-mono text-[0.72rem] font-medium text-gold-ink">
+      {children}
+    </span>
+  );
+}
+
+function DocToggle({
+  active,
+  onClick,
+  icon: Icon,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof FileText;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "inline-flex min-h-[40px] items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.78rem] font-medium transition-colors",
+        active ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+      {children}
+    </button>
   );
 }
 

@@ -17,8 +17,8 @@ import { streamAi } from "@/lib/ai/client";
    Small atoms (ink/ghost buttons, toggle, field) plus two domain helpers the
    Admin views reuse:
      • slugForName()    — resolve a person's display name → real agent slug so
-                          <Avatar> can load the real headshot (initials fallback
-                          for synthetic operators like Taylor Reed).
+                          <Avatar> can load the real headshot (used for audit-log
+                          actor names; initials fallback for "System").
      • useInlineAi()    — drives ONE streamAi() call into local state so AI
                           helpers stream INLINE (never the global sidecar).
    ────────────────────────────────────────────────────────────────────────── */

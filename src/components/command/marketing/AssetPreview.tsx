@@ -14,13 +14,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusChip, AIInsightChip, PropertyThumb } from "@/components/os";
+import { MatinMark } from "@/components/brand/Logo";
+import { company } from "@/lib/data";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
-import {
-  PREVIEW_CHANNELS,
-  CHANNEL_META,
-  STUDIO_LISTING,
-  type PreviewChannel,
-} from "./marketing-data";
+import { PREVIEW_CHANNELS, CHANNEL_META, type PreviewChannel } from "./marketing-data";
+import { STUDIO_LISTING } from "./marketing-branding";
+
+const OFFICE_LINE = `${company.address.street}, ${company.address.city} ${company.address.state} ${company.address.zip} · ${company.phone}`;
 
 /* ──────────────────────────────────────────────────────────────────────────
    Marketing Studio — AssetPreview  (pane 2, ref §2.8 / wireframe 11)
@@ -51,8 +51,9 @@ function MatinFromBar({ metaLine, kicker }: { metaLine: string; kicker: string }
   return (
     <div className="mb-4 flex items-center justify-between gap-3 border-b border-mist pb-3">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink text-[0.7rem] font-bold text-cloud">
-          M
+        {/* Real Matin mark on an ink chip — never a hand-rolled "M" box */}
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
+          <MatinMark theme="white" className="h-4" />
         </span>
         <div className="leading-tight">
           <p className="text-[0.78rem] font-semibold text-ink">Matin Real Estate</p>
@@ -62,6 +63,72 @@ function MatinFromBar({ metaLine, kicker }: { metaLine: string; kicker: string }
       <span className="text-[0.66rem] uppercase tracking-[0.18em] text-slate">
         {kicker}
       </span>
+    </div>
+  );
+}
+
+/** Per-asset email telemetry — delivered / opened / clicked counters plus an
+ *  "Email has not been opened — View" tile (S8 ticket 9). Numbers model a
+ *  representative send so the panel reads like a real deliverability report. */
+function AssetTelemetry({ channel }: { channel: PreviewChannel }) {
+  if (channel !== "Email" && channel !== "Ad" && channel !== "Web page") return null;
+  const delivered = 1286;
+  const opened = 494; // ~38.4% — the Spring Seller Nurture benchmark
+  const clicked = 188;
+  const unopened = delivered - opened;
+  const cell =
+    "flex flex-col gap-0.5 rounded-lg border border-mist bg-paper px-3 py-2";
+  return (
+    <div className="mt-4 space-y-2">
+      <div className="grid grid-cols-3 gap-2">
+        <div className={cell}>
+          <span className="text-[0.66rem] uppercase tracking-[0.08em] text-slate">Delivered</span>
+          <span className="text-[0.92rem] font-bold tabular-nums text-ink">
+            {delivered.toLocaleString("en-US")}
+          </span>
+        </div>
+        <div className={cell}>
+          <span className="text-[0.66rem] uppercase tracking-[0.08em] text-slate">Opened</span>
+          <span className="text-[0.92rem] font-bold tabular-nums text-success">
+            {opened.toLocaleString("en-US")}
+          </span>
+        </div>
+        <div className={cell}>
+          <span className="text-[0.66rem] uppercase tracking-[0.08em] text-slate">Clicked</span>
+          <span className="text-[0.92rem] font-bold tabular-nums text-ink">
+            {clicked.toLocaleString("en-US")}
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-cloud px-3 py-2">
+        <span className="text-[0.74rem] text-slate">
+          <span className="font-semibold text-ink tabular-nums">
+            {unopened.toLocaleString("en-US")}
+          </span>{" "}
+          recipients have not opened this {channel.toLowerCase()} yet
+        </span>
+        <button
+          type="button"
+          className="inline-flex min-h-9 items-center rounded-lg border border-mist bg-paper px-3 text-[0.74rem] font-semibold text-ink transition-colors hover:border-ink/20"
+        >
+          View · resend
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Brand-kit footer applied to every channel deliverable (logo + EHO + office). */
+function BrandKitFooter() {
+  return (
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-mist pt-3">
+      <div className="flex items-center gap-2">
+        <MatinMark theme="dark" className="h-4" />
+        <span className="text-[0.66rem] font-medium text-slate">
+          Equal Housing Opportunity
+        </span>
+      </div>
+      <span className="text-[0.64rem] text-slate">{OFFICE_LINE}</span>
     </div>
   );
 }
@@ -226,8 +293,8 @@ export function AssetPreview({
             <MatinFromBar metaLine={`${STUDIO_LISTING.address} · single-property page`} kicker={meta.kicker} />
           ) : isSocial ? (
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-[0.7rem] font-bold text-cloud">
-                M
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink">
+                <MatinMark theme="white" className="h-4" />
               </span>
               <div className="leading-tight">
                 <p className="text-[0.78rem] font-semibold text-ink">matinrealestate</p>
@@ -237,8 +304,8 @@ export function AssetPreview({
           ) : channel === "Ad" ? (
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-[0.7rem] font-bold text-cloud">
-                  M
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink">
+                  <MatinMark theme="white" className="h-4" />
                 </span>
                 <div className="leading-tight">
                   <p className="text-[0.78rem] font-semibold text-ink">Matin Real Estate</p>
@@ -269,17 +336,32 @@ export function AssetPreview({
             </>
           ) : null}
 
-          {/* Hero PHOTO — real listing photography, not a gray box */}
+          {/* Hero PHOTO — the REAL listing hero (listingPhoto), with the brand
+              frame + logo lockup actually overlaid (not just claimed). */}
           <div className="mt-4">
-            <PropertyThumb
-              seedIndex={STUDIO_LISTING.seedIndex}
-              ratio={heroRatio}
-              alt={STUDIO_LISTING.address}
-              className="w-full"
-            />
+            <div className="relative overflow-hidden rounded-xl ring-1 ring-inset ring-ink/10">
+              <PropertyThumb
+                src={STUDIO_LISTING.photo}
+                ratio={heroRatio}
+                alt={STUDIO_LISTING.address}
+                className="w-full"
+                rounded={false}
+              />
+              {/* Brand frame + logo lockup overlay (makes the caption TRUE) */}
+              <span className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-inset ring-cloud/70" />
+              <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-md bg-ink/85 px-2 py-1">
+                <MatinMark theme="white" className="h-3.5" />
+                <span className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-cloud">
+                  Matin Real Estate
+                </span>
+              </span>
+              <span className="absolute bottom-2.5 right-2.5 rounded-md bg-cloud/90 px-2 py-0.5 text-[0.72rem] font-bold tabular-nums text-ink">
+                {STUDIO_LISTING.price}
+              </span>
+            </div>
             <p className="mt-1.5 text-[0.66rem] text-slate">
-              Hero photo · {STUDIO_LISTING.address} · brand frame + logo lockup
-              applied
+              Hero photo · {STUDIO_LISTING.address}, {STUDIO_LISTING.cityShort} ·
+              brand frame + logo lockup applied
             </p>
           </div>
 
@@ -305,7 +387,13 @@ export function AssetPreview({
               </span>
             </div>
           ) : null}
+
+          {/* Brand-kit footer — real Matin mark + EHO + West Linn office line */}
+          {body || streaming ? <BrandKitFooter /> : null}
         </div>
+
+        {/* Per-asset email telemetry (delivered / opened / clicked + unopened) */}
+        {!streaming && body ? <AssetTelemetry channel={channel} /> : null}
       </div>
 
       {/* Action bar — real "Send test" with inline confirmation */}

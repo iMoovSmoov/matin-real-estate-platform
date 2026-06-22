@@ -478,9 +478,10 @@ export function CoachingWorkbench({
   const planDrills = useMemo(() => buildPlanDrills(active?.title ?? "", seed), [active, seed]);
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)_330px]">
+    // R8: real responsive Tailwind — 1-col phone, md two-column, lg three-column.
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[260px_minmax(0,1fr)_330px]">
       {/* ── Pane 1 — Scenario library ──────────────────────────────────── */}
-      <section className="rounded-2xl border border-mist bg-cloud shadow-soft">
+      <section className="rounded-2xl border border-mist bg-cloud shadow-soft md:self-start">
         <div className="flex items-center gap-2 border-b border-mist px-4 py-3.5">
           <GraduationCap className="h-4 w-4 text-slate" aria-hidden />
           <h2 className="font-display text-[1rem] font-normal text-ink">Scenario library</h2>
@@ -540,8 +541,8 @@ export function CoachingWorkbench({
         </ul>
       </section>
 
-      {/* ── Pane 2 — Roleplay transcript ───────────────────────────────── */}
-      <section className="flex min-h-[30rem] flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+      {/* ── Pane 2 — Roleplay transcript (spans both cols at md) ───────── */}
+      <section className="flex min-h-[30rem] flex-col rounded-2xl border border-mist bg-cloud shadow-soft md:order-3 md:col-span-2 lg:order-none lg:col-span-1">
         <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-slate" aria-hidden />
@@ -699,7 +700,7 @@ export function CoachingWorkbench({
       </section>
 
       {/* ── Pane 3 — Scorecard ─────────────────────────────────────────── */}
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-4 md:order-2 md:self-start lg:order-none">
         <div className="rounded-2xl border border-mist bg-cloud shadow-soft">
           <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
             <div className="flex items-center gap-2">

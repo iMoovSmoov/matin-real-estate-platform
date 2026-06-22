@@ -9,7 +9,7 @@ import {
   Pause,
   Play,
 } from "lucide-react";
-import { marketingAssets } from "@/lib/data";
+import { marketingAssets, exteriorFallback } from "@/lib/data";
 import type { Campaign } from "@/lib/types";
 import { compactUsd, num } from "@/lib/utils";
 import {
@@ -22,7 +22,15 @@ import {
   type ActivityItem,
   AIInsightChip,
 } from "@/components/os";
-import { campaignOwner, campaignSeed } from "./marketing-data";
+import { campaignOwner } from "./marketing-data";
+import { STUDIO_LISTING } from "./marketing-branding";
+
+/** Campaign hero: the studio listing's REAL photo for its launch campaign,
+ *  else a deterministic exterior keyed by the campaign id (never a random seed). */
+function campaignPhoto(id: string): string {
+  if (id === STUDIO_LISTING.campaignId) return STUDIO_LISTING.photo;
+  return exteriorFallback(id);
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    Marketing Studio — CampaignDrawer  (ref §1.9)
@@ -172,7 +180,7 @@ export function CampaignDrawer({
 
   if (!campaign) return null;
   const s = STATUS[campaign.status];
-  const seed = campaignSeed(campaign.id);
+  const heroPhoto = campaignPhoto(campaign.id);
   const isLive = campaign.status === "live";
 
   return (
@@ -214,7 +222,7 @@ export function CampaignDrawer({
       {/* Identity row — real property hero + owner avatar + status */}
       <div className="flex items-center gap-3">
         <PropertyThumb
-          seedIndex={seed}
+          src={heroPhoto}
           ratio="square"
           alt={campaign.name}
           className="h-16 w-16 shrink-0 rounded-xl"

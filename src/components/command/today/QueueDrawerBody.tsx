@@ -16,6 +16,7 @@ import {
 import type { WorkQueueItem, AIAction, WorkflowRun } from "@/lib/types";
 import { CATEGORY_TONE } from "./workQueueMeta";
 import { enrich, personSlugFor, activityFor } from "./queueEnrich";
+import { brandedDraftFor, BrandedDraftPreview } from "./BrandedDraftPreview";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center — RecordDrawer body for a work-queue item
@@ -57,8 +58,9 @@ export function QueueDrawerBody({
 }) {
   const rec = enrich(item);
   const personSlug = personSlugFor(item);
-  const isProperty = rec.thumbSeed != null;
+  const isProperty = rec.thumbSrc != null || rec.thumbSeed != null;
   const activity = activityFor(item, rec);
+  const isBrandedDraft = brandedDraftFor(item, linkedAction);
 
   return (
     <div className="space-y-5">
@@ -66,6 +68,7 @@ export function QueueDrawerBody({
       {isProperty ? (
         <div className="overflow-hidden rounded-xl border border-mist">
           <PropertyThumb
+            src={rec.thumbSrc}
             seedIndex={rec.thumbSeed}
             ratio="wide"
             rounded={false}
@@ -215,7 +218,7 @@ export function QueueDrawerBody({
             onEdit={onAskAi}
             onReject={onReject}
             result={
-              draft ? (
+              draft && !isBrandedDraft ? (
                 <span>
                   <span className="mb-1.5 flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-gold/90">
                     <MatinMark theme="white" className="h-3 w-3" />
@@ -226,7 +229,13 @@ export function QueueDrawerBody({
               ) : undefined
             }
           />
-          {!draft && !drafting ? (
+          {/* Client-facing drafts render inside the Matin letterhead (G-B/S1.7) */}
+          {isBrandedDraft ? (
+            <div>
+              <p className="eyebrow pb-2 text-slate">Branded preview — what the client receives</p>
+              <BrandedDraftPreview item={item} action={linkedAction} draft={draft} />
+            </div>
+          ) : !draft && !drafting ? (
             <p className="text-[0.8rem] leading-relaxed text-slate">
               Generate an editable draft from the cited evidence above. Nothing sends
               until you approve it.

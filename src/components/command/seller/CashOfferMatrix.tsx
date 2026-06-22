@@ -8,8 +8,10 @@ import {
   TriangleAlert,
   Link2,
   Copy,
+  Receipt,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
+import { getAgent, listingPhoto } from "@/lib/data";
 import { cn, usd } from "@/lib/utils";
 import {
   StatusChip,
@@ -17,8 +19,14 @@ import {
   Dot,
   Avatar,
   PropertyThumb,
+  BrandedDocument,
 } from "@/components/os";
+import type { NetSheetLine } from "@/components/os/BrandedDocument";
 import { MatinMark } from "@/components/brand/Logo";
+import { NetToSellerBar } from "./SellerCharts";
+
+/* Real listing agent representing Sarah Mitchell (SL-000 → chase-bright). */
+const LISTING_AGENT_SLUG = "chase-bright";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Seller / Cash Offers — cash-offer comparison matrix + net sheet (§2.3)
@@ -67,7 +75,7 @@ const ATTRS: { key: AttrKey; label: string }[] = [
 const OFFERS: OfferColumn[] = [
   {
     id: "OFF-01",
-    buyer: "Cash Is King Home Buyers",
+    buyer: "Cascade Cash Offers (partner)",
     agent: "Jordan Matin",
     agentSlug: "jordan-matin",
     price: 798000,
@@ -150,7 +158,19 @@ function cellValue(o: OfferColumn, key: AttrKey): string {
   }
 }
 
-const SHARE_LINK = "matinos.app/offer/5127-cedar-hills";
+/* Real Matin host (not the fake matinos.app — S3 ticket 6). */
+const SHARE_LINK = "matinrealestate.com/offer/5127-cedar-hills";
+
+/** Map an accepted/top offer's net-sheet rows to BrandedDocument net lines. */
+function brandedNetLines(o: OfferColumn): NetSheetLine[] {
+  const commission = Math.round(o.price * o.commissionRate);
+  return [
+    { label: "Existing mortgage payoff", amount: -o.payoff, note: "Pending lender statement" },
+    { label: `Brokerage commission (${Math.round(o.commissionRate * 100)}%)`, amount: -commission, note: "Fully negotiable" },
+    { label: "Title, escrow & recording", amount: -o.closingCosts },
+    { label: "Property-tax proration", amount: -o.taxProration },
+  ];
+}
 
 export function CashOfferMatrix() {
   // Default the net sheet to the recommended offer until one is accepted.
@@ -159,6 +179,8 @@ export function CashOfferMatrix() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [verdict, setVerdict] = useState<{ text: string; running: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
+  /** Net sheet: quick summary card vs the printable branded document. */
+  const [netView, setNetView] = useState<"summary" | "branded">("summary");
 
   const netSheetOffer = useMemo(
     () => OFFERS.find((o) => o.id === accepted) ?? OFFERS.find((o) => o.recommended)!,
@@ -168,6 +190,27 @@ export function CashOfferMatrix() {
     () => netSheetFor(netSheetOffer),
     [netSheetOffer],
   );
+
+  // Strongest net across offers — drives the per-column net-to-seller bar.
+  const maxNet = useMemo(() => Math.max(...OFFERS.map((o) => netSheetFor(o).net)), []);
+  const topNetId = useMemo(
+    () =>
+      OFFERS.reduce((best, o) =>
+        netSheetFor(o).net > netSheetFor(best).net ? o : best,
+      ).id,
+    [],
+  );
+
+  // Real listing agent identity for the branded net sheet signature.
+  const listingAgent = getAgent(LISTING_AGENT_SLUG);
+  const brandedAgent = {
+    name: listingAgent?.name ?? "Chase Bright",
+    title: listingAgent?.title ?? "Real Estate Broker",
+    license: listingAgent?.licenseNumbers?.OR ?? listingAgent?.licenses?.[0],
+    phone: listingAgent?.phone,
+    email: listingAgent?.email,
+    slug: LISTING_AGENT_SLUG,
+  };
 
   async function runVerdict() {
     setVerdict({ text: "", running: true });
@@ -212,7 +255,7 @@ export function CashOfferMatrix() {
         <div className="flex items-center justify-between gap-3 border-b border-mist px-5 py-3.5">
           <div className="flex min-w-0 items-center gap-3">
             <PropertyThumb
-              seedIndex={5}
+              src={listingPhoto({ id: "SL-000" })}
               ratio="square"
               alt="5127 SW Cedar Hills Blvd"
               className="h-11 w-11 shrink-0 rounded-lg"
@@ -261,7 +304,7 @@ export function CashOfferMatrix() {
             <thead>
               <tr>
                 {/* Frozen attribute-label corner */}
-                <th className="sticky left-0 z-10 w-40 bg-paper-200/70 px-4 py-3 align-bottom" />
+                <th className="sticky left-0 z-10 w-36 bg-cloud px-4 py-3 align-bottom shadow-[6px_0_8px_-6px_rgba(6,6,6,0.12)]" />
                 {OFFERS.map((o) => {
                   const isAccepted = accepted === o.id;
                   const disabled = accepted != null && !isAccepted;
@@ -269,7 +312,7 @@ export function CashOfferMatrix() {
                     <th
                       key={o.id}
                       className={cn(
-                        "min-w-[13.5rem] border-l border-mist px-4 py-3 align-top transition-colors",
+                        "min-w-[12rem] border-l border-mist px-4 py-3 align-top transition-colors",
                         isAccepted
                           ? "bg-success/[0.06]"
                           : o.recommended
@@ -377,7 +420,7 @@ export function CashOfferMatrix() {
                 <tr key={attr.key} className="border-t border-mist">
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 w-40 bg-paper-200/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate"
+                    className="sticky left-0 z-10 w-36 bg-cloud px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate shadow-[6px_0_8px_-6px_rgba(6,6,6,0.12)]"
                   >
                     {attr.label}
                   </th>
@@ -416,17 +459,20 @@ export function CashOfferMatrix() {
                   })}
                 </tr>
               ))}
-              {/* Net-proceeds row — reconciles each column to the net sheet */}
+              {/* Net-proceeds row — reconciles each column to the net sheet,
+                  with a per-column net-to-seller mini bar so the winner is
+                  obvious at a glance (S3 ticket 2). */}
               <tr className="border-t border-mist bg-paper-200/40">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 w-40 bg-paper-200/70 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate"
+                  className="sticky left-0 z-10 w-36 bg-paper-200 px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-slate shadow-[6px_0_8px_-6px_rgba(6,6,6,0.12)]"
                 >
                   Net to seller
                 </th>
                 {OFFERS.map((o) => {
                   const isAccepted = accepted === o.id;
                   const disabled = accepted != null && !isAccepted;
+                  const net = netSheetFor(o).net;
                   return (
                     <td
                       key={o.id}
@@ -436,9 +482,8 @@ export function CashOfferMatrix() {
                         disabled && "opacity-45",
                       )}
                     >
-                      <span className="font-semibold tabular-nums text-ink">
-                        {usd(netSheetFor(o).net)}
-                      </span>
+                      <span className="font-semibold tabular-nums text-ink">{usd(net)}</span>
+                      <NetToSellerBar net={net} max={maxNet} isTop={o.id === topNetId} />
                     </td>
                   );
                 })}
@@ -471,60 +516,108 @@ export function CashOfferMatrix() {
       {/* ── Right rail: net sheet + share-link intake ─────────────────────── */}
       <aside className="flex min-w-0 flex-col gap-5">
         <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
               Net sheet
             </h3>
-            <StatusChip tone={accepted ? "success" : "gold"} variant="soft">
-              {accepted ? "Accepted offer" : "Top cash offer"}
-            </StatusChip>
+            <div className="flex items-center gap-2">
+              <StatusChip tone={accepted ? "success" : "gold"} variant="soft">
+                {accepted ? "Accepted offer" : "Top cash offer"}
+              </StatusChip>
+              {/* Summary vs printable branded document (S3 ticket 7) */}
+              <div className="inline-flex items-center gap-0.5 rounded-lg border border-mist bg-paper-200/60 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setNetView("summary")}
+                  aria-pressed={netView === "summary"}
+                  className={cn(
+                    "inline-flex min-h-[36px] items-center rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
+                    netView === "summary" ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
+                  )}
+                >
+                  Summary
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNetView("branded")}
+                  aria-pressed={netView === "branded"}
+                  className={cn(
+                    "inline-flex min-h-[36px] items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-medium transition-colors",
+                    netView === "branded" ? "bg-cloud text-ink shadow-soft" : "text-slate hover:text-ink",
+                  )}
+                >
+                  <Receipt className="h-3 w-3" aria-hidden />
+                  Branded
+                </button>
+              </div>
+            </div>
           </div>
           <p className="mt-1 text-[0.74rem] text-slate">
             {netSheetOffer.buyer} · {usd(netSheetOffer.price)}
           </p>
-          <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate">
-            Estimated seller proceeds
-          </p>
-          <p className="mt-1 border-b-2 border-ink pb-2 font-display text-[2rem] font-normal leading-none text-ink tabular-nums">
-            {usd(netProceeds)}
-          </p>
 
-          <dl className="mt-4 space-y-2.5">
-            {netRows.map((row) => (
-              <div key={row.label} className="flex items-center justify-between gap-3">
-                <dt className="flex items-center gap-2 text-[0.8rem] text-slate">
-                  <Dot tone={row.tone === "danger" ? "danger" : "ink"} />
-                  {row.label}
-                </dt>
-                <dd
-                  className={cn(
-                    "text-[0.84rem] font-semibold tabular-nums",
-                    row.tone === "danger" ? "text-danger" : "text-ink",
-                  )}
-                >
-                  {row.value < 0 ? `(${usd(Math.abs(row.value))})` : usd(row.value)}
-                </dd>
+          {netView === "summary" ? (
+            <>
+              <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate">
+                Estimated seller proceeds
+              </p>
+              <p className="mt-1 border-b-2 border-ink pb-2 font-display text-[2rem] font-normal leading-none text-ink tabular-nums">
+                {usd(netProceeds)}
+              </p>
+
+              <dl className="mt-4 space-y-2.5">
+                {netRows.map((row) => (
+                  <div key={row.label} className="flex items-center justify-between gap-3">
+                    <dt className="flex items-center gap-2 text-[0.8rem] text-slate">
+                      <Dot tone={row.tone === "danger" ? "danger" : "ink"} />
+                      {row.label}
+                    </dt>
+                    <dd
+                      className={cn(
+                        "text-[0.84rem] font-semibold tabular-nums",
+                        row.tone === "danger" ? "text-danger" : "text-ink",
+                      )}
+                    >
+                      {row.value < 0 ? `(${usd(Math.abs(row.value))})` : usd(row.value)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-mist pt-3">
+                <span className="flex items-center gap-2 text-[0.8rem] font-semibold text-ink">
+                  <Banknote className="h-4 w-4 text-success" aria-hidden />
+                  Net to seller
+                </span>
+                <span className="font-display text-[1.05rem] font-normal text-success tabular-nums">
+                  {usd(netProceeds)}
+                </span>
               </div>
-            ))}
-          </dl>
 
-          <div className="mt-4 flex items-center justify-between gap-3 border-t border-mist pt-3">
-            <span className="flex items-center gap-2 text-[0.8rem] font-semibold text-ink">
-              <Banknote className="h-4 w-4 text-success" aria-hidden />
-              Net to seller
-            </span>
-            <span className="font-display text-[1.05rem] font-normal text-success tabular-nums">
-              {usd(netProceeds)}
-            </span>
-          </div>
-
-          <p className="mt-3 text-[0.7rem] leading-relaxed text-slate">
-            Reconciles to {accepted ? "the accepted" : "the top"} offer ({usd(netSheetOffer.price)}).
-            Figures are estimates pending title and payoff confirmation.
-          </p>
+              <p className="mt-3 text-[0.7rem] leading-relaxed text-slate">
+                Reconciles to {accepted ? "the accepted" : "the top"} offer ({usd(netSheetOffer.price)}).
+                Figures are estimates pending title and payoff confirmation.
+              </p>
+            </>
+          ) : (
+            /* Printable Matin-branded net sheet via BrandedDocument (G-B) */
+            <div className="mt-3">
+              <BrandedDocument
+                variant="netsheet"
+                title="Estimated Seller Net Proceeds"
+                recipient="Sarah Mitchell"
+                agent={brandedAgent}
+                salePrice={netSheetOffer.price}
+                netSheetLines={brandedNetLines(netSheetOffer)}
+                page={1}
+                pages={1}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Share-link offer intake (realism must — §2.3) */}
+        {/* Share-link offer intake (realism must — §2.3) with a Matin-branded
+            mini-preview of the public offer-submission page (S3 ticket 6). */}
         <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
           <h3 className="flex items-center gap-1.5 font-display text-[1.02rem] font-normal leading-tight text-ink">
             <Link2 className="h-4 w-4 text-slate" aria-hidden />
@@ -534,6 +627,32 @@ export function CashOfferMatrix() {
             Share this link with cash buyers and agents. Submitted offers land in
             this grid for the seller to compare.
           </p>
+
+          {/* Branded preview of the public page the link opens */}
+          <div className="mt-3 overflow-hidden rounded-xl border border-mist">
+            <div className="flex items-center justify-between gap-2 bg-ink px-3.5 py-2.5">
+              <MatinMark theme="white" className="h-4" />
+              <span className="font-mono text-[0.64rem] text-slate-300">Submit a cash offer</span>
+            </div>
+            <div className="space-y-2 bg-cloud px-3.5 py-3">
+              <p className="text-[0.78rem] font-semibold text-ink">5127 SW Cedar Hills Blvd</p>
+              <p className="text-[0.7rem] text-slate">Beaverton, OR · est. {usd(EST_VALUE)}</p>
+              <div className="grid grid-cols-2 gap-1.5 pt-1">
+                {["Offer price", "Closing date", "Loan type", "Contingencies"].map((f) => (
+                  <span
+                    key={f}
+                    className="rounded-md border border-dashed border-mist bg-paper-200/50 px-2 py-1 text-[0.64rem] text-slate"
+                  >
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <p className="pt-1 text-[0.62rem] text-slate">
+                Submissions land in this grid · Matin Real Estate · Equal Housing Opportunity
+              </p>
+            </div>
+          </div>
+
           <div className="mt-3 flex items-center gap-2 rounded-lg border border-mist bg-paper-200/60 px-3 py-2">
             <span className="min-w-0 flex-1 truncate font-mono text-[0.74rem] text-ink">
               {SHARE_LINK}
@@ -542,7 +661,7 @@ export function CashOfferMatrix() {
               type="button"
               onClick={copyLink}
               className={cn(
-                "inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-semibold transition-colors",
+                "inline-flex min-h-[40px] shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[0.72rem] font-semibold transition-colors",
                 copied ? "text-success" : "text-slate hover:text-ink",
               )}
             >

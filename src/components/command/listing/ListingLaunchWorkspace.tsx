@@ -37,6 +37,8 @@ import {
   CheckCircle2,
   ChevronRight,
   CalendarClock,
+  Sparkles,
+  Database,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import {
@@ -45,15 +47,26 @@ import {
   StatusChip,
   ProgressTrack,
   DocumentPreview,
+  BrandedDocument,
   AIInsightChip,
   RecordDrawer,
+  ScoreRing,
+  Avatar,
+  PropertyThumb,
+  PaneSwitcher,
+  usePaneSwitcher,
   useAiSidecar,
   type ChipTone,
   type TrackTone,
 } from "@/components/os";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { getAgent, roles, defaultListingCoordinator, listingPhoto } from "@/lib/data";
 import type { ListingPipeline } from "@/lib/types";
+
+/* Role-derived principal broker (no hardcoded "Broker Jordan Matin" — G-A #2). */
+const BROKER = getAgent(roles.principalBroker);
+const BROKER_NAME = BROKER?.name ?? "Jordan Matin";
 
 /* ── track model ─────────────────────────────────────────────────────────── */
 
@@ -104,7 +117,7 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
         tone: "warn",
         blockerTitle: "Selected blocker: seller disclosures",
         aiExplanation:
-          "AI found missing initials on page 4 and a name/title mismatch (form lists \"Sarah Mitchell\" but signature block reads \"S. Mitchell, Trustee\"). Drafted a correction request for the seller.",
+          "AI found missing initials on page 4 of the seller property disclosure and a name/title mismatch between the form and the signature block. Drafted a correction request for the seller to e-sign.",
         insight: "Needs initials · page 4 · name/title mismatch",
         icon: ShieldCheck,
       },
@@ -148,8 +161,8 @@ function tracksFor(listing: ListingPipeline): LaunchTrack[] {
         tone: "danger",
         blockerTitle: "Broker approval — required before MLS publish",
         aiExplanation:
-          "Broker Jordan Matin has not yet signed off. Launch cannot be marked ready while broker MLS approval is outstanding. Disclosures + MLS input must clear first to unblock the review.",
-        insight: "Awaiting Jordan Matin · blocks MLS publish",
+          `Principal broker ${BROKER_NAME} has not yet signed off. Launch cannot be marked ready while broker MLS approval is outstanding. Disclosures + MLS input must clear first to unblock the review.`,
+        insight: `Awaiting ${BROKER_NAME} · blocks MLS publish`,
         icon: ShieldCheck,
       },
     ];
@@ -280,23 +293,40 @@ interface OutputAsset {
   body: string;
 }
 
-function outputsFor(listing: ListingPipeline, marketingKit: string | null): OutputAsset[] {
+function outputsFor(
+  listing: ListingPipeline,
+  marketingKit: string | null,
+  overall: number,
+): OutputAsset[] {
   const done = (n: number, total: number) => `${n}/${total} complete`;
   const checklistDone = (
     Object.values(listing.checklist).flat() as { done: boolean }[]
   ).filter((i) => i.done).length;
   const checklistTotal = (Object.values(listing.checklist).flat() as unknown[]).length;
 
+  // Wire each asset's status to its real checklist group (S4 ticket 4) — never
+  // a "flyer Generated" on an Intake-stage record.
+  const grp = (items: { done: boolean }[]) =>
+    items.length > 0 && items.every((i) => i.done);
+  const mlsLive = grp(listing.checklist.mls);
+  const photosDone = grp(listing.checklist.photos);
+  const flyerDone = listing.checklist.marketing.find((i) =>
+    /flyer/i.test(i.label),
+  )?.done;
+  const socialDone = listing.checklist.marketing.find((i) =>
+    /social/i.test(i.label),
+  )?.done;
+
   return [
     {
       key: "mls-remarks",
       title: "MLS remarks",
-      status: "Draft ready",
-      tone: "info",
+      status: mlsLive ? "Published" : "Draft ready",
+      tone: mlsLive ? "success" : "info",
       icon: FileText,
-      previewTitle: "RMLS Public Remarks — draft",
-      previewStatus: "Draft · awaiting agent approval",
-      previewStatusTone: "info",
+      previewTitle: "RMLS Public Remarks",
+      previewStatus: mlsLive ? "Published to RMLS" : "Draft · awaiting agent approval",
+      previewStatusTone: mlsLive ? "success" : "info",
       lines: 8,
       body:
         `Refined ${listing.beds}-bed, ${listing.baths}-bath retreat in ${listing.city}. ` +
@@ -321,23 +351,25 @@ function outputsFor(listing: ListingPipeline, marketingKit: string | null): Outp
       status: "Needs approve",
       tone: "warn",
       icon: Send,
-      previewTitle: "Seller launch update — Sarah Mitchell",
+      previewTitle: `Seller launch update — ${listing.address}`,
       previewStatus: "Draft · needs agent approval",
       previewStatusTone: "warn",
       lines: 7,
       missing: ["Approval required before client send"],
       body:
-        "Hi Sarah — here's where your launch stands. We're 58% through prep. Remaining: your initials on disclosure page 4, the exterior twilight photo set (tomorrow), and broker MLS approval. We'll go live within 5 days.",
+        `Here's where the ${listing.address} launch stands — we're ${overall}% through prep. ` +
+        `Remaining items reconcile to the open blockers: ${(listing.blockers ?? ["final checklist items"]).join("; ")}. ` +
+        `We're targeting MLS-live within the week.`,
     },
     {
       key: "flyer",
       title: "Open house flyer",
-      status: "Generated",
-      tone: "success",
+      status: flyerDone ? "Generated" : "Drafting",
+      tone: flyerDone ? "success" : "warn",
       icon: Megaphone,
       previewTitle: "Open house flyer — 8.5×11",
-      previewStatus: "Generated · brand-approved",
-      previewStatusTone: "success",
+      previewStatus: flyerDone ? "Generated · brand-approved" : "Drafting · hero photo + price block",
+      previewStatusTone: flyerDone ? "success" : "warn",
       lines: 6,
       body:
         `Open House this Saturday 11–2. ${listing.address}, ${listing.city}. Offered at $${listing.price.toLocaleString()}. Hero image, QR to listing page, and agent contact block laid into the Matin flyer template.`,
@@ -345,16 +377,20 @@ function outputsFor(listing: ListingPipeline, marketingKit: string | null): Outp
     {
       key: "carousel",
       title: "Social carousel",
-      status: "Queued",
-      tone: "info",
+      status: socialDone ? "Published" : "Queued",
+      tone: socialDone ? "success" : "info",
       icon: Camera,
       previewTitle: "Instagram carousel — 6 frames",
-      previewStatus: "Queued · holds on twilight photo",
-      previewStatusTone: "info",
+      previewStatus: socialDone
+        ? "Published to Instagram"
+        : photosDone
+          ? "Queued · ready to schedule"
+          : "Queued · holds on photo delivery",
+      previewStatusTone: socialDone ? "success" : "info",
       lines: 6,
-      missing: ["Hero frame waiting on exterior twilight set"],
+      missing: socialDone || photosDone ? undefined : ["Hero frame waiting on photo delivery"],
       body:
-        "Six-frame carousel: hero, kitchen, primary suite, deck, neighborhood, call-to-action. Captions drafted in brand voice; publishes once the twilight hero lands.",
+        "Six-frame carousel: hero, kitchen, primary suite, deck, neighborhood, call-to-action. Captions drafted in brand voice; publishes once the hero photo lands.",
     },
     {
       key: "youtube",
@@ -402,7 +438,10 @@ function readinessOf(listing: ListingPipeline): number {
     : Math.round((all.filter((i) => i.done).length / all.length) * 100);
 }
 
-function ListingSelector({
+/** Active-launches selector — a horizontal scroll rail of compact cards that
+ *  works at every breakpoint (R6: scrollable, never a broken wrap). Below lg it
+ *  is the only selector; at lg+ it sits above the two-pane workspace. */
+function ListingSelectorBar({
   listings,
   selectedId,
   onSelect,
@@ -412,9 +451,9 @@ function ListingSelector({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <p className="eyebrow px-1 pb-1">Active launches ({listings.length})</p>
-      <div className="flex flex-col gap-1.5">
+    <div>
+      <p className="eyebrow px-1 pb-1.5">Active launches ({listings.length})</p>
+      <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {listings.map((l) => {
           const active = l.id === selectedId;
           const r = readinessOf(l);
@@ -423,8 +462,9 @@ function ListingSelector({
               key={l.id}
               type="button"
               onClick={() => onSelect(l.id)}
+              aria-pressed={active}
               className={cn(
-                "flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors",
+                "flex min-h-11 w-56 shrink-0 snap-start items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left transition-colors",
                 active
                   ? "border-ink bg-ink text-cloud"
                   : "border-mist bg-cloud text-ink hover:border-ink/20",
@@ -487,14 +527,40 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
   const [kitOutput, setKitOutput] = useState<string | null>(null);
   const [kitLoading, setKitLoading] = useState(false);
 
-  const outputs = useMemo(() => outputsFor(selected, kitOutput), [selected, kitOutput]);
+  // Overall launch progress = mean of tracks (drives KPI + seller note + outputs).
+  const overall = Math.round(tracks.reduce((s, t) => s + t.value, 0) / tracks.length);
+
+  const outputs = useMemo(
+    () => outputsFor(selected, kitOutput, overall),
+    [selected, kitOutput, overall],
+  );
 
   // Asset drawer.
   const [openAssetKey, setOpenAssetKey] = useState<AssetKey | null>(null);
   const openAsset = outputs.find((o) => o.key === openAssetKey) ?? null;
 
-  // Overall launch progress = mean of tracks (drives KPI + seller note).
-  const overall = Math.round(tracks.reduce((s, t) => s + t.value, 0) / tracks.length);
+  // Mobile pane-switcher (R1): below lg show ONE pane at a time.
+  const pane = usePaneSwitcher(
+    [
+      { key: "record", label: "Record" },
+      { key: "outputs", label: "Outputs", count: outputs.length },
+      { key: "action", label: "Action" },
+    ],
+    "record",
+  );
+
+  // Real assigned-agent identity (Maple → chase-bright) for header + signatures.
+  const agent = getAgent(selected.agentSlug);
+  const agentLicense = agent?.licenseNumbers?.OR ?? agent?.licenses?.[0];
+  const brandedAgent = {
+    name: agent?.name ?? selected.agentName,
+    title: agent?.title ?? "Real Estate Broker",
+    license: agentLicense,
+    phone: agent?.phone,
+    email: agent?.email,
+    slug: selected.agentSlug,
+  };
+  const heroPhoto = listingPhoto({ id: selected.id });
 
   const contextLine = `Context: Listing Launch / ${selected.address}`;
 
@@ -546,8 +612,8 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         Automated listing workflow: intake → docs → photos → MLS → marketing → seller updates.
       </p>
 
-      {/* KPI strip */}
-      <KpiStrip>
+      {/* KPI strip — explicit 2/3/6 so no tile orphans (R4) */}
+      <KpiStrip cols={6}>
         <KpiCard
           label="Active launches"
           value={activeLaunches}
@@ -590,36 +656,78 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         />
       </KpiStrip>
 
-      {/* Body: selector + record (left) | outputs + action drawer (right) */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        {/* Selector */}
-        <div className="lg:col-span-2">
-          <ListingSelector
-            listings={listings}
-            selectedId={selected.id}
-            onSelect={(id) => {
-              setSelectedId(id);
-              setActiveTrackKey("disclosures");
-              setKitOutput(null);
-            }}
-          />
-        </div>
+      {/* Selector — vertical list at lg+, horizontal chip row / dropdown
+          below lg (R1/R6). */}
+      <ListingSelectorBar
+        listings={listings}
+        selectedId={selected.id}
+        onSelect={(id) => {
+          setSelectedId(id);
+          setActiveTrackKey("disclosures");
+          setKitOutput(null);
+          pane.go("record");
+        }}
+      />
 
-        {/* LEFT ~50% — Listing record */}
-        <div className="lg:col-span-5">
+      {/* Mobile pane-switcher (R1): below lg, ONE pane at a time. */}
+      <PaneSwitcher {...pane.switcherProps} ariaLabel="Listing launch panes" />
+
+      {/* Below lg — single active pane. */}
+      <div className="space-y-5 lg:hidden">
+        {pane.is("record") ? (
           <ListingRecordCard
             listing={selected}
             tracks={tracks}
             activeTrackKey={activeTrack.key}
             overall={overall}
+            agent={brandedAgent}
+            heroPhoto={heroPhoto}
+            onSelectTrack={(k) => {
+              setActiveTrackKey(k);
+              pane.go("action");
+            }}
+            onOpenAi={() => openAi(contextLine)}
+          />
+        ) : null}
+        {pane.is("outputs") ? (
+          <OutputPreviews
+            outputs={outputs}
+            heroPhoto={heroPhoto}
+            onView={(k) => setOpenAssetKey(k)}
+          />
+        ) : null}
+        {pane.is("action") ? (
+          <ActionDrawerCard
+            track={activeTrack}
+            kitLoading={kitLoading}
+            kitOutput={kitOutput}
+            onGenerateKit={handleGenerateKit}
+            onOpenDoc={() => setOpenAssetKey("seller-email")}
+          />
+        ) : null}
+      </div>
+
+      {/* lg+ — record (left) | outputs + action drawer (right). Tablet (md)
+          gets a 2-column intermediate via the selector bar being horizontal. */}
+      <div className="hidden gap-5 lg:grid lg:grid-cols-12">
+        <div className="lg:col-span-6 xl:col-span-5">
+          <ListingRecordCard
+            listing={selected}
+            tracks={tracks}
+            activeTrackKey={activeTrack.key}
+            overall={overall}
+            agent={brandedAgent}
+            heroPhoto={heroPhoto}
             onSelectTrack={setActiveTrackKey}
             onOpenAi={() => openAi(contextLine)}
           />
         </div>
-
-        {/* RIGHT — outputs (top) + action drawer (bottom) */}
-        <div className="space-y-5 lg:col-span-5">
-          <OutputPreviews outputs={outputs} onView={(k) => setOpenAssetKey(k)} />
+        <div className="space-y-5 lg:col-span-6 xl:col-span-7">
+          <OutputPreviews
+            outputs={outputs}
+            heroPhoto={heroPhoto}
+            onView={(k) => setOpenAssetKey(k)}
+          />
           <ActionDrawerCard
             track={activeTrack}
             kitLoading={kitLoading}
@@ -630,6 +738,17 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         </div>
       </div>
 
+      {/* Schema-transparency note (S4 ticket 8) */}
+      <div className="rounded-xl border border-mist bg-paper-200/40 px-4 py-3">
+        <p className="flex items-center gap-1.5 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate">
+          <Database className="h-3.5 w-3.5" aria-hidden />
+          Backend record joins
+        </p>
+        <p className="mt-1.5 font-mono text-[0.72rem] leading-relaxed text-slate">
+          listings · checklist_items · documents · marketing_assets · ai_actions
+        </p>
+      </div>
+
       {/* Asset preview drawer */}
       <RecordDrawer
         open={!!openAsset}
@@ -638,32 +757,32 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         subtitle={`${selected.address} · ${selected.city}`}
         actions={
           openAsset ? (
-            <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex w-full flex-wrap items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setOpenAssetKey(null)}
-                className="rounded-lg px-3 py-2 text-[0.82rem] font-medium text-slate transition-colors hover:bg-paper-200"
+                className="min-h-[44px] rounded-lg px-3 py-2 text-[0.82rem] font-medium text-slate transition-colors hover:bg-paper-200"
               >
                 Close
               </button>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
+                  className="min-h-[44px] rounded-lg border border-mist px-3 py-2 text-[0.82rem] font-medium text-ink transition-colors hover:bg-paper-200"
                 >
                   Download PDF
                 </button>
                 {openAsset.previewStatusTone === "warn" ? (
                   <button
                     type="button"
-                    className="rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+                    className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
                   >
                     Approve &amp; send
                   </button>
                 ) : (
                   <button
                     type="button"
-                    className="rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
+                    className="min-h-[44px] rounded-lg bg-ink px-3 py-2 text-[0.82rem] font-medium text-cloud transition-colors hover:bg-ink-800"
                   >
                     Send for signature
                   </button>
@@ -676,17 +795,86 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         {openAsset ? (
           <div className="space-y-4">
             <AIInsightChip>Generated by Matin AI · saved as draft version</AIInsightChip>
-            <p className="text-[0.86rem] leading-relaxed text-ink">{openAsset.body}</p>
-            <DocumentPreview
-              title={openAsset.previewTitle}
-              status={openAsset.previewStatus}
-              statusTone={openAsset.previewStatusTone}
-              lines={openAsset.lines}
-              signatureField={openAsset.signatureField}
-              missing={openAsset.missing}
-              page={1}
-              pages={openAsset.key === "checklist" ? 2 : 1}
-            />
+            {/* Client-facing types render through BrandedDocument (G-B); the
+                internal checklist export keeps the gray-ruled DocumentPreview. */}
+            {openAsset.key === "seller-email" ? (
+              <BrandedDocument
+                variant="email"
+                title={`${selected.address} launch update`}
+                emailSubject={`Your launch update — ${selected.address}`}
+                fromName={`Matin Real Estate · ${brandedAgent.name}`}
+                recipient="Seller"
+                agent={brandedAgent}
+                mergeTokens={["{{first_name}}", "{{address}}"]}
+                body={
+                  <>
+                    <p>Hi {"{{first_name}}"},</p>
+                    <p>{openAsset.body}</p>
+                    <p>
+                      I&rsquo;ll keep you posted as each item clears. Reach me directly at{" "}
+                      {brandedAgent.phone ?? "(503) 622-9624"} with any questions.
+                    </p>
+                    <p>
+                      Warmly,
+                      <br />
+                      {brandedAgent.name}
+                      {brandedAgent.title ? `, ${brandedAgent.title}` : ""}
+                    </p>
+                  </>
+                }
+              />
+            ) : openAsset.key === "mls-remarks" ? (
+              <BrandedDocument
+                variant="letter"
+                formId="RMLS Public Remarks"
+                title="RMLS Public Remarks"
+                recipient={`${selected.address}, ${selected.city}`}
+                agent={brandedAgent}
+                completion={openAsset.previewStatusTone === "success" ? 100 : 70}
+                page={1}
+                pages={1}
+                fields={[
+                  { label: "Listing", value: selected.address },
+                  { label: "List price", value: `$${selected.price.toLocaleString()}` },
+                  { label: "Beds / baths", value: `${selected.beds} / ${selected.baths}` },
+                  { label: "Living area", value: `${selected.sqft.toLocaleString()} sqft` },
+                ]}
+                body={<p className="leading-relaxed text-ink/90">{openAsset.body}</p>}
+              />
+            ) : openAsset.key === "flyer" ? (
+              <BrandedDocument
+                variant="flyer"
+                title={selected.address}
+                agent={brandedAgent}
+                listing={{
+                  address: selected.address,
+                  city: selected.city,
+                  state: "OR",
+                  price: `$${selected.price.toLocaleString()}`,
+                  beds: selected.beds,
+                  baths: selected.baths,
+                  sqft: selected.sqft.toLocaleString(),
+                  year: selected.yearBuilt,
+                  heroPhoto,
+                  headline: "Just Listed",
+                  blurb: selected.features.slice(0, 3).join(" · "),
+                }}
+              />
+            ) : (
+              <>
+                <p className="text-[0.86rem] leading-relaxed text-ink">{openAsset.body}</p>
+                <DocumentPreview
+                  title={openAsset.previewTitle}
+                  status={openAsset.previewStatus}
+                  statusTone={openAsset.previewStatusTone}
+                  lines={openAsset.lines}
+                  signatureField={openAsset.signatureField}
+                  missing={openAsset.missing}
+                  page={1}
+                  pages={openAsset.key === "checklist" ? 2 : 1}
+                />
+              </>
+            )}
           </div>
         ) : null}
       </RecordDrawer>
@@ -696,11 +884,54 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
 
 /* ── left record card ────────────────────────────────────────────────────── */
 
+interface BrandedAgent {
+  name: string;
+  title?: string;
+  license?: string;
+  phone?: string;
+  email?: string;
+  slug?: string;
+}
+
+/** Map a track to its real checklist group (for per-track count) + owner role
+ *  + a plausible due window. Owners come from real role slots (G-A #2). */
+function trackMeta(
+  listing: ListingPipeline,
+  key: TrackKey,
+  agent: BrandedAgent,
+): { done: number; total: number; owner: string; ownerSlug?: string; due: string } {
+  const c = listing.checklist;
+  const count = (items: { done: boolean }[]) => ({
+    done: items.filter((i) => i.done).length,
+    total: items.length,
+  });
+  switch (key) {
+    case "intake":
+      return { ...count(c.prep), owner: defaultListingCoordinatorName(), ownerSlug: defaultListingCoordinator, due: "Today" };
+    case "disclosures":
+      return { ...count(c.prep.filter((i) => /disclosure|repair|inspection/i.test(i.label))), owner: agent.name, ownerSlug: agent.slug, due: "Tomorrow" };
+    case "photos":
+      return { ...count(c.photos), owner: defaultListingCoordinatorName(), ownerSlug: defaultListingCoordinator, due: "In 1 day" };
+    case "mls":
+      return { ...count(c.mls), owner: agent.name, ownerSlug: agent.slug, due: "In 2 days" };
+    case "marketing":
+      return { ...count(c.marketing), owner: defaultListingCoordinatorName(), ownerSlug: defaultListingCoordinator, due: "In 3 days" };
+    case "broker":
+      return { ...count(c.launch), owner: BROKER_NAME, ownerSlug: roles.principalBroker, due: "On clear" };
+  }
+}
+
+function defaultListingCoordinatorName(): string {
+  return getAgent(defaultListingCoordinator)?.name ?? "Listing Coordinator";
+}
+
 function ListingRecordCard({
   listing,
   tracks,
   activeTrackKey,
   overall,
+  agent,
+  heroPhoto,
   onSelectTrack,
   onOpenAi,
 }: {
@@ -708,6 +939,8 @@ function ListingRecordCard({
   tracks: LaunchTrack[];
   activeTrackKey: TrackKey;
   overall: number;
+  agent: BrandedAgent;
+  heroPhoto: string;
   onSelectTrack: (key: TrackKey) => void;
   onOpenAi: () => void;
 }) {
@@ -715,10 +948,34 @@ function ListingRecordCard({
     listing.address === "7428 SW Maple Ave"
       ? 5
       : Math.max(2, 14 - listing.daysInStage);
+  const ppsf = Math.round(listing.price / listing.sqft);
+  const blockers = listing.blockers ?? [];
+
+  const stats = [
+    { k: "Beds", v: String(listing.beds) },
+    { k: "Baths", v: String(listing.baths) },
+    { k: "Sq Ft", v: listing.sqft.toLocaleString() },
+    { k: "$/SqFt", v: `$${ppsf}` },
+  ];
 
   return (
     <div className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
-      {/* Header */}
+      {/* 16:9 real hero photo (G-A #6 — deterministic by record id) */}
+      <div className="relative">
+        <PropertyThumb
+          src={heroPhoto}
+          ratio="video"
+          rounded={false}
+          alt={`${listing.address}, ${listing.city}`}
+        />
+        <span className="absolute right-3 top-3">
+          <StatusChip tone={stageTone(listing)} variant="solid">
+            {listing.stage}
+          </StatusChip>
+        </span>
+      </div>
+
+      {/* Header — address + real agent Avatar + role-derived broker + readiness ring */}
       <div className="flex items-start justify-between gap-3 border-b border-mist px-5 py-4">
         <div className="min-w-0">
           <h2 className="font-display text-[1.2rem] font-normal leading-tight text-ink">
@@ -727,34 +984,55 @@ function ListingRecordCard({
           <p className="mt-1 text-[0.8rem] text-slate">
             {listing.city} · ${listing.price.toLocaleString()} target · Launch in {launchDays} days
           </p>
-          <p className="mt-1.5 text-[0.74rem] text-slate">
-            Listing agent {listing.agentName} · Broker Jordan Matin · {listing.beds}bd / {listing.baths}ba ·{" "}
-            {listing.sqft.toLocaleString()} sqft
-          </p>
+          {/* Real assigned agent shown as an Avatar (no gray initials — §S4.2) */}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="inline-flex items-center gap-1.5">
+              <Avatar name={agent.name} slug={agent.slug} size={22} ring />
+              <span className="text-[0.74rem] font-medium text-ink">{agent.name}</span>
+              <span className="text-[0.7rem] text-slate">listing agent</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Avatar name={BROKER_NAME} slug={roles.principalBroker} size={22} ring />
+              <span className="text-[0.74rem] font-medium text-ink">{BROKER_NAME}</span>
+              <span className="text-[0.7rem] text-slate">broker</span>
+            </span>
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <StatusChip tone={stageTone(listing)}>{listing.stage}</StatusChip>
-          <span className="text-[0.72rem] text-slate tabular-nums">{listing.daysInStage}d in stage</span>
+        {/* Launch-readiness ScoreRing (§S4.3) */}
+        <div className="shrink-0">
+          <ScoreRing value={overall} size={58} label="Ready" />
         </div>
       </div>
 
-      {/* Multi-track checklist as labeled ProgressTrack bars */}
+      {/* 4-cell PropertyStats strip (§S4.3) */}
+      <div className="grid grid-cols-4 divide-x divide-mist border-b border-mist">
+        {stats.map((s) => (
+          <div key={s.k} className="px-3 py-3 text-center">
+            <p className="text-[1.02rem] font-bold tabular-nums text-ink">{s.v}</p>
+            <p className="eyebrow !text-[0.56rem] !tracking-[0.14em] text-slate">{s.k}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Multi-track checklist as labeled ProgressTrack bars — densified with
+          count (done/total), owner avatar, due date, next action (§S4.7). */}
       <div className="space-y-4 px-5 py-5">
         <div className="flex items-center justify-between">
           <p className="eyebrow">Launch tracks</p>
           <span className="text-[0.74rem] font-semibold text-ink tabular-nums">{overall}% overall</span>
         </div>
-        <div className="space-y-3.5">
+        <div className="space-y-2.5">
           {tracks.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === activeTrackKey;
+            const m = trackMeta(listing, t.key, agent);
             return (
               <button
                 key={t.key}
                 type="button"
                 onClick={() => onSelectTrack(t.key)}
                 className={cn(
-                  "block w-full rounded-lg px-2 py-1.5 text-left transition-colors",
+                  "block w-full rounded-lg px-2.5 py-2 text-left transition-colors",
                   isActive ? "bg-paper-200 ring-1 ring-inset ring-ink/10" : "hover:bg-paper-200/60",
                 )}
               >
@@ -767,14 +1045,29 @@ function ListingRecordCard({
                   }
                   value={t.value}
                   tone={t.tone}
+                  valueRight={
+                    <span className="tabular-nums">
+                      {m.done}/{m.total}
+                    </span>
+                  }
                 />
+                <div className="mt-1.5 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-[0.7rem] text-slate">
+                    <Avatar name={m.owner} slug={m.ownerSlug} size={16} ring />
+                    <span className="truncate" title={m.owner}>{m.owner}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[0.68rem] text-slate">
+                    <CalendarClock className="h-3 w-3" aria-hidden />
+                    {m.due}
+                  </span>
+                </div>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Auto-generated seller update note */}
+      {/* Auto-generated seller update note — record-driven from real blockers */}
       <div className="border-t border-mist px-5 py-4">
         <div className="rounded-xl border border-mist bg-paper px-4 py-3.5">
           <div className="flex items-center justify-between gap-2">
@@ -787,21 +1080,23 @@ function ListingRecordCard({
             <StatusChip tone="info">Draft</StatusChip>
           </div>
           <p className="mt-2.5 text-[0.86rem] leading-relaxed text-ink">
-            We are {overall}% through launch prep. Remaining items: initials on disclosure page 4,
-            exterior twilight photo, and broker MLS approval.
+            We are {overall}% through launch prep on {listing.address}.{" "}
+            {blockers.length > 0
+              ? `Remaining items: ${blockers.join("; ")}.`
+              : "All launch tracks are clear — preparing to go live."}
           </p>
-          <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <button
               type="button"
               onClick={onOpenAi}
-              className="inline-flex items-center gap-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:text-ink"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold/15 px-2.5 py-1.5 text-[0.78rem] font-semibold text-gold-ink ring-1 ring-inset ring-gold/30 transition-colors hover:bg-gold/25"
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              Refine with AI
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              Refine with Matin AI
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
             >
               <Forward className="h-3.5 w-3.5" />
               Forward to seller
@@ -815,11 +1110,64 @@ function ListingRecordCard({
 
 /* ── right top — output previews ─────────────────────────────────────────── */
 
+/** A tiny visual proxy per asset type (flyer hero-crop / carousel stacked-frame
+ *  / MLS ruled-page / email letterhead / checklist) so the grid reads like real
+ *  deliverables, not a row of identical black buttons (§S4.9). */
+function AssetProxy({ asset, heroPhoto }: { asset: OutputAsset; heroPhoto: string }) {
+  if (asset.key === "flyer") {
+    return (
+      <div className="relative h-20 overflow-hidden rounded-lg border border-mist">
+        <PropertyThumb src={heroPhoto} ratio="video" rounded={false} alt="Flyer hero" className="h-full" />
+        <span className="absolute inset-x-0 top-0 flex items-center gap-1 bg-ink/85 px-2 py-1">
+          <MatinMark theme="white" className="h-2.5" />
+          <span className="text-[0.56rem] font-medium text-paper">Just Listed</span>
+        </span>
+      </div>
+    );
+  }
+  if (asset.key === "carousel") {
+    return (
+      <div className="relative h-20 rounded-lg">
+        <span className="absolute left-2 top-2 h-16 w-[70%] -rotate-2 overflow-hidden rounded-md border border-mist bg-paper-200" />
+        <span className="absolute left-3 top-1 h-16 w-[70%] rotate-1 overflow-hidden rounded-md border border-mist">
+          <PropertyThumb src={heroPhoto} ratio="square" rounded={false} alt="Carousel frame" className="h-full" />
+        </span>
+      </div>
+    );
+  }
+  if (asset.key === "seller-email") {
+    return (
+      <div className="h-20 overflow-hidden rounded-lg border border-mist bg-cloud">
+        <span className="flex items-center gap-1 bg-ink px-2 py-1">
+          <MatinMark theme="white" className="h-2.5" />
+          <span className="text-[0.56rem] text-slate-300">Matin Real Estate</span>
+        </span>
+        <span className="block space-y-1 px-2 py-1.5">
+          <span className="block h-1 w-[80%] rounded bg-mist" />
+          <span className="block h-1 w-[92%] rounded bg-mist" />
+          <span className="block h-1 w-[60%] rounded bg-mist" />
+        </span>
+      </div>
+    );
+  }
+  // MLS ruled-page + checklist + youtube → ruled-page proxy
+  return (
+    <div className="h-20 space-y-1.5 overflow-hidden rounded-lg border border-mist bg-cloud px-2.5 py-2">
+      <span className="block h-1.5 w-[55%] rounded bg-paper-200" />
+      {[88, 96, 72, 90].map((w, i) => (
+        <span key={i} className="block h-1 rounded bg-mist" style={{ width: `${w}%` }} />
+      ))}
+    </div>
+  );
+}
+
 function OutputPreviews({
   outputs,
+  heroPhoto,
   onView,
 }: {
   outputs: OutputAsset[];
+  heroPhoto: string;
   onView: (key: AssetKey) => void;
 }) {
   return (
@@ -832,30 +1180,31 @@ function OutputPreviews({
         {outputs.map((o) => {
           const Icon = o.icon;
           return (
-            <div
+            // Single card-level click target (§S4.9) — kills the row of identical
+            // black buttons; the whole card opens the branded preview drawer.
+            <button
               key={o.key}
-              className="flex flex-col justify-between gap-3 rounded-xl border border-mist bg-paper px-3.5 py-3"
+              type="button"
+              onClick={() => onView(o.key)}
+              className="group flex flex-col gap-2.5 rounded-xl border border-mist bg-paper p-3 text-left transition-all hover:border-ink/20 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-slate ring-1 ring-inset ring-mist">
-                    <Icon className="h-3.5 w-3.5" />
-                  </span>
-                  <p className="text-[0.82rem] font-semibold leading-tight text-ink">{o.title}</p>
+              <AssetProxy asset={o} heroPhoto={heroPhoto} />
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-[0.82rem] font-semibold leading-tight text-ink">
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-slate" />
+                    {o.title}
+                  </p>
+                  <div className="mt-1.5">
+                    <StatusChip tone={o.tone}>{o.status}</StatusChip>
+                  </div>
                 </div>
-                <div className="mt-2.5">
-                  <StatusChip tone={o.tone}>{o.status}</StatusChip>
-                </div>
+                <span className="inline-flex shrink-0 items-center gap-1 text-[0.72rem] font-medium text-slate transition-colors group-hover:text-ink">
+                  <FileSearch className="h-3.5 w-3.5" aria-hidden />
+                  View
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={() => onView(o.key)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.78rem] font-medium text-cloud transition-colors hover:bg-ink-800"
-              >
-                <FileSearch className="h-3.5 w-3.5" />
-                View
-              </button>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -911,14 +1260,14 @@ function ActionDrawerCard({
         </span>
 
         {/* Buttons */}
-        <div className="mt-1 flex flex-wrap items-center gap-2 pt-1">
+        <div className="mt-1 flex flex-col flex-wrap gap-2 pt-1 sm:flex-row sm:items-center">
           {isMarketing ? (
             <button
               type="button"
               onClick={onGenerateKit}
               disabled={kitLoading}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors",
+                "inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors sm:w-auto sm:justify-start",
                 kitLoading
                   ? "cursor-not-allowed opacity-60"
                   : "hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
@@ -934,7 +1283,7 @@ function ActionDrawerCard({
           ) : (
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-cloud px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-cloud px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200 sm:w-auto sm:justify-start"
             >
               <Send className="h-3.5 w-3.5" />
               Send correction request
@@ -943,7 +1292,7 @@ function ActionDrawerCard({
 
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud sm:w-auto sm:justify-start"
           >
             <UserPlus className="h-3.5 w-3.5" />
             Assign TC follow-up
@@ -951,14 +1300,14 @@ function ActionDrawerCard({
           <button
             type="button"
             onClick={onOpenDoc}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud sm:w-auto sm:justify-start"
           >
             <FileSearch className="h-3.5 w-3.5" />
             Open document preview
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud sm:w-auto sm:justify-start"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             Mark exception approved
