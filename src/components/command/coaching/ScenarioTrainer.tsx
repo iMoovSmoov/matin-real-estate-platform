@@ -584,7 +584,7 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
           </button>
         </form>
         <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[0.68rem] text-slate/45">
-          <Flame className="h-3 w-3 text-ink/80/60" /> Coaching notes appear in [brackets] after each
+          <Flame className="h-3 w-3 text-ink/60" /> Coaching notes appear in [brackets] after each
           reply · stay sharp
         </p>
       </div>

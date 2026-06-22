@@ -263,7 +263,7 @@ export default async function CommunityPage({
       {/* ---------- TALK TO A LOCAL EXPERT CTA ---------- */}
       <Section className="pb-24 pt-0">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-bright px-6 py-12 text-center text-white shadow-glow sm:px-8 sm:py-14 md:px-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-azure-deep via-azure to-azure-deep px-6 py-12 text-center text-white shadow-glow sm:px-8 sm:py-14 md:px-16">
             <div className="absolute inset-0 grid-tech opacity-20" />
             <div className="relative">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">

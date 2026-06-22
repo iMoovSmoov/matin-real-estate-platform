@@ -60,7 +60,7 @@ export function SiteFooter() {
                 key={kind}
                 href={href}
                 aria-label={kind}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 transition hover:border-azure hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 transition hover:border-white/40 hover:text-white"
               >
                 <SocialIcon kind={kind} />
               </a>
@@ -87,17 +87,17 @@ export function SiteFooter() {
           <h4 className="font-display text-lg">Visit us</h4>
           <ul className="mt-4 space-y-3 text-sm text-slate-300">
             <li className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-azure" />
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white/70" />
               {company.address.street}, {company.address.city}, {company.address.state} {company.address.zip}
             </li>
             <li className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-azure" />
+              <Phone className="h-4 w-4 shrink-0 text-white/70" />
               <a href="tel:+15036229624" className="hover:text-white">
                 {company.phone}
               </a>
             </li>
             <li className="flex items-center gap-2.5">
-              <Mail className="h-4 w-4 shrink-0 text-azure" />
+              <Mail className="h-4 w-4 shrink-0 text-white/70" />
               <a href={`mailto:${company.email}`} className="hover:text-white">
                 {company.email}
               </a>
@@ -108,7 +108,7 @@ export function SiteFooter() {
               <Link
                 key={c.slug}
                 href={`/communities/${c.slug}`}
-                className="rounded-full border border-white/12 px-2.5 py-1 text-[0.72rem] text-slate-300 hover:border-azure/60 hover:text-white"
+                className="rounded-full border border-white/12 px-2.5 py-1 text-[0.72rem] text-slate-300 hover:border-white/40 hover:text-white"
               >
                 {c.name}
               </Link>

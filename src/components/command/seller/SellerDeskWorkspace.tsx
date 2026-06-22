@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Database,
   Home,
@@ -83,6 +84,23 @@ export function SellerDeskWorkspace() {
   const [view, setView] = useState<SellerViewKey>("all");
   // Approved-draft activity events, keyed by lead id.
   const [activityLog, setActivityLog] = useState<Record<string, ActivityItem[]>>({});
+
+  // Deep-link from the shared "+ Create" command menu:
+  // /hub/cash-offer?create=opportunity auto-opens the New opportunity drawer
+  // on mount (the same drawer the "Add opportunity" button toggles), then
+  // strips the param so a refresh / back-nav doesn't reopen it.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const didAutoOpen = useRef(false);
+  useEffect(() => {
+    if (didAutoOpen.current) return;
+    if (searchParams.get("create") === "opportunity") {
+      didAutoOpen.current = true;
+      setCreateOpen(true);
+      router.replace(pathname, { scroll: false });
+    }
+  }, [searchParams, router, pathname]);
 
   const selected = useMemo(
     () => leads.find((l) => l.id === selectedId) ?? null,

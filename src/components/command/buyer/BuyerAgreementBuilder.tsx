@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   FileSignature,
   Send,
@@ -254,6 +255,22 @@ export default function BuyerAgreementBuilder() {
   const [recordOpen, setRecordOpen] = useState(false);
   const [recordTab, setRecordTab] = useState("overview");
   const [createOpen, setCreateOpen] = useState(false);
+
+  // Shared "+ Create" menu deep-link: /hub/buyer-agreements?create=agreement
+  // auto-opens the new-agreement drawer on mount, then strips the param so a
+  // refresh/back won't reopen it.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createHandled = useRef(false);
+  useEffect(() => {
+    if (createHandled.current) return;
+    if (searchParams.get("create") === "agreement") {
+      createHandled.current = true;
+      setCreateOpen(true);
+      router.replace(pathname, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   // The controlled intake form (re-seeded when selection changes).
   const [form, setForm] = useState<IntakeForm>(() =>
@@ -1229,7 +1246,7 @@ export default function BuyerAgreementBuilder() {
             <button
               type="button"
               onClick={() => fixField(missing[0].inputId)}
-              className="inline-flex min-h-9 items-center gap-1 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              className="inline-flex min-h-9 items-center gap-1 rounded-lg bg-cloud px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-paper-200"
             >
               Go to first gap
               <ChevronRight className="h-3.5 w-3.5" />

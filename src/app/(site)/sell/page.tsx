@@ -140,7 +140,7 @@ export default function SellPage() {
       {/* ---------- CASH IS KING ---------- */}
       <section id="cash-offer" className="relative scroll-mt-20 overflow-hidden bg-ink py-16 text-white sm:py-20 md:py-28">
         <div className="absolute inset-0 grid-tech opacity-50" />
-        <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
+        <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-white/[0.05] blur-3xl" />
         <Container className="relative">
           <div className="grid items-center gap-14 lg:grid-cols-2">
             <div>

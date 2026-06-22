@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   FileText,
   PenLine,
@@ -146,7 +147,7 @@ export function FormsDocsWorkspace() {
     filteredPackets[0] ??
     packets[0];
 
-  const [docId, setDocId] = useState<string>(firstActionableDoc(packets[0]).id);
+  const [docId, setDocId] = useState<string>(firstActionableDoc(packets[0])?.id ?? "");
   const doc =
     packet.docs.find((d) => d.id === docId) ?? firstActionableDoc(packet);
 
@@ -156,6 +157,21 @@ export function FormsDocsWorkspace() {
     ? packet.docs.find((d) => d.id === drawerDocId) ?? null
     : null;
   const [newOpen, setNewOpen] = useState(false);
+
+  // Shared "+ Create" menu deep-link: /hub/forms?create=packet auto-opens the
+  // NewPacketDrawer on mount, then strips the param so refresh/back won't reopen.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createHandled = useRef(false);
+  useEffect(() => {
+    if (createHandled.current) return;
+    if (searchParams.get("create") === "packet") {
+      createHandled.current = true;
+      setNewOpen(true);
+      router.replace(pathname, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   // AI field check (pane 3) — streamed inline, NOT into the sidecar.
   const [checkOut, setCheckOut] = useState("");
@@ -174,7 +190,7 @@ export function FormsDocsWorkspace() {
 
   function selectPacket(next: Packet) {
     setPacketId(next.id);
-    setDocId(firstActionableDoc(next).id);
+    setDocId(firstActionableDoc(next)?.id ?? "");
     setCheckOut("");
     setPaneConfirm(null);
     // Visible result of the tap (R1/R2): mobile jumps to the Documents pane;
@@ -324,7 +340,7 @@ export function FormsDocsWorkspace() {
     );
     if (docId === targetId) {
       const remaining = packet.docs.filter((d) => d.id !== targetId);
-      if (remaining.length) setDocId(firstActionableDoc({ ...packet, docs: remaining }).id);
+      if (remaining.length) setDocId(firstActionableDoc({ ...packet, docs: remaining })?.id ?? "");
     }
     if (drawerDocId === targetId) setDrawerDocId(null);
   }
@@ -333,7 +349,7 @@ export function FormsDocsWorkspace() {
     setPackets((prev) => [next, ...prev]);
     setView("all");
     setPacketId(next.id);
-    setDocId(firstActionableDoc(next).id);
+    setDocId(firstActionableDoc(next)?.id ?? "");
     flashPane(`Packet created · ${next.name} for ${next.subject}.`);
   }
 
@@ -1577,7 +1593,7 @@ function GhostBtn({
   );
 }
 
-function firstActionableDoc(p: Packet): PacketDoc {
+function firstActionableDoc(p: Packet): PacketDoc | undefined {
   return p.docs.find((d) => isOpenDoc(d.status)) ?? p.docs[0];
 }
 

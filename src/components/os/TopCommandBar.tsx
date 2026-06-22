@@ -2,7 +2,19 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Search, Plus, Bell, Menu } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Bell,
+  Menu,
+  Users,
+  Building2,
+  HandCoins,
+  FileSignature,
+  FileText,
+  Megaphone,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
 import { NAV_ITEMS } from "./SidebarNav";
@@ -19,15 +31,35 @@ import { useAiSidecar } from "./AISidecar";
    gold = AI. "Ask AI" opens the docked AISidecar with a global context line.
    ────────────────────────────────────────────────────────────────────────── */
 
-export type Notification = { title: string; meta: string; tone: "info" | "success" | "warn" };
+export type Notification = {
+  title: string;
+  meta: string;
+  tone: "info" | "success" | "warn";
+  /** Where clicking the notification takes the user (always a real destination). */
+  href: string;
+};
 
+/** Notifications are bound to the canonical demo records so each one navigates
+    to the actual lead / deal / opportunity it refers to (no dead ends). */
 const NOTIFICATIONS: Notification[] = [
-  { title: "New lead — Sarah M. from Zillow", meta: "Lake Oswego · Buyer inquiry · 2m ago", tone: "info" },
-  { title: "Offer accepted — 8457 NW Lakeshore", meta: "Listed at $1.15M · 18m ago", tone: "success" },
-  { title: "Inspection deadline this week", meta: "TX-4003 · due in 2 days · action needed", tone: "warn" },
-  { title: "5-star review from the Harrisons", meta: "West Linn · posted on Google · 1h ago", tone: "success" },
-  { title: "Kim Tran opened your CMA", meta: "Lake Oswego lead · viewed 3 pages · 2h ago", tone: "info" },
-  { title: "Buyer agreement missing — Reyes family", meta: "Showing tomorrow, not signed", tone: "warn" },
+  { title: "New lead — Daniel Cho from IDX Search", meta: "Beaverton · Buyer · score 84 · 2m ago", tone: "info", href: "/hub/crm" },
+  { title: "Inspection deadline — 8912 SE Hawthorne", meta: "Due tomorrow · repair addendum unsigned", tone: "warn", href: "/hub/transactions" },
+  { title: "Sarah Mitchell opened your market report", meta: "Seller intent 91 · clicked the cash-offer page", tone: "info", href: "/hub/cash-offer" },
+  { title: "Listing blocked — 1248 NW Cedar Hills Dr", meta: "Seller disclosure missing initials · broker review due", tone: "warn", href: "/hub/listing-launch" },
+  { title: "Buyer agreement awaiting signature", meta: "Angela Park · sent for e-signature · not yet signed", tone: "warn", href: "/hub/buyer-agreements" },
+  { title: "5-star review from the Harrisons", meta: "West Linn · posted on Google · 1h ago", tone: "success", href: "/hub/reporting" },
+];
+
+/** "+ Create" menu — each item routes to its section and (via ?create=) opens
+    that section's create form, so Create is fully connected, never a dead end. */
+type CreateItem = { label: string; href: string; icon: LucideIcon };
+const CREATE_ITEMS: CreateItem[] = [
+  { label: "New lead", href: "/hub/crm?create=lead", icon: Users },
+  { label: "New listing launch", href: "/hub/listing-launch?create=listing", icon: Building2 },
+  { label: "New seller / cash offer", href: "/hub/cash-offer?create=opportunity", icon: HandCoins },
+  { label: "New buyer agreement", href: "/hub/buyer-agreements?create=agreement", icon: FileSignature },
+  { label: "New document packet", href: "/hub/forms?create=packet", icon: FileText },
+  { label: "New marketing campaign", href: "/hub/marketing?create=campaign", icon: Megaphone },
 ];
 
 /** Derive the page H1 from the deepest matching nav route. */
@@ -60,6 +92,7 @@ export function TopCommandBar({
 }) {
   const { openAi } = useAiSidecar();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const heading = title ?? titleFromPath(pathname);
 
   return (
@@ -104,14 +137,50 @@ export function TopCommandBar({
           <Search className="h-[1.05rem] w-[1.05rem]" />
         </button>
 
-        {/* + Create — ink-filled (primary HUMAN action) */}
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full bg-ink py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Create</span>
-        </button>
+        {/* + Create — ink-filled (primary HUMAN action) → opens a create menu */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setCreateOpen((o) => !o)}
+            aria-haspopup="menu"
+            aria-expanded={createOpen}
+            className="inline-flex items-center gap-1.5 rounded-full bg-ink py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Create</span>
+          </button>
+
+          {createOpen ? (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setCreateOpen(false)} aria-hidden />
+              <div
+                role="menu"
+                className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-mist bg-cloud py-1.5 shadow-lift"
+              >
+                <p className="px-4 pb-1.5 pt-1 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-slate">
+                  Create new
+                </p>
+                {CREATE_ITEMS.map((c) => {
+                  const Icon = c.icon;
+                  return (
+                    <Link
+                      key={c.label}
+                      href={c.href}
+                      role="menuitem"
+                      onClick={() => setCreateOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[0.85rem] font-medium text-ink transition-colors hover:bg-paper-200"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-ink ring-1 ring-inset ring-mist">
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      {c.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+        </div>
 
         {/* Ask AI — gold-filled (the ONE accent, rationed to AI) */}
         <button
@@ -154,17 +223,23 @@ export function TopCommandBar({
                 </div>
                 <ul className="max-h-[22rem] divide-y divide-mist overflow-y-auto">
                   {NOTIFICATIONS.map((n, i) => (
-                    <li key={i} className="flex cursor-pointer gap-3 px-4 py-3 transition-colors hover:bg-paper">
-                      <span
-                        className={cn(
-                          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                          n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-info",
-                        )}
-                      />
-                      <div className="min-w-0">
-                        <p className="text-[0.82rem] font-medium leading-snug text-ink">{n.title}</p>
-                        <p className="mt-0.5 text-[0.72rem] text-slate">{n.meta}</p>
-                      </div>
+                    <li key={i}>
+                      <Link
+                        href={n.href}
+                        onClick={() => setNotifOpen(false)}
+                        className="flex gap-3 px-4 py-3 transition-colors hover:bg-paper"
+                      >
+                        <span
+                          className={cn(
+                            "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                            n.tone === "success" ? "bg-success" : n.tone === "warn" ? "bg-warn" : "bg-info",
+                          )}
+                        />
+                        <div className="min-w-0">
+                          <p className="text-[0.82rem] font-medium leading-snug text-ink">{n.title}</p>
+                          <p className="mt-0.5 text-[0.72rem] text-slate">{n.meta}</p>
+                        </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>

@@ -51,7 +51,9 @@ function ActionBtn({
   tone?: "ghost" | "gold";
 }) {
   const cls = cn(
-    "inline-flex h-9 min-h-9 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[0.74rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20",
+    // ≥44px touch target on phone (where this cluster is the only way to act on a
+    // row); reverts to the dense 36px height at sm+ where a pointer is assumed.
+    "inline-flex h-11 min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[0.74rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 sm:h-9 sm:min-h-9 sm:min-w-0",
     tone === "gold"
       ? "bg-gold text-ink hover:bg-gold-bright"
       : "border border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",

@@ -53,7 +53,7 @@ export default function ContactPage() {
       {/* ---------- HERO ---------- */}
       <section className="relative overflow-hidden bg-ink pb-20 pt-36 text-white md:pb-24">
         <div className="absolute inset-0 grid-tech opacity-50" />
-        <div className="absolute -right-32 top-0 h-96 w-96 rounded-full bg-azure/20 blur-3xl" />
+        <div className="absolute -right-32 top-0 h-96 w-96 rounded-full bg-white/[0.05] blur-3xl" />
         <Container className="relative">
           <div className="max-w-2xl">
             <Reveal>

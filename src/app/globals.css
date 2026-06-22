@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Hide the Vercel preview/feedback toolbar that Vercel injects on preview
+   deployments (the floating button on the right edge). Not part of our app —
+   it only exists on preview URLs and never on production; this keeps the demo
+   clean for reviewers. Harmless on production (the element won't exist). */
+vercel-live-feedback,
+[data-vercel-toolbar],
+#vercel-toolbar {
+  display: none !important;
+}
+
 /*
   MATIN REAL ESTATE — design system
   True to their real brand: clean monochrome luxury — neutral charcoal-black,
@@ -45,10 +55,12 @@
      Gold is rationed STRICTLY to AI affordances + active states inside the
      /hub route group. It is NEVER used anywhere on the monochrome marketing
      site. Usage discipline lives in the hub components, not here. */
-  --color-gold: #b8924a;        /* THE accent: Ask AI, Run/Approve, active nav, AI Assist pill */
-  --color-gold-bright: #d2a050; /* gold hover / score-ring fill */
-  --color-gold-soft: #f0e6d2;   /* pale gold chip fill (AI-handled tag, score chip bg) */
-  --color-gold-ink: #5c4a24;    /* text on pale-gold chips */
+  /* Refined champagne-gold — warmer + brighter than the old olive-gold, reads
+     as high-end metallic gold (not brown). Rationed to AI affordances + active. */
+  --color-gold: #caa64e;        /* THE accent: Ask AI, Run/Approve, active nav, AI Assist pill */
+  --color-gold-bright: #e2bd63; /* gold hover / score-ring fill */
+  --color-gold-soft: #f6eed7;   /* pale gold chip fill (AI-handled tag, score chip bg) */
+  --color-gold-ink: #6a5320;    /* text on pale-gold chips */
 
   /* Type */
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
@@ -230,7 +242,7 @@
 
 /* Gold shimmer text effect */
 .gold-shimmer {
-  background: linear-gradient(105deg, rgba(210,160,80,0.9) 0%, rgba(240,200,100,1) 40%, rgba(210,160,80,0.9) 80%);
+  background: linear-gradient(105deg, rgba(202,166,78,0.95) 0%, rgba(238,205,120,1) 40%, rgba(202,166,78,0.95) 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -241,7 +253,7 @@
   transition: box-shadow 0.35s ease, transform 0.35s ease;
 }
 .card-luxury:hover {
-  box-shadow: 0 20px 60px rgba(6,6,6,0.12), 0 4px 16px rgba(6,6,6,0.06), 0 0 0 1px rgba(210,160,80,0.15);
+  box-shadow: 0 20px 60px rgba(6,6,6,0.12), 0 4px 16px rgba(6,6,6,0.06), 0 0 0 1px rgba(202,166,78,0.18);
   transform: translateY(-3px);
 }
 

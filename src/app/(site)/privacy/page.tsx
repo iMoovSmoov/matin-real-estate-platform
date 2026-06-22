@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
+import { company } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Matin Real Estate",
@@ -77,11 +78,11 @@ export default function PrivacyPage() {
                 reach out to us at:
               </p>
               <address className="mt-3 not-italic text-ink/80">
-                <strong>Matin Real Estate</strong><br />
-                1900 SW 4th Ave, Suite 100<br />
-                Portland, OR 97201<br />
-                <a href="mailto:info@matinrealestate.com" className="text-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
-                  info@matinrealestate.com
+                <strong>{company.name}</strong><br />
+                {company.address.street}<br />
+                {company.address.city}, {company.address.state} {company.address.zip}<br />
+                <a href={`mailto:${company.email}`} className="text-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
+                  {company.email}
                 </a>
               </address>
               <p className="mt-4 text-sm text-slate/70">

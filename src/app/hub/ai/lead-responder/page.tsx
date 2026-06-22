@@ -293,7 +293,7 @@ export default function LeadResponderPage() {
       <nav className="mb-4 flex items-center gap-1.5 text-[0.78rem] text-slate/60">
         <Link href="/hub/ai" className="inline-flex items-center gap-1 hover:text-ink transition-colors">
           <ChevronLeft className="h-3.5 w-3.5" />
-          AI Studio
+          AI Tools
         </Link>
         <span>/</span>
         <span className="text-ink/70">Lead Responder</span>

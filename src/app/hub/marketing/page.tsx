@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useMemo, useState, type ReactNode } from "react";
 import {
   Megaphone,
   Layers,
@@ -47,6 +47,7 @@ import {
   CreateCampaignForm,
   type NewCampaignDraft,
 } from "@/components/command/marketing/CreateCampaignForm";
+import { CreateParamWatcher } from "@/components/command/marketing/CreateParamWatcher";
 import { CampaignChart } from "@/components/command/marketing/CampaignChart";
 import { CampaignFlyer } from "@/components/command/marketing/CampaignFlyer";
 import { EmailComposer } from "@/components/command/marketing/EmailComposer";
@@ -170,6 +171,8 @@ export default function MarketingStudioPage() {
 
   /* ── Create-campaign form drawer ── */
   const [createOpen, setCreateOpen] = useState(false);
+  // Stable opener for the "+ Create" command-bar deep link (?create=campaign).
+  const openCreate = useCallback(() => setCreateOpen(true), []);
   const [draft, setDraft] = useState<NewCampaignDraft>({
     name: "",
     templateKey: "listing-launch",
@@ -591,6 +594,12 @@ export default function MarketingStudioPage() {
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-6 lg:py-6">
+      {/* Shared "+ Create" deep link: /hub/marketing?create=campaign auto-opens
+          the create-campaign drawer once on mount, then strips the param. */}
+      <Suspense fallback={null}>
+        <CreateParamWatcher value="campaign" onMatch={openCreate} />
+      </Suspense>
+
       {/* Subtitle (no page-level h1 — TopCommandBar owns the title) */}
       <p className="text-[0.82rem] leading-snug text-slate">
         Brand-controlled templates generate email, web, print, social, ad, and

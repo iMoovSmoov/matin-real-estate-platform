@@ -26,7 +26,7 @@ export default async function PropertySearchPage({
             Every home on the market, in one place
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate text-pretty">
-            Browse {listings.length} active and upcoming listings across the Portland metro and SW Washington —
+            Browse {listings.length} listings across the Portland metro and SW Washington —
             filtered the way you think about a home.
           </p>
         </Container>

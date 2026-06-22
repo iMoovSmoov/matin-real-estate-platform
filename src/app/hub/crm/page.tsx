@@ -1,6 +1,7 @@
 "use client";
 
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Inbox,
   PhoneOff,
@@ -73,6 +74,14 @@ const BEHAVIORAL_VIEWS: { key: SavedViewKey; label: string }[] = [
 const CANONICAL_LEAD = "LD-1999"; // Daniel Cho (84)
 
 export default function CrmPage() {
+  return (
+    <Suspense fallback={null}>
+      <CrmPageInner />
+    </Suspense>
+  );
+}
+
+function CrmPageInner() {
   const [leads, setLeads] = useState<Lead[]>(seedLeads);
   const [view, setView] = useState<SavedViewKey>("hot");
   const [search, setSearch] = useState("");
@@ -82,6 +91,21 @@ export default function CrmPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   /** quick-action compose target opened directly from a row */
   const [rowCompose, setRowCompose] = useState<{ lead: Lead; mode: ComposeMode } | null>(null);
+
+  // Shared "+ Create" menu deep-link: /hub/crm?create=lead auto-opens the
+  // AddLeadDrawer on mount, then strips the param so refresh/back won't reopen.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createHandled = useRef(false);
+  useEffect(() => {
+    if (createHandled.current) return;
+    if (searchParams.get("create") === "lead") {
+      createHandled.current = true;
+      setAddOpen(true);
+      router.replace(pathname, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   /* The lead inbox sits well below the KPI strip; a KPI drill that re-filters it
      must be VISIBLE, so we scroll the master-detail into view + fade the list on
@@ -442,10 +466,13 @@ const AppointmentsBand = forwardRef<
   { leads: Lead[]; onOpen: (l: Lead) => void }
 >(function AppointmentsBand({ leads, onOpen }, ref) {
   // Real upcoming-touch candidates: leads that progressed to a showing/offer.
-  const upcoming = leads
+  // Keep the FULL count so the header reconciles to the "Appointments set" KPI,
+  // and only cap the rendered cards (highest-intent first).
+  const appointmentLeads = leads
     .filter((l) => ["Showing", "Offer", "Under Contract"].includes(l.stage))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4);
+    .sort((a, b) => b.score - a.score);
+  const upcoming = appointmentLeads.slice(0, 4);
+  const moreCount = appointmentLeads.length - upcoming.length;
 
   return (
     <section ref={ref} className="scroll-mt-20 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
@@ -456,31 +483,40 @@ const AppointmentsBand = forwardRef<
             Upcoming appointments
           </h3>
         </div>
-        <span className="text-[0.72rem] text-slate tabular-nums">{upcoming.length} this week</span>
+        <span className="text-[0.72rem] text-slate tabular-nums">
+          {appointmentLeads.length} this week
+        </span>
       </div>
 
       {upcoming.length > 0 ? (
-        <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {upcoming.map((l) => (
-            <li key={l.id} className="min-w-0">
-              <button
-                type="button"
-                onClick={() => onOpen(l)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-mist bg-paper-200/40 px-3.5 py-2.5 text-left transition-colors hover:border-ink/20"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-[0.84rem] font-semibold text-ink">{l.name}</span>
-                  <span className="block truncate text-[0.74rem] text-slate">
-                    {l.community} · {l.stage}
+        <>
+          <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {upcoming.map((l) => (
+              <li key={l.id} className="min-w-0">
+                <button
+                  type="button"
+                  onClick={() => onOpen(l)}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-mist bg-paper-200/40 px-3.5 py-2.5 text-left transition-colors hover:border-ink/20"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-[0.84rem] font-semibold text-ink">{l.name}</span>
+                    <span className="block truncate text-[0.74rem] text-slate">
+                      {l.community} · {l.stage}
+                    </span>
                   </span>
-                </span>
-                <StatusChip tone={stageTone(l.stage)} variant="soft">
-                  {l.stage}
-                </StatusChip>
-              </button>
-            </li>
-          ))}
-        </ul>
+                  <StatusChip tone={stageTone(l.stage)} variant="soft">
+                    {l.stage}
+                  </StatusChip>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {moreCount > 0 ? (
+            <p className="mt-2.5 text-[0.72rem] text-slate tabular-nums">
+              Showing the {upcoming.length} highest-intent of {appointmentLeads.length}.
+            </p>
+          ) : null}
+        </>
       ) : (
         <p className="mt-3 text-[0.8rem] text-slate">No appointments scheduled yet this week.</p>
       )}

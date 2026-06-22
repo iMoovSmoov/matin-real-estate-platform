@@ -936,7 +936,7 @@ export function SystemsHealthWorkspace({
         {/* AI usage / quota — Structurely-style */}
         <section className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
           <div className="border-b border-mist px-5 py-3">
-            <p className="eyebrow text-[0.66rem] text-slate">AI usage · this month</p>
+            <p className="eyebrow text-[0.66rem] text-slate">AI &amp; messaging · this month</p>
           </div>
           <div className="space-y-4 px-5 py-4">
             {USAGE_QUOTAS.map((q) => {
