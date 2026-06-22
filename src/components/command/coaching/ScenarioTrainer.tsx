@@ -5,7 +5,6 @@ import {
   Drama,
   Send,
   RotateCcw,
-  Bot,
   Award,
   Play,
   Swords,
@@ -19,11 +18,11 @@ import {
   Target,
   DollarSign,
   GraduationCap,
-  Wand2,
   type LucideIcon,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { LiveDot, Pill } from "@/components/command/ui";
 import {
@@ -443,7 +442,7 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
                 ) : isGradeBubble ? (
                   <GraduationCap className="h-4 w-4" />
                 ) : (
-                  <Bot className="h-4 w-4" />
+                  <MatinMark theme="dark" className="h-4 w-4" />
                 )}
               </span>
               <div
@@ -501,7 +500,7 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
               disabled={gradeLoading || busy}
               className="inline-flex items-center gap-1.5 rounded-full border border-ink/[0.08] bg-white px-3.5 py-1.5 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.04] disabled:opacity-40"
             >
-              <Bot className="h-3.5 w-3.5" />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               {gradeLoading ? "Grading…" : "Get AI Coaching"}
             </button>
           </div>
@@ -609,7 +608,7 @@ function CoachGradePanel({ text }: { text: string }) {
         hasBetterPhrasing ? (
           <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 p-3">
             <div className="mb-1.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-amber-700">
-              <Wand2 className="h-3.5 w-3.5" /> Stronger phrasing
+              <MatinMark theme="dark" className="h-3.5 w-3.5" /> Stronger phrasing
             </div>
             <AiMarkdown text={bodyText} />
           </div>

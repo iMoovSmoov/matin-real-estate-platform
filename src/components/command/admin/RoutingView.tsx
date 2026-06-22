@@ -168,7 +168,7 @@ export function AlertsAutomationGrid() {
             </span>
             {/* per-row fired/7d stat (S12 ticket 4) */}
             <span className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-slate tabular-nums">
-              <Zap className="h-3 w-3 text-gold" aria-hidden />
+              <Zap className="h-3 w-3 text-slate" aria-hidden />
               {r.fired7d}× / 7d
             </span>
           </div>

@@ -80,7 +80,7 @@
     "id": "WQ-008",
     "category": "Review",
     "subject": "CRM Sync — Follow Up Boss",
-    "why": "Sync failed mapping external field preferred_area; 38 contacts not updated.",
+    "why": "CRM sync couldn't match the \"preferred area\" field — 38 contacts didn't update.",
     "dueLabel": "Failed 12 min ago",
     "tab": "Failed Automations",
     "sourceType": "workflow-run",

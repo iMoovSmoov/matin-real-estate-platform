@@ -267,7 +267,7 @@ const HAWTHORNE: DealScreen = {
   statusRows: [
     { label: "Inspection", value: "Due tomorrow", tone: "danger" },
     { label: "Appraisal", value: "Not ordered", tone: "warn" },
-    { label: "Loan", value: "Processing", tone: "gold" },
+    { label: "Loan", value: "Processing", tone: "warn" },
     { label: "Title", value: "Clear", tone: "success" },
   ],
   milestones: [
@@ -376,7 +376,7 @@ function deriveStatusRows(tx: Transaction): StatusRow[] {
 
   const loanRow: StatusRow = loan?.done
     ? { label: "Loan", value: "Approved", tone: "success" }
-    : { label: "Loan", value: "Conditional", tone: "gold" };
+    : { label: "Loan", value: "Conditional", tone: "warn" };
 
   const titleRow: StatusRow = { label: "Title", value: "Clear", tone: "success" };
 
@@ -427,7 +427,7 @@ function deriveMilestones(tx: Transaction): DealMilestone[] {
       id: "m5",
       title: "Loan approval",
       dateLabel: fmt(Math.round(close * 0.6)),
-      tone: (stageIdx <= 5 ? "gold" : "success") as MilestoneTone,
+      tone: (stageIdx <= 5 ? "warn" : "success") as MilestoneTone,
     },
     { id: "m6", title: "Closing", dateLabel: fmt(close), tone: "ink" as MilestoneTone, terminal: true },
   ];

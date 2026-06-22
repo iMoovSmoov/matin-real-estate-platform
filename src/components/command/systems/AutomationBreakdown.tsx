@@ -237,7 +237,11 @@ export function AutomationBreakdown({
                 <AIActionCard
                   title="Diagnose & draft a safe restart plan"
                   riskTag="Approval required"
-                  evidence={`"${selected.name}" is paused and ran 0 times this month. Get the likely reason and a safe restart plan to approve.`}
+                  evidence={`"${selected.name}" is paused${
+                    selected.runsThisMonth === 0
+                      ? " and has not run this month"
+                      : ` after ${selected.runsThisMonth.toLocaleString("en-US")} runs this month`
+                  }. Get the likely reason and a safe restart plan to approve.`}
                   confidence="Medium"
                   runLabel="Diagnose"
                   running={diagnosing}

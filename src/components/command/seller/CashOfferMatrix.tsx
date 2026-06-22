@@ -110,8 +110,10 @@ const OFFERS: OfferColumn[] = [
   {
     id: "OFF-03",
     buyer: "R. & M. Okonkwo",
-    agent: "Chase Bright",
-    agentSlug: "chase-bright",
+    // Buyer's agent — must NOT be the listing agent (chase-bright) or the grid
+    // would show the same person on both sides of the deal.
+    agent: "Alicia Smith",
+    agentSlug: "alicia-smith",
     price: 805000,
     closing: "Aug 1 · 38 days",
     loan: "FHA 30yr",

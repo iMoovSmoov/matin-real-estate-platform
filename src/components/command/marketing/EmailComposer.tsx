@@ -9,7 +9,6 @@ import {
   Search,
   X,
   Loader2,
-  Sparkle,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -322,7 +321,7 @@ export function EmailComposer({
                 </>
               ) : (
                 <>
-                  <Sparkle className="h-3.5 w-3.5" aria-hidden />
+                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
                   Use Matin AI
                 </>
               )}

@@ -10,11 +10,11 @@ import {
   CircleCheck,
   Banknote,
   CalendarClock,
-  Sparkles,
   FileText,
   Receipt,
 } from "lucide-react";
 import type { SellerLead } from "@/lib/types";
+import { MatinMark } from "@/components/brand/Logo";
 import { getAgent, listingPhoto } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
 import { cn, usd } from "@/lib/utils";
@@ -101,6 +101,8 @@ export function OpportunityDrawer({
   const [approved, setApproved] = useState(false);
   /** Which branded deliverable is previewed in the Documents tab. */
   const [docKind, setDocKind] = useState<"email" | "netsheet">("email");
+  /** Inline confirmation for the footer quick-actions (no no-op buttons). */
+  const [footerNote, setFooterNote] = useState<string | null>(null);
   const draftRef = useRef<HTMLElement>(null);
 
   // Reset the open draft + tab whenever a different opportunity is selected.
@@ -109,6 +111,7 @@ export function OpportunityDrawer({
     setTab("overview");
     setApproved(false);
     setDocKind("email");
+    setFooterNote(null);
   }, [lead?.id]);
 
   if (!lead) {
@@ -187,6 +190,39 @@ export function OpportunityDrawer({
     });
   }
 
+  // Footer quick-actions log a real, visible event to the activity feed (the
+  // Activity-tab count bumps) and surface an inline confirmation — never a
+  // dead no-op click.
+  function logCall() {
+    if (!lead) return;
+    onLogActivity?.(lead.id, {
+      id: `${lead.id}-call-${Date.now()}`,
+      channel: "call",
+      name: "Call logged",
+      tag: "outbound",
+      tagTone: "info",
+      meta: `${agentName(lead.assignedAgent)} called ${lead.sellerName}`,
+      timeLabel: "just now",
+      group: "Now",
+    });
+    setFooterNote(`Call with ${lead.sellerName.split(" ")[0]} logged to the timeline`);
+  }
+
+  function bookAppt() {
+    if (!lead) return;
+    onLogActivity?.(lead.id, {
+      id: `${lead.id}-appt-${Date.now()}`,
+      channel: "note",
+      name: "Listing appointment booked",
+      tag: "scheduled",
+      tagTone: "warn",
+      meta: `Booked with ${lead.sellerName}`,
+      timeLabel: "just now",
+      group: "Now",
+    });
+    setFooterNote("Listing appointment booked and saved to the timeline");
+  }
+
   const tabs: DrawerTab[] = [
     { key: "overview", label: "Overview" },
     { key: "documents", label: "Documents" },
@@ -218,30 +254,47 @@ export function OpportunityDrawer({
       activeTab={tab}
       onTab={setTab}
       actions={
-        <div className="flex w-full flex-wrap items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
-          >
-            <Phone className="h-4 w-4" aria-hidden />
-            Call seller
-          </button>
-          <ActionPill icon={Mail} label="Email" />
-          <ActionPill icon={CalendarPlus} label="Book appt" />
-          {/* Dock the seller-intel sidecar to THIS record (S3 ticket 8 — the
-              global AI sidecar opens only from an explicit Ask-AI button). */}
-          <button
-            type="button"
-            onClick={() =>
-              openAi(
-                `Working on: cash offer for ${lead.sellerName} · ${lead.address}, ${lead.city}`,
-              )
-            }
-            className="ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
-          >
-            <Sparkles className="h-4 w-4" aria-hidden />
-            Ask Matin
-          </button>
+        <div className="w-full">
+          {footerNote ? (
+            <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-success/10 px-2.5 py-1.5 text-[0.76rem] font-medium text-success ring-1 ring-inset ring-success/25 motion-safe:animate-fade">
+              <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+              {footerNote}
+            </p>
+          ) : null}
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={logCall}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+            >
+              <Phone className="h-4 w-4" aria-hidden />
+              Call seller
+            </button>
+            {/* Email jumps to the branded home-value email in the Documents tab. */}
+            <ActionPill
+              icon={Mail}
+              label="Email"
+              onClick={() => {
+                setFooterNote(null);
+                setTab("documents");
+              }}
+            />
+            <ActionPill icon={CalendarPlus} label="Book appt" onClick={bookAppt} />
+            {/* Dock the seller-intel sidecar to THIS record (S3 ticket 8 — the
+                global AI sidecar opens only from an explicit Ask-AI button). */}
+            <button
+              type="button"
+              onClick={() =>
+                openAi(
+                  `Working on: cash offer for ${lead.sellerName} · ${lead.address}, ${lead.city}`,
+                )
+              }
+              className="ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+            >
+              <MatinMark theme="dark" className="h-4 w-4" />
+              Ask Matin
+            </button>
+          </div>
         </div>
       }
     >
@@ -336,29 +389,38 @@ export function OpportunityDrawer({
             ) : null}
           </section>
 
-          {/* Owner / opportunity profile facts — assigned agent shown as a real Avatar */}
+          {/* Owner / opportunity profile facts — the homeowner is the record's
+              subject (initials token per build-ref); the assigned agent is shown
+              separately, clearly labeled, so the two are never conflated. */}
           <section className="mt-4">
             <p className="eyebrow pb-1.5 text-slate">Owner profile</p>
-            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-mist bg-cloud px-3 py-2.5">
-              <Avatar
-                name={agentName(lead.assignedAgent)}
-                slug={lead.assignedAgent}
-                size={36}
-                ring
-              />
+            <div className="mb-2.5 flex items-center gap-2.5 rounded-xl border border-mist bg-cloud px-3 py-2.5">
+              <Avatar name={lead.sellerName} size={36} ring />
               <div className="min-w-0">
                 <p className="truncate text-[0.82rem] font-semibold text-ink">
-                  {agentName(lead.assignedAgent)}
+                  {lead.sellerName}
                 </p>
                 <p className="truncate text-[0.74rem] text-slate">
-                  {agent?.title ?? "Assigned agent"}
+                  Homeowner · {lead.city}
+                </p>
+              </div>
+            </div>
+            {/* Assigned agent — clearly the agent, not the owner */}
+            <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-mist bg-paper-200/50 px-3 py-2">
+              <Avatar name={agentName(lead.assignedAgent)} slug={lead.assignedAgent} size={28} ring />
+              <div className="min-w-0">
+                <p className="truncate text-[0.78rem] font-medium text-ink">
+                  {agentName(lead.assignedAgent)}
+                </p>
+                <p className="truncate text-[0.72rem] text-slate">
+                  Assigned agent
                   {agent?.phone ? ` · ${agent.phone}` : ""}
                 </p>
               </div>
             </div>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[0.78rem]">
-              <Fact label="Seller" value={lead.sellerName} />
               <Fact label="Source" value={lead.source ?? "Owner database"} />
+              <Fact label="Timeline" value={lead.timeline} />
               <Fact label="Stage" value={lead.stage} />
               <Fact
                 label="Days in stage"
@@ -587,14 +649,17 @@ function Fact({
 function ActionPill({
   icon: Icon,
   label,
+  onClick,
 }: {
   icon: typeof Phone;
   label: string;
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+      onClick={onClick}
+      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-2 text-[0.8rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
     >
       <Icon className="h-4 w-4" aria-hidden />
       {label}

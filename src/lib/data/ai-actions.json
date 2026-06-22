@@ -102,7 +102,7 @@
     "id": "AI-010",
     "title": "Suggest mapping fix for CRM Sync failure",
     "context": "Systems Health / CRM Sync",
-    "evidence": "Run WR-003 failed mapping external field preferred_area. Closest internal field is contacts.community (92% name+value match). Propose adding preferred_area → community to the field map.",
+    "evidence": "Run WR-003 couldn't match the 'preferred area' field. Closest match is our Community field (92% match). Suggest mapping 'preferred area' to Community.",
     "confidence": "High",
     "riskTag": "Approval required",
     "status": "pending",

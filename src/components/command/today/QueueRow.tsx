@@ -9,7 +9,7 @@ import {
   Avatar,
   PropertyThumb,
 } from "@/components/os";
-import { getAgent, leads, sellerLeads } from "@/lib/data";
+import { leads } from "@/lib/data";
 import type { WorkQueueItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { telHref } from "@/components/command/crm/ComposeDrawer";
@@ -108,13 +108,13 @@ export function QueueRow({
   const personSlug = personSlugFor(item);
   const isProperty = rec.thumbSrc != null || rec.thumbSeed != null;
 
-  // Resolve a real phone for one-tap calling on lead/seller rows.
+  // Resolve a real lead phone for one-tap calling. Seller leads carry no
+  // contact phone in the record, so we intentionally leave this undefined for
+  // them — a Call button there would dial the assigned agent, not the seller.
   const phone =
     item.sourceType === "lead"
       ? leads.find((l) => l.id === item.sourceId)?.phone
-      : item.sourceType === "seller-lead"
-        ? getAgent(sellerLeads.find((s) => s.id === item.sourceId)?.assignedAgent ?? "")?.phone
-        : undefined;
+      : undefined;
 
   const isContactRow = item.sourceType === "lead" || item.sourceType === "seller-lead";
   const isDraftRow = item.tab === "AI Drafts";

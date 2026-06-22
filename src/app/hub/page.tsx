@@ -104,6 +104,9 @@ const VIEWS: SavedView[] = TAB_KEYS.map((t) => ({
 const PIPELINE_TOTAL = reportMetrics.pipeline.reduce((s, p) => s + p.value, 0);
 const PIPELINE_DEALS = reportMetrics.pipeline.reduce((s, p) => s + p.deals, 0);
 
+/* ── Overnight-summary headline count — DERIVED, reconciles to the queue ───── */
+const QUEUE_TOTAL = workQueue.length;
+
 /* ── Brokerage Calendar + Risk Alerts — BACKED BY REAL DATA (S1.9) ────────── */
 type AlertRow = {
   id: string;
@@ -386,8 +389,8 @@ export default function TodayCommandCenter() {
       }
     >
       <p>
-        Sorted <span className="font-semibold text-cloud">181 overnight lead updates</span> into{" "}
-        <span className="font-semibold text-cloud">22 priorities</span>, drafted{" "}
+        Triaged your <span className="font-semibold text-cloud">overnight lead activity</span> into{" "}
+        <span className="font-semibold text-cloud">{QUEUE_TOTAL} priorities</span>, drafted{" "}
         <span className="font-semibold text-cloud">{K.aiDraftsWaiting} replies</span>, and flagged{" "}
         <span className="font-semibold text-danger">{K.txAtRisk} deals at risk</span> plus{" "}
         <span className="font-semibold text-danger">{K.workflowErrors} failed automations</span>.
@@ -482,7 +485,7 @@ export default function TodayCommandCenter() {
               Brokerage Calendar + Risk Alerts
             </h3>
             <p className="mt-0.5 text-[0.78rem] text-slate">
-              Deadlines inside 48 hours auto-surface here
+              Risk-flagged deals, blocked launches, and your hottest seller signal
             </p>
             <ul className="mt-3 divide-y divide-mist">
               {RISK_ALERTS.map((a) => (

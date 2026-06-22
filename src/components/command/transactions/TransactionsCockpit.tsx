@@ -142,9 +142,16 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
       (t) => t.closeDateDaysOut >= 0 && t.closeDateDaysOut <= 7,
     );
     const atRisk = open.filter((t) => t.riskFlag != null);
-    const inspectionsDue = open.filter(
-      (t) => t.stage === "Inspection" || !t.checklist.find((c) => c.label === "Inspection complete")?.done,
-    );
+    // Inspection contingency genuinely open: the deal is IN the inspection
+    // stage, or it's under contract (offer accepted) with the inspection not
+    // yet cleared. Pre-offer "Active" listings have no live inspection
+    // contingency, so they must not inflate this count.
+    const inspectionsDue = open.filter((t) => {
+      if (t.stage === "Inspection") return true;
+      const offerAccepted = t.checklist.find((c) => c.label === "Offer accepted")?.done === true;
+      const inspectionDone = t.checklist.find((c) => c.label === "Inspection complete")?.done === true;
+      return offerAccepted && !inspectionDone;
+    });
     const pendingDocs = open.reduce(
       (sum, t) => sum + t.checklist.filter((c) => !c.done).length,
       0,
@@ -1235,7 +1242,7 @@ function documentForStatus(docs: DealDocument[], label: string): DealDocument | 
   const l = label.toLowerCase();
   const wants =
     l === "inspection"
-      ? ["inspection", "addendum", "contingenc"]
+      ? ["inspection", "addendum"]
       : l === "appraisal"
         ? ["appraisal", "closing disclosure"]
         : l === "loan"

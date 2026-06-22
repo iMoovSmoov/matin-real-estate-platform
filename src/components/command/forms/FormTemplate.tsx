@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   X,
-  Wand2,
+  FileInput,
   Save,
   Send,
   Printer,
@@ -439,12 +439,12 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
               disabled={!recordKey}
               className="inline-flex items-center gap-1.5 rounded-md bg-ink px-2.5 py-1 text-[0.76rem] font-semibold text-white transition-colors hover:bg-ink/80 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Wand2 className="h-3.5 w-3.5" /> Auto-fill
+              <FileInput className="h-3.5 w-3.5" /> Auto-fill
             </button>
           </div>
 
           <ToolbarButton onClick={generate} disabled={aiBusy}>
-            {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+            {aiBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MatinMark theme="dark" className="h-3.5 w-3.5" />}
             Generate with AI
           </ToolbarButton>
 
@@ -493,7 +493,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
             disabled={!recordKey}
             className="shrink-0 inline-flex items-center gap-1 rounded-md bg-ink px-2 py-1 text-[0.72rem] font-semibold text-white disabled:opacity-40"
           >
-            <Wand2 className="h-3 w-3" /> Fill
+            <FileInput className="h-3 w-3" /> Fill
           </button>
         </div>
 
@@ -502,7 +502,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.74rem]">
             {filledFrom && (
               <span className="inline-flex items-center gap-1.5 font-medium text-ink">
-                <Wand2 className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
+                <FileInput className="h-3.5 w-3.5" /> Auto-filled from {filledFrom}
               </span>
             )}
             {saveMessage && (
@@ -585,7 +585,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {(aiOut || aiBusy) && (
           <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-white/10 bg-white backdrop-blur-md print:hidden">
             <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
-              <Wand2 className="h-4 w-4 text-ink" />
+              <MatinMark theme="dark" className="h-4 w-4" />
               <span className="text-[0.82rem] font-semibold text-ink">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>
@@ -609,7 +609,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
           className="flex flex-col items-center gap-0.5 text-[0.64rem] font-medium text-ink disabled:opacity-50"
           aria-label="Generate with AI"
         >
-          {aiBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Wand2 className="h-5 w-5" />}
+          {aiBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <MatinMark theme="dark" className="h-5 w-5" />}
           AI
         </button>
         <button
@@ -689,7 +689,7 @@ function DocField({
         </label>
         {field.autofill && (
           <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-1.5 py-0.5 text-[0.56rem] font-semibold uppercase tracking-wide text-white print:hidden">
-            <Wand2 className="h-2.5 w-2.5" /> auto
+            <FileInput className="h-2.5 w-2.5" /> auto
           </span>
         )}
       </div>

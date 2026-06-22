@@ -24,7 +24,7 @@
     "id": "AL-004",
     "actor": "System",
     "action": "Workflow failed",
-    "target": "CRM Sync — Map external field preferred_area (WR-003)",
+    "target": "CRM Sync — couldn't match the \"preferred area\" field (WR-003)",
     "timeLabel": "12 min ago"
   },
   {

@@ -187,8 +187,8 @@ export default function CoachingPage() {
           label="Practice sessions"
           value={k.practiceSessions}
           icon={<GraduationCap className="h-4 w-4" aria-hidden />}
-          delta={`${k.avgScoreDelta >= 0 ? "+" : ""}${k.avgScoreDelta} vs last qtr`}
-          deltaTone={k.avgScoreDelta >= 0 ? "up" : "down"}
+          delta={`${k.practiceDelta > 0 ? "+" : ""}${k.practiceDelta} vs last qtr`}
+          deltaTone={k.practiceDelta > 0 ? "up" : k.practiceDelta < 0 ? "down" : "flat"}
           hint="Completed roleplay drills across the team"
           onDrill={() => setRoster("practice")}
         />
@@ -197,9 +197,13 @@ export default function CoachingPage() {
           value={k.avgScorecard}
           icon={<Gauge className="h-4 w-4" aria-hidden />}
           valueTone={k.avgScorecard >= 80 ? "success" : "ink"}
-          delta="rubric-weighted"
-          deltaTone="flat"
-          hint="Mean across all scored attempts"
+          delta={
+            k.avgScoreDelta === 0
+              ? "even vs last qtr"
+              : `${k.avgScoreDelta > 0 ? "+" : ""}${k.avgScoreDelta} vs last qtr`
+          }
+          deltaTone={k.avgScoreDelta > 0 ? "up" : k.avgScoreDelta < 0 ? "down" : "flat"}
+          hint="Rubric-weighted mean of scored attempts"
           onDrill={() => setRoster("avgScore")}
         />
         <KpiCard
@@ -577,19 +581,23 @@ function rosterValue(view: RosterView, r: CoachingStanding): string {
       return String(r.scenariosRun);
     case "practice":
       return `${r.practiceSessions}/${r.goal}`;
+    case "behind":
+      // The "behind pace" bucket is about pace, so the value must BE the pace %
+      // (it previously showed the avg score under a "% pace" label — a mismatch).
+      return `${r.pace}%`;
     default:
       return String(r.avgScore);
   }
 }
 
-function rosterLabel(view: RosterView, r: CoachingStanding): string {
+function rosterLabel(view: RosterView, _r: CoachingStanding): string {
   switch (view) {
     case "scenarios":
       return "drills";
     case "practice":
       return "sessions";
     case "behind":
-      return `${r.pace}% pace`;
+      return "of goal";
     default:
       return "avg score";
   }

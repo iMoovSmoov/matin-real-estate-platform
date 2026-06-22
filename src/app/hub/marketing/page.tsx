@@ -179,6 +179,15 @@ export default function MarketingStudioPage() {
   const activeTemplate = templateByKey(template);
   const studioContext = studioContextFor(activeTemplate.label);
 
+  // Only the three templates that market THIS studio listing carry its specific
+  // address/price/specs chrome. Sphere/market templates (just-sold, nurture,
+  // recruiting, spotlight, cash-offer) render as branded creative without
+  // claiming the listing's address or price.
+  const isListingTemplate =
+    template === "listing-launch" ||
+    template === "open-house" ||
+    template === "price-reduction";
+
   const kpi = useMemo(() => studioKpis(campaignRows), [campaignRows]);
   const perf = useMemo(() => campaignPerformance(campaignRows), [campaignRows]);
 
@@ -613,7 +622,11 @@ export default function MarketingStudioPage() {
          <div className="flex flex-col gap-5">
           <AssetPreview
             headline={activeTemplate.headline}
-            subhead={`${activeTemplate.label} · ${STUDIO_LISTING.address}, ${STUDIO_LISTING.city}`}
+            subhead={
+              isListingTemplate
+                ? `${activeTemplate.label} · ${STUDIO_LISTING.address}, ${STUDIO_LISTING.city}`
+                : `${activeTemplate.label} · ${activeTemplate.blurb}`
+            }
             channel={channel}
             onChannel={selectChannel}
             body={previewBody}
@@ -624,6 +637,7 @@ export default function MarketingStudioPage() {
             onGenerate={handleGenerate}
             sentState={sentState}
             metaLine={`to ${controls.audiences[0] ?? "Seller database"} · ${STUDIO_LISTING.city}`}
+            isListing={isListingTemplate}
           />
 
           {/* AI producer — dark panel; proposed actions stream INLINE.

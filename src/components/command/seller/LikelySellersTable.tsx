@@ -87,9 +87,11 @@ export function LikelySellersTable({
       key: "sellerName",
       header: "Owner / property",
       sortable: true,
+      // Avatar represents the OWNER (initials token per build-ref §1.5), not the
+      // assigned agent — the column header + bold title are the homeowner.
       render: (r) => (
         <div className="flex items-center gap-2.5">
-          <Avatar name={agentName(r.assignedAgent)} slug={r.assignedAgent} size={32} ring />
+          <Avatar name={r.sellerName} size={32} ring />
           <TwoLineCell title={r.sellerName} sub={`${r.address} · ${r.city}`} />
         </div>
       ),

@@ -11,8 +11,8 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 import { marketingAssets } from "@/lib/data";
-import type { Campaign, MarketingAsset } from "@/lib/types";
-import { STUDIO_LISTING, campaignOwner } from "./marketing-branding";
+import type { Campaign } from "@/lib/types";
+import { STUDIO_LISTING, STUDIO_AGENT, campaignOwner } from "./marketing-branding";
 
 /* The real listing + owner resolvers live in marketing-branding.ts (bound to
    the Wave-0 data layer). Re-exported here so existing pane imports keep
@@ -141,42 +141,37 @@ export function templateByKey(key: string): MarketingTemplate {
   return TEMPLATES.find((t) => t.key === key) ?? TEMPLATES[0];
 }
 
-/* ── Per-channel seed copy. Listing-launch pulls the REAL Cedar Hills assets so
-   the canvas reads complete before any generate. Other templates carry their
-   own plausible copy so switching templates actually changes the canvas. ── */
-const CEDAR_ASSETS: MarketingAsset[] = marketingAssets.filter(
-  (a) => a.campaignId === STUDIO_LISTING.campaignId,
-);
-function cedar(type: MarketingAsset["type"]): string {
-  return CEDAR_ASSETS.find((a) => a.type === type)?.body ?? "";
-}
-
+/* ── Per-channel seed copy. The listing-specific templates (listing-launch /
+   open-house / price-reduction) compose directly from the REAL studio listing
+   (STUDIO_LISTING) so the canvas chrome, hero, subject line, and body all name
+   the SAME home. Other templates carry their own plausible sphere/market copy
+   so switching templates actually changes the canvas. ── */
 const ADDR = STUDIO_LISTING.address;
-const CITY = STUDIO_LISTING.city;
+const CITYSHORT = STUDIO_LISTING.cityShort;
+const PRICE = STUDIO_LISTING.price;
+const BEDS = STUDIO_LISTING.beds;
+const BATHS = STUDIO_LISTING.baths;
+const SQFT = STUDIO_LISTING.sqft;
+const AGENT_NAME = STUDIO_AGENT?.name ?? "Matin Real Estate";
 
 const TEMPLATE_SEEDS: Record<TemplateKey, Record<PreviewChannel, string>> = {
   "listing-launch": {
-    Email: cedar("Email"),
-    Social: cedar("Social"),
-    Flyer: cedar("Flyer"),
-    Ad: `Just listed in ${STUDIO_LISTING.cityShort} — ${STUDIO_LISTING.beds}BR at ${STUDIO_LISTING.address}, ${STUDIO_LISTING.price}. Primary on main, quartz kitchen, oversized lot. Tour this week before it's gone. Tap to book a private showing.`,
-    "Web page": cedar("Web"),
+    Email: `Coming soon in ${CITYSHORT}: a light-filled ${BEDS}-bed at ${ADDR} with a primary on main and a quartz chef's kitchen. Be first in line — reply for a private preview before it hits the market.`,
+    Social: `Just listed energy ✨ ${ADDR} | ${BEDS}BR · ${BATHS}BA · ${SQFT} sqft | ${CITYSHORT}. Swipe for the kitchen. Private tours opening this week — DM us.`,
+    Flyer: `OPEN HOUSE · ${ADDR}, ${CITYSHORT} · ${PRICE} · ${BEDS} bed / ${BATHS} bath / ${SQFT} sqft · Primary on main, quartz kitchen, oversized lot. Hosted by ${AGENT_NAME}, Matin Real Estate.`,
+    Ad: `Just listed in ${CITYSHORT} — ${BEDS}BR at ${ADDR}, ${PRICE}. Primary on main, quartz kitchen, oversized lot. Tour this week before it's gone. Tap to book a private showing.`,
+    "Web page": `A calm, modern ${CITYSHORT} home where everyday life flows easily — open great room, quartz kitchen, and a primary suite on the main level. Full gallery, map, and tour request inside.`,
   },
   "open-house": {
-    Email:
-      "You're invited: open house this Saturday 11–1 at 1248 NW Cedar Hills Dr, Beaverton. Three saved-search matches on one street — bring your pre-approval, we'll have coffee ready.",
-    Social:
-      "OPEN HOUSE this weekend 🏡 1248 NW Cedar Hills Dr · Beaverton · Sat 11–1. Primary on main, quartz kitchen, greenspace out back. Tap for directions + tour times.",
-    Flyer:
-      "OPEN HOUSE · Sat 11AM–1PM · 1248 NW Cedar Hills Dr, Beaverton · $845,000 · 4 bed / 3 bath / 2,580 sqft · Hosted by Chase Bright, Matin Real Estate.",
+    Email: `You're invited: open house this Saturday 11–1 at ${ADDR}, ${CITYSHORT}. Bring your pre-approval — we'll have coffee ready and the full tour set up.`,
+    Social: `OPEN HOUSE this weekend 🏡 ${ADDR} · ${CITYSHORT} · Sat 11–1. Primary on main, quartz kitchen, oversized lot. Tap for directions + tour times.`,
+    Flyer: `OPEN HOUSE · Sat 11AM–1PM · ${ADDR}, ${CITYSHORT} · ${PRICE} · ${BEDS} bed / ${BATHS} bath / ${SQFT} sqft · Hosted by ${AGENT_NAME}, Matin Real Estate.`,
     Ad: "",
     "Web page": "",
   },
   "price-reduction": {
-    Email:
-      "Good news on a home you saved: the price just improved to $845,000. It now fits your budget — want a private showing before this weekend's rush in Beaverton?",
-    Social:
-      "PRICE IMPROVED 📉 1248 NW Cedar Hills Dr is now $845,000 — 4BR, primary on main, backs to greenspace. Serious value in Beaverton. DM for a tour.",
+    Email: `Good news on a home you saved: the price just improved to ${PRICE}. It now fits more budgets — want a private showing before this weekend's rush in ${CITYSHORT}?`,
+    Social: `PRICE IMPROVED 📉 ${ADDR} is now ${PRICE} — ${BEDS}BR, primary on main, oversized lot. Serious value in ${CITYSHORT}. DM for a tour.`,
     Flyer: "",
     Ad: "",
     "Web page": "",

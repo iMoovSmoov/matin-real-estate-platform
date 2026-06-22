@@ -315,7 +315,7 @@ export function FormsDocsWorkspace() {
   /* ── AI missing-field check (streamAi 'form-suggest', inline) ──────────── */
 
   async function runFieldCheck() {
-    if (checkBusy) return;
+    if (!doc || checkBusy) return;
     setCheckBusy(true);
     setCheckOut("");
     const missing = doc.missing ?? [];
@@ -340,23 +340,27 @@ export function FormsDocsWorkspace() {
   /* ── Pane-3 send / correction (with inline confirmation) ───────────────── */
 
   function paneSend() {
-    if (isSendBlocked(doc.status)) return;
+    if (!doc || isSendBlocked(doc.status)) return;
     sendDoc(doc.id);
     flashPane(`${doc.code} sent for signature · Matin e-sign envelope created.`);
   }
 
   function paneCorrection() {
+    if (!doc) return;
     requestCorrection(doc.id);
     flashPane(`${doc.code} returned for correction.`);
   }
 
   function paneResolve() {
+    if (!doc) return;
     resolveFields(doc.id);
     flashPane(`${doc.code} fields resolved · now send-ready.`);
   }
 
-  const docMeta = STATUS_META[doc.status];
-  const sendBlocked = isSendBlocked(doc.status);
+  // `doc` can be undefined if every document in the packet was deleted — guard
+  // the derived status so the workspace renders an empty state instead of crashing.
+  const docMeta = doc ? STATUS_META[doc.status] : STATUS_META.draft;
+  const sendBlocked = doc ? isSendBlocked(doc.status) : true;
 
   /* ── Templates tab (wires the orphaned FormsLibrary) ───────────────────── */
   if (topTab === "templates") {
@@ -389,7 +393,7 @@ export function FormsDocsWorkspace() {
   const docsPane = (
     <DocStackPane
       packet={packet}
-      activeDocId={doc.id}
+      activeDocId={doc?.id ?? ""}
       onSelect={selectDoc}
       onView={(d) => setDrawerDocId(d.id)}
       onNew={() => setNewOpen(true)}
@@ -402,7 +406,7 @@ export function FormsDocsWorkspace() {
     />
   );
 
-  const actionsPane = (
+  const actionsPane = doc ? (
     <ActionsPane
       packet={packet}
       doc={doc}
@@ -421,6 +425,16 @@ export function FormsDocsWorkspace() {
         openAi(`Working on: Forms & Docs / ${packet.name} · ${doc.code}`)
       }
     />
+  ) : (
+    <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+      <EmptyState
+        title="No documents in this packet"
+        body="Every document here was removed. Add one from a template to preview, run a field check, and send it for signature."
+        actionLabel="Add documents"
+        onAction={() => setNewOpen(true)}
+        icon={<FileText className="h-5 w-5" />}
+      />
+    </section>
   );
 
   return (
@@ -459,8 +473,6 @@ export function FormsDocsWorkspace() {
           value={m.awaitingSignature}
           valueTone="danger"
           icon={<PenLine className="h-4 w-4" />}
-          delta="needs initials · out for e-sign"
-          deltaTone="down"
           hint="Documents out for e-sign or needing initials"
           className={activeKpiClass(view === "awaiting")}
           onDrill={() => setView_("awaiting")}
@@ -475,12 +487,10 @@ export function FormsDocsWorkspace() {
           onDrill={() => setView_("missing")}
         />
         <KpiCard
-          label="Completed this week"
+          label="Completed"
           value={m.completedThisWeek}
           valueTone="success"
           icon={<CircleCheck className="h-4 w-4" />}
-          delta="+6 vs last wk"
-          deltaTone="up"
           hint="Fully executed documents"
           className={activeKpiClass(view === "completed")}
           onDrill={() => setView_("completed")}
@@ -489,8 +499,7 @@ export function FormsDocsWorkspace() {
           label="Templates"
           value={m.templates}
           icon={<FileText className="h-4 w-4" />}
-          hint="OREF + Matin packet library"
-          className={activeKpiClass(view === "all")}
+          hint="OREF + Matin form library"
           onDrill={() => setTopTab("templates")}
         />
       </KpiStrip>

@@ -15,7 +15,7 @@ import { company } from "@/lib/data";
 export const metadata: Metadata = {
   title: "Sell Your Home | Matin Real Estate",
   description:
-    "Sell faster and net more with Matin Real Estate — 18 active listings, 40+ brokers, $130M volume. Pro photography, the largest local website, sharp pricing. Or get a guaranteed cash offer.",
+    "Sell faster and net more with Matin Real Estate — 100+ active listings, 40+ brokers, $130M volume. Pro photography, the largest local website, sharp pricing. Or get a guaranteed cash offer.",
 };
 
 const advantages = [

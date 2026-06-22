@@ -9,7 +9,6 @@ import {
   Filter,
   X,
   Clock,
-  Wand2,
   Loader2,
   LayoutList,
   CheckSquare,
@@ -17,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Panel, PanelHeader, Pill } from "@/components/command/ui";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
+import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { FormTemplate } from "@/components/command/forms/FormTemplate";
 import { reForms, FORM_CATEGORIES } from "@/lib/forms";
@@ -524,7 +524,7 @@ export function FormsLibrary() {
               <PanelHeader
                 title="AI Form Suggest"
                 subtitle="Describe your situation"
-                icon={<Wand2 className="h-4 w-4" />}
+                icon={<MatinMark theme="dark" className="h-4 w-4" />}
               />
               <div className="px-5 pb-5 pt-3 space-y-3">
                 <textarea
@@ -545,7 +545,7 @@ export function FormsLibrary() {
                   {suggestBusy ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <Wand2 className="h-3.5 w-3.5" />
+                    <MatinMark theme="white" className="h-3.5 w-3.5" />
                   )}
                   {suggestBusy ? "Thinking…" : "Suggest Form"}
                 </button>

@@ -215,6 +215,7 @@ export function AssetPreview({
   onGenerate,
   metaLine,
   sentState,
+  isListing,
 }: {
   subhead: string;
   headline: string;
@@ -229,6 +230,12 @@ export function AssetPreview({
   metaLine: string;
   /** Drives the Send-test button: idle → sending → sent (inline confirmation). */
   sentState: "idle" | "sending" | "sent";
+  /** True only for templates that market THIS studio listing (listing-launch /
+   *  open-house / price-reduction). When false the canvas drops the specific
+   *  listing chrome (price badge, beds/baths subject, single-property header,
+   *  "Listing photo" caption) so a Recruiting/Cash-offer/Just-sold asset never
+   *  falsely claims the studio listing's address or price. */
+  isListing: boolean;
 }) {
   const meta = CHANNEL_META[channel];
   const isSocial = channel === "Social";
@@ -298,12 +305,21 @@ export function AssetPreview({
                 Subject
               </p>
               <p className="mb-3 text-[0.92rem] font-semibold text-ink">
-                {headline} — {STUDIO_LISTING.beds}BD/{STUDIO_LISTING.baths}BA at{" "}
-                {STUDIO_LISTING.price}
+                {headline}
+                {isListing
+                  ? ` — ${STUDIO_LISTING.beds}BD/${STUDIO_LISTING.baths}BA at ${STUDIO_LISTING.price}`
+                  : ""}
               </p>
             </>
           ) : channel === "Web page" ? (
-            <MatinFromBar metaLine={`${STUDIO_LISTING.address} · single-property page`} kicker={meta.kicker} />
+            <MatinFromBar
+              metaLine={
+                isListing
+                  ? `${STUDIO_LISTING.address} · single-property page`
+                  : "matinrealestate.com · landing page"
+              }
+              kicker={meta.kicker}
+            />
           ) : isSocial ? (
             <div className="mb-3 flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink">
@@ -368,13 +384,16 @@ export function AssetPreview({
                   Matin Real Estate
                 </span>
               </span>
-              <span className="absolute bottom-2.5 right-2.5 rounded-md bg-cloud/90 px-2 py-0.5 text-[0.72rem] font-bold tabular-nums text-ink">
-                {STUDIO_LISTING.price}
-              </span>
+              {isListing ? (
+                <span className="absolute bottom-2.5 right-2.5 rounded-md bg-cloud/90 px-2 py-0.5 text-[0.72rem] font-bold tabular-nums text-ink">
+                  {STUDIO_LISTING.price}
+                </span>
+              ) : null}
             </div>
             <p className="mt-1.5 text-[0.66rem] text-slate">
-              Listing photo · {STUDIO_LISTING.address}, {STUDIO_LISTING.cityShort} ·
-              Matin frame and logo added
+              {isListing
+                ? `Listing photo · ${STUDIO_LISTING.address}, ${STUDIO_LISTING.cityShort} · Matin frame and logo added`
+                : "Matin-branded creative · logo and brand kit applied"}
             </p>
           </div>
 

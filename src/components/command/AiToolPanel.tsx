@@ -7,7 +7,8 @@ import {
   Copy,
   Check,
   RefreshCw,
-  Wand2,
+  PenLine,
+  Building2,
   Printer,
   X,
   ClipboardCopy,
@@ -19,6 +20,7 @@ import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { LiveDot, StatTile } from "@/components/command/ui";
+import { MatinMark } from "@/components/brand/Logo";
 import { company } from "@/lib/data";
 
 export type Field = {
@@ -302,7 +304,7 @@ export function AiToolPanel({
       )}>
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]">
-            <Wand2 className="h-5 w-5" />
+            <MatinMark className="h-5 w-auto" theme="dark" />
           </span>
           <div className="flex-1 min-w-0">
             {pillar && (
@@ -326,7 +328,7 @@ export function AiToolPanel({
             {busy ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Generating...</>
             ) : (
-              <><Wand2 className="h-4 w-4" /> Try with live data &rarr;</>
+              <><PenLine className="h-4 w-4" /> Try with live data &rarr;</>
             )}
           </button>
         )}
@@ -345,7 +347,7 @@ export function AiToolPanel({
                   className="group inline-flex items-center gap-1.5 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-[0.78rem] font-medium text-slate transition-colors hover:border-ink/20 hover:bg-paper hover:text-ink"
                   title={p.hint}
                 >
-                  <Wand2 className="h-3.5 w-3.5 text-ink" />
+                  <Building2 className="h-3.5 w-3.5 text-ink" />
                   {p.label}
                 </button>
               ))}
@@ -469,7 +471,7 @@ export function AiToolPanel({
                 </>
               ) : (
                 <>
-                  <Wand2 className="h-4 w-4" /> {submitLabel}
+                  <PenLine className="h-4 w-4" /> {submitLabel}
                 </>
               )}
             </button>
@@ -778,7 +780,7 @@ function EmptyState({
       style={{ minHeight: minHeight ? `${Math.round(minHeight * 0.6)}px` : "400px" }}
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-paper ring-1 ring-inset ring-ink/[0.06]">
-        <Wand2 className="h-6 w-6 text-ink/30" />
+        <MatinMark className="h-6 w-auto opacity-30" theme="dark" />
       </div>
       <p className="text-center text-[0.82rem] text-slate/45 max-w-[18rem]">
         Fill in the details above and generate your{" "}

@@ -57,8 +57,8 @@ function validateAll(
   // Year built (optional but validated if entered)
   if (yearBuilt.trim()) {
     const yr = Number(yearBuilt);
-    if (isNaN(yr) || yr < 1880 || yr > 2025) {
-      errors.yearBuilt = "Year built must be between 1880 and 2025";
+    if (isNaN(yr) || yr < 1880 || yr > 2026) {
+      errors.yearBuilt = "Year built must be between 1880 and 2026";
     }
   }
 

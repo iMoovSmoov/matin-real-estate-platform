@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, RotateCcw, Bot, Copy, Check, Sparkles } from "lucide-react";
+import { Send, RotateCcw, Copy, Check, Lightbulb } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn, initials } from "@/lib/utils";
@@ -280,7 +280,7 @@ export function AiChat({
                     : "bg-ink/[0.06] text-ink ring-1 ring-inset ring-ink/[0.06]",
                 )}
               >
-                {m.role === "user" ? initials(userLabel) : <Bot className="h-4 w-4" />}
+                {m.role === "user" ? initials(userLabel) : <MatinMark className="h-3.5 w-auto" theme="dark" />}
               </span>
               <div className="relative max-w-[80%]">
                 {/* Per-message copy button (assistant only) */}
@@ -373,7 +373,7 @@ export function AiChat({
               showTopics && "border-azure/30 bg-azure/5 text-azure",
             )}
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <Lightbulb className="h-3.5 w-3.5" />
           </button>
 
           <textarea

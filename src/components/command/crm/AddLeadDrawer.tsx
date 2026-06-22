@@ -4,10 +4,17 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import type { Lead, LeadStage } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { agents } from "@/lib/data";
 import { LEAD_STAGES } from "@/components/command/crm/leadStyles";
 
 const SOURCES = ["Zillow", "Realtor.com", "Referral", "Organic", "Other"] as const;
-const INTENTS = ["Buy", "Rent", "Invest"] as const;
+// Canonical intent vocabulary — must match leadView's type/seller-intent logic
+// (Buying / Selling / Buying & Selling / Investing) so a new lead is labeled
+// correctly downstream instead of always falling back to "Buyer".
+const INTENTS = ["Buying", "Selling", "Buying & Selling", "Investing"] as const;
+// Real, assignable agents (a chosen slug resolves to a real headshot + owner).
+const ASSIGNABLE_AGENTS = agents.filter((a) => !a.slug.startsWith("system-"));
+const DEFAULT_OWNER = "jordan-matin";
 
 export function AddLeadDrawer({
   open,
@@ -23,11 +30,11 @@ export function AddLeadDrawer({
   const [phone, setPhone] = useState("");
   const [source, setSource] = useState<string>("Organic");
   const [stage, setStage] = useState<LeadStage>("New");
-  const [intent, setIntent] = useState<string>("Buy");
+  const [intent, setIntent] = useState<string>("Buying");
   const [community, setCommunity] = useState("");
   const [budgetMin, setBudgetMin] = useState<string>("");
   const [budgetMax, setBudgetMax] = useState<string>("");
-  const [assignedAgent, setAssignedAgent] = useState("");
+  const [assignedAgent, setAssignedAgent] = useState(DEFAULT_OWNER);
   const [nameError, setNameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
@@ -37,11 +44,11 @@ export function AddLeadDrawer({
     setPhone("");
     setSource("Organic");
     setStage("New");
-    setIntent("Buy");
+    setIntent("Buying");
     setCommunity("");
     setBudgetMin("");
     setBudgetMax("");
-    setAssignedAgent("");
+    setAssignedAgent(DEFAULT_OWNER);
     setNameError(false);
     setEmailError(false);
   }
@@ -73,7 +80,7 @@ export function AddLeadDrawer({
       budgetMax: budgetMax ? parseInt(budgetMax, 10) : 0,
       communitySlug: community.trim().toLowerCase().replace(/\s+/g, "-"),
       community: community.trim() || "—",
-      assignedAgent: assignedAgent.trim(),
+      assignedAgent,
       createdDaysAgo: 0,
       lastContactDaysAgo: 0,
       tags: [],
@@ -249,16 +256,20 @@ export function AddLeadDrawer({
             </div>
           </div>
 
-          {/* Assign Agent */}
+          {/* Assign Agent — real roster so the new lead resolves to a real owner */}
           <div>
             <label className={labelClass}>Assign agent</label>
-            <input
-              type="text"
+            <select
               value={assignedAgent}
               onChange={(e) => setAssignedAgent(e.target.value)}
-              placeholder="e.g. Alicia Smith"
-              className={inputClass}
-            />
+              className={selectClass}
+            >
+              {ASSIGNABLE_AGENTS.map((a) => (
+                <option key={a.slug} value={a.slug}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

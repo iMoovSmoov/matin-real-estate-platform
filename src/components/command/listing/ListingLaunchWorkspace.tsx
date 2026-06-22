@@ -23,7 +23,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import {
-  Rocket,
+  Home,
   AlertTriangle,
   Camera,
   FileText,
@@ -37,7 +37,6 @@ import {
   CheckCircle2,
   ChevronRight,
   CalendarClock,
-  Sparkles,
   Database,
 } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
@@ -655,9 +654,14 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
         <KpiCard
           label="Active launches"
           value={activeLaunches}
-          icon={<Rocket className="h-4 w-4" />}
+          icon={<Home className="h-4 w-4" />}
           hint="In prep before MLS live"
-          onDrill={() => openAi("Working on: Listing Launch / Active launches")}
+          onDrill={() =>
+            drillToListing(
+              (l) => l.stage !== "Active" && l.stage !== "Under Offer",
+              "intake",
+            )
+          }
         />
         <KpiCard
           label="Blocked"
@@ -665,7 +669,9 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
           valueTone="danger"
           icon={<AlertTriangle className="h-4 w-4" />}
           hint="One or more open blockers"
-          onDrill={() => openAi("Working on: Listing Launch / Blocked launches")}
+          onDrill={() =>
+            drillToListing((l) => (l.blockers?.length ?? 0) > 0, "disclosures")
+          }
         />
         <KpiCard
           label="Photos pending"
@@ -1175,7 +1181,7 @@ function ListingRecordCard({
               onClick={onOpenAi}
               className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold/15 px-2.5 py-1.5 text-[0.78rem] font-semibold text-gold-ink ring-1 ring-inset ring-gold/30 transition-colors hover:bg-gold/25"
             >
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              <MatinMark theme="dark" className="h-3.5 w-3.5" />
               Refine with Matin AI
             </button>
             {forwarded ? (
@@ -1322,6 +1328,10 @@ function ActionDrawerCard({
   const isMarketing = track.key === "marketing";
   const kitGenerated = !!kitOutput && !kitLoading;
   const hasStream = kitOutput != null && kitOutput.length > 0;
+  // Inline confirmation so the secondary actions are never dead no-op clicks
+  // (mandate: MUTATE → inline confirmation). Resets with the component, which
+  // remounts on track change via the `key={activeTrack.key}` wrappers.
+  const [actionNote, setActionNote] = useState<string | null>(null);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-ink-700 bg-ink-800 text-slate-300 shadow-soft">
@@ -1375,6 +1385,7 @@ function ActionDrawerCard({
           ) : (
             <button
               type="button"
+              onClick={() => setActionNote("Correction request sent to the seller to e-sign")}
               className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-cloud px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-paper-200 sm:w-auto sm:justify-start"
             >
               <Send className="h-3.5 w-3.5" />
@@ -1384,6 +1395,7 @@ function ActionDrawerCard({
 
           <button
             type="button"
+            onClick={() => setActionNote("Transaction coordinator follow-up assigned")}
             className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud sm:w-auto sm:justify-start"
           >
             <UserPlus className="h-3.5 w-3.5" />
@@ -1399,12 +1411,21 @@ function ActionDrawerCard({
           </button>
           <button
             type="button"
+            onClick={() => setActionNote("Exception approved and logged to the file")}
             className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-ink-600 px-3 py-2 text-[0.8rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud sm:w-auto sm:justify-start"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             Mark exception approved
           </button>
         </div>
+
+        {/* Inline confirmation for the secondary actions */}
+        {actionNote ? (
+          <p className="inline-flex items-center gap-1.5 rounded-lg bg-success/15 px-2.5 py-1.5 text-[0.78rem] font-medium text-success ring-1 ring-inset ring-success/25 motion-safe:animate-fade">
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+            {actionNote}
+          </p>
+        ) : null}
 
         {/* Streaming kit output */}
         {(kitLoading || kitGenerated) && isMarketing ? (

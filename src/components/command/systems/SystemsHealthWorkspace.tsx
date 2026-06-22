@@ -312,7 +312,7 @@ export function SystemsHealthWorkspace({
     const a = automations.find((x) => x.id === selectedAutomationId);
     if (!a) return;
     setDiagnoseState({ running: true, text: "" });
-    const prompt = `Our brokerage automation "${a.name}" (trigger: ${a.trigger}) is paused with 0 runs this month. Its steps are: ${a.steps.join("; ")}. In 3 short sentences, diagnose the most likely reason it was paused and give a safe restart plan an operator can approve. Plain English.`;
+    const prompt = `Our brokerage automation "${a.name}" (trigger: ${a.trigger}) is paused (${a.runsThisMonth} run${a.runsThisMonth === 1 ? "" : "s"} this month). Its steps are: ${a.steps.join("; ")}. In 3 short sentences, diagnose the most likely reason it was paused and give a safe restart plan an operator can approve. Plain English.`;
     try {
       await streamAi(
         { tool: "integration_setup_guide", messages: [{ role: "user", content: prompt }] },

@@ -290,11 +290,12 @@ export default function BuyerAgreementBuilder() {
     const out = records.length;
     const awaiting = records.filter((b) => b.agreementStatus === "Sent").length;
     const signed = records.filter((b) => b.agreementStatus === "Signed");
+    const signedTotal = signed.length;
     const signedThisWeek = signed.filter((b) => b.lastContactDaysAgo <= 7).length;
     const expiringSoon = records.filter((b) => b.lastContactDaysAgo >= 14).length;
-    const missingFlags =
-      records.filter((b) => b.agreementStatus === "Not Signed").length +
-      records.filter((b) => b.agreementStatus === "Sent" && b.preapproval !== "Yes").length;
+    // Drafts (Not Signed) that can't be sent until their fields are complete —
+    // counts exactly the rows in the Drafts saved-view this tile drills into.
+    const missingFlags = records.filter((b) => b.agreementStatus === "Not Signed").length;
     // Money sub-stats (ticket 6): signed $ volume (band midpoint), pipeline, avg term.
     const signedVolume = signed.reduce((s, b) => s + (b.budgetMin + b.budgetMax) / 2, 0);
     const pipeline = records
@@ -306,6 +307,7 @@ export default function BuyerAgreementBuilder() {
     return {
       out,
       awaiting,
+      signedTotal,
       signedThisWeek,
       expiringSoon,
       missingFlags,
@@ -1264,7 +1266,7 @@ export default function BuyerAgreementBuilder() {
       <div className="mt-4">
         <KpiStrip cols={5}>
           <KpiCard
-            label="Agreements out"
+            label="All agreements"
             value={kpis.out}
             icon={<FileSignature className="h-4 w-4" />}
             hint={`Avg term ${kpis.avgTerm} mo`}
@@ -1279,11 +1281,11 @@ export default function BuyerAgreementBuilder() {
             onDrill={() => drillView("sent")}
           />
           <KpiCard
-            label="Signed this week"
-            value={kpis.signedThisWeek}
+            label="Signed"
+            value={kpis.signedTotal}
             valueTone="success"
             icon={<CircleCheck className="h-4 w-4" />}
-            hint={`${compactUsd(kpis.signedVolume)} signed volume`}
+            hint={`${kpis.signedThisWeek} this week · ${compactUsd(kpis.signedVolume)} volume`}
             onDrill={() => drillView("signed")}
           />
           <KpiCard

@@ -36,11 +36,11 @@
     "status": "failed",
     "subject": "Follow Up Boss",
     "startedLabel": "12 min ago",
-    "failedStep": "Map external field preferred_area",
+    "failedStep": "Map the 'preferred area' field",
     "steps": [
       { "name": "Pull changed contacts", "status": "succeeded", "detail": "38 contacts changed since last sync" },
       { "name": "Normalize phone + email", "status": "succeeded", "detail": "All records normalized" },
-      { "name": "Map external field preferred_area", "status": "failed", "detail": "No mapping for external field preferred_area → community" },
+      { "name": "Map the 'preferred area' field", "status": "failed", "detail": "No mapping for 'preferred area' → community" },
       { "name": "Upsert into CRM", "status": "waiting", "detail": "Blocked by mapping failure" }
     ]
   },

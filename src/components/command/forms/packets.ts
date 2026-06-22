@@ -27,6 +27,7 @@ import type { BrandedDocumentField } from "@/components/os/BrandedDocument";
 import { listingPhoto } from "@/lib/data/listing-photo";
 import { rosterOption } from "@/lib/data/agreement-roster";
 import { roles } from "@/lib/data/roles";
+import { reForms } from "@/lib/forms";
 
 /** Resolve a real agent's name from a slug (fallback to the slug if unknown). */
 function ownerName(slug: string): string {
@@ -490,6 +491,8 @@ export function packetMetrics(packets: Packet[] = PACKETS) {
     awaitingSignature,
     missingFields,
     completedThisWeek,
-    templates: packets.length,
+    // The Templates tab renders the full OREF + Matin form library (reForms) —
+    // count that, so the KPI tile + tab badge match what the tab actually shows.
+    templates: reForms.length,
   };
 }

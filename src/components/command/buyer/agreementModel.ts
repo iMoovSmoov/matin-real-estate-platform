@@ -277,6 +277,7 @@ export function matchesView(b: BuyerAgreement, view: ViewKey): boolean {
   if (view === "draft") return b.agreementStatus === "Not Signed";
   if (view === "sent") return b.agreementStatus === "Sent";
   if (view === "signed") return b.agreementStatus === "Signed";
-  // expiring — stale records winding down / drafts left open
-  return b.lastContactDaysAgo >= 14 || b.agreementStatus === "Not Signed";
+  // expiring — representation winding down (stale: 14+ days since last contact).
+  // Reconciles 1:1 with the "Expiring soon" KPI tile that drills into this view.
+  return b.lastContactDaysAgo >= 14;
 }

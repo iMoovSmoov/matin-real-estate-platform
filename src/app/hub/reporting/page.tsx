@@ -163,10 +163,12 @@ type Drawer =
   | { kind: "pipeline"; stage: ReportPipelineStage }
   | null;
 
-/* Recent closings strip — REAL Matin listings (real address / city / price /
+/* Top active listings strip — REAL Matin listings (real address / city / price /
    agent) with the real listing hero via listingPhoto(). We take the 4 highest-
    value real listings whose agent has a headshot on disk, so every card shows a
-   real property photo + a real agent face (no hardcoded addresses, no seeds). */
+   real property photo + a real agent face (no hardcoded addresses, no seeds).
+   These are the live board's highest-value ACTIVE listings — not closed sales —
+   so the strip is labeled as current inventory, never GCI-attributed closings. */
 const AGENTS_WITH_PHOTOS = new Set([
   "alicia-smith","amanda-conlon","amy-mead","andy-wilcox","benjamin-fabian","boston-bate",
   "charles-corbett","chase-bright","chris-zurita-orozco","christopher-young","edmar-martinez",
@@ -177,7 +179,7 @@ const AGENTS_WITH_PHOTOS = new Set([
   "sierra-lockwood","sierra-palmeri","sophia-freiling","vince-kinney","william-carrell","zach-hosford",
 ]);
 
-const RECENT_CLOSINGS = [...realListings]
+const TOP_LISTINGS = [...realListings]
   .filter((l) => l.agentSlug && AGENTS_WITH_PHOTOS.has(l.agentSlug))
   .sort((a, b) => b.price - a.price)
   .slice(0, 4)
@@ -855,8 +857,8 @@ export default function ReportingPage() {
                     </div>
                   </div>
 
-                  {/* Recent closings — real photos + agent headshots */}
-                  <RecentClosings />
+                  {/* Top active listings — real photos + agent headshots */}
+                  <TopListings />
                 </>
               ) : dataset === "performance" ? (
                 <>
@@ -938,19 +940,19 @@ export default function ReportingPage() {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Recent closings strip — wires PropertyThumb (real exteriors) + Avatar
+   Top active listings strip — wires PropertyThumb (real exteriors) + Avatar
    ────────────────────────────────────────────────────────────────────────── */
-function RecentClosings() {
+function TopListings() {
   return (
     <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-display text-[1.05rem] font-normal leading-none text-ink">
-          Recent closings
+          Top active listings
         </h2>
-        <span className="text-[0.72rem] font-medium text-slate">Last 14 days · attributed to GCI</span>
+        <span className="text-[0.72rem] font-medium text-slate">Highest-value homes on the board</span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {RECENT_CLOSINGS.map((c) => (
+        {TOP_LISTINGS.map((c) => (
           <div
             key={c.id}
             className="overflow-hidden rounded-xl border border-mist bg-paper/40 transition-colors hover:border-ink/20"

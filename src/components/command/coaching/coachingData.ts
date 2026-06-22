@@ -117,9 +117,15 @@ export const coachingKpis = (() => {
   const agentsBehind = rows.filter((r) => r.behind).length;
   // Reviews due is a REAL field on the data (managerReviewDue) — no magic +2.
   const reviewsDue = rows.filter((r) => r.managerReviewDue).length;
-  // Average delta-vs-last-quarter, for the headline KPI deltas (S9 ticket 10).
+  // Average delta-vs-last-quarter (scorecard points) for the headline KPI delta.
   const avgScoreDelta = Math.round(
     rows.reduce((s, r) => s + r.deltaVsLastQuarter, 0) / (rows.length || 1),
+  );
+  // Real practice-sessions change vs the prior quarter, from the same pacing
+  // series the chart uses (this-qtr practice total reconciles to practiceSessions).
+  const practiceDelta = file.pacingByMonth.reduce(
+    (s, m) => s + m.practiceCurrent - m.practicePrior,
+    0,
   );
   return {
     practiceSessions,
@@ -128,6 +134,7 @@ export const coachingKpis = (() => {
     agentsBehind,
     reviewsDue,
     avgScoreDelta,
+    practiceDelta,
     activeAgents: rows.length,
   };
 })();

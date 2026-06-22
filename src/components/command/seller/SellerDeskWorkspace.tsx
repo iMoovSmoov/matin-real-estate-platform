@@ -221,7 +221,7 @@ export function SellerDeskWorkspace() {
           label="Agent appts"
           value={19 + apptCount}
           icon={<CalendarClock className="h-4 w-4" />}
-          hint={<RampHint pct={62} label={`${compactUsd(apptValue)} booked · ${derived.hotSellerSignals} hot signals`} />}
+          hint={<RampHint pct={62} label={`${compactUsd(apptValue)} booked · ${derived.hotSellerSignals} hot ${derived.hotSellerSignals === 1 ? "signal" : "signals"}`} />}
           delta="+5 vs goal"
           deltaTone="up"
           onDrill={() => drillTo("appts")}

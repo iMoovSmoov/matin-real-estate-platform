@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Zap,
-  Sparkle,
+  PenLine,
   ShieldCheck,
   Mail,
   Clock,
@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MatinMark } from "@/components/brand/Logo";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Marketing Studio — SequenceBuilder  (S8 ticket 7, Sierra automation builder)
@@ -56,7 +57,7 @@ const INITIAL_NODES: FlowNode[] = [
     id: "ai-draft",
     label: "AI draft",
     kind: "ai",
-    icon: Sparkle,
+    icon: PenLine,
     detail: "Matin AI drafts on-brand home-value outreach",
     config: "Matin AI writes the email and fills in each person's name and address.",
     state: "committed",
@@ -309,7 +310,11 @@ export function SequenceBuilder() {
                       : "bg-paper-200 text-slate ring-mist",
                   )}
                 >
-                  <active.icon className="h-3.5 w-3.5" aria-hidden />
+                  {active.kind === "ai" ? (
+                    <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                  ) : (
+                    <active.icon className="h-3.5 w-3.5" aria-hidden />
+                  )}
                 </span>
                 <div>
                   <p className="text-[0.84rem] font-semibold text-ink">{active.label}</p>
@@ -382,7 +387,11 @@ function FlowNodeCard({
             isAi ? "bg-gold/15 text-gold-ink ring-gold/30" : "bg-paper-200 text-slate ring-mist",
           )}
         >
-          <Icon className="h-3.5 w-3.5" aria-hidden />
+          {isAi ? (
+            <MatinMark theme="dark" className="h-3.5 w-3.5" />
+          ) : (
+            <Icon className="h-3.5 w-3.5" aria-hidden />
+          )}
         </span>
         <span
           aria-hidden

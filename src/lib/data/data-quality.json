@@ -15,7 +15,7 @@
   },
   {
     "id": "DQ-003",
-    "issue": "Unmapped field preferred_area on sync",
+    "issue": "Unmapped 'preferred area' field on sync",
     "source": "Follow Up Boss",
     "count": 38,
     "severity": "high"
