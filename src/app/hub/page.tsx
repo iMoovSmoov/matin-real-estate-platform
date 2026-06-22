@@ -449,10 +449,12 @@ export default function TodayCommandCenter() {
             below lg; the real two-column workspace returns at lg so the
             1024–1279 band gets the queue + rail side-by-side, not a buried
             single column (R1) ─────────────────────────────────────────────── */}
-      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         {/* On < lg, render the rail context first so the user sees it before
-            scrolling a long queue. At lg+ it sits in the right column (order-2). */}
-        <div className="flex min-w-0 flex-col gap-5 lg:order-2">
+            scrolling a long queue. At lg+ it sits in the right column (order-2)
+            and STICKS — compact summary widgets stay in view while the wide
+            primary column scrolls, so neither column leaves dead space. */}
+        <div className="flex min-w-0 flex-col gap-5 lg:order-2 lg:sticky lg:top-4 lg:self-start">
           {aiSummaryCard}
           <BrokerageVitalScore />
 
@@ -480,59 +482,17 @@ export default function TodayCommandCenter() {
             </div>
           </section>
 
-          {/* Brokerage Calendar + Risk Alerts — real records */}
-          <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
-            <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
-              Brokerage Calendar + Risk Alerts
-            </h3>
-            <p className="mt-0.5 text-[0.78rem] text-slate">
-              Risk-flagged deals, blocked launches, and your hottest seller signal
-            </p>
-            <ul className="mt-3 divide-y divide-mist">
-              {RISK_ALERTS.map((a) => (
-                <li key={a.id}>
-                  <Link
-                    href={a.href}
-                    className="group flex items-center gap-3 py-3 transition-colors hover:bg-paper-200/40"
-                  >
-                    <span className="h-9 w-12 shrink-0 overflow-hidden rounded-md">
-                      <PropertyThumb
-                        src={a.thumbSrc}
-                        ratio="video"
-                        rounded={false}
-                        alt={a.title}
-                        className="h-full w-full"
-                      />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5">
-                        <Dot tone={a.tone} className="shrink-0" />
-                        <span className="block truncate text-[0.84rem] font-medium leading-snug text-ink">
-                          {a.title}
-                        </span>
-                      </span>
-                      <span className="mt-0.5 block text-[0.76rem] text-slate tabular-nums">
-                        {a.date}
-                      </span>
-                    </span>
-                    {a.ownerSlug ? (
-                      <Avatar name={a.title} slug={a.ownerSlug} size={24} ring className="shrink-0" />
-                    ) : null}
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <RecentActivityFeed limit={7} />
         </div>
 
+        {/* PRIMARY column (wide) — the work queue plus the calendar/risk and
+            activity lists, so the wide column carries the scrolling content and
+            the compact rail stays sticky beside it (no empty half-column). */}
+        <div className="flex min-w-0 flex-col gap-5 lg:order-1">
         {/* PRIMARY — Human Work Queue */}
         <section
           ref={queueRef}
           id="human-work-queue"
-          className="min-w-0 scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft lg:order-1"
+          className="min-w-0 scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft"
         >
           <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
             <div className="min-w-0">
@@ -641,6 +601,54 @@ export default function TodayCommandCenter() {
             )}
           </div>
         </section>
+
+          {/* Brokerage Calendar + Risk Alerts — real records */}
+          <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+            <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
+              Brokerage Calendar + Risk Alerts
+            </h3>
+            <p className="mt-0.5 text-[0.78rem] text-slate">
+              Risk-flagged deals, blocked launches, and your hottest seller signal
+            </p>
+            <ul className="mt-3 divide-y divide-mist">
+              {RISK_ALERTS.map((a) => (
+                <li key={a.id}>
+                  <Link
+                    href={a.href}
+                    className="group flex items-center gap-3 py-3 transition-colors hover:bg-paper-200/40"
+                  >
+                    <span className="h-9 w-12 shrink-0 overflow-hidden rounded-md">
+                      <PropertyThumb
+                        src={a.thumbSrc}
+                        ratio="video"
+                        rounded={false}
+                        alt={a.title}
+                        className="h-full w-full"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5">
+                        <Dot tone={a.tone} className="shrink-0" />
+                        <span className="block truncate text-[0.84rem] font-medium leading-snug text-ink">
+                          {a.title}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-[0.76rem] text-slate tabular-nums">
+                        {a.date}
+                      </span>
+                    </span>
+                    {a.ownerSlug ? (
+                      <Avatar name={a.title} slug={a.ownerSlug} size={24} ring className="shrink-0" />
+                    ) : null}
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slate transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <RecentActivityFeed limit={7} />
+        </div>
       </div>
 
       {/* ── Record drawer (row click) ─────────────────────────────────────── */}
