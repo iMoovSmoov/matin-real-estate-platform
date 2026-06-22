@@ -5,6 +5,7 @@ import {
   Plus,
   Pencil,
   Copy,
+  Check,
   Trash2,
   ChevronUp,
   ChevronDown,
@@ -15,6 +16,7 @@ import {
   CircleCheck,
   Banknote,
   Zap,
+  Download,
 } from "lucide-react";
 import {
   DataTable,
@@ -33,6 +35,7 @@ import {
 import { type AiActionState } from "@/components/os/AiPanel";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
+import { downloadCsv } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import {
   routingRules as seedRules,
@@ -262,18 +265,18 @@ function OwnershipCard({ rule }: { rule: RoutingRule }) {
     {
       label: "Owned by",
       value: (
-        <span className="inline-flex items-center gap-2">
-          <Avatar name={o.ownedBy} slug={o.ownedBySlug} size={26} ring />
-          <TwoLineCell title={o.ownedBy} sub={o.ownedByTitle} />
+        <span className="flex min-w-0 items-center justify-end gap-2">
+          <Avatar name={o.ownedBy} slug={o.ownedBySlug} size={26} ring className="shrink-0" />
+          <TwoLineCell title={o.ownedBy} sub={o.ownedByTitle} className="text-left" />
         </span>
       ),
     },
     {
       label: "Assigned to",
       value: (
-        <span className="inline-flex items-center gap-2">
-          <Avatar name={o.assignedTo} slug={o.assignedToSlug} size={26} ring />
-          <TwoLineCell title={o.assignedTo} sub={o.assignedToTitle} />
+        <span className="flex min-w-0 items-center justify-end gap-2">
+          <Avatar name={o.assignedTo} slug={o.assignedToSlug} size={26} ring className="shrink-0" />
+          <TwoLineCell title={o.assignedTo} sub={o.assignedToTitle} className="text-left" />
         </span>
       ),
     },
@@ -606,6 +609,7 @@ function RuleFormDrawer({
 }) {
   const [draft, setDraft] = useState<RuleDraft | null>(initial);
   const [lastInitial, setLastInitial] = useState<RuleDraft | null>(initial);
+  const [copiedPreview, setCopiedPreview] = useState(false);
 
   // Inline AI: preview the exact merge-field message this rule will send.
   const preview = useInlineAi();
@@ -614,7 +618,20 @@ function RuleFormDrawer({
   if (initial !== lastInitial) {
     setLastInitial(initial);
     setDraft(initial);
+    setCopiedPreview(false);
     preview.reset();
+  }
+
+  // The previewed auto-reply is a real draft — let the admin copy it out.
+  async function copyPreview() {
+    if (!preview.state.result) return;
+    try {
+      await navigator.clipboard.writeText(preview.state.result);
+      setCopiedPreview(true);
+      setTimeout(() => setCopiedPreview(false), 1600);
+    } catch {
+      /* clipboard blocked — no-op */
+    }
   }
 
   if (!open || !draft) return null;
@@ -771,9 +788,24 @@ function RuleFormDrawer({
             </p>
           )}
           {preview.state.done && !preview.state.error ? (
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
               <AIInsightChip>Merge fields ready</AIInsightChip>
               <AIInsightChip>Brand voice · approved</AIInsightChip>
+              <button
+                type="button"
+                onClick={copyPreview}
+                className="ml-auto inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-gold/40 hover:text-cloud"
+              >
+                {copiedPreview ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-success" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" /> Copy
+                  </>
+                )}
+              </button>
             </div>
           ) : null}
         </div>
@@ -826,6 +858,41 @@ export function RoutingView() {
   function flash(msg: string) {
     setToast(msg);
     window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2600);
+  }
+
+  // Real CSV export of every routing rule (criteria + weighted recipients) — a
+  // downloadable config record, not a no-op.
+  function exportRules() {
+    const header = [
+      "Rule ID",
+      "Source",
+      "Criteria",
+      "Type",
+      "Recipients",
+      "Team",
+      "Status",
+      "Priority",
+      "First-response SLA",
+      "Leads routed (30d)",
+      "Fired (7d)",
+    ];
+    const body = sorted.map((r) => [
+      r.id,
+      r.source,
+      r.criteria.map((c) => `${c.label}: ${c.value}`).join(" | "),
+      r.type,
+      r.members
+        .map((m) => `${m.name}${r.type === "Round Robin" ? ` (wt ${m.weight})` : ""}`)
+        .join(", "),
+      r.team,
+      r.status,
+      r.priority,
+      r.firstResponseSla,
+      r.leadsRouted30d,
+      r.fired7d,
+    ]);
+    downloadCsv("matin-routing-rules.csv", [header, ...body]);
+    flash(`Exported ${sorted.length} routing rules to CSV`);
   }
 
   /** Patch the selected rule from the live recipient/priority editor. */
@@ -1120,9 +1187,15 @@ export function RoutingView() {
                   Checked top-to-bottom by priority. The first match wins · click a rule to edit.
                 </p>
               </div>
-              <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={openNew}>
-                New Rule
-              </InkButton>
+              <div className="flex items-center gap-2">
+                <GhostButton ariaLabel="Export routing rules to CSV" onClick={exportRules}>
+                  <Download className="h-3.5 w-3.5" />
+                  Export
+                </GhostButton>
+                <InkButton icon={<Plus className="h-3.5 w-3.5" />} onClick={openNew}>
+                  New Rule
+                </InkButton>
+              </div>
             </div>
 
             <DataTable<RoutingRule>

@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import {
-  Eye,
   Download,
-  Printer,
+  Copy,
+  Check,
   Send,
   RotateCcw,
   CircleCheck,
@@ -24,15 +24,19 @@ import {
 } from "@/components/os";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { downloadTextFile } from "@/lib/download";
 import { rosterOption } from "@/lib/data/agreement-roster";
 import {
   STATUS_META,
   isSendBlocked,
   docFields,
   docCompletion,
+  documentText,
+  docSlug,
   type Packet,
   type PacketDoc,
 } from "./packets";
+import { copyText } from "./interactions";
 
 /** Real OREF/form legal blurbs for the branded center-pane preview (per code). */
 const FORM_BLURB: Record<string, string> = {
@@ -100,6 +104,7 @@ export function DocumentDrawer({
   const [checkBusy, setCheckBusy] = useState(false);
   const [checkOut, setCheckOut] = useState("");
   const [confirm, setConfirm] = useState<string | null>(null);
+  const [aiCopied, setAiCopied] = useState(false);
 
   // Reset transient view state whenever a different doc opens — the official
   // "adjust state during render on prop change" pattern (no effect, matches the
@@ -113,6 +118,7 @@ export function DocumentDrawer({
     setCheckOut("");
     setCheckBusy(false);
     setConfirm(null);
+    setAiCopied(false);
   }
 
   const activity = useMemo<ActivityItem[]>(
@@ -182,6 +188,22 @@ export function DocumentDrawer({
     if (!doc) return;
     onResolveFields(doc.id);
     setConfirm("Fields marked resolved · this document is now send-ready.");
+  }
+
+  async function handleCopyCheck() {
+    if (!checkOut) return;
+    if (await copyText(checkOut)) {
+      setAiCopied(true);
+      window.setTimeout(() => setAiCopied(false), 1800);
+    }
+  }
+
+  function handleDownloadCheck() {
+    if (!doc || !packet || !checkOut) return;
+    downloadTextFile(
+      `matin-${doc.code.toLowerCase()}-field-check.txt`,
+      `MATIN AI — MISSING-FIELD CHECK\n${doc.code} · ${doc.title}\n${packet.name} — ${packet.subject}\n\n${checkOut}`,
+    );
   }
 
   const tabs: DrawerTab[] = [
@@ -327,8 +349,11 @@ export function DocumentDrawer({
             }
           />
 
-          {/* Light document utilities — real inline confirmations */}
-          <DocUtilities title={doc.title} pages={doc.pages} />
+          {/* Light document utilities — copy / download a real text artifact */}
+          <DocUtilities
+            text={documentText(packet, doc)}
+            filename={`matin-${docSlug(doc)}.txt`}
+          />
 
           {/* Blocking-field resolver (human action; ink, not gold) */}
           {blocked ? (
@@ -380,6 +405,30 @@ export function DocumentDrawer({
               result={checkOut || undefined}
               onRun={runFieldCheck}
             />
+            {checkOut && !checkBusy ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyCheck}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                >
+                  {aiCopied ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {aiCopied ? "Copied" : "Copy"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadCheck}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : (
@@ -389,39 +438,49 @@ export function DocumentDrawer({
   );
 }
 
-/* ── Light document utilities (Preview / Download / Print) ───────────────── */
+/* ── Light document utilities (Copy / Download a real text artifact) ─────────
+   The branded letterhead above carries its own "Save copy" + "Download PDF"
+   toolbar; these are quick shortcuts that produce a real, tangible file/clip so
+   nothing here is a dead end. */
 
-function DocUtilities({ title, pages }: { title: string; pages: number }) {
+function DocUtilities({ text, filename }: { text: string; filename: string }) {
   const [note, setNote] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   function flash(message: string) {
     setNote(message);
     window.setTimeout(() => setNote((n) => (n === message ? null : n)), 2600);
   }
 
+  async function handleCopy() {
+    if (await copyText(text)) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    }
+  }
+
+  function handleDownload() {
+    downloadTextFile(filename, text);
+    flash(`Downloaded ${filename}`);
+  }
+
   return (
     <div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <UtilBtn
-          icon={<Eye className="h-3.5 w-3.5" />}
-          onClick={() => flash(`Opened full preview — ${pages} page${pages > 1 ? "s" : ""}.`)}
+          icon={
+            copied ? (
+              <Check className="h-3.5 w-3.5 text-success" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )
+          }
+          onClick={handleCopy}
         >
-          Preview
+          {copied ? "Copied" : "Copy text"}
         </UtilBtn>
-        <UtilBtn
-          icon={<Download className="h-3.5 w-3.5" />}
-          onClick={() => flash(`Generated PDF · ${title}.pdf`)}
-        >
-          PDF
-        </UtilBtn>
-        <UtilBtn
-          icon={<Printer className="h-3.5 w-3.5" />}
-          onClick={() => {
-            flash("Sent to printer.");
-            if (typeof window !== "undefined") window.print();
-          }}
-        >
-          Print
+        <UtilBtn icon={<Download className="h-3.5 w-3.5" />} onClick={handleDownload}>
+          Download
         </UtilBtn>
       </div>
       {note ? (

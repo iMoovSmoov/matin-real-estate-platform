@@ -12,12 +12,17 @@ import {
   Loader2,
   LayoutList,
   CheckSquare,
+  Copy,
+  Check,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Panel, PanelHeader, Pill } from "@/components/command/ui";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
+import { copyText } from "./interactions";
 import { FormTemplate } from "@/components/command/forms/FormTemplate";
 import { reForms, FORM_CATEGORIES } from "@/lib/forms";
 import type { ReForm, FormCategory } from "@/lib/forms";
@@ -100,6 +105,22 @@ export function FormsLibrary() {
   const [suggestQuery, setSuggestQuery] = useState("");
   const [suggestOut, setSuggestOut] = useState("");
   const [suggestBusy, setSuggestBusy] = useState(false);
+  const [suggestCopied, setSuggestCopied] = useState(false);
+
+  async function copySuggest() {
+    if (await copyText(suggestOut)) {
+      setSuggestCopied(true);
+      setTimeout(() => setSuggestCopied(false), 1800);
+    }
+  }
+
+  function downloadSuggest() {
+    if (!suggestOut) return;
+    downloadTextFile(
+      "matin-form-suggestion.txt",
+      `MATIN AI — FORM SUGGESTION\n\nSituation: ${suggestQuery}\n\n${suggestOut}`,
+    );
+  }
 
   // Recently used collapse on mobile
   const [showRecent, setShowRecent] = useState(false);
@@ -555,6 +576,28 @@ export function FormsLibrary() {
                     <AiMarkdown text={suggestOut} />
                     {suggestBusy && (
                       <span className="ml-0.5 inline-block h-3.5 w-1 animate-pulse rounded-sm bg-ink align-middle" />
+                    )}
+                    {suggestOut && !suggestBusy && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink/[0.06] pt-3">
+                        <button
+                          onClick={copySuggest}
+                          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                        >
+                          {suggestCopied ? (
+                            <Check className="h-3.5 w-3.5 text-success" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                          {suggestCopied ? "Copied" : "Copy"}
+                        </button>
+                        <button
+                          onClick={downloadSuggest}
+                          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}

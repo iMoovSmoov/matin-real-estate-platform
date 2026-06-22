@@ -11,6 +11,7 @@ import {
   Loader2,
   ArrowRight,
   CircleCheck,
+  Download,
 } from "lucide-react";
 import {
   KpiStrip,
@@ -36,6 +37,7 @@ import type {
   IntegrationHealth,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { downloadCsv } from "@/lib/download";
 import company from "@/lib/data/company.json";
 import { KPI_SPARKS, sparkDelta } from "@/lib/data/systems-series";
 import {
@@ -47,6 +49,7 @@ import {
   applyRetry,
 } from "./systemsModel";
 import { VendorMark } from "./VendorMark";
+import { AiDraftResult } from "./AiDraftResult";
 import { scrollIdIntoView } from "./useScrollIntoView";
 import { SystemsDiagram } from "./SystemsDiagram";
 import { SyncActivityChart } from "./SyncActivityChart";
@@ -344,7 +347,8 @@ export function SystemsHealthWorkspace({
 
   async function runAskAction(action: AIAction) {
     const key = action.id ?? "0";
-    setAskState((prev) => ({ ...prev, [key]: { running: true, result: "" } }));
+    const filename = `matin-systems-${action.id ?? "answer"}.txt`;
+    setAskState((prev) => ({ ...prev, [key]: { running: true, result: undefined } }));
     const ctx = `Connected: ${connected}/${integrations.length}. Need attention: ${integrations
       .filter((i) => i.status !== "Healthy")
       .map((i) => `${i.name} (${i.status})`)
@@ -357,16 +361,30 @@ export function SystemsHealthWorkspace({
       action.id === "triage"
         ? `You are an operations copilot for a real-estate brokerage's automation platform. ${ctx} Give a numbered, prioritized fix list (max 4 items), highest-impact first, one line each.`
         : `You are an operations copilot for a real-estate brokerage's automation platform. ${ctx} In 3 short sentences, summarize overall system health and the single most urgent item.`;
+    let last = "";
     try {
       await streamAi(
         { tool: "integration_setup_guide", messages: [{ role: "user", content: prompt }] },
-        (_c, full) =>
-          setAskState((prev) => ({ ...prev, [key]: { running: true, result: full } })),
+        (_c, full) => {
+          last = full;
+          setAskState((prev) => ({
+            ...prev,
+            [key]: {
+              running: true,
+              result: <AiDraftResult text={full} running filename={filename} />,
+            },
+          }));
+        },
       );
     } finally {
       setAskState((prev) => ({
         ...prev,
-        [key]: { running: false, result: prev[key]?.result ?? "" },
+        [key]: {
+          running: false,
+          result: last ? (
+            <AiDraftResult text={last} running={false} filename={filename} />
+          ) : undefined,
+        },
       }));
     }
   }
@@ -378,6 +396,36 @@ export function SystemsHealthWorkspace({
       delete next[key];
       return next;
     });
+  }
+
+  // ── Exports: turn the live tables into REAL downloadable .csv logs ────────
+  function exportIntegrationsCsv() {
+    downloadCsv("matin-integrations.csv", [
+      ["System", "Provider", "Category", "Status", "Records", "Errors (24h)", "Last sync"],
+      ...sortedIntegrations.map((i) => [
+        i.name,
+        i.provider ?? i.name,
+        i.category,
+        i.status,
+        i.recordsSynced ?? i.records ?? 0,
+        i.errors ?? 0,
+        i.lastSync ?? "—",
+      ]),
+    ]);
+  }
+
+  function exportRunsCsv() {
+    downloadCsv("matin-workflow-runs.csv", [
+      ["Run", "ID", "Subject", "Status", "Failed step", "Started"],
+      ...orderedRuns.map((r) => [
+        r.name,
+        r.id,
+        r.subject,
+        r.status,
+        r.failedStep ?? "",
+        r.startedLabel,
+      ]),
+    ]);
   }
 
   // ── Integration table columns ────────────────────────────────────────────
@@ -546,8 +594,8 @@ export function SystemsHealthWorkspace({
 
         {/* Integrations status grid */}
         <section className="space-y-3">
-          <header className="flex items-end justify-between">
-            <div>
+          <header className="flex flex-wrap items-end justify-between gap-3">
+            <div className="min-w-0">
               <h2 className="font-display text-[1.12rem] font-normal leading-tight text-ink">
                 Integrations status
               </h2>
@@ -556,20 +604,30 @@ export function SystemsHealthWorkspace({
                 data, and last sync. Trouble surfaces first.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() =>
-                setActiveIntegrationName(
-                  sortedIntegrations.find((i) => i.status === "Needs auth")?.name ??
-                    sortedIntegrations[0]?.name ??
-                    null,
-                )
-              }
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.78rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
-            >
-              <Plug className="h-3.5 w-3.5" />
-              Connect system
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={exportIntegrationsCsv}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-paper"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Export CSV
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setActiveIntegrationName(
+                    sortedIntegrations.find((i) => i.status === "Needs auth")?.name ??
+                      sortedIntegrations[0]?.name ??
+                      null,
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-[0.78rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+              >
+                <Plug className="h-3.5 w-3.5" />
+                Connect system
+              </button>
+            </div>
           </header>
 
           <DataTable<Integration>
@@ -673,8 +731,8 @@ export function SystemsHealthWorkspace({
 
         {/* Workflow Runs */}
         <section className="space-y-3">
-          <header className="flex items-end justify-between">
-            <div>
+          <header className="flex flex-wrap items-end justify-between gap-3">
+            <div className="min-w-0">
               <h2 className="font-display text-[1.12rem] font-normal leading-tight text-ink">
                 Workflow runs
               </h2>
@@ -683,17 +741,29 @@ export function SystemsHealthWorkspace({
                 and in Today — and they are retryable.
               </p>
             </div>
-            {failedRuns.length > 0 ? (
-              <StatusChip tone="danger" variant="soft">
-                <Dot tone="danger" />
-                {failedRuns.length} failed
-              </StatusChip>
-            ) : (
-              <StatusChip tone="success" variant="soft">
-                <Dot tone="success" />
-                All clear
-              </StatusChip>
-            )}
+            <div className="flex shrink-0 items-center gap-2">
+              {orderedRuns.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={exportRunsCsv}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-mist bg-cloud px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-paper"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export log
+                </button>
+              ) : null}
+              {failedRuns.length > 0 ? (
+                <StatusChip tone="danger" variant="soft">
+                  <Dot tone="danger" />
+                  {failedRuns.length} failed
+                </StatusChip>
+              ) : (
+                <StatusChip tone="success" variant="soft">
+                  <Dot tone="success" />
+                  All clear
+                </StatusChip>
+              )}
+            </div>
           </header>
 
           {orderedRuns.length === 0 ? (

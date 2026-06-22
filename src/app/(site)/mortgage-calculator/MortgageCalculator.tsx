@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Info } from "lucide-react";
+import { Info, Copy, Check, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { downloadTextFile } from "@/lib/download";
 
 function fmtUSD(v: number) {
   return new Intl.NumberFormat("en-US", {
@@ -116,6 +117,49 @@ export function MortgageCalculator() {
   const piPct = totalMonthly > 0 ? (monthlyPI / totalMonthly) * 100 : 0;
   const taxPct = totalMonthly > 0 ? (monthlyTax / totalMonthly) * 100 : 0;
   const insPct = Math.max(0, 100 - piPct - taxPct);
+
+  // ── Real, keepable output: copy + download the payment estimate ───────────
+  const [copied, setCopied] = useState(false);
+
+  function buildSummary(): string {
+    const line = "—".repeat(44);
+    return [
+      "MATIN REAL ESTATE — MORTGAGE PAYMENT ESTIMATE",
+      line,
+      `Home price:            ${fmtUSD(homePrice)}`,
+      `Down payment:          ${fmtUSD(downPayment)} (${downPct}%)`,
+      `Loan amount:           ${fmtUSD(principal)}`,
+      `Interest rate:         ${rate}%`,
+      `Loan term:             ${termYears} years`,
+      `Loan-to-value (LTV):   ${ltvPct}%`,
+      line,
+      `Estimated monthly payment: ${fmtUSD2(totalMonthly)}/mo`,
+      `  • Principal & interest:  ${fmtUSD2(monthlyPI)}`,
+      `  • Property tax (est.):   ${fmtUSD2(monthlyTax)}`,
+      `  • Home insurance (est.): ${fmtUSD2(monthlyInsurance)}`,
+      line,
+      `Total interest paid:   ${fmtUSD(Math.round(totalInterest))}`,
+      `Total of all payments: ${fmtUSD(Math.round(totalPIPayments))}`,
+      line,
+      "Estimate only — property tax assumed 1.2%/yr, insurance 0.5%/yr.",
+      "Talk to a Matin broker to get pre-approved: (503) 622-9624",
+      "matinrealestate.com",
+    ].join("\n");
+  }
+
+  async function onCopy() {
+    try {
+      await navigator.clipboard.writeText(buildSummary());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable — Download remains as the fallback path */
+    }
+  }
+
+  function onDownload() {
+    downloadTextFile("matin-mortgage-estimate.txt", buildSummary());
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
@@ -277,6 +321,33 @@ export function MortgageCalculator() {
                 </span>
               </div>
             ))}
+          </div>
+
+          {/* Save / share the estimate — a real, keepable artifact */}
+          <div className="mt-5 flex flex-wrap gap-2.5 border-t border-ink/[0.06] pt-5">
+            <button
+              type="button"
+              onClick={onCopy}
+              aria-live="polite"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-ink/15 bg-paper px-4 py-2.5 text-[0.85rem] font-medium text-ink transition hover:border-ink/40 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 text-success" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" /> Copy summary
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onDownload}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-ink/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-1"
+            >
+              <Download className="h-4 w-4" /> Download
+            </button>
           </div>
         </div>
 

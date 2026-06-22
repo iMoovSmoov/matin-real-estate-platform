@@ -8,6 +8,8 @@ import {
   Send,
   Printer,
   Check,
+  Copy,
+  Download,
   Loader2,
   ShieldCheck,
   FilePen,
@@ -17,6 +19,8 @@ import {
 import type { ReForm, ReFormField } from "@/lib/forms";
 import { listings, leads, company, getAgent } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
+import { copyText } from "@/components/command/forms/interactions";
 import { cn, usd } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
@@ -229,6 +233,7 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
 
   const [aiOut, setAiOut] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+  const [aiCopied, setAiCopied] = useState(false);
 
   const [saved, setSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -332,6 +337,22 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
     } finally {
       setAiBusy(false);
     }
+  }
+
+  async function copyAiOut() {
+    if (await copyText(aiOut)) {
+      setAiCopied(true);
+      setTimeout(() => setAiCopied(false), 1800);
+    }
+  }
+
+  function downloadAiOut() {
+    if (!aiOut) return;
+    const kind = isListingForm ? "listing-copy" : "clause-language";
+    downloadTextFile(
+      `matin-${form.code.toLowerCase()}-${kind}.txt`,
+      `MATIN REAL ESTATE — ${form.code} ${form.name}\n${isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}\n\n${aiOut}`,
+    );
   }
 
   function handleSave() {
@@ -584,12 +605,34 @@ function FormTemplateInner({ form, onClose }: { form: ReForm; onClose: () => voi
         {/* AI drafted clause / copy panel */}
         {(aiOut || aiBusy) && (
           <div className="mx-auto mt-5 max-w-[640px] rounded-2xl border border-white/10 bg-white backdrop-blur-md print:hidden">
-            <div className="flex items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
-              <MatinMark theme="dark" className="h-4 w-4" />
-              <span className="text-[0.82rem] font-semibold text-ink">
+            <div className="flex flex-wrap items-center gap-2 border-b border-ink/[0.08] px-4 py-3">
+              <MatinMark theme="dark" className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 text-[0.82rem] font-semibold text-ink">
                 {isListingForm ? "AI-drafted listing copy" : "AI-drafted clause language"}
               </span>
               {aiBusy && <span className="text-[0.72rem] text-slate/70">drafting…</span>}
+              {aiOut && !aiBusy && (
+                <div className="ml-auto flex items-center gap-1.5">
+                  <button
+                    onClick={copyAiOut}
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/20"
+                  >
+                    {aiCopied ? (
+                      <Check className="h-3.5 w-3.5 text-success" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                    {aiCopied ? "Copied" : "Copy"}
+                  </button>
+                  <button
+                    onClick={downloadAiOut}
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-ink transition-colors hover:border-ink/20"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download
+                  </button>
+                </div>
+              )}
             </div>
             <div className="px-4 py-3">
               <AiMarkdown text={aiOut} />

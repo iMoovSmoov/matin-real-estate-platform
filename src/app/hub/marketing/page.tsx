@@ -11,10 +11,14 @@ import {
   PanelsTopLeft,
   Eye,
   SlidersHorizontal,
+  Copy,
+  Check,
+  Download,
 } from "lucide-react";
 import { campaigns as seedCampaigns, roles, getAgent } from "@/lib/data";
 import type { Campaign } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
 import { cn, compactUsd, num } from "@/lib/utils";
 import {
   KpiStrip,
@@ -299,6 +303,49 @@ export default function MarketingStudioPage() {
       ? { label: "AI draft", tone: "info" as const }
       : { label: "Approved kit", tone: "success" as const };
 
+  /* ── Full-campaign export text — every channel of the active template stitched
+     into one paste-ready, downloadable document (uses the live streamed kit when
+     generated, otherwise the approved seed copy). Keeps the generated campaign a
+     real artifact the viewer can copy or save, never a dead-end preview. ── */
+  const campaignText = useMemo(() => {
+    const bodyFor = (ch: PreviewChannel): string => {
+      if (kit !== null) {
+        const parsed = sectionFromKit(kit, ch);
+        return parsed || (generating ? "" : seedFor(template, ch));
+      }
+      return seedFor(template, ch);
+    };
+    const headerLines = [
+      `${activeTemplate.label.toUpperCase()} — MULTI-CHANNEL CAMPAIGN`,
+      isListingTemplate
+        ? `${STUDIO_LISTING.address}, ${STUDIO_LISTING.city} · ${STUDIO_LISTING.price}`
+        : activeTemplate.blurb,
+      `Matin Real Estate · ${isGenerated ? "AI draft v1 (unsaved)" : "Approved kit v2"}`,
+      `Audience: ${controls.audiences.join(", ") || "Seller database"} · Tone: ${controls.tones.join(", ")}`,
+      "",
+    ];
+    const sections = activeTemplate.channels.map((ch) => {
+      const b = bodyFor(ch).trim();
+      return `## ${ch}\n${b || "(not included in this template)"}`;
+    });
+    return [
+      ...headerLines,
+      sections.join("\n\n"),
+      "",
+      "Equal Housing Opportunity · Matin Real Estate",
+    ].join("\n");
+  }, [
+    activeTemplate,
+    kit,
+    generating,
+    template,
+    isGenerated,
+    isListingTemplate,
+    controls.audiences,
+    controls.tones,
+  ]);
+  const campaignFilename = `matin-${template}-campaign.txt`;
+
   /* ── AI producer proposed actions (stream INLINE into the cards) ── */
   const producerActions: AIAction[] = useMemo(
     () => [
@@ -324,8 +371,14 @@ export default function MarketingStudioPage() {
   const runProducerAction = useCallback(
     async (action: AIAction) => {
       const id = action.id ?? action.title;
-      setActionState((prev) => ({ ...prev, [id]: { running: true, result: "" } }));
+      const filename =
+        id === "ab-variants"
+          ? "matin-subject-variants.txt"
+          : "matin-subject-line.txt";
+      setActionState((prev) => ({ ...prev, [id]: { running: true, result: undefined } }));
       const tool = id === "ab-variants" ? "marketing-kit" : "lead-responder";
+      // Track the streamed text so the final (copyable) result keeps the full draft.
+      let acc = "";
       try {
         await streamAi(
           {
@@ -340,16 +393,21 @@ export default function MarketingStudioPage() {
               tone: controls.tones.join(", "),
             },
           },
-          (_chunk, full) =>
+          (_chunk, full) => {
+            acc = full;
             setActionState((prev) => ({
               ...prev,
-              [id]: { running: true, result: full },
-            })),
+              [id]: { running: true, result: <AiDraftResult text={acc} running filename={filename} /> },
+            }));
+          },
         );
       } finally {
         setActionState((prev) => ({
           ...prev,
-          [id]: { running: false, result: prev[id]?.result ?? "" },
+          [id]: {
+            running: false,
+            result: acc ? <AiDraftResult text={acc} running={false} filename={filename} /> : undefined,
+          },
         }));
       }
     },
@@ -638,6 +696,8 @@ export default function MarketingStudioPage() {
             sentState={sentState}
             metaLine={`to ${controls.audiences[0] ?? "Seller database"} · ${STUDIO_LISTING.city}`}
             isListing={isListingTemplate}
+            campaignText={campaignText}
+            campaignFilename={campaignFilename}
           />
 
           {/* AI producer — dark panel; proposed actions stream INLINE.
@@ -793,6 +853,68 @@ export default function MarketingStudioPage() {
       >
         <CreateCampaignForm draft={draft} onChange={setDraft} />
       </RecordDrawer>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   AiDraftResult — the streamed AI producer draft (subject-line / A/B variants)
+   rendered INSIDE the dark AIActionCard, with Copy + Save .txt so the generated
+   draft is a real, exportable artifact (never a look-only dead end). While the
+   stream is running it shows a caret; once done the export controls appear.
+   ────────────────────────────────────────────────────────────────────────── */
+function AiDraftResult({
+  text,
+  running,
+  filename,
+}: {
+  text: string;
+  running: boolean;
+  filename: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard?.writeText(text);
+    } catch {
+      /* clipboard blocked — still confirm so the affordance never feels broken */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+  const btn =
+    "inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-900/60 px-2.5 text-[0.74rem] font-semibold text-cloud transition-colors hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40";
+  return (
+    <div>
+      <span className="break-words">
+        {text}
+        {running ? <span className="animate-pulse">▍</span> : null}
+      </span>
+      {!running && text ? (
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          <button type="button" onClick={copy} className={btn}>
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5" aria-hidden />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" aria-hidden />
+                Copy
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadTextFile(filename, text)}
+            className={btn}
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden />
+            Save .txt
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

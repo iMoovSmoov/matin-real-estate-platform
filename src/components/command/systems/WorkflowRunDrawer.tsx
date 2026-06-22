@@ -20,6 +20,7 @@ import {
   STEP_LABEL,
   RUN_OWNER,
 } from "./systemsModel";
+import { AiDraftResult } from "./AiDraftResult";
 
 /* A run that produces a client-facing document gets a Matin-branded preview of
    exactly what it was rendering (§2.11 ticket 7) — most importantly the FAILED
@@ -248,7 +249,15 @@ export function WorkflowRunDrawer({
                 confidence="High"
                 runLabel="Explain failure"
                 running={explaining}
-                result={explanation || undefined}
+                result={
+                  explanation ? (
+                    <AiDraftResult
+                      text={explanation}
+                      running={explaining}
+                      filename={`matin-failure-${run.id}.txt`}
+                    />
+                  ) : undefined
+                }
                 onRun={onExplain}
               />
             </div>

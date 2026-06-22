@@ -8,6 +8,8 @@ import {
   Banknote,
   Pause,
   Play,
+  Copy,
+  Check,
 } from "lucide-react";
 import { marketingAssets, exteriorFallback } from "@/lib/data";
 import type { Campaign } from "@/lib/types";
@@ -85,6 +87,40 @@ function MetricCell({
         {value}
       </p>
     </div>
+  );
+}
+
+/** Copy one generated asset's title + body to the clipboard with an inline
+ *  confirmation — so a previewed asset is never a look-only dead end. */
+function CopyAssetButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard?.writeText(text);
+    } catch {
+      /* clipboard blocked — still confirm so the affordance never feels broken */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-mist bg-paper px-2.5 text-[0.72rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+    >
+      {copied ? (
+        <>
+          <Check className="h-3 w-3" aria-hidden />
+          Copied
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3" aria-hidden />
+          Copy
+        </>
+      )}
+    </button>
   );
 }
 
@@ -342,6 +378,9 @@ export function CampaignDrawer({
                   <p className="mt-1 line-clamp-2 text-[0.76rem] leading-snug text-slate">
                     {a.body}
                   </p>
+                  <div className="mt-2 flex justify-end">
+                    <CopyAssetButton text={`${a.title}\n\n${a.body}`} />
+                  </div>
                 </div>
               );
             })

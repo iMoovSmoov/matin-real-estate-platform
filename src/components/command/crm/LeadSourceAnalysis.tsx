@@ -10,7 +10,9 @@ import {
   Tooltip,
   LabelList,
 } from "recharts";
+import { Download } from "lucide-react";
 import type { Lead } from "@/lib/types";
+import { downloadCsv } from "@/lib/download";
 import { leadSourceAnalysis } from "./leadView";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -73,15 +75,43 @@ export function LeadSourceAnalysis({ leads }: { leads: Lead[] }) {
   }));
   const total = leads.length;
 
+  function exportCsv() {
+    const totals = rows.reduce(
+      (acc, r) => ({ hot: acc.hot + r.hot, rest: acc.rest + r.rest, count: acc.count + r.count }),
+      { hot: 0, rest: 0, count: 0 },
+    );
+    downloadCsv("matin-lead-source-analysis.csv", [
+      ["Source", "Hot (80+)", "Warm/Cold", "Total", "Hot %"],
+      ...rows.map((r) => [
+        r.source,
+        r.hot,
+        r.rest,
+        r.count,
+        `${r.count ? Math.round((r.hot / r.count) * 100) : 0}%`,
+      ]),
+      ["All sources", totals.hot, totals.rest, totals.count, `${totals.count ? Math.round((totals.hot / totals.count) * 100) : 0}%`],
+    ]);
+  }
+
   return (
     <div className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
-      <div className="flex items-baseline justify-between">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-[1.02rem] font-normal leading-tight text-ink">
           Lead source analysis
         </h3>
-        <span className="text-[0.74rem] text-slate tabular-nums">
-          {total} leads · {rows.length} sources
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[0.74rem] text-slate tabular-nums">
+            {total} leads · {rows.length} sources
+          </span>
+          <button
+            type="button"
+            onClick={exportCsv}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden />
+            Export CSV
+          </button>
+        </div>
       </div>
       <p className="mt-0.5 text-[0.74rem] text-slate">
         Volume by channel; the gold segment is hot leads (score ≥ 80).

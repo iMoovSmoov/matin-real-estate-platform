@@ -39,6 +39,7 @@ import {
 } from "./leadView";
 import { ComposeDrawer, type ComposeMode, type ComposeResult, telHref } from "./ComposeDrawer";
 import { LeadFullDrawer } from "./LeadFullDrawer";
+import { DraftActions, slugify } from "@/components/command/today/DraftActions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    CRM & Leads — selected-lead detail panel (inline, right ~36%)
@@ -340,6 +341,7 @@ export function LeadDetailPanel({
                     <DraftBlock
                       state={d}
                       channelLabel={c.channel === "email" ? "email" : "text"}
+                      leadName={lead.name}
                       onChange={(t) => setDraftText(c.key, t)}
                       onApprove={() => approveDraft(c.key)}
                       onDiscard={() => discardDraft(c.key)}
@@ -500,12 +502,14 @@ function EngagementStrip({ lead }: { lead: Lead }) {
 function DraftBlock({
   state,
   channelLabel,
+  leadName,
   onChange,
   onApprove,
   onDiscard,
 }: {
   state: DraftState;
   channelLabel: string;
+  leadName: string;
   onChange: (text: string) => void;
   onApprove: () => void;
   onDiscard: () => void;
@@ -542,6 +546,13 @@ function DraftBlock({
             <CircleCheck className="h-3.5 w-3.5" aria-hidden />
             {state.approved ? "View branded" : "Approve & preview"}
           </button>
+          {/* Copy + Save .txt so the drafted reply is never view-only */}
+          <DraftActions
+            text={state.text}
+            fileName={`matin-${channelLabel}-${slugify(leadName)}.txt`}
+            tone="dark"
+            copyLabel="Copy"
+          />
           <button
             type="button"
             onClick={onDiscard}

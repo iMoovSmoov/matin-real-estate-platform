@@ -467,6 +467,57 @@ export function docCompletion(packet: Packet, doc: PacketDoc): number {
   return Math.round((done / fields.length) * 100);
 }
 
+/** A filesystem-safe slug for a document download filename. */
+export function docSlug(doc: PacketDoc): string {
+  const base = `${doc.code}-${doc.title}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return base || "document";
+}
+
+/**
+ * Assemble a real, serializable plain-text version of a packet document — the
+ * branded letterhead, the live field grid (filled vs missing), and any
+ * outstanding items — so "Download" / "Copy" produce a tangible artifact the
+ * demo viewer can keep, not a dead-end preview.
+ */
+export function documentText(packet: Packet, doc: PacketDoc): string {
+  const fields = docFields(packet, doc);
+  const rule = "────────────────────────────────────";
+  const out: string[] = [];
+  out.push("MATIN REAL ESTATE");
+  out.push("18825 Willamette Dr, West Linn OR 97068 · (503) 622-9624");
+  out.push(`Form: ${doc.code}`);
+  out.push("");
+  out.push(doc.title);
+  out.push(`Packet: ${packet.name} — ${packet.subject}`);
+  out.push(`Prepared by: ${packet.ownerName}`);
+  out.push(`Status: ${STATUS_META[doc.status].label} · Page ${doc.page} of ${doc.pages}`);
+  out.push("");
+  out.push("DETAILS");
+  out.push(rule);
+  for (const f of fields) {
+    const v = f.filled
+      ? typeof f.value === "string" || typeof f.value === "number"
+        ? String(f.value)
+        : "Complete"
+      : "Missing";
+    out.push(`${f.label}: ${v}`);
+  }
+  const missing = doc.missing ?? [];
+  if (missing.length > 0) {
+    out.push("");
+    out.push("OUTSTANDING — RESOLVE BEFORE SENDING");
+    out.push(rule);
+    for (const mi of missing) out.push(`• ${mi}`);
+  }
+  out.push("");
+  out.push("Matin Real Estate · West Linn, OR · Equal Housing Opportunity");
+  return out.join("\n");
+}
+
 /**
  * Aggregate counters reconciled from the packet/doc records (KPI strip).
  * Accepts the LIVE packet array so the numbers re-derive after a Send / fix —

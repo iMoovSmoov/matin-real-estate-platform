@@ -8,11 +8,13 @@ import {
   TriangleAlert,
   Link2,
   Copy,
+  Download,
   Receipt,
 } from "lucide-react";
 import { scrollToEl } from "./motion";
 import { streamAi } from "@/lib/ai/client";
 import { getAgent, listingPhoto } from "@/lib/data";
+import { downloadTextFile, downloadCsv } from "@/lib/download";
 import { cn, usd } from "@/lib/utils";
 import {
   StatusChip,
@@ -182,6 +184,9 @@ export function CashOfferMatrix() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [verdict, setVerdict] = useState<{ text: string; running: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
+  /** Inline "Copied" flashes for the verdict + net-sheet copy buttons. */
+  const [verdictCopied, setVerdictCopied] = useState(false);
+  const [netCopied, setNetCopied] = useState(false);
   /** Net sheet: quick summary card vs the printable branded document. */
   const [netView, setNetView] = useState<"summary" | "branded">("summary");
   /** The streaming AI-verdict callout — scrolled into view when it runs so the
@@ -252,6 +257,58 @@ export function CashOfferMatrix() {
     }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  }
+
+  // ── AI verdict: real, takeable artifact (copy / download) ────────────────
+  function copyVerdict() {
+    if (!verdict?.text) return;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(verdict.text);
+    }
+    setVerdictCopied(true);
+    window.setTimeout(() => setVerdictCopied(false), 1800);
+  }
+  function downloadVerdict() {
+    if (!verdict?.text) return;
+    downloadTextFile("matin-ai-offer-verdict-5127-cedar-hills.txt", verdict.text);
+  }
+
+  // ── Net sheet: plain-text copy + tabular CSV download ────────────────────
+  function netSheetText() {
+    const lines = [
+      "Estimated Seller Net Proceeds",
+      `${netSheetOffer.buyer} · ${usd(netSheetOffer.price)}`,
+      "5127 SW Cedar Hills Blvd, Beaverton · Sarah Mitchell",
+      "─".repeat(40),
+    ];
+    for (const r of netRows) {
+      const amt = r.value < 0 ? `(${usd(Math.abs(r.value))})` : usd(r.value);
+      lines.push(`${r.label}: ${amt}`);
+    }
+    lines.push("─".repeat(40));
+    lines.push(`Net to seller: ${usd(netProceeds)}`);
+    lines.push("");
+    lines.push("Estimates pending title and payoff confirmation · Matin Real Estate");
+    return lines.join("\n");
+  }
+  function netSheetCsvRows(): (string | number)[][] {
+    const rows: (string | number)[][] = [["Line item", "Amount (USD)"]];
+    for (const r of netRows) rows.push([r.label, r.value]);
+    rows.push(["Net to seller", netProceeds]);
+    return rows;
+  }
+  function copyNetSheet() {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(netSheetText());
+    }
+    setNetCopied(true);
+    window.setTimeout(() => setNetCopied(false), 1800);
+  }
+  function downloadNetSheet() {
+    downloadCsv(
+      `net-sheet-5127-cedar-hills-${netSheetOffer.id.toLowerCase()}.csv`,
+      netSheetCsvRows(),
+    );
   }
 
   const acceptedOffer = accepted ? OFFERS.find((o) => o.id === accepted) : null;
@@ -524,6 +581,41 @@ export function CashOfferMatrix() {
                 {verdict.text ||
                   (verdict.running ? "Matin AI is weighing the offers…" : "")}
               </p>
+              {/* The verdict is a real artifact — copy or download it */}
+              {verdict.text && !verdict.running ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink-700/60 pt-3">
+                  <button
+                    type="button"
+                    onClick={copyVerdict}
+                    className={cn(
+                      "inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
+                      verdictCopied
+                        ? "text-success"
+                        : "text-slate-300 hover:bg-ink-700 hover:text-cloud",
+                    )}
+                  >
+                    {verdictCopied ? (
+                      <>
+                        <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" aria-hidden />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={downloadVerdict}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                  >
+                    <Download className="h-3.5 w-3.5" aria-hidden />
+                    Download
+                  </button>
+                </div>
+              ) : null}
             </CalloutCard>
           </div>
         ) : null}
@@ -618,6 +710,41 @@ export function CashOfferMatrix() {
                 Reconciles to {accepted ? "the accepted" : "the top"} offer ({usd(netSheetOffer.price)}).
                 Figures are estimates pending title and payoff confirmation.
               </p>
+
+              {/* Copy / download the net sheet — never a look-only output.
+                  (The Branded view adds the full printable PDF + .txt.) */}
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-mist pt-3">
+                <button
+                  type="button"
+                  onClick={copyNetSheet}
+                  className={cn(
+                    "inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[0.74rem] font-medium transition-colors",
+                    netCopied
+                      ? "border-success/40 text-success"
+                      : "border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
+                  )}
+                >
+                  {netCopied ? (
+                    <>
+                      <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" aria-hidden />
+                      Copy
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadNetSheet}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1.5 text-[0.74rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+                >
+                  <Download className="h-3.5 w-3.5" aria-hidden />
+                  Download CSV
+                </button>
+              </div>
             </>
           ) : (
             /* Printable Matin-branded net sheet via BrandedDocument (G-B) */

@@ -24,6 +24,9 @@ import {
   ListChecks,
   Home,
   ArrowRight,
+  Copy,
+  Check,
+  Download,
 } from "lucide-react";
 import {
   KpiStrip,
@@ -56,10 +59,11 @@ import {
 } from "@/lib/data/agreement-roster";
 import type { BuyerAgreement } from "@/lib/types";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
 import { cn, compactUsd, daysLabel } from "@/lib/utils";
 import { IntakeField, intakeInputClass, intakeSelectClass } from "./IntakeField";
 import { NewAgreementForm } from "./NewAgreementForm";
-import { scrollIntoView } from "./interactions";
+import { scrollIntoView, copyText } from "./interactions";
 import {
   ALL_CLAUSES,
   COMPENSATION_OPTIONS,
@@ -354,6 +358,13 @@ export default function BuyerAgreementBuilder() {
   const canSend = missing.length === 0 && !sent;
   const aiContext = `Buyer Agreements / ${buyer.name} · OREF C-565`;
   const draftReady = sent || draft.length > 0;
+  const draftSlug =
+    (form.buyerName || buyer.name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50) || "draft";
+  const draftFilename = `matin-buyer-agreement-packet-${draftSlug}.txt`;
 
   // Real matched listings in the buyer's representation area + budget band.
   const matches = matchedListings(
@@ -1069,6 +1080,9 @@ export default function BuyerAgreementBuilder() {
               <span className="ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-ink/40" />
             )}
           </p>
+          {draft && !generating ? (
+            <DraftActions text={draft} filename={draftFilename} />
+          ) : null}
         </div>
       )}
     </section>
@@ -1461,6 +1475,7 @@ export default function BuyerAgreementBuilder() {
                 <p className="whitespace-pre-wrap text-[0.8rem] leading-relaxed text-ink/85">
                   {draft}
                 </p>
+                <DraftActions text={draft} filename={draftFilename} />
               </div>
             ) : (
               <button
@@ -1507,6 +1522,41 @@ export default function BuyerAgreementBuilder() {
       >
         <NewAgreementForm formId="new-agreement-form" onCreate={handleCreate} />
       </RecordDrawer>
+    </div>
+  );
+}
+
+/* ── AI-draft output actions — Copy + Download a real artifact ─────────────── */
+function DraftActions({ text, filename }: { text: string; filename: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    if (await copyText(text)) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    }
+  }
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-mist pt-3">
+      <button
+        type="button"
+        onClick={copy}
+        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-success" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+        {copied ? "Copied" : "Copy"}
+      </button>
+      <button
+        type="button"
+        onClick={() => downloadTextFile(filename, text)}
+        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+      >
+        <Download className="h-3.5 w-3.5" />
+        Download
+      </button>
     </div>
   );
 }

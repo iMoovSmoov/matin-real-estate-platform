@@ -20,10 +20,13 @@ import {
   FileBadge,
   Mail,
   Wrench,
+  Download,
+  X,
 } from "lucide-react";
 import type { Transaction } from "@/lib/types";
 import { getAgent } from "@/lib/data";
 import { usd, compactUsd, cn } from "@/lib/utils";
+import { downloadTextFile } from "@/lib/download";
 import {
   KpiStrip,
   KpiCard,
@@ -108,6 +111,17 @@ function closeLabel(daysOut: number, closed: boolean) {
   if (daysOut < 0) return `${Math.abs(daysOut)}d past close`;
   if (daysOut === 0) return "Closes today";
   return `Closes in ${daysOut}d`;
+}
+
+/** Filename-safe slug for downloaded AI drafts. */
+function slugify(s: string): string {
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50) || "draft"
+  );
 }
 
 export function TransactionsCockpit({ transactions }: { transactions: Transaction[] }) {
@@ -454,6 +468,9 @@ function DealScreen({
 
   // Contextual deal-action bar state (streams an AI update inline).
   const [actionRun, setActionRun] = useState<{ id: string; label: string; text: string; running: boolean } | null>(null);
+  const [actionCopied, setActionCopied] = useState(false);
+  // Inline confirmation for a non-draft order (warranty/NHD/update co-op agent).
+  const [orderConfirm, setOrderConfirm] = useState<string | null>(null);
 
   // Document review drawer.
   const [openDocId, setOpenDocId] = useState<string | null>(null);
@@ -597,6 +614,48 @@ function DealScreen({
     });
   }
 
+  function handleDownloadDraft() {
+    if (!draft) return;
+    const label = screen.risk?.actionLabel ?? "draft";
+    downloadTextFile(`matin-${slugify(`${label}-${addressShort}`)}.txt`, draft);
+  }
+
+  /* Action-draft (seller/buyer update, addendum) — copy / download / clear. */
+  function copyActionRun() {
+    if (!actionRun?.text) return;
+    navigator.clipboard.writeText(actionRun.text).then(() => {
+      setActionCopied(true);
+      setTimeout(() => setActionCopied(false), 2200);
+    });
+  }
+
+  function downloadActionRun() {
+    if (!actionRun?.text) return;
+    downloadTextFile(
+      `matin-${slugify(`${actionRun.label}-${addressShort}`)}.txt`,
+      actionRun.text,
+    );
+  }
+
+  function approveActionRun() {
+    if (!actionRun) return;
+    pushLog({
+      channel: "system",
+      name: `Approved & sent: ${actionRun.label}`,
+      tag: "sent",
+      tagTone: "success",
+      meta: "Branded update sent · logged to the deal",
+      timeLabel: "now",
+    });
+    setActionRun(null);
+    setActionCopied(false);
+  }
+
+  function dismissActionRun() {
+    setActionRun(null);
+    setActionCopied(false);
+  }
+
   function approveDraft() {
     setRiskState("approved");
     pushLog({
@@ -626,6 +685,7 @@ function DealScreen({
      action (order warranty/NHD/update) logs the order immediately. */
   async function runDealAction(action: DealAction) {
     if (action.draftPrompt) {
+      setOrderConfirm(null);
       setActionRun({ id: action.id, label: action.label, text: "", running: true });
       await streamAi(
         { tool: "contract-extractor", input: { contractText: action.draftPrompt, address: tx.address }, messages: [{ role: "user", content: action.draftPrompt }] },
@@ -641,6 +701,10 @@ function DealScreen({
         timeLabel: "now",
       });
     } else {
+      // Non-draft order (warranty / NHD / update co-op agent): show an inline
+      // confirmation right at the action bar AND write the activity_event, so
+      // the click has an immediate visible result near where it was pressed.
+      setOrderConfirm(`${action.label} — ordered and logged to the deal.`);
       pushLog({
         channel: "system",
         name: action.label,
@@ -835,6 +899,22 @@ function DealScreen({
             </button>
           ))}
         </div>
+        {orderConfirm ? (
+          <div className="flex items-start gap-2 border-t border-mist bg-success/[0.06] px-5 py-2.5">
+            <CircleCheck className="mt-px h-4 w-4 shrink-0 text-success" />
+            <p className="flex-1 text-[0.78rem] font-medium leading-snug text-success">
+              {orderConfirm}
+            </p>
+            <button
+              type="button"
+              onClick={() => setOrderConfirm(null)}
+              aria-label="Dismiss confirmation"
+              className="-mr-1 -mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-success/70 transition-colors hover:bg-success/10 hover:text-success"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : null}
         {actionRun ? (
           <div className="border-t border-ink-700 bg-ink-900 px-5 py-3.5">
             <div className="flex items-center justify-between gap-2">
@@ -847,9 +927,42 @@ function DealScreen({
                 <span className="text-[0.7rem] text-slate-300">Drafting…</span>
               )}
             </div>
-            <p className="mt-2 whitespace-pre-wrap text-[0.8rem] leading-relaxed text-slate-300">
+            <p className="mt-2 whitespace-pre-wrap break-words text-[0.8rem] leading-relaxed text-slate-300">
               {actionRun.text || "…"}
             </p>
+            {!actionRun.running && actionRun.text ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink-700 pt-3">
+                <button
+                  type="button"
+                  onClick={copyActionRun}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                >
+                  {actionCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {actionCopied ? "Copied" : "Copy"}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadActionRun}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                >
+                  <Download className="h-3.5 w-3.5" /> Download
+                </button>
+                <button
+                  type="button"
+                  onClick={approveActionRun}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                >
+                  <CircleCheck className="h-3.5 w-3.5" /> Approve &amp; send
+                </button>
+                <button
+                  type="button"
+                  onClick={dismissActionRun}
+                  className="ml-auto inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                >
+                  Dismiss
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -941,14 +1054,23 @@ function DealScreen({
                         <span className="eyebrow text-gold/80">
                           AI draft · {screen.risk.actionLabel}
                         </span>
-                        <button
-                          type="button"
-                          onClick={handleCopy}
-                          className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:text-cloud"
-                        >
-                          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                          {copied ? "Copied" : "Copy"}
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={handleCopy}
+                            className="inline-flex min-h-[40px] items-center gap-1 rounded-lg px-2 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                          >
+                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {copied ? "Copied" : "Copy"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDownloadDraft}
+                            className="inline-flex min-h-[40px] items-center gap-1 rounded-lg px-2 py-1 text-[0.72rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                          >
+                            <Download className="h-3 w-3" /> Download
+                          </button>
+                        </div>
                       </div>
                       <p className="whitespace-pre-wrap text-[0.8rem] leading-relaxed text-slate-300">
                         {draft}

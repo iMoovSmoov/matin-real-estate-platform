@@ -19,6 +19,7 @@ import type { Automation } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { AUTOMATION_OWNER } from "./systemsModel";
 import { scrollElementIntoView } from "./useScrollIntoView";
+import { AiDraftResult } from "./AiDraftResult";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Systems Health — AutomationBreakdown (ref §2.11 + §1.6 backend-logic)
@@ -245,7 +246,15 @@ export function AutomationBreakdown({
                   confidence="Medium"
                   runLabel="Diagnose"
                   running={diagnosing}
-                  result={diagnosis || undefined}
+                  result={
+                    diagnosis ? (
+                      <AiDraftResult
+                        text={diagnosis}
+                        running={diagnosing}
+                        filename={`matin-restart-plan-${selected.id}.txt`}
+                      />
+                    ) : undefined
+                  }
                   onRun={onDiagnose}
                 />
               </div>

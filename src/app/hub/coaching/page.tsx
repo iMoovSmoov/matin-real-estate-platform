@@ -34,6 +34,7 @@ import { CoachingWorkbench } from "@/components/command/coaching/CoachingWorkben
 import { CoachingPacingChart } from "@/components/command/coaching/CoachingPacingChart";
 import { RoiLeaderboard } from "@/components/command/coaching/RoiLeaderboard";
 import { CoachingPlanDoc } from "@/components/command/coaching/CoachingPlanDoc";
+import { OutputActions } from "@/components/command/coaching/OutputActions";
 import {
   coachingStandings,
   coachingScenarioLibrary,
@@ -463,6 +464,20 @@ export default function CoachingPage() {
                     onEdit={editPlan}
                     onReject={rejectPlan}
                   />
+                  {/* The streamed plan is a real artifact — copy it or keep a .txt
+                      (never a draft the viewer can only look at). */}
+                  {planState?.text && !planState.running ? (
+                    <OutputActions
+                      className="mt-2 justify-end"
+                      getText={() =>
+                        `Coaching plan — ${selected.name} (${selected.title})\n` +
+                        `Quarter: ${COACHING_QUARTER} · Matin Real Estate\n\n` +
+                        `${planState?.text ?? ""}`
+                      }
+                      filename={`matin-coaching-plan-${selected.slug}.txt`}
+                      copyLabel="Copy plan"
+                    />
+                  ) : null}
                 </div>
 
                 {/* Static fallback plan summary + CRM downstream chips */}

@@ -3,9 +3,14 @@ import Image from "next/image";
 import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/ui/badge";
 import { usd, num } from "@/lib/utils";
+import { listingPhoto } from "@/lib/data";
 import type { Listing } from "@/lib/types";
 
 export function ListingCard({ listing }: { listing: Listing }) {
+  // Use the shared resolver so a listing with no `photos` still shows a real,
+  // deterministic exterior (prevents a broken/undefined <Image src> on the
+  // ~26 photoless Active/Pending listings that appear in Property Search).
+  const hero = listingPhoto(listing);
   return (
     <Link
       href={`/listings/${listing.id}`}
@@ -14,7 +19,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       {/* Image */}
       <div className="relative overflow-hidden rounded-t-2xl aspect-[4/3]">
         <Image
-          src={listing.photos[0]}
+          src={hero}
           alt={listing.address}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

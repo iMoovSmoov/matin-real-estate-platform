@@ -10,6 +10,9 @@ import {
   Bell,
   Phone,
   CircleCheck,
+  Download,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   DataTable,
@@ -30,6 +33,7 @@ import { Logo, MatinMark } from "@/components/brand/Logo";
 import { auditLogs, company, roles, getAgent } from "@/lib/data";
 import type { AuditLog } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { downloadCsv, downloadTextFile } from "@/lib/download";
 import {
   userRows as seedUsers,
   roleDefs,
@@ -516,7 +520,25 @@ export function TemplatesView() {
   const [selected, setSelected] = useState<TemplateRow | null>(null);
   const draftAi = useInlineAi();
   const [describe, setDescribe] = useState("");
+  const [copiedDraft, setCopiedDraft] = useState(false);
   const { msg, flash } = useFlash();
+
+  // The AI-drafted checklist is a real artifact — copy it or keep a .txt, not
+  // just Save-to-table or Discard.
+  async function copyDraft() {
+    if (!draftAi.state.result) return;
+    try {
+      await navigator.clipboard.writeText(draftAi.state.result);
+      setCopiedDraft(true);
+      setTimeout(() => setCopiedDraft(false), 1600);
+    } catch {
+      /* clipboard blocked — no-op */
+    }
+  }
+  function downloadDraft() {
+    if (!draftAi.state.result) return;
+    downloadTextFile("matin-checklist-template.txt", draftAi.state.result);
+  }
 
   // "New template" is the AI drafter below the table — scroll it into view and
   // focus the description input so the button has a visible, real result (not a
@@ -644,14 +666,40 @@ export function TemplatesView() {
             ) : null}
 
             {draftAi.state.done && !draftAi.state.error ? (
-              <div className="mt-3 flex items-center justify-end gap-2">
-                <button type="button" onClick={draftAi.reset} className="rounded-lg px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 hover:text-cloud">
-                  Discard
-                </button>
-                <button type="button" onClick={saveDraft} className="inline-flex items-center gap-1.5 rounded-lg bg-cloud px-3 py-1.5 text-[0.78rem] font-semibold text-ink hover:bg-cloud/90">
-                  <CircleCheck className="h-3.5 w-3.5" />
-                  Save as draft template
-                </button>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={copyDraft}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-gold/40 hover:text-cloud"
+                  >
+                    {copiedDraft ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-success" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" /> Copy
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={downloadDraft}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:border-gold/40 hover:text-cloud"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={draftAi.reset} className="rounded-lg px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 hover:text-cloud">
+                    Discard
+                  </button>
+                  <button type="button" onClick={saveDraft} className="inline-flex items-center gap-1.5 rounded-lg bg-cloud px-3 py-1.5 text-[0.78rem] font-semibold text-ink hover:bg-cloud/90">
+                    <CircleCheck className="h-3.5 w-3.5" />
+                    Save as draft template
+                  </button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -790,6 +838,31 @@ export function BrandKitView() {
   const marketing = getAgent(roles.marketingLead);
   const { msg, flash } = useFlash();
 
+  // Real .txt brand spec (palette hexes, fonts, voice) — a tangible asset, not a
+  // fake "preparing pack…" toast. The letterhead/email previews below are also
+  // downloadable via their own BrandedDocument toolbars.
+  function downloadBrandKit() {
+    const lines = [
+      "MATIN REAL ESTATE — BRAND KIT",
+      "Portland & SW Washington's most advanced brokerage.",
+      "",
+      "IDENTITY",
+      "Display font: Fraunces",
+      "Body / numbers: Inter (tabular)",
+      "Brand voice: Confident · precise · no hype",
+      `Office: ${company.address.city}, ${company.address.state}`,
+      `Reply-to: ${company.email}`,
+      "",
+      "CORE PALETTE",
+      ...brandCoreSwatches.map((s) => `${s.name}  ${s.hex}${s.note ? ` — ${s.note}` : ""}`),
+      "",
+      "AI ACCENT · GOLD (rationed to AI/active affordances only)",
+      ...brandGoldSwatches.map((s) => `${s.name}  ${s.hex}${s.note ? ` — ${s.note}` : ""}`),
+    ];
+    downloadTextFile("matin-brand-kit.txt", lines.join("\n"));
+    flash("Brand kit downloaded (palette, fonts, voice)");
+  }
+
   return (
     <>
     <div className="grid gap-5 lg:grid-cols-2">
@@ -800,12 +873,9 @@ export function BrandKitView() {
             <p className="eyebrow text-slate">Logo lockups</p>
             <h2 className="mt-1 font-display text-[1.1rem] font-normal text-ink">Matin Real Estate marks</h2>
           </div>
-          <GhostButton
-            ariaLabel="Download brand assets"
-            onClick={() => flash("Preparing brand asset pack (logos, palette, fonts)…")}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            Download assets
+          <GhostButton ariaLabel="Download brand kit" onClick={downloadBrandKit}>
+            <Download className="h-3.5 w-3.5" />
+            Download brand kit
           </GhostButton>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -880,7 +950,7 @@ export function BrandKitView() {
         </p>
       </div>
 
-      {/* ── Branded letterhead preview ──────────────────────────────────────── */}
+      {/* ── Branded letterhead preview (its own Save copy / Download PDF) ────── */}
       <div className="min-w-0 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
         <p className="eyebrow mb-3 text-slate">Letterhead preview</p>
         <BrandedDocument
@@ -915,7 +985,6 @@ export function BrandKitView() {
               footer. This is the shell the Marketing Studio and Forms sections compose.
             </p>
           }
-          hideToolbar
         />
       </div>
 
@@ -1047,6 +1116,24 @@ export function AiPolicyView() {
                   Get a plain-English explanation of what AI may do under the {selected.mode} setting and why approval is required.
                 </p>
               )}
+              {explain.state.done && !explain.state.error && explain.state.result ? (
+                <div className="mt-2.5 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(explain.state.result);
+                        flash("Explanation copied");
+                      } catch {
+                        /* clipboard blocked — no-op */
+                      }
+                    }}
+                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.74rem] font-medium text-slate-300 transition-colors hover:border-gold/40 hover:text-cloud"
+                  >
+                    <Copy className="h-3.5 w-3.5" /> Copy
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <div className="rounded-xl border border-mist bg-paper p-4">
@@ -1137,6 +1224,15 @@ export function AuditView() {
     ai: auditLogs.filter((a) => /\bAI\b/i.test(a.action) || /\bAI\b/i.test(a.target)).length,
   };
 
+  // Real CSV export of the current view — a downloadable compliance record, not
+  // a fake "exporting…" toast.
+  function exportCsv() {
+    const header = ["Event ID", "Actor", "Action", "Target", "When"];
+    const body = rows.map((a) => [a.id, a.actor, a.action, a.target, a.timeLabel]);
+    downloadCsv(`matin-audit-log-${view}.csv`, [header, ...body]);
+    flash(`Exported ${rows.length} log entries to CSV`);
+  }
+
   const cols: Column<AuditLog>[] = [
     {
       key: "actor",
@@ -1171,12 +1267,9 @@ export function AuditView() {
             Click an entry for full detail · permanent record · exportable for compliance.
           </p>
         </div>
-        <GhostButton
-          ariaLabel="Export audit log"
-          onClick={() => flash(`Exporting ${rows.length} log entries to CSV…`)}
-        >
-          <Send className="h-3.5 w-3.5" />
-          Export
+        <GhostButton ariaLabel="Export audit log to CSV" onClick={exportCsv}>
+          <Download className="h-3.5 w-3.5" />
+          Export CSV
         </GhostButton>
       </div>
 

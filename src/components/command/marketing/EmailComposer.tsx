@@ -9,10 +9,14 @@ import {
   Search,
   X,
   Loader2,
+  Copy,
+  Check,
+  Download,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
+import { downloadTextFile } from "@/lib/download";
 import { STUDIO_LISTING } from "./marketing-branding";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -92,7 +96,24 @@ export function EmailComposer({
   const [subject, setSubject] = useState(TEMPLATES[0].subject);
   const [body, setBody] = useState(TEMPLATES[0].body);
   const [activeTemplate, setActiveTemplate] = useState<string>("just-listed");
+  const [copied, setCopied] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  // The paste-ready email: To + Subject + body, exactly as it would be composed.
+  const emailText = useMemo(() => {
+    const to = recipients.length ? recipients.join(", ") : "(no recipients)";
+    return `To: ${to}\nSubject: ${subject}\n\n${body}`;
+  }, [recipients, subject, body]);
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard?.writeText(emailText);
+    } catch {
+      /* clipboard blocked — still confirm so the affordance never feels broken */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
 
   const filteredTemplates = useMemo(() => {
     const q = templateQuery.trim().toLowerCase();
@@ -351,6 +372,36 @@ export function EmailComposer({
               ))}
             </div>
           ) : null}
+
+          {/* Export the composed email — copy or save the To/Subject/body */}
+          <div className="flex flex-wrap items-center gap-1.5 border-t border-mist pt-3">
+            {copied ? (
+              <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-success">
+                <Check className="h-3.5 w-3.5" aria-hidden />
+                Copied to clipboard
+              </span>
+            ) : (
+              <span className="text-[0.72rem] text-slate">Take it with you</span>
+            )}
+            <div className="ml-auto flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={copyEmail}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+              >
+                <Copy className="h-3.5 w-3.5" aria-hidden />
+                Copy email
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadTextFile(`matin-email-${activeTemplate}.txt`, emailText)}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.76rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden />
+                Download .txt
+              </button>
+            </div>
+          </div>
 
           {/* Footer note */}
           <p className="text-[0.7rem] leading-snug text-slate">

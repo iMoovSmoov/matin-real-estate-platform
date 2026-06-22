@@ -382,7 +382,7 @@ export default function AboutPage() {
             ))}
           </div>
           <p className="mt-6 text-center text-[0.9rem] text-slate">
-            Day-to-day operations are led by <strong className="text-ink">Alicia Kelly-Smith</strong>, who keeps
+            Day-to-day operations are led by <strong className="text-ink">Alicia Smith</strong>, who keeps
             our 40-broker team — and every transaction — running on time.
           </p>
 

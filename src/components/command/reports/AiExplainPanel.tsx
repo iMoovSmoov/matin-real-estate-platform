@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Copy, Check } from "lucide-react";
 import { CalloutCard, AIActionCard, AIInsightChip } from "@/components/os";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
@@ -42,6 +42,19 @@ export function AiExplainPanel({
   const [running, setRunning] = useState(true);
   const [createdAction, setCreatedAction] = useState<string | null>(null);
   const [rejected, setRejected] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function copyExplanation() {
+    if (!text) return;
+    const out = `Why "${scope.context}" changed — ${scope.range} · ${scope.team} · ${scope.source}\n\n${text}\n\nKey drivers:\n${scope.drivers.map((d) => `• ${d}`).join("\n")}`;
+    try {
+      await navigator.clipboard?.writeText(out);
+    } catch {
+      /* clipboard blocked — still confirm so the affordance never feels broken */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
 
   // Guards stale streams: only the latest run is allowed to write state.
   const runIdRef = useRef(0);
@@ -101,6 +114,24 @@ export function AiExplainPanel({
       }
       action={
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={copyExplanation}
+            disabled={running || !text}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.76rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud disabled:opacity-40"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-success" aria-hidden />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" aria-hidden />
+                Copy
+              </>
+            )}
+          </button>
           <button
             type="button"
             onClick={() => void run()}

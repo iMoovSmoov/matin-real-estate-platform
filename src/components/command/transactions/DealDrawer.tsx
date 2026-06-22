@@ -9,7 +9,6 @@ import {
   Check,
   Loader2,
   X,
-  FileText,
 } from "lucide-react";
 import {
   RecordDrawer,
@@ -27,6 +26,7 @@ import {
 import { MatinMark } from "@/components/brand/Logo";
 import { getAgent } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { downloadTextFile, printElementById } from "@/lib/download";
 import type { DealDocument, DocStatus, MetaField } from "./deal-screen";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -105,6 +105,56 @@ function fieldsFor(doc: DealDocument, dealMeta?: MetaField[]): BrandedDocumentFi
   return fields;
 }
 
+/** Filename-safe slug for the downloaded document copy. */
+function slugify(s: string): string {
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50) || "document"
+  );
+}
+
+/* Assemble the compliance document into a real plain-text artifact so the
+   drawer's Download is a tangible file (not a fake "Downloaded" flash). The
+   branded on-screen preview carries the visual; this carries the record. */
+function assembleDocText(
+  doc: DealDocument,
+  formId: string,
+  dealAddress: string,
+  dealMeta?: MetaField[],
+  reviewer?: string,
+): string {
+  const rule = "─".repeat(46);
+  const out: string[] = [];
+  out.push("MATIN REAL ESTATE — TRANSACTION DOCUMENT");
+  out.push(rule);
+  out.push(`Document:     ${doc.name}`);
+  out.push(`Form:         ${formId}`);
+  out.push(`Requirement:  ${doc.requirement}`);
+  out.push(`Property:     ${dealAddress}`);
+  out.push(`Status:       ${STATUS_LABEL[doc.status]}`);
+  out.push(`Pages:        ${doc.pages}`);
+  out.push(`Provenance:   ${doc.meta}`);
+  out.push("");
+  if (dealMeta && dealMeta.length > 0) {
+    out.push("TRANSACTION DETAILS");
+    out.push(rule);
+    for (const m of dealMeta) out.push(`${m.label}: ${m.value}`);
+    out.push("");
+  }
+  if (doc.missing && doc.missing.length > 0) {
+    out.push("OUTSTANDING ITEMS (resolve before acceptance)");
+    out.push(rule);
+    for (const x of doc.missing) out.push(`• ${x}`);
+    out.push("");
+  }
+  if (reviewer) out.push(`Reviewed by:  ${reviewer} · Transaction Coordinator`);
+  out.push("Matin Real Estate · Equal Housing Opportunity");
+  return out.join("\n");
+}
+
 export function DealDrawer({
   open,
   onClose,
@@ -144,6 +194,16 @@ export function DealDrawer({
   const coordinator = coordinatorSlug ? getAgent(coordinatorSlug) : undefined;
   const tcName = coordinator?.name ?? agentName;
   const tcSlug = coordinator?.slug ?? agentSlug;
+
+  // Real document artifacts: a .txt record (Download) + a scoped print of just
+  // the branded letterhead (Print) — both wired to actual files, never no-ops.
+  const docDomId = `deal-doc-${doc.id}`;
+  const downloadDoc = () =>
+    downloadTextFile(
+      `matin-${slugify(doc.name)}.txt`,
+      assembleDocText(doc, formId, dealAddress, dealMeta, tcName),
+    );
+  const printDoc = () => printElementById(docDomId, doc.name);
   const completion =
     doc.status === "complete"
       ? 100
@@ -171,6 +231,8 @@ export function DealDrawer({
           resolved={resolved}
           onAccept={() => onAccept(doc)}
           onReject={() => onReject(doc)}
+          onDownload={downloadDoc}
+          onPrint={printDoc}
         />
       }
     >
@@ -206,22 +268,26 @@ export function DealDrawer({
           ) : null}
 
           {/* The REAL branded letterhead preview — green ✓ filled / red-outline
-              missing field grid; click a missing item to see what's needed. */}
-          <BrandedDocument
-            variant={variant}
-            formId={formId}
-            title={doc.name}
-            recipient={dealAddress}
-            completion={completion}
-            page={1}
-            pages={doc.pages}
-            fields={fieldsFor(doc, dealMeta)}
-            agent={
-              tcName
-                ? { name: tcName, slug: tcSlug, title: "Transaction Coordinator" }
-                : undefined
-            }
-          />
+              missing field grid; click a missing item to see what's needed. The
+              id wrapper lets the footer "Print" scope a Save-as-PDF to just this
+              document. */}
+          <div id={docDomId}>
+            <BrandedDocument
+              variant={variant}
+              formId={formId}
+              title={doc.name}
+              recipient={dealAddress}
+              completion={completion}
+              page={1}
+              pages={doc.pages}
+              fields={fieldsFor(doc, dealMeta)}
+              agent={
+                tcName
+                  ? { name: tcName, slug: tcSlug, title: "Transaction Coordinator" }
+                  : undefined
+              }
+            />
+          </div>
 
           {doc.missing && doc.missing.length > 0 ? (
             <div className="flex items-start gap-2 rounded-xl bg-gold-soft px-3 py-2.5 ring-1 ring-inset ring-gold/25">
@@ -261,11 +327,15 @@ function DrawerActions({
   resolved,
   onAccept,
   onReject,
+  onDownload,
+  onPrint,
 }: {
   doc: DealDocument;
   resolved: boolean;
   onAccept: () => void;
   onReject: () => void;
+  onDownload: () => void;
+  onPrint: () => void;
 }) {
   // Send-for-signature has a 3-state lifecycle (idle → sending → sent) so the
   // click produces real inline feedback instead of being a dead control.
@@ -298,8 +368,8 @@ function DrawerActions({
           )}
         </span>
         <div className="flex flex-wrap items-center gap-1.5">
-          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} label="Download" doneLabel="Downloaded" />
-          <GhostBtn icon={<Printer className="h-3.5 w-3.5" />} label="Print" doneLabel="Sent to printer" />
+          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} label="Download" doneLabel="Downloaded" onFire={onDownload} />
+          <GhostBtn icon={<Printer className="h-3.5 w-3.5" />} label="Print" doneLabel="Sent to printer" onFire={onPrint} />
           {doc.status === "complete" ? (
             <button
               type="button"
@@ -329,7 +399,7 @@ function DrawerActions({
 
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-2">
-      <GhostBtn icon={<FileText className="h-3.5 w-3.5" />} label="Preview" doneLabel="Opened preview" />
+      <GhostBtn icon={<Download className="h-3.5 w-3.5" />} label="Download" doneLabel="Downloaded" onFire={onDownload} />
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
@@ -350,19 +420,23 @@ function DrawerActions({
   );
 }
 
-/* A utility document action (Preview / Download / Print) — flashes a brief
-   confirmation on click so it is never a dead control (mandate 1). */
+/* A utility document action (Download / Print) — runs a REAL side effect
+   (`onFire`: download a .txt, scope-print the branded doc) and flashes a brief
+   confirmation, so it is never a dead control (mandate 1). */
 function GhostBtn({
   icon,
   label,
   doneLabel,
+  onFire,
 }: {
   icon: ReactNode;
   label: string;
   doneLabel: string;
+  onFire?: () => void;
 }) {
   const [done, setDone] = useState(false);
   function fire() {
+    onFire?.();
     setDone(true);
     window.setTimeout(() => setDone(false), 1800);
   }

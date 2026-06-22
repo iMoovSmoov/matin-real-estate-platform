@@ -10,6 +10,7 @@ import {
 } from "@/components/os";
 import type { DataQualityIssue } from "@/lib/types";
 import { SEVERITY_TONE } from "./systemsModel";
+import { AiDraftResult } from "./AiDraftResult";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Systems Health — DataQualityDrawer (ref §2.11)
@@ -203,7 +204,15 @@ export function DataQualityDrawer({
               confidence="High"
               runLabel="Draft fix plan"
               running={drafting}
-              result={draft || undefined}
+              result={
+                draft ? (
+                  <AiDraftResult
+                    text={draft}
+                    running={drafting}
+                    filename={`matin-fix-plan-${dq.id}.txt`}
+                  />
+                ) : undefined
+              }
               onRun={onDraftPlan}
             />
           </div>

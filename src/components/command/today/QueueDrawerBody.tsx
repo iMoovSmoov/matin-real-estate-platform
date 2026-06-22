@@ -17,6 +17,7 @@ import type { WorkQueueItem, AIAction, WorkflowRun } from "@/lib/types";
 import { CATEGORY_TONE } from "./workQueueMeta";
 import { enrich, personSlugFor, activityFor } from "./queueEnrich";
 import { brandedDraftFor, BrandedDraftPreview } from "./BrandedDraftPreview";
+import { DraftActions, slugify } from "./DraftActions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center — RecordDrawer body for a work-queue item
@@ -214,13 +215,22 @@ export function QueueDrawerBody({
             onReject={onReject}
             result={
               draft && !isBrandedDraft ? (
-                <span>
-                  <span className="mb-1.5 flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-gold/90">
+                <div className="space-y-2.5">
+                  <span className="flex items-center gap-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-gold/90">
                     <MatinMark theme="white" className="h-3 w-3" />
                     Draft — review before sending
                   </span>
-                  {draft}
-                </span>
+                  <p className="whitespace-pre-wrap break-words text-[0.8rem] leading-relaxed text-slate-300">
+                    {draft}
+                  </p>
+                  {/* No dead-end: the drafted reply is copyable + savable, not just viewable */}
+                  <DraftActions
+                    text={draft}
+                    fileName={`matin-draft-${slugify(rec.personName ?? item.subject)}.txt`}
+                    tone="dark"
+                    copyLabel="Copy draft"
+                  />
+                </div>
               ) : undefined
             }
           />

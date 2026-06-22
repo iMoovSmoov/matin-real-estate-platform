@@ -8,8 +8,10 @@ import {
   Check,
   FileText,
   Eraser,
+  Download,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
@@ -157,20 +159,28 @@ export function ContractCoach() {
               Coaching critique
             </p>
             {output && !busy && (
-              <button
-                onClick={copy}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-3 w-3 text-success" /> Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3 w-3" /> Copy
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={copy}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3 w-3 text-success" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" /> Copy
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => downloadTextFile("matin-contract-coaching.txt", output)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-ink/[0.08] bg-white px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+                >
+                  <Download className="h-3 w-3" /> Download
+                </button>
+              </div>
             )}
           </div>
 

@@ -12,11 +12,14 @@ import {
   CalendarClock,
   FileText,
   Receipt,
+  Copy,
+  Download,
 } from "lucide-react";
 import type { SellerLead } from "@/lib/types";
 import { MatinMark } from "@/components/brand/Logo";
 import { getAgent, listingPhoto } from "@/lib/data";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
 import { cn, usd } from "@/lib/utils";
 import {
   RecordDrawer,
@@ -99,6 +102,8 @@ export function OpportunityDrawer({
   const [draft, setDraft] = useState<DraftState>(null);
   const [tab, setTab] = useState<string>("overview");
   const [approved, setApproved] = useState(false);
+  /** Inline "Copied" flash on the AI-draft Copy button. */
+  const [draftCopied, setDraftCopied] = useState(false);
   /** Which branded deliverable is previewed in the Documents tab. */
   const [docKind, setDocKind] = useState<"email" | "netsheet">("email");
   /** Inline confirmation for the footer quick-actions (no no-op buttons). */
@@ -110,6 +115,7 @@ export function OpportunityDrawer({
     setDraft(null);
     setTab("overview");
     setApproved(false);
+    setDraftCopied(false);
     setDocKind("email");
     setFooterNote(null);
   }, [lead?.id]);
@@ -188,6 +194,32 @@ export function OpportunityDrawer({
       timeLabel: "just now",
       group: "Now",
     });
+  }
+
+  /** Slug for the draft download filename, from the seller name. */
+  function draftSlug() {
+    return (
+      (lead?.sellerName ?? "seller")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "seller"
+    );
+  }
+
+  // The AI draft is a real, takeable artifact — copy to clipboard…
+  function copyDraft() {
+    if (!draft?.text) return;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(draft.text);
+    }
+    setDraftCopied(true);
+    window.setTimeout(() => setDraftCopied(false), 1800);
+  }
+
+  // …or download as a real .txt file.
+  function downloadDraft() {
+    if (!draft?.text) return;
+    downloadTextFile(`home-value-outreach-${draftSlug()}.txt`, draft.text);
   }
 
   // Footer quick-actions log a real, visible event to the activity feed (the
@@ -468,7 +500,39 @@ export function OpportunityDrawer({
                     </p>
                     {draft.text}
                     {!draft.running ? (
-                      <div className="mt-3 flex items-center gap-2 border-t border-ink-700 pt-3">
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink-700 pt-3">
+                        {/* The draft is a real artifact — always copyable + downloadable */}
+                        <button
+                          type="button"
+                          onClick={copyDraft}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.78rem] font-medium transition-colors",
+                            draftCopied
+                              ? "text-success"
+                              : "text-slate-300 hover:bg-ink-700 hover:text-cloud",
+                          )}
+                        >
+                          {draftCopied ? (
+                            <>
+                              <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                              Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5" aria-hidden />
+                              Copy
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={downloadDraft}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-ink-700 px-2.5 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-ink-700 hover:text-cloud"
+                        >
+                          <Download className="h-3.5 w-3.5" aria-hidden />
+                          Download
+                        </button>
+                        <span className="mx-0.5 hidden h-4 w-px bg-ink-700 sm:block" aria-hidden />
                         {approved ? (
                           <span className="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-success">
                             <CircleCheck className="h-4 w-4" aria-hidden />

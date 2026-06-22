@@ -18,13 +18,16 @@ import {
   Target,
   DollarSign,
   GraduationCap,
+  Download,
   type LucideIcon,
 } from "lucide-react";
 import { streamAi } from "@/lib/ai/client";
+import { downloadTextFile } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { LiveDot, Pill } from "@/components/command/ui";
+import { OutputActions } from "@/components/command/coaching/OutputActions";
 import {
   scenarios,
   type Scenario,
@@ -225,6 +228,20 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
     // catFilter is preserved intentionally
   }
 
+  /** Assemble the visible role-play (client lines, your lines, coach grades) into
+   *  a real .txt so the practice session is a keepable artifact, not a dead-end. */
+  function buildTranscriptText(): string {
+    const lines: string[] = [];
+    if (active) lines.push(`Role-play — ${active.title} (${active.category} · ${active.difficulty})`, "");
+    for (const m of messages) {
+      if (!m.content.trim()) continue;
+      const who = m.role === "user" ? "You" : m.isGrade ? "Coach (grade)" : "Client";
+      lines.push(`${who}: ${m.content}`, "");
+    }
+    lines.push("Matin Real Estate · Scenario Trainer");
+    return lines.join("\n").trim();
+  }
+
   /* ── Library view ─────────────────────────────────────────────────────── */
   if (!active) {
     return (
@@ -353,8 +370,19 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
               </p>
               {coachGrade ? (
                 <div className="rounded-xl border border-azure/20 bg-azure/[0.03] p-3.5">
-                  <div className="mb-2.5 flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
-                    <GraduationCap className="h-3.5 w-3.5" /> Last Line Grade
+                  <div className="mb-2.5 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-azure">
+                      <GraduationCap className="h-3.5 w-3.5" /> Last Line Grade
+                    </div>
+                    {!gradeLoading ? (
+                      <OutputActions
+                        iconOnly
+                        getText={() => coachGrade}
+                        filename="matin-roleplay-grade.txt"
+                        copyLabel="Copy grade"
+                        downloadLabel="Download grade"
+                      />
+                    ) : null}
                   </div>
                   <CoachGradePanel text={coachGrade} />
                 </div>
@@ -447,23 +475,38 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
               </span>
               <div
                 className={cn(
-                  "max-w-[80%] break-words rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
-                  m.role === "user"
-                    ? "rounded-tr-sm bg-ink text-white"
-                    : isGradeBubble
-                      ? "rounded-tl-sm bg-azure/[0.04] text-slate ring-1 ring-inset ring-azure/20"
-                      : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
+                  "flex min-w-0 max-w-[80%] flex-col gap-1.5",
+                  m.role === "user" ? "items-end" : "items-start",
                 )}
               >
-                {m.role === "assistant" ? (
-                  m.content ? (
-                    <AiMarkdown text={m.content} />
+                <div
+                  className={cn(
+                    "max-w-full break-words rounded-2xl px-4 py-2.5 text-[0.88rem] leading-relaxed",
+                    m.role === "user"
+                      ? "rounded-tr-sm bg-ink text-white"
+                      : isGradeBubble
+                        ? "rounded-tl-sm bg-azure/[0.04] text-slate ring-1 ring-inset ring-azure/20"
+                        : "rounded-tl-sm bg-white text-slate ring-1 ring-inset ring-ink/[0.06]",
+                  )}
+                >
+                  {m.role === "assistant" ? (
+                    m.content ? (
+                      <AiMarkdown text={m.content} />
+                    ) : (
+                      <TypingDots />
+                    )
                   ) : (
-                    <TypingDots />
-                  )
-                ) : (
-                  <span className="whitespace-pre-wrap">{m.content}</span>
-                )}
+                    <span className="whitespace-pre-wrap">{m.content}</span>
+                  )}
+                </div>
+                {/* The AI grade is a real output — copy it or keep a .txt. */}
+                {isGradeBubble && m.content && !busy ? (
+                  <OutputActions
+                    getText={() => m.content}
+                    filename="matin-roleplay-grade.txt"
+                    copyLabel="Copy grade"
+                  />
+                ) : null}
               </div>
             </div>
           );
@@ -502,6 +545,13 @@ export function ScenarioTrainer({ startScenarioId, onStarted }: ScenarioTrainerP
             >
               <MatinMark theme="dark" className="h-3.5 w-3.5" />
               {gradeLoading ? "Grading…" : "Get AI Coaching"}
+            </button>
+            {/* Keep the whole practice session — a real downloadable transcript. */}
+            <button
+              onClick={() => downloadTextFile("matin-roleplay-transcript.txt", buildTranscriptText())}
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink/[0.08] bg-white px-3.5 py-1.5 text-[0.76rem] font-medium text-ink transition-colors hover:border-ink/20 hover:bg-ink/[0.04]"
+            >
+              <Download className="h-3.5 w-3.5" /> Download transcript
             </button>
           </div>
         )}

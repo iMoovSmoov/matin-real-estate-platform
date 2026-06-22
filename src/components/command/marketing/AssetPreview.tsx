@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Mail,
   Camera,
@@ -11,15 +11,40 @@ import {
   Loader2,
   CircleCheck,
   Plus,
+  Copy,
+  Check,
+  Download,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusChip, AIInsightChip, PropertyThumb } from "@/components/os";
 import { MatinMark } from "@/components/brand/Logo";
 import { company } from "@/lib/data";
+import { downloadTextFile } from "@/lib/download";
 import { AiMarkdown } from "@/components/command/AiMarkdown";
 import { PREVIEW_CHANNELS, CHANNEL_META, type PreviewChannel } from "./marketing-data";
 import { STUDIO_LISTING } from "./marketing-branding";
+
+/** Copy `text` to the clipboard and flash an inline confirmation via `mark`.
+ *  Stays graceful (still flashes) when the clipboard API is blocked so the demo
+ *  affordance never feels broken. */
+async function copyText(text: string, mark: (v: boolean) => void) {
+  try {
+    await navigator.clipboard?.writeText(text);
+  } catch {
+    /* clipboard unavailable in this context — still confirm for the demo */
+  }
+  mark(true);
+  setTimeout(() => mark(false), 1800);
+}
+
+/** A URL/file-safe slug from the studio listing address (for download names). */
+function addressSlug() {
+  return STUDIO_LISTING.address
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 const OFFICE_LINE = `${company.address.street}, ${company.address.city} ${company.address.state} ${company.address.zip} · ${company.phone}`;
 
@@ -216,6 +241,8 @@ export function AssetPreview({
   metaLine,
   sentState,
   isListing,
+  campaignText,
+  campaignFilename,
 }: {
   subhead: string;
   headline: string;
@@ -230,6 +257,12 @@ export function AssetPreview({
   metaLine: string;
   /** Drives the Send-test button: idle → sending → sent (inline confirmation). */
   sentState: "idle" | "sending" | "sent";
+  /** Assembled multi-channel campaign text (all channels of this template) so a
+   *  viewer can copy or download the WHOLE generated campaign, not just one
+   *  channel — every generated asset is a real, exportable artifact. */
+  campaignText: string;
+  /** Suggested file name for the full-campaign .txt download. */
+  campaignFilename: string;
   /** True only for templates that market THIS studio listing (listing-launch /
    *  open-house / price-reduction). When false the canvas drops the specific
    *  listing chrome (price badge, beds/baths subject, single-property header,
@@ -240,6 +273,28 @@ export function AssetPreview({
   const meta = CHANNEL_META[channel];
   const isSocial = channel === "Social";
   const heroRatio = isSocial ? "square" : "video";
+
+  const [copiedChannel, setCopiedChannel] = useState(false);
+  const [copiedCampaign, setCopiedCampaign] = useState(false);
+
+  // The plain-text asset for the ACTIVE channel: brand header + subject/headline
+  // + the copy itself + CTA + the Equal-Housing office line — a self-contained,
+  // paste-ready deliverable (not just the raw body fragment).
+  const channelFileText = useMemo(() => {
+    const subjectLine =
+      channel === "Email"
+        ? `Subject: ${headline}${isListing ? ` — ${STUDIO_LISTING.beds}BD/${STUDIO_LISTING.baths}BA at ${STUDIO_LISTING.price}` : ""}`
+        : headline;
+    const parts = [`Matin Real Estate — ${meta.kicker}`, subjectLine];
+    if (channel !== "Email" && subhead) parts.push(subhead);
+    parts.push("", body.trim(), "", `CTA: ${meta.cta}`, `Equal Housing Opportunity · ${OFFICE_LINE}`);
+    return parts.join("\n");
+  }, [channel, headline, subhead, body, meta, isListing]);
+
+  const channelFilename = `matin-${channel.toLowerCase().replace(/\s+/g, "-")}-${addressSlug()}.txt`;
+  // Channels carried by this campaign (for the export strip label).
+  const channelCount = (campaignText.match(/^## /gm) ?? []).length;
+  const hasBody = Boolean(body && body.trim());
 
   return (
     <div className="flex flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
@@ -291,6 +346,39 @@ export function AssetPreview({
 
       {/* Preview canvas */}
       <div className="bg-paper px-5 py-5">
+        {/* Full-campaign export strip — copy or download EVERY channel asset at
+            once (the generated campaign is a real, exportable artifact). */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-cloud px-3 py-2">
+          <span className="min-w-0 text-[0.72rem] text-slate">
+            <span className="font-semibold text-ink">Full campaign</span> · {channelCount}{" "}
+            {channelCount === 1 ? "channel" : "channels"}
+            {status.label === "AI draft" ? " · AI draft" : ""}
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {copiedCampaign ? (
+              <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-success">
+                <Check className="h-3.5 w-3.5" aria-hidden />
+                Copied
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => copyText(campaignText, setCopiedCampaign)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.74rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+            >
+              <Copy className="h-3.5 w-3.5" aria-hidden />
+              Copy all
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadTextFile(campaignFilename, campaignText)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.74rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              Download .txt
+            </button>
+          </div>
+        </div>
         <div
           className={cn(
             "mx-auto rounded-xl border border-mist bg-cloud p-6 shadow-soft",
@@ -428,9 +516,9 @@ export function AssetPreview({
         {!streaming && body ? <AssetTelemetry channel={channel} /> : null}
       </div>
 
-      {/* Action bar — real "Send test" with inline confirmation */}
+      {/* Action bar — copy / download THIS channel + a real "Send test" */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist px-5 py-3.5">
-        <p className="text-[0.72rem] text-slate">
+        <p className="min-w-0 text-[0.72rem] text-slate">
           {sentState === "sent" ? (
             <span className="inline-flex items-center gap-1.5 font-medium text-success">
               <CircleCheck className="h-3.5 w-3.5" aria-hidden />
@@ -440,29 +528,57 @@ export function AssetPreview({
             "Test sends to your inbox only — nothing reaches the audience without approval."
           )}
         </p>
-        <button
-          type="button"
-          onClick={onSendTest}
-          disabled={sentState === "sending" || (!body && !streaming)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-50"
-        >
-          {sentState === "sending" ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-              Sending…
-            </>
-          ) : sentState === "sent" ? (
-            <>
-              <CircleCheck className="h-3.5 w-3.5" aria-hidden />
-              Sent
-            </>
-          ) : (
-            <>
-              <Send className="h-3.5 w-3.5" aria-hidden />
-              Send test {channel === "Email" ? "email" : channel.toLowerCase()}
-            </>
-          )}
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {copiedChannel ? (
+            <span className="inline-flex items-center gap-1 text-[0.72rem] font-medium text-success">
+              <Check className="h-3.5 w-3.5" aria-hidden />
+              Copied
+            </span>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => copyText(channelFileText, setCopiedChannel)}
+            disabled={!hasBody}
+            title={`Copy the ${channel} copy`}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.78rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-40"
+          >
+            <Copy className="h-3.5 w-3.5" aria-hidden />
+            Copy
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadTextFile(channelFilename, channelFileText)}
+            disabled={!hasBody}
+            title={`Download the ${channel} copy as .txt`}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-paper px-3 text-[0.78rem] font-semibold text-ink transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 disabled:opacity-40"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden />
+            Save .txt
+          </button>
+          <button
+            type="button"
+            onClick={onSendTest}
+            disabled={sentState === "sending" || (!body && !streaming)}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3.5 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-50"
+          >
+            {sentState === "sending" ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                Sending…
+              </>
+            ) : sentState === "sent" ? (
+              <>
+                <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                Sent
+              </>
+            ) : (
+              <>
+                <Send className="h-3.5 w-3.5" aria-hidden />
+                Send test {channel === "Email" ? "email" : channel.toLowerCase()}
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

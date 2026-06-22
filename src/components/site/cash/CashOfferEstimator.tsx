@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, BadgeCheck, Clock } from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock, Copy, Check, Download } from "lucide-react";
 import { prefersReducedMotion, scrollIntoViewSafe } from "@/components/site/useScrollReveal";
+import { downloadTextFile } from "@/lib/download";
 
 const fmt = (n: number) => "$" + Math.round(n).toLocaleString();
 
@@ -11,11 +12,40 @@ export function CashOfferEstimator() {
   const [revealed, setRevealed] = useState(false);
   const [shown, setShown] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
   const raf = useRef<number | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const low = value * 0.9;
   const high = value * 0.94;
+
+  function buildOfferText(): string {
+    const line = "—".repeat(44);
+    return [
+      "CASH IS KING HOME BUYERS — by Matin Real Estate",
+      "NO-OBLIGATION CASH OFFER ESTIMATE",
+      line,
+      `Estimated home value:  ${fmt(value)}`,
+      `Cash offer range:      ${fmt(low)} – ${fmt(high)}`,
+      line,
+      "• No repairs, no showings, no fees",
+      "• Close in as little as 7 days, on your date",
+      "",
+      "This is a preliminary range — we firm it up with real local",
+      "comps within 24 hours.",
+      "Lock it in: (503) 622-9624 · matinrealestate.com",
+    ].join("\n");
+  }
+
+  async function copyOffer() {
+    try {
+      await navigator.clipboard.writeText(buildOfferText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — Download is the real fallback */
+    }
+  }
 
   function getOffer() {
     if (submitting) return;
@@ -70,7 +100,7 @@ export function CashOfferEstimator() {
             max={2500000}
             step={10000}
             value={value}
-            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); setSubmitting(false); }}
+            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); setSubmitting(false); setCopied(false); }}
             className="mt-2 w-full accent-emerald-500"
           />
           <div className="mt-1 flex justify-between text-[0.66rem] text-slate-300/50">
@@ -107,7 +137,35 @@ export function CashOfferEstimator() {
               <p className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-emerald-400" /> No repairs, no showings, no fees</p>
               <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-emerald-400" /> Close in as little as 7 days</p>
             </div>
-            <a href="tel:+15036229624" className="mt-5 text-[0.82rem] font-semibold text-emerald-300 hover:text-emerald-200">
+
+            {/* Keep the offer — real copy/download, not a dead end */}
+            <div className="mt-5 flex w-full flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={copyOffer}
+                aria-live="polite"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2.5 text-[0.82rem] font-medium text-emerald-200 transition hover:bg-emerald-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" /> Copy offer
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadTextFile("cash-is-king-offer-estimate.txt", buildOfferText())}
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-[0.82rem] font-semibold text-white transition hover:bg-emerald-500 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+              >
+                <Download className="h-4 w-4" /> Download
+              </button>
+            </div>
+
+            <a href="tel:+15036229624" className="mt-4 text-[0.82rem] font-semibold text-emerald-300 hover:text-emerald-200">
               Lock it in → (503) 622-9624
             </a>
           </>

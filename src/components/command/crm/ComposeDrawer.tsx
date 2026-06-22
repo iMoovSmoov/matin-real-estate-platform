@@ -8,6 +8,7 @@ import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
 import { RecordDrawer, Avatar, AIActionCard, StatusChip } from "@/components/os";
 import { budgetLabel } from "./leadView";
+import { DraftActions, slugify } from "@/components/command/today/DraftActions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    CRM & Leads — Compose / Assign drawer (RecordDrawer-backed)
@@ -254,9 +255,9 @@ export function ComposeDrawer({
               result={
                 draftResult ? (
                   <div className="space-y-2.5">
-                    <p>{draftResult}</p>
+                    <p className="whitespace-pre-wrap break-words">{draftResult}</p>
                     {!drafting && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={acceptDraft}
@@ -265,6 +266,13 @@ export function ComposeDrawer({
                           <CircleCheck className="h-3.5 w-3.5" aria-hidden />
                           Use this draft
                         </button>
+                        {/* Copy + Save .txt — the drafted reply is a real artifact, not view-only */}
+                        <DraftActions
+                          text={draftResult}
+                          fileName={`matin-${meta.channel ?? "text"}-${slugify(lead.name)}.txt`}
+                          tone="dark"
+                          copyLabel="Copy"
+                        />
                         <button
                           type="button"
                           onClick={() => setDraftResult("")}

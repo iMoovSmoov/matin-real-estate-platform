@@ -9,7 +9,6 @@ import {
   Layers,
   Eye,
   Download,
-  Printer,
   Send,
   RotateCcw,
   ChevronRight,
@@ -17,6 +16,7 @@ import {
   MoreHorizontal,
   Pencil,
   Copy,
+  Check,
   Trash2,
   ListChecks,
 } from "lucide-react";
@@ -35,6 +35,7 @@ import {
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { downloadTextFile, downloadCsv } from "@/lib/download";
 import { rosterOption } from "@/lib/data/agreement-roster";
 import {
   PACKETS,
@@ -44,6 +45,8 @@ import {
   packetProgress,
   docFields,
   docCompletion,
+  documentText,
+  docSlug,
   isSendBlocked,
   isOpenDoc,
   type Packet,
@@ -52,7 +55,7 @@ import {
 import { DocumentDrawer } from "./DocumentDrawer";
 import { NewPacketDrawer } from "./NewPacketDrawer";
 import { FormsLibrary } from "./FormsLibrary";
-import { scrollIntoView } from "./interactions";
+import { scrollIntoView, copyText } from "./interactions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Forms & Docs — packet center (build-reference §2.7; plan S7 1–8)
@@ -68,10 +71,11 @@ import { scrollIntoView } from "./interactions";
          documents (BrandedDocument letterhead, live field grids, green/red
          completion). Card click selects; "View" opens the paginated
          DocumentDrawer; per-card kebab renames / duplicates / deletes.
-     (3) Selected document actions — Preview / Download / Print render the
-         branded artifact (window.print of the BrandedDocument), Send for
-         signature (ink primary, mutates state) shows a Matin e-sign envelope;
-         an AI missing-field check streamed inline.
+     (3) Selected document actions — View opens the branded DocumentDrawer,
+         Download/Copy produce a real .txt artifact / clipboard copy of the
+         document, Send for signature (ink primary, mutates state) shows a Matin
+         e-sign envelope; an AI missing-field check streams inline with its own
+         Copy / Download. Bulk Download exports the selected packets to CSV.
 
    Mobile (R1): below lg a PaneSwitcher (List · Documents · Actions) shows ONE
    pane at a time; selecting a packet jumps to Documents, selecting a doc jumps
@@ -230,9 +234,30 @@ export function FormsDocsWorkspace() {
   }
 
   function bulkDownload() {
-    const n = selectedPackets.size;
-    flashPane(`Generated branded PDFs for ${n} packet${n === 1 ? "" : "s"}.`);
-    if (typeof window !== "undefined") window.print();
+    const chosen = packets.filter((p) => selectedPackets.has(p.id));
+    const rows: (string | number)[][] = [
+      ["Packet", "Subject", "Owner", "Form", "Document", "Status", "Page", "Pages", "Outstanding"],
+    ];
+    for (const p of chosen) {
+      for (const d of p.docs) {
+        rows.push([
+          p.name,
+          p.subject,
+          p.ownerName,
+          d.code,
+          d.title,
+          STATUS_META[d.status].label,
+          d.page,
+          d.pages,
+          (d.missing ?? []).join("; "),
+        ]);
+      }
+    }
+    const docCount = rows.length - 1;
+    downloadCsv(`matin-packets-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    flashPane(
+      `Exported ${chosen.length} packet${chosen.length === 1 ? "" : "s"} (${docCount} document${docCount === 1 ? "" : "s"}) to CSV.`,
+    );
     setSelectedPackets(new Set());
   }
 
@@ -1266,7 +1291,44 @@ function ActionsPane({
   const missing = doc.missing ?? [];
   const missingCount = missing.length;
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
+  const [docCopied, setDocCopied] = useState(false);
+  const [aiCopied, setAiCopied] = useState(false);
+  const [downloadNote, setDownloadNote] = useState<string | null>(null);
   const ownerOpt = rosterOption(packet.ownerSlug);
+
+  function flashDownload(message: string) {
+    setDownloadNote(message);
+    window.setTimeout(() => setDownloadNote((n) => (n === message ? null : n)), 2600);
+  }
+
+  function handleDownloadDoc() {
+    downloadTextFile(`matin-${docSlug(doc)}.txt`, documentText(packet, doc));
+    flashDownload(`Downloaded ${doc.code} · ${doc.title}.txt`);
+  }
+
+  async function handleCopyDoc() {
+    if (await copyText(documentText(packet, doc))) {
+      setDocCopied(true);
+      window.setTimeout(() => setDocCopied(false), 1800);
+    }
+  }
+
+  function handleDownloadCheck() {
+    if (!checkOut) return;
+    downloadTextFile(
+      `matin-${doc.code.toLowerCase()}-field-check.txt`,
+      `MATIN AI — MISSING-FIELD CHECK\n${doc.code} · ${doc.title}\n${packet.name} — ${packet.subject}\n\n${checkOut}`,
+    );
+    flashDownload(`Downloaded ${doc.code} field check.txt`);
+  }
+
+  async function handleCopyCheck() {
+    if (!checkOut) return;
+    if (await copyText(checkOut)) {
+      setAiCopied(true);
+      window.setTimeout(() => setAiCopied(false), 1800);
+    }
+  }
 
   return (
     <section className="flex flex-col gap-4">
@@ -1293,23 +1355,34 @@ function ActionsPane({
           </div>
         ) : null}
 
-        {/* Light actions — Preview / branded PDF / Print */}
+        {/* Light actions — each produces a REAL result: open the branded doc,
+            download a tangible .txt, or copy it to the clipboard. */}
         <div className="mt-3.5 grid grid-cols-3 gap-2">
           <GhostBtn icon={<Eye className="h-3.5 w-3.5" />} onClick={onView}>
             View
           </GhostBtn>
-          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} onClick={onView}>
-            PDF
+          <GhostBtn icon={<Download className="h-3.5 w-3.5" />} onClick={handleDownloadDoc}>
+            Download
           </GhostBtn>
           <GhostBtn
-            icon={<Printer className="h-3.5 w-3.5" />}
-            onClick={() => {
-              if (typeof window !== "undefined") window.print();
-            }}
+            icon={
+              docCopied ? (
+                <Check className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )
+            }
+            onClick={handleCopyDoc}
           >
-            Print
+            {docCopied ? "Copied" : "Copy"}
           </GhostBtn>
         </div>
+        {downloadNote ? (
+          <p className="mt-2 inline-flex items-center gap-1.5 text-[0.74rem] font-medium text-success">
+            <CircleCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {downloadNote}
+          </p>
+        ) : null}
 
         {/* Primary ink action + correction */}
         <button
@@ -1427,6 +1500,30 @@ function ActionsPane({
         {checkOut ? (
           <div className="mt-3 rounded-xl border border-mist bg-paper px-3.5 py-3 text-[0.78rem] leading-relaxed text-ink">
             <p className="whitespace-pre-wrap">{checkOut}</p>
+            {!checkBusy ? (
+              <div className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-mist pt-2.5">
+                <button
+                  type="button"
+                  onClick={handleCopyCheck}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                >
+                  {aiCopied ? (
+                    <Check className="h-3.5 w-3.5 text-success" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {aiCopied ? "Copied" : "Copy"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadCheck}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-mist bg-cloud px-2.5 py-1 text-[0.74rem] font-medium text-ink transition-colors hover:border-ink/20"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

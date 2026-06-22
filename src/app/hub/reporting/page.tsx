@@ -7,6 +7,7 @@ import {
   Radio,
   Download,
   ChevronDown,
+  Check,
 } from "lucide-react";
 import {
   reportMetrics,
@@ -932,6 +933,9 @@ export default function ReportingPage() {
           setDrawer(null);
           askMatin(ctx, drivers, action);
         }}
+        rangeLabel={RANGE_LABEL[range]}
+        team={team}
+        source={source}
       />
 
       {/* ── Branded report export — Matin-letterhead PDF via BrandedDocument ── */}
@@ -1019,22 +1023,32 @@ function ReportingDrawer({
   drawer,
   onClose,
   onAskAi,
+  rangeLabel,
+  team,
+  source,
 }: {
   drawer: Drawer;
   onClose: () => void;
   onAskAi: (context: string, drivers: string[], action: ExplainScope["action"]) => void;
+  rangeLabel: string;
+  team: string;
+  source: string;
 }) {
   const open = drawer != null;
+  const [exported, setExported] = useState(false);
 
   let title = "";
   let subtitle = "";
   let body: React.ReactNode = null;
   let ask: { context: string; drivers: string[]; action: ExplainScope["action"] } | null = null;
+  // Rows for the per-record CSV export (filled per drawer kind below).
+  let exportRows: [string, string | number][] = [];
 
   if (drawer?.kind === "metric") {
     const copy = SCORECARD_COPY[drawer.metric];
     title = copy.title;
     subtitle = copy.sub;
+    exportRows = [...copy.lines, ["% to goal", `${copy.pct}%`]];
     ask = {
       context: copy.title,
       drivers: copy.drivers,
@@ -1059,6 +1073,18 @@ function ReportingDrawer({
     subtitle = a?.title ?? "Sales agent";
     const apptRate = r.leads ? Math.round((r.appts / r.leads) * 100) : 0;
     const signRate = r.appts ? Math.round((r.signed / r.appts) * 100) : 0;
+    exportRows = [
+      ["GCI", usd(r.gci)],
+      ["Leads", num(r.leads)],
+      ["Appointments", num(r.appts)],
+      ["Signed", num(r.signed)],
+      ["Lead → appointment", `${apptRate}%`],
+      ["Appointment → signed", `${signRate}%`],
+      ["Career volume", a ? compactUsd(a.volume) : "—"],
+      ["Homes sold", a ? num(a.homesSold) : "—"],
+      ["Active listings", a ? num(a.activeListings) : "—"],
+      ["Speed-to-lead", a?.responseTimeMins ? `${a.responseTimeMins} min` : "—"],
+    ];
     ask = {
       context: `${r.agent} accountability`,
       drivers: [
@@ -1135,6 +1161,17 @@ function ReportingDrawer({
     const gci = Math.round(s.revenue * 0.025);
     const net = gci - s.spend;
     const roas = s.spend === 0 ? "∞" : `${(gci / s.spend).toFixed(1)}x`;
+    exportRows = [
+      ["Attributed GCI", compactUsd(gci)],
+      ["Marketing spend", s.spend === 0 ? "$0" : compactUsd(s.spend)],
+      ["Attributed volume", compactUsd(s.revenue)],
+      ["Leads", num(s.leads)],
+      ["Closed", num(s.closed)],
+      ["Close rate", `${s.leads ? Math.round((s.closed / s.leads) * 100) : 0}%`],
+      ["Cost per lead", s.cpl === 0 ? "$0 (referral)" : `$${num(s.cpl)}`],
+      ["Net contribution", compactUsd(net)],
+      ["Return on spend (GCI)", s.spend === 0 ? "∞ (pure referral)" : roas],
+    ];
     ask = {
       context: `${s.source} ROI`,
       drivers: [
@@ -1184,6 +1221,10 @@ function ReportingDrawer({
     const s = drawer.stage;
     title = `${s.stage} stage`;
     subtitle = "Funnel stage detail";
+    exportRows = [
+      ["Stage", s.stage],
+      ["Contacts at stage", num(s.count)],
+    ];
     ask = {
       context: `${s.stage} funnel stage`,
       drivers: [`${num(s.count)} contacts at this stage`],
@@ -1205,6 +1246,12 @@ function ReportingDrawer({
     const s = drawer.stage;
     title = `${s.stage} pipeline`;
     subtitle = "Live deals at this stage";
+    exportRows = [
+      ["Stage", s.stage],
+      ["Attributed value", compactUsd(s.value)],
+      ["Live deals", num(s.deals)],
+      ["Avg deal size", s.deals ? compactUsd(Math.round(s.value / s.deals)) : "—"],
+    ];
     ask = {
       context: `${s.stage} pipeline stage`,
       drivers: [`${compactUsd(s.value)} attributed`, `${s.deals} live deals`],
@@ -1233,6 +1280,27 @@ function ReportingDrawer({
     );
   }
 
+  /* Real per-record export — downloads a scoped CSV of exactly the figures this
+     drilldown shows (never a no-op control). */
+  function exportRecord() {
+    if (exportRows.length === 0) return;
+    const rows: (string | number)[][] = [
+      [`Matin Real Estate — ${title}`],
+      ["Detail", subtitle],
+      ["Reporting period", rangeLabel],
+      ["Team / office", team],
+      ["Lead source scope", source],
+      [],
+      ["Metric", "Value"],
+      ...exportRows,
+    ];
+    const slug =
+      title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "record";
+    downloadCsv(`matin-${slug}.csv`, rows);
+    setExported(true);
+    setTimeout(() => setExported(false), 2000);
+  }
+
   return (
     <RecordDrawer
       open={open}
@@ -1252,10 +1320,20 @@ function ReportingDrawer({
             </button>
             <button
               type="button"
+              onClick={exportRecord}
               className="inline-flex items-center gap-1.5 rounded-lg border border-mist px-3 py-2 text-[0.8rem] font-medium text-ink transition-colors hover:bg-paper"
             >
-              <Download className="h-3.5 w-3.5" />
-              Export
+              {exported ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-success" />
+                  Exported
+                </>
+              ) : (
+                <>
+                  <Download className="h-3.5 w-3.5" />
+                  Export CSV
+                </>
+              )}
             </button>
           </>
         ) : undefined

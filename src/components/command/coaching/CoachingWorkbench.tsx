@@ -25,6 +25,7 @@ import {
   StatusChip,
   type TrackTone,
 } from "@/components/os";
+import { OutputActions } from "./OutputActions";
 
 /* ──────────────────────────────────────────────────────────────────────────
    CoachingWorkbench — the §2.9 three-pane coaching surface.
@@ -502,6 +503,43 @@ export function CoachingWorkbench({
   // Drills that the auto-plan exposes as assignable CRM tasks.
   const planDrills = useMemo(() => buildPlanDrills(active?.title ?? "", seed), [active, seed]);
 
+  // ── Plain-text exports — assembled at click-time so live turns/scores are
+  //    current. The transcript export carries the coach grade + live scorecard
+  //    so "roleplay transcript" and "AI grade output" are one portable file.
+  function buildTranscriptText(): string {
+    const lines: string[] = [
+      `Roleplay — ${active?.title ?? "Coaching drill"} (${active?.category ?? ""})`,
+      `Persona: ${seed.personaName} — ${seed.personaContext}`,
+      "",
+    ];
+    for (const t of transcript) {
+      if (!t.text.trim()) continue;
+      lines.push(`${t.speaker === "agent" ? "Agent (you)" : seed.personaName}: ${t.text}`);
+    }
+    lines.push("", `Coach: ${coachText}`, "", `Scorecard — overall ${overallScore}`);
+    for (const r of liveRubric) lines.push(`  ${r.label}: ${r.value}`);
+    lines.push("", "Matin Real Estate · Coaching");
+    return lines.join("\n");
+  }
+
+  function buildPlanText(): string {
+    const lines: string[] = [
+      `Auto-created coaching plan — ${active?.title ?? "Coaching drill"}`,
+      "",
+      seed.plan,
+      "",
+      "Drills (assignable to Today):",
+      ...planDrills.map(
+        (d) => `- ${d}${assignedDrills.includes(d) ? "  [assigned]" : ""}`,
+      ),
+      "",
+      "Matin Real Estate · Coaching",
+    ];
+    return lines.join("\n");
+  }
+
+  const scenarioSlug = (active?.id ?? activeId).toLowerCase();
+
   return (
     // R8: real responsive Tailwind — 1-col phone, md two-column, xl three-column.
     // The three-pane split is gated at xl (1280px), NOT lg: at the 1024–1279
@@ -599,16 +637,27 @@ export function CoachingWorkbench({
             </p>
             <p className="truncate text-[0.7rem] leading-tight text-slate">{seed.personaContext}</p>
           </div>
-          {(liveTurns.length > 0 || practicing) && (
-            <button
-              type="button"
-              onClick={resetRoleplay}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-mist px-2.5 py-1 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
-            >
-              <RotateCcw className="h-3 w-3" aria-hidden />
-              Reset
-            </button>
-          )}
+          <div className="ml-auto flex items-center gap-1.5">
+            {/* Export this roleplay (+ its coach grade & live scorecard) as a real
+                file — the transcript is never a dead-end the viewer can only read. */}
+            <OutputActions
+              iconOnly
+              getText={buildTranscriptText}
+              filename={`matin-roleplay-${scenarioSlug}.txt`}
+              copyLabel="Copy transcript"
+              downloadLabel="Download transcript"
+            />
+            {(liveTurns.length > 0 || practicing) && (
+              <button
+                type="button"
+                onClick={resetRoleplay}
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-mist px-2.5 py-1.5 text-[0.72rem] font-medium text-slate transition-colors hover:border-ink/20 hover:text-ink"
+              >
+                <RotateCcw className="h-3 w-3" aria-hidden />
+                Reset
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Bubbles — cross-fade when a new scenario loads (motion-safe). */}
@@ -855,6 +904,14 @@ export function CoachingWorkbench({
               Logged to the agent&apos;s file
             </StatusChip>
           </div>
+
+          {/* The plan is a real deliverable — copy it or keep a .txt. */}
+          <OutputActions
+            className="mt-3 justify-end border-t border-mist pt-3"
+            getText={buildPlanText}
+            filename={`matin-coaching-plan-${scenarioSlug}.txt`}
+            copyLabel="Copy plan"
+          />
         </div>
       </section>
     </div>

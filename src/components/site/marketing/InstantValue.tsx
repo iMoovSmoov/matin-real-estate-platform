@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Home, Loader2, ShieldCheck, ArrowRight, TrendingUp, AlertCircle } from "lucide-react";
+import { Home, Loader2, ShieldCheck, ArrowRight, TrendingUp, AlertCircle, Copy, Check, Download } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { downloadTextFile } from "@/lib/download";
 import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
 
 // ── Shared field styles ───────────────────────────────────────────────────────
@@ -156,6 +157,40 @@ export function InstantValue() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   // On stacked layouts the result panel renders below the form — scroll to it.
   const resultRef = useRef<HTMLDivElement>(null);
+  // Lets the viewer keep the generated estimate (copy / download) — not a dead end.
+  const [copied, setCopied] = useState(false);
+
+  function buildEstimateText(r: { low: number; high: number; mid: number }): string {
+    const conditionLabel =
+      CONDITIONS.find((c) => c.value === condition)?.label?.split(" — ")[0] ?? condition;
+    const line = "—".repeat(44);
+    return [
+      "MATIN REAL ESTATE — INSTANT HOME VALUE ESTIMATE",
+      line,
+      `Address:        ${address || "Subject property"}`,
+      `Beds / Baths:   ${beds || "—"} bd / ${baths || "—"} ba`,
+      `Square footage: ${sqft ? Number(sqft).toLocaleString() : "—"} sqft`,
+      `Year built:     ${yearBuilt || "—"}`,
+      `Condition:      ${conditionLabel}`,
+      line,
+      `Estimated value range: ${formatDollars(r.low)} – ${formatDollars(r.high)}`,
+      `Estimated market value: ~${formatDollars(r.mid)}`,
+      line,
+      "Estimate only — a licensed broker CMA may vary by ±8–12%.",
+      "Get a precise, comp-by-comp CMA: (503) 622-9624",
+      "matinrealestate.com",
+    ].join("\n");
+  }
+
+  async function copyEstimate(r: { low: number; high: number; mid: number }) {
+    try {
+      await navigator.clipboard.writeText(buildEstimateText(r));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — Download remains as the real fallback */
+    }
+  }
 
   function blurField(field: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -241,6 +276,7 @@ export function InstantValue() {
     setRange(null);
     setErrors({});
     setTouched({});
+    setCopied(false);
   }
 
   const showError = (field: keyof FormErrors) =>
@@ -556,6 +592,33 @@ export function InstantValue() {
                   This estimate is for informational purposes. A licensed broker CMA may vary by
                   ±8–12%.
                 </p>
+
+                {/* Keep the estimate — real copy/download, not a dead end */}
+                <div className="mt-5 flex flex-wrap gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => copyEstimate(range)}
+                    aria-live="polite"
+                    className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-ink/15 bg-paper px-4 py-2.5 text-[0.85rem] font-medium text-ink transition hover:border-ink/40 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-success" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" /> Copy estimate
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => downloadTextFile("matin-home-value-estimate.txt", buildEstimateText(range))}
+                    className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-[0.85rem] font-semibold text-white transition hover:bg-ink/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-1"
+                  >
+                    <Download className="h-4 w-4" /> Download
+                  </button>
+                </div>
 
                 <div className="mt-5 rounded-2xl bg-paper p-5 ring-1 ring-ink/[0.06]">
                   <p className="text-[0.9rem] leading-relaxed text-ink/80">
