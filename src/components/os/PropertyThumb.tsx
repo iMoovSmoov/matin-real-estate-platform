@@ -59,12 +59,14 @@ export function PropertyThumb({
         className,
       )}
     >
-      {failed ? (
-        <div className="flex h-full w-full items-center justify-center text-slate/55">
-          <Building2 className="h-1/4 w-1/4 min-h-5 min-w-5" aria-hidden />
-          <span className="sr-only">{alt}</span>
-        </div>
-      ) : (
+      {/* Faint placeholder ALWAYS behind the image — so a lazy-loading (or
+          missing) thumb reads as an intentional property tile, never a flat
+          empty-gray box on first paint. The loaded photo covers it. */}
+      <div className="absolute inset-0 flex items-center justify-center text-slate/25">
+        <Building2 className="h-1/4 w-1/4 min-h-5 min-w-5" aria-hidden />
+        <span className="sr-only">{alt}</span>
+      </div>
+      {!failed && (
         // eslint-disable-next-line @next/next/no-img-element -- runtime onError fallback to placeholder; next/image can't swap on a missing public file
         <img
           src={resolved}
@@ -72,7 +74,7 @@ export function PropertyThumb({
           loading="lazy"
           decoding="async"
           onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
+          className="relative h-full w-full object-cover"
         />
       )}
     </div>
