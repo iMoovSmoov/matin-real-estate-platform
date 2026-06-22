@@ -261,10 +261,10 @@ export function ComposeDrawer({
                         <button
                           type="button"
                           onClick={acceptDraft}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                          className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
                         >
                           <CircleCheck className="h-3.5 w-3.5" aria-hidden />
-                          Use this draft
+                          <span>Use this draft</span>
                         </button>
                         {/* Copy + Save .txt — the drafted reply is a real artifact, not view-only */}
                         <DraftActions

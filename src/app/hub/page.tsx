@@ -459,7 +459,7 @@ export default function TodayCommandCenter() {
           <BrokerageVitalScore />
 
           {/* Live Pipeline (recharts) */}
-          <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <section className="card-elevated p-5">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
@@ -492,7 +492,7 @@ export default function TodayCommandCenter() {
         <section
           ref={queueRef}
           id="human-work-queue"
-          className="min-w-0 scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft"
+          className="accent-edge min-w-0 scroll-mt-20 rounded-2xl border border-mist bg-cloud shadow-soft"
         >
           <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
             <div className="min-w-0">
@@ -510,10 +510,10 @@ export default function TodayCommandCenter() {
                   "Working on: Today / Human Work Queue — prioritize my queue and explain what to do first",
                 )
               }
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+              className="btn-accent inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              Ask AI to prioritize
+              <MatinMark theme="white" className="h-3.5 w-3.5" />
+              <span>Ask AI to prioritize</span>
             </button>
           </div>
 
@@ -603,7 +603,7 @@ export default function TodayCommandCenter() {
         </section>
 
           {/* Brokerage Calendar + Risk Alerts — real records */}
-          <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+          <section className="card-elevated p-5">
             <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
               Brokerage Calendar + Risk Alerts
             </h3>
@@ -705,14 +705,16 @@ export default function TodayCommandCenter() {
                   type="button"
                   onClick={() => runDraft(selected, linkedAction)}
                   disabled={drafting === selected.id}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-3 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:cursor-default disabled:bg-gold/70"
+                  className="btn-accent inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[0.82rem] font-semibold disabled:cursor-default disabled:opacity-60"
                 >
-                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                  {drafting === selected.id
-                    ? "Drafting…"
-                    : drafts[selected.id]
-                      ? "Regenerate"
-                      : "Approve & draft"}
+                  <MatinMark theme="white" className="h-3.5 w-3.5" />
+                  <span>
+                    {drafting === selected.id
+                      ? "Drafting…"
+                      : drafts[selected.id]
+                        ? "Regenerate"
+                        : "Approve & draft"}
+                  </span>
                 </button>
               ) : (
                 <button

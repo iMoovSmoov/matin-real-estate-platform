@@ -706,7 +706,7 @@ export function CoachingWorkbench({
             tone="ai"
             title={
               <span className="inline-flex items-center gap-2">
-                <span className="rounded-md bg-gold px-2 py-0.5 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink">
+                <span className="rounded-md bg-gold px-2 py-0.5 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-cloud">
                   Coach
                 </span>
                 <span className="text-cloud">
@@ -719,10 +719,10 @@ export function CoachingWorkbench({
                 <button
                   type="button"
                   onClick={() => onAskAi(`Coaching / ${active?.title} roleplay`)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                  className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
                 >
-                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                  Ask Matin
+                  <MatinMark theme="white" className="h-3.5 w-3.5" />
+                  <span>Ask Matin</span>
                 </button>
               ) : undefined
             }
@@ -790,7 +790,7 @@ export function CoachingWorkbench({
 
       {/* ── Pane 3 — Scorecard ─────────────────────────────────────────── */}
       <section className="flex min-w-0 flex-col gap-4 md:order-2 md:self-start xl:order-none">
-        <div key={`score-${swapKey}`} className="rounded-2xl border border-mist bg-cloud shadow-soft motion-safe:animate-fade">
+        <div key={`score-${swapKey}`} className="accent-edge rounded-2xl border border-mist bg-cloud shadow-lift motion-safe:animate-fade">
           <div className="flex items-center justify-between gap-2 border-b border-mist px-4 py-3.5">
             <div className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4 text-slate" aria-hidden />

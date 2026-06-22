@@ -21,13 +21,13 @@ export function CashFaqAccordion({ faqs }: { faqs: FaqItem[] }) {
               id={btnId}
               type="button"
               onClick={() => setOpen(isOpen ? null : i)}
-              className="flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left font-medium text-white transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold/60"
+              className="flex min-h-[44px] w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left font-medium text-white transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d9b441]/60"
               aria-expanded={isOpen}
               aria-controls={panelId}
             >
               <span>{f.q}</span>
               <ChevronDown
-                className={`h-4 w-4 shrink-0 text-gold transition-transform duration-200 motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`}
+                className={`h-4 w-4 shrink-0 text-[#d9b441] transition-transform duration-200 motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`}
               />
             </button>
             {/* Smooth height reveal via grid-rows (no JS measurement); collapses

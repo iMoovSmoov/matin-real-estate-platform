@@ -259,10 +259,10 @@ export function DealDrawer({
               <button
                 type="button"
                 onClick={() => onAskAi(doc)}
-                className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                className="btn-accent inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.74rem] font-semibold"
               >
-                <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                Ask Matin
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
+                <span>Ask Matin</span>
               </button>
             </div>
           ) : null}

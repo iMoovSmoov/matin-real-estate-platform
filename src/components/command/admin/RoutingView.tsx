@@ -773,9 +773,9 @@ function RuleFormDrawer({
               type="button"
               onClick={runPreview}
               disabled={preview.state.running}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-gold px-2.5 py-1 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:bg-gold/70"
+              className="btn-accent inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-2.5 py-1 text-[0.74rem] font-semibold disabled:bg-gold/70"
             >
-              {preview.state.running ? "Drafting…" : preview.state.done ? "Regenerate" : "Preview message"}
+              <span>{preview.state.running ? "Drafting…" : preview.state.done ? "Regenerate" : "Preview message"}</span>
             </button>
           </div>
           {preview.state.result ? (

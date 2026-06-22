@@ -321,10 +321,10 @@ export function OpportunityDrawer({
                   `Working on: cash offer for ${lead.sellerName} · ${lead.address}, ${lead.city}`,
                 )
               }
-              className="ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              className="btn-accent ml-auto inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-[0.8rem] font-semibold"
             >
-              <MatinMark theme="dark" className="h-4 w-4" />
-              Ask Matin
+              <MatinMark theme="white" className="h-4 w-4" />
+              <span>Ask Matin</span>
             </button>
           </div>
         </div>
@@ -543,10 +543,10 @@ export function OpportunityDrawer({
                             <button
                               type="button"
                               onClick={approveDraft}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                              className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-semibold"
                             >
                               <CircleCheck className="h-3.5 w-3.5" aria-hidden />
-                              Approve &amp; send
+                              <span>Approve &amp; send</span>
                             </button>
                             <button
                               type="button"

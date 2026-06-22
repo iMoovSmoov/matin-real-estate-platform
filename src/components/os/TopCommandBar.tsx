@@ -182,14 +182,15 @@ export function TopCommandBar({
           ) : null}
         </div>
 
-        {/* Ask AI — gold-filled (the ONE accent, rationed to AI) */}
+        {/* Ask AI — the ONE accent, rationed to AI. Premium jeweled
+            green→brass gradient w/ hover sheen (.btn-accent). */}
         <button
           type="button"
           onClick={() => openAi("Working on: Matin Brokerage OS")}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gold py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+          className="btn-accent inline-flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
         >
-          {/* Gold surface = LIGHT → dark "M" mark */}
-          <MatinMark theme="dark" className="h-4 w-4" />
+          {/* Dark green accent surface → white "M" mark */}
+          <MatinMark theme="white" className="h-4 w-4" />
           <span className="hidden sm:inline">Ask AI</span>
         </button>
 

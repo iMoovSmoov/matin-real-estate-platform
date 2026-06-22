@@ -17,13 +17,13 @@ import { coachingPacing } from "./coachingData";
    MatinOS — Coaching · real per-quarter pacing chart (S9 ticket 4, recharts)
 
    Team practice volume (bars) + conversion % (line) over the quarter, current
-   vs prior period. Dark hover tooltip stating both periods. Gold = the AI/active
-   accent (current period); prior period recedes to a muted ink. No animation.
+   vs prior period. Dark hover tooltip stating both periods. Estate Green = the
+   AI/active accent (current period); prior period recedes to a muted ink. No animation.
    ────────────────────────────────────────────────────────────────────────── */
 
 const GRID = "#ebebea";
 const AXIS = "#8a8a90";
-const GOLD = "#b8924a";
+const ACCENT = "#1f6b4a";
 const INK_MUTED = "#c3c3c9";
 const SUCCESS = "#56a07d";
 
@@ -112,12 +112,12 @@ export function CoachingPacingChart() {
             yAxisId="left"
             dataKey="practiceCurrent"
             name="Practice · this qtr"
-            fill={GOLD}
+            fill={ACCENT}
             radius={[3, 3, 0, 0]}
             maxBarSize={26}
           >
             {coachingPacing.map((_, i) => (
-              <Cell key={i} fill={GOLD} />
+              <Cell key={i} fill={ACCENT} />
             ))}
           </Bar>
           <Line

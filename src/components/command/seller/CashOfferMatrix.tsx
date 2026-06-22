@@ -316,7 +316,7 @@ export function CashOfferMatrix() {
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.65fr_1fr]">
       {/* ── Comparison matrix ─────────────────────────────────────────────── */}
-      <section className="min-w-0 rounded-2xl border border-mist bg-cloud shadow-soft">
+      <section className="accent-edge min-w-0 rounded-2xl border border-mist bg-cloud shadow-soft">
         {/* Header — property photo + AI verdict trigger */}
         <div className="flex items-center justify-between gap-3 border-b border-mist px-5 py-3.5">
           <div className="flex min-w-0 items-center gap-3">
@@ -339,10 +339,10 @@ export function CashOfferMatrix() {
             type="button"
             onClick={runVerdict}
             disabled={verdict?.running}
-            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-50"
+            className="btn-accent inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-semibold disabled:opacity-50"
           >
-            <MatinMark theme="dark" className="h-3.5 w-3.5" />
-            {verdict?.running ? "Evaluating…" : "AI verdict"}
+            <MatinMark theme="white" className="h-3.5 w-3.5" />
+            <span>{verdict?.running ? "Evaluating…" : "AI verdict"}</span>
           </button>
         </div>
 

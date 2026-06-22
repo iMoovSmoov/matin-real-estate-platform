@@ -53,7 +53,7 @@ export function SystemsDiagram({ integrations }: { integrations: Integration[] }
   const stroke = (h: Health) => (h === "bad" ? "var(--color-danger)" : "var(--color-success)");
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <div className="card-elevated accent-edge overflow-hidden rounded-2xl">
       <div className="flex items-center justify-between gap-3 border-b border-mist px-5 py-4">
         <div>
           <h2 className="font-display text-[1.12rem] font-normal leading-tight text-ink">

@@ -59,7 +59,7 @@ export function RecentActivityFeed({ limit = 7 }: { limit?: number }) {
   });
 
   return (
-    <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="card-elevated p-5">
       <div className="flex items-baseline justify-between">
         <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">
           Recent activity

@@ -111,7 +111,7 @@ export function CashOfferEstimator() {
         <button
           onClick={getOffer}
           disabled={submitting}
-          className="mt-6 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-gold px-6 py-3 font-semibold text-ink shadow-[0_10px_30px_rgba(202,166,78,.35)] transition hover:bg-gold-bright active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+          className="mt-6 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#d9b441] px-6 py-3 font-semibold text-ink shadow-[0_10px_30px_rgba(202,166,78,.35)] transition hover:bg-[#efcb66] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
         >
           Get my cash offer <ArrowRight className="h-4 w-4" />
         </button>
@@ -121,21 +121,21 @@ export function CashOfferEstimator() {
       <div
         ref={resultRef}
         aria-live="polite"
-        className="flex scroll-mt-24 flex-col items-center justify-center rounded-2xl border border-gold/20 bg-gradient-to-br from-ink-800/60 to-ink-900/40 p-6 text-center"
+        className="flex scroll-mt-24 flex-col items-center justify-center rounded-2xl border border-[#d9b441]/20 bg-gradient-to-br from-ink-800/60 to-ink-900/40 p-6 text-center"
       >
         {revealed ? (
           <>
-            <span className="eyebrow-light text-gold/80">Your cash offer range</span>
+            <span className="eyebrow-light text-[#d9b441]/80">Your cash offer range</span>
             <div className="mt-2 font-display text-4xl text-white tabular-nums motion-safe:[animation:countup-glow_2.4s_ease-in-out_infinite] md:text-5xl">
               {fmt(shown)}
             </div>
             <div className="mt-1 text-[0.86rem] text-slate-300">
-              between <span className="font-semibold text-gold">{fmt(low)}</span> and{" "}
-              <span className="font-semibold text-gold">{fmt(high)}</span>
+              between <span className="font-semibold text-[#d9b441]">{fmt(low)}</span> and{" "}
+              <span className="font-semibold text-[#d9b441]">{fmt(high)}</span>
             </div>
             <div className="mt-5 space-y-2 text-left text-[0.82rem] text-slate-300">
-              <p className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-gold" /> No repairs, no showings, no fees</p>
-              <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-gold" /> Close in as little as 7 days</p>
+              <p className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-[#d9b441]" /> No repairs, no showings, no fees</p>
+              <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#d9b441]" /> Close in as little as 7 days</p>
             </div>
 
             {/* Keep the offer — real copy/download, not a dead end */}
@@ -144,7 +144,7 @@ export function CashOfferEstimator() {
                 type="button"
                 onClick={copyOffer}
                 aria-live="polite"
-                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2.5 text-[0.82rem] font-medium text-gold transition hover:bg-gold/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-[#d9b441]/40 bg-[#d9b441]/10 px-4 py-2.5 text-[0.82rem] font-medium text-[#d9b441] transition hover:bg-[#d9b441]/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
               >
                 {copied ? (
                   <>
@@ -159,19 +159,19 @@ export function CashOfferEstimator() {
               <button
                 type="button"
                 onClick={() => downloadTextFile("cash-is-king-offer-estimate.txt", buildOfferText())}
-                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-gold px-4 py-2.5 text-[0.82rem] font-semibold text-ink transition hover:bg-gold-bright active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-[#d9b441] px-4 py-2.5 text-[0.82rem] font-semibold text-ink transition hover:bg-[#efcb66] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
               >
                 <Download className="h-4 w-4" /> Download
               </button>
             </div>
 
-            <a href="tel:+15036229624" className="mt-4 text-[0.82rem] font-semibold text-gold hover:text-gold">
+            <a href="tel:+15036229624" className="mt-4 text-[0.82rem] font-semibold text-[#d9b441] hover:text-[#d9b441]">
               Lock it in → (503) 622-9624
             </a>
           </>
         ) : (
           <div className="flex flex-col items-center text-slate-300/70">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gold/30 bg-gold/10 font-display text-2xl text-gold">$</span>
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d9b441]/30 bg-[#d9b441]/10 font-display text-2xl text-[#d9b441]">$</span>
             <p className="mt-4 max-w-[16rem] text-[0.88rem]">Set your value and hit <span className="font-semibold text-white">Get my cash offer</span> to see your number.</p>
           </div>
         )}

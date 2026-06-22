@@ -646,9 +646,9 @@ export function TemplatesView() {
                 type="button"
                 onClick={runDraft}
                 disabled={draftAi.state.running}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:bg-gold/70"
+                className="btn-accent inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-[0.8rem] font-semibold disabled:bg-gold/70"
               >
-                {draftAi.state.running ? "Drafting…" : draftAi.state.done ? "Regenerate" : "Draft template"}
+                <span>{draftAi.state.running ? "Drafting…" : draftAi.state.done ? "Regenerate" : "Draft template"}</span>
               </button>
             </div>
 
@@ -933,11 +933,11 @@ export function BrandKitView() {
           ))}
         </div>
 
-        {/* Gold AI-accent tokens — rationed to AI/active only (S12 ticket 3) */}
+        {/* Estate Green AI-accent tokens — rationed to AI/active only (S12 ticket 3) */}
         <div className="mt-4 border-t border-mist pt-3.5">
           <p className="flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate">
             <MatinMark theme="dark" className="h-3.5 w-3.5" />
-            AI accent · gold (rationed)
+            AI accent · Estate Green (rationed)
           </p>
           <div className="mt-2.5 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {brandGoldSwatches.map((s) => (
@@ -946,7 +946,7 @@ export function BrandKitView() {
           </div>
         </div>
         <p className="mt-4 text-[0.74rem] text-slate">
-          Used in every generated marketing asset and email. Gold appears only on AI/active affordances.
+          Used in every generated marketing asset and email. Estate Green appears only on AI/active affordances.
         </p>
       </div>
 
@@ -1104,9 +1104,9 @@ export function AiPolicyView() {
                   type="button"
                   onClick={() => runExplain(selected)}
                   disabled={explain.state.running}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-2.5 py-1 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:bg-gold/70"
+                  className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[0.74rem] font-semibold disabled:bg-gold/70"
                 >
-                  {explain.state.running ? "Explaining…" : explain.state.done ? "Regenerate" : "Explain with AI"}
+                  <span>{explain.state.running ? "Explaining…" : explain.state.done ? "Regenerate" : "Explain with AI"}</span>
                 </button>
               </div>
               {explain.state.result ? (

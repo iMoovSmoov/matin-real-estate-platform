@@ -71,7 +71,7 @@ export function ReportsScorecard({
   ];
 
   return (
-    <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft sm:p-6">
+    <section className="card-elevated accent-edge rounded-2xl p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="font-display text-[1.1rem] font-normal leading-none text-ink">
           Company scorecard

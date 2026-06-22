@@ -48,7 +48,7 @@ export function ReportFinancialStrip({
         // gridTemplateColumns (the bug we're fixing). Cell borders come from a
         // 1px gap over an ink/mist backdrop so dividers render cleanly in both
         // the 2x2 phone grid and the 1x4 desktop row.
-        "grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-mist bg-mist shadow-soft sm:grid-cols-4",
+        "accent-edge grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-mist bg-mist shadow-lift sm:grid-cols-4",
         className,
       )}
     >

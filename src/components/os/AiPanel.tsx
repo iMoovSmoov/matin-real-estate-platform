@@ -58,15 +58,17 @@ export function AiPanel({
   return (
     <div
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 text-slate-300 shadow-soft",
+        "surface-ai relative flex flex-col overflow-hidden rounded-2xl text-slate-300",
         className,
       )}
     >
-      {/* Gold accent rail on the left edge — marks an AI surface */}
-      <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-gold" />
+      {/* Accent rail on the left edge — marks an AI surface */}
+      <span aria-hidden className="absolute inset-y-0 left-0 z-[1] w-1 bg-gold" />
+      {/* Accent bloom — soft AI glow in the corner */}
+      <span aria-hidden className="ai-bloom -right-16 -top-16" />
 
       {/* Header */}
-      <div className="border-b border-ink-700 px-5 py-4 pl-6">
+      <div className="relative border-b border-ink-700 px-5 py-4 pl-6">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
             <MatinMark theme="white" className="h-3.5 w-3.5" />
@@ -81,7 +83,7 @@ export function AiPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4 pl-6">
+      <div className="relative flex-1 space-y-4 overflow-y-auto px-5 py-4 pl-6">
         {children}
 
         {/* Chat area */}

@@ -172,10 +172,10 @@ export default function CoachingPage() {
         <button
           type="button"
           onClick={() => openAi("Coaching / Team performance overview")}
-          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+          className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-semibold"
         >
-          <MatinMark theme="dark" className="h-3.5 w-3.5" />
-          Ask Matin
+          <MatinMark theme="white" className="h-3.5 w-3.5" />
+          <span>Ask Matin</span>
         </button>
       </div>
 
@@ -296,10 +296,10 @@ export default function CoachingPage() {
                 <button
                   type="button"
                   onClick={() => openAi("Coaching / Team pacing & focus")}
-                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                  className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
                 >
-                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                  Ask Matin
+                  <MatinMark theme="white" className="h-3.5 w-3.5" />
+                  <span>Ask Matin</span>
                 </button>
               }
             >
@@ -401,10 +401,10 @@ export default function CoachingPage() {
               <button
                 type="button"
                 onClick={() => openAi(`Coaching / ${selected.name} coaching plan`)}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-[0.8rem] font-semibold"
               >
-                <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                Ask Matin
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
+                <span>Ask Matin</span>
               </button>
             </div>
           ) : undefined

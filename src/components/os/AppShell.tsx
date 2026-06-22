@@ -118,8 +118,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        {/* Workspace canvas — wide & dense for operator surfaces */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-paper pb-16 lg:pb-0">
+        {/* Workspace canvas — wide & dense for operator surfaces. Warm,
+            faintly dotted workspace texture (replaces flat bg-paper; the
+            utility bg-paper would otherwise win over the component layer). */}
+        <main className="workspace-texture flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0">
           <div className="mx-auto w-full max-w-[1600px]">{children}</div>
         </main>
       </div>

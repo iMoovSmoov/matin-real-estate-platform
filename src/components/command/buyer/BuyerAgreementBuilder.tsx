@@ -724,7 +724,7 @@ export default function BuyerAgreementBuilder() {
   );
 
   const FormColumn = (
-    <section className="flex min-w-0 flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="accent-edge flex min-w-0 flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* Identity header with real agent avatar */}
       <div className="flex items-center gap-3 border-b border-mist px-5 py-4">
         <Avatar name={form.buyerName || buyer.name} size={36} ring />

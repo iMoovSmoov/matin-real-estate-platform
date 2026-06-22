@@ -477,9 +477,9 @@ export const brandCoreSwatches: BrandSwatch[] = [
   { name: "Danger", hex: "#C0584A", cls: "bg-danger", note: "At-risk · failed · cost" },
 ];
 
-/** Gold AI-accent tokens — rationed to AI/active states only (S12 ticket 3). */
+/** Estate Green AI-accent tokens — rationed to AI/active states only (S12 ticket 3). */
 export const brandGoldSwatches: BrandSwatch[] = [
-  { name: "Gold", hex: "#B8924A", cls: "bg-gold", note: "Ask AI · Run · active" },
-  { name: "Gold bright", hex: "#D2A050", cls: "bg-gold-bright", note: "Hover · score ring" },
-  { name: "Gold soft", hex: "#F0E6D2", cls: "bg-gold-soft", note: "AI chip fill" },
+  { name: "Estate Green", hex: "#1F6B4A", cls: "bg-gold", note: "Ask AI · Run · active" },
+  { name: "Estate Green bright", hex: "#2F8A60", cls: "bg-gold-bright", note: "Hover · score ring" },
+  { name: "Estate Green soft", hex: "#E7F1EA", cls: "bg-gold-soft", note: "AI chip fill" },
 ];

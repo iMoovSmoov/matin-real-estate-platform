@@ -87,7 +87,7 @@ export function BrokerageVitalScore() {
   };
 
   return (
-    <section className="rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section className="card-elevated accent-edge rounded-2xl p-5">
       <div className="flex items-center gap-2">
         <Gauge className="h-4 w-4 text-gold" aria-hidden />
         <h3 className="font-display text-[1.05rem] font-normal leading-tight text-ink">

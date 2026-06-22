@@ -721,7 +721,7 @@ function DealScreen({
   /* ── Pane bodies (reused by the mobile switcher and the lg+ grid) ──────── */
 
   const summaryPane = (
-    <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <section className="card-elevated accent-edge flex min-w-0 flex-col overflow-hidden rounded-2xl">
       {/* Property hero — real listing imagery keyed to the address */}
       <div className="relative">
         <PropertyThumb src={heroPhoto} ratio="video" alt={tx.address} rounded={false} />
@@ -817,10 +817,10 @@ function DealScreen({
             <button
               type="button"
               onClick={() => onOpenAi(`Working on: ${aiContext}`)}
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              className="btn-accent inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              Ask Matin
+              <MatinMark theme="white" className="h-3.5 w-3.5" />
+              <span>Ask Matin</span>
             </button>
           </div>
         ) : null}
@@ -880,12 +880,12 @@ function DealScreen({
               className={cn(
                 "inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold transition-colors",
                 a.draftPrompt
-                  ? "bg-gold text-ink hover:bg-gold-bright"
+                  ? "btn-accent"
                   : "border border-mist bg-cloud text-ink hover:bg-paper",
               )}
             >
               {a.draftPrompt ? (
-                <MatinMark theme="dark" className="h-3.5 w-3.5" />
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
               ) : a.id === "warranty" ? (
                 <ShieldCheck className="h-3.5 w-3.5" />
               ) : a.id === "nhd" ? (
@@ -895,7 +895,7 @@ function DealScreen({
               ) : (
                 <Mail className="h-3.5 w-3.5" />
               )}
-              {a.label}
+              <span>{a.label}</span>
             </button>
           ))}
         </div>
@@ -950,9 +950,9 @@ function DealScreen({
                 <button
                   type="button"
                   onClick={approveActionRun}
-                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                  className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.74rem] font-semibold"
                 >
-                  <CircleCheck className="h-3.5 w-3.5" /> Approve &amp; send
+                  <CircleCheck className="h-3.5 w-3.5" /> <span>Approve &amp; send</span>
                 </button>
                 <button
                   type="button"
@@ -1025,10 +1025,10 @@ function DealScreen({
                 type="button"
                 onClick={handleDraft}
                 disabled={drafting}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
+                className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold disabled:opacity-60"
               >
-                <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                {screen.risk.actionLabel}
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
+                <span>{screen.risk.actionLabel}</span>
               </button>
             )
           }
@@ -1080,9 +1080,9 @@ function DealScreen({
                           <button
                             type="button"
                             onClick={approveDraft}
-                            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.74rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+                            className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.74rem] font-semibold"
                           >
-                            <CircleCheck className="h-3.5 w-3.5" /> Approve & queue
+                            <CircleCheck className="h-3.5 w-3.5" /> <span>Approve & queue</span>
                           </button>
                           <button
                             type="button"
@@ -1111,10 +1111,10 @@ function DealScreen({
             <button
               type="button"
               onClick={() => onOpenAi(`Working on: ${aiContext}`)}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              className="btn-accent inline-flex min-h-[40px] items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold"
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              Ask Matin
+              <MatinMark theme="white" className="h-3.5 w-3.5" />
+              <span>Ask Matin</span>
             </button>
           }
         >

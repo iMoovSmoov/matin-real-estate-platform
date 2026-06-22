@@ -53,10 +53,10 @@ function ActionBtn({
   const cls = cn(
     // ≥44px touch target on phone (where this cluster is the only way to act on a
     // row); reverts to the dense 36px height at sm+ where a pointer is assumed.
-    "inline-flex h-11 min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[0.74rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 sm:h-9 sm:min-h-9 sm:min-w-0",
+    "inline-flex h-11 min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[0.74rem] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 sm:h-9 sm:min-h-9 sm:min-w-0",
     tone === "gold"
-      ? "bg-gold text-ink hover:bg-gold-bright"
-      : "border border-mist bg-cloud text-slate hover:border-ink/20 hover:text-ink",
+      ? "btn-accent"
+      : "border border-mist bg-cloud text-slate transition-colors hover:border-ink/20 hover:text-ink",
   );
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const inner = (
@@ -217,7 +217,7 @@ export function QueueRow({
           )
         ) : isDraftRow ? (
           <ActionBtn
-            glyph={<MatinMark theme="dark" className="h-3.5 w-3.5" />}
+            glyph={<MatinMark theme="white" className="h-3.5 w-3.5" />}
             label="Approve & draft"
             tone="gold"
             onClick={() => onQuick?.(item, "approve")}

@@ -86,7 +86,7 @@ export function SidebarNav({
   const { openAi } = useAiSidecar();
 
   return (
-    <div className="flex h-full flex-col bg-ink-900 text-slate-300">
+    <div className="flex h-full flex-col bg-gradient-to-b from-ink-800 to-ink-900 text-slate-300">
       {/* Brand block — quiet wordmark. Right padding leaves room for the
           collapse toggle that floats on the rail's edge (never overlaps). */}
       <div
@@ -95,7 +95,11 @@ export function SidebarNav({
           collapsed ? "justify-center px-0" : "gap-2.5 pl-5 pr-9",
         )}
       >
-        <MatinMark className="h-5 w-5 shrink-0" theme="white" />
+        {/* Brand mark seated in a faceted chip — subtle gradient + brass
+            ring + inset highlight for depth on the dark rail. */}
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-ink-700 to-ink-900 ring-1 ring-brass/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <MatinMark className="h-[1.1rem] w-[1.1rem]" theme="white" />
+        </span>
         {!collapsed ? (
           <div className="min-w-0 leading-tight">
             <span className="block truncate font-sans text-[0.92rem] font-bold uppercase tracking-[0.14em] text-cloud">
@@ -152,7 +156,7 @@ export function SidebarNav({
               onClick={() => openAi("Working on: Matin Brokerage OS")}
               title="Ask Matin"
               aria-label="Ask Matin"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold/40 bg-gold/[0.08] transition-colors hover:bg-gold/[0.16]"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold/35 bg-gold/[0.10] shadow-[0_6px_16px_-6px_rgba(31,107,74,0.5)] transition-colors hover:bg-gold/[0.18]"
             >
               <MatinMark theme="white" className="h-4 w-4" />
             </button>
@@ -165,7 +169,7 @@ export function SidebarNav({
             <button
               type="button"
               onClick={() => openAi("Working on: Matin Brokerage OS")}
-              className="mt-2 inline-flex w-full items-center gap-2 rounded-lg border border-gold/40 bg-gold/[0.08] px-3 py-2 text-left transition-colors hover:bg-gold/[0.16]"
+              className="mt-2 inline-flex w-full items-center gap-2 rounded-lg border border-gold/35 bg-gold/[0.10] px-3 py-2 text-left shadow-[0_6px_18px_-6px_rgba(31,107,74,0.5)] transition-colors hover:bg-gold/[0.16]"
             >
               <MatinMark theme="white" className="h-3.5 w-3.5 shrink-0" />
               <span className="text-[0.74rem] font-semibold text-gold-bright">
@@ -209,6 +213,12 @@ function NavLink({
               : "text-slate-300/70 hover:bg-cloud/[0.06] hover:text-cloud",
           )}
         >
+          {active ? (
+            <span
+              aria-hidden
+              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-gold-bright to-gold"
+            />
+          ) : null}
           <Icon className="h-[1.05rem] w-[1.05rem] shrink-0" />
           {/* Tooltip */}
           <span className="pointer-events-none absolute left-full z-50 ml-2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[0.72rem] font-medium text-cloud opacity-0 shadow-lift transition-opacity group-hover:opacity-100">
@@ -226,7 +236,7 @@ function NavLink({
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-colors",
+          "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-colors",
           active
             ? "bg-cloud text-ink shadow-soft"
             : cn(
@@ -235,6 +245,12 @@ function NavLink({
               ),
         )}
       >
+        {active ? (
+          <span
+            aria-hidden
+            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-gold-bright to-gold"
+          />
+        ) : null}
         <Icon
           className={cn(
             "h-[1.05rem] w-[1.05rem] shrink-0 transition-colors",

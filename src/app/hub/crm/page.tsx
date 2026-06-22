@@ -476,7 +476,7 @@ const AppointmentsBand = forwardRef<
   const moreCount = appointmentLeads.length - upcoming.length;
 
   return (
-    <section ref={ref} className="scroll-mt-20 rounded-2xl border border-mist bg-cloud p-5 shadow-soft">
+    <section ref={ref} className="card-elevated scroll-mt-20 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarClock className="h-4 w-4 text-slate" aria-hidden />

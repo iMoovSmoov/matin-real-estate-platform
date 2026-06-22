@@ -154,9 +154,9 @@ export function AIActionCard({
           onClick={onRun}
           disabled={running}
           aria-busy={running}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 disabled:cursor-default disabled:bg-gold/70"
+          className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 disabled:cursor-default disabled:opacity-70"
         >
-          {running ? "Drafting…" : runLabel}
+          <span>{running ? "Drafting…" : runLabel}</span>
         </button>
       </div>
 

@@ -297,7 +297,7 @@ export function AssetPreview({
   const hasBody = Boolean(body && body.trim());
 
   return (
-    <div className="flex flex-col rounded-2xl border border-mist bg-cloud shadow-soft">
+    <div className="card-elevated accent-edge flex flex-col rounded-2xl">
       {/* Header + channel tabs */}
       <div className="border-b border-mist px-5 pt-4">
         <div className="flex items-center justify-between gap-3">

@@ -1464,8 +1464,8 @@ function ActionsPane({
         ) : null}
       </div>
 
-      {/* AI missing-field check — gold AI affordance; streams inline */}
-      <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft">
+      {/* AI missing-field check — accent AI affordance; streams inline */}
+      <div className="card-elevated p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-display text-[0.92rem] font-normal text-ink">Missing-field check</h3>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-soft px-2 py-0.5 text-[0.7rem] font-semibold text-gold-ink ring-1 ring-inset ring-gold/25">
@@ -1499,10 +1499,10 @@ function ActionsPane({
           onClick={onRunCheck}
           disabled={checkBusy}
           aria-busy={checkBusy}
-          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-2 text-[0.82rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
+          className="btn-accent mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-[0.82rem] font-semibold disabled:opacity-60"
         >
-          <MatinMark theme="dark" className="h-3.5 w-3.5" />
-          {checkBusy ? "Checking fields…" : checkOut ? "Re-run AI field check" : "Run AI field check"}
+          <MatinMark theme="white" className="h-3.5 w-3.5" />
+          <span>{checkBusy ? "Checking fields…" : checkOut ? "Re-run AI field check" : "Run AI field check"}</span>
         </button>
 
         {checkBusy && !checkOut ? (
@@ -1552,10 +1552,10 @@ function ActionsPane({
           <button
             type="button"
             onClick={onAskAi}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+            className="btn-accent inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
           >
-            <MatinMark theme="dark" className="h-3.5 w-3.5" />
-            Ask AI
+            <MatinMark theme="white" className="h-3.5 w-3.5" />
+            <span>Ask AI</span>
           </button>
         }
       >

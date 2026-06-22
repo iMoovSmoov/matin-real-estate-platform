@@ -94,7 +94,7 @@ export default function CashOfferPage() {
         <Container className="relative z-10 pt-28 pb-16">
           <div className="max-w-2xl">
             <Reveal>
-              <span className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/[0.08] px-4 py-1.5 text-[0.78rem] font-semibold tracking-wide text-gold">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#d9b441]/30 bg-[#d9b441]/[0.08] px-4 py-1.5 text-[0.78rem] font-semibold tracking-wide text-[#d9b441]">
                 <BadgeCheck className="h-4 w-4" /> The Matin Cash Offer Program
               </span>
             </Reveal>
@@ -102,7 +102,7 @@ export default function CashOfferPage() {
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-6 font-display text-white text-balance">
                 Sell your home for cash —{" "}
-                <span className="italic text-gold">no repairs, no showings, no stress.</span>
+                <span className="italic text-[#d9b441]">no repairs, no showings, no stress.</span>
               </h1>
             </Reveal>
 
@@ -116,9 +116,9 @@ export default function CashOfferPage() {
 
             <Reveal delay={0.2}>
               <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-2 text-sm font-medium text-white/90">
-                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-gold" /> Close in as little as 7 days</span>
-                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-gold" /> As-is condition</span>
-                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-gold" /> No agent commissions</span>
+                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d9b441]" /> Close in as little as 7 days</span>
+                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d9b441]" /> As-is condition</span>
+                <span className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d9b441]" /> No agent commissions</span>
               </div>
             </Reveal>
 
@@ -127,7 +127,7 @@ export default function CashOfferPage() {
                 <ButtonLink
                   href="#estimate"
                   size="lg"
-                  className="bg-gold text-ink hover:bg-gold-bright shadow-[0_12px_36px_rgba(202,166,78,.35)]"
+                  className="bg-[#d9b441] text-ink hover:bg-[#efcb66] shadow-[0_12px_36px_rgba(202,166,78,.35)]"
                 >
                   Get my cash offer <ArrowRight className="h-4 w-4" />
                 </ButtonLink>
@@ -178,8 +178,8 @@ export default function CashOfferPage() {
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {perks.map((p, i) => (
               <Reveal key={p.title} delay={(i % 3) * 0.07}>
-                <div className="h-full rounded-2xl border border-white/10 bg-ink-800/50 p-6 transition-colors hover:border-gold/35">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/12 text-gold ring-1 ring-inset ring-gold/25">
+                <div className="h-full rounded-2xl border border-white/10 bg-ink-800/50 p-6 transition-colors hover:border-[#d9b441]/35">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#d9b441]/12 text-[#d9b441] ring-1 ring-inset ring-[#d9b441]/25">
                     <p.icon className="h-6 w-6" />
                   </span>
                   <h3 className="mt-4 font-display text-xl text-white">{p.title}</h3>
@@ -198,14 +198,14 @@ export default function CashOfferPage() {
           <div className="relative mt-14">
             <div
               aria-hidden="true"
-              className="absolute left-1/6 right-1/6 top-[2.75rem] hidden h-px bg-gold/20 md:block"
+              className="absolute left-1/6 right-1/6 top-[2.75rem] hidden h-px bg-[#d9b441]/20 md:block"
             />
             <div className="grid gap-8 md:grid-cols-3">
               {steps.map((s, i) => (
                 <Reveal key={s.n} delay={i * 0.1}>
                   <div className="relative flex flex-col items-center text-center px-4">
-                    <div className="relative z-10 flex h-[5.5rem] w-[5.5rem] items-center justify-center rounded-full border border-gold/25 bg-ink">
-                      <span className="font-display text-4xl font-light text-gold">{s.n}</span>
+                    <div className="relative z-10 flex h-[5.5rem] w-[5.5rem] items-center justify-center rounded-full border border-[#d9b441]/25 bg-ink">
+                      <span className="font-display text-4xl font-light text-[#d9b441]">{s.n}</span>
                     </div>
                     <h3 className="mt-5 font-display text-xl text-white">{s.title}</h3>
                     <p className="mt-2 max-w-xs text-[0.92rem] leading-relaxed text-slate-300">{s.body}</p>
@@ -225,7 +225,7 @@ export default function CashOfferPage() {
             {testimonials.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
                 <figure className="flex h-full flex-col rounded-2xl border border-white/10 bg-ink-800/50 p-6">
-                  <div className="flex gap-0.5 text-gold">
+                  <div className="flex gap-0.5 text-[#d9b441]">
                     {Array.from({ length: 5 }).map((_, k) => (
                       <Star key={k} className="h-4 w-4 fill-current" />
                     ))}
@@ -234,7 +234,7 @@ export default function CashOfferPage() {
                     <p className="text-[0.93rem] leading-relaxed text-slate-300 italic">&ldquo;{t.quote}&rdquo;</p>
                   </blockquote>
                   <figcaption className="mt-5 flex items-center gap-2 border-t border-white/10 pt-4">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/15 text-[0.8rem] font-bold text-gold">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d9b441]/15 text-[0.8rem] font-bold text-[#d9b441]">
                       {t.name.charAt(0)}
                     </span>
                     <div>
@@ -275,9 +275,9 @@ export default function CashOfferPage() {
             {compare.map(([label, a, b]) => (
               <div key={label} className="rounded-2xl border border-white/10 bg-ink-900/70 p-4">
                 <div className="text-[0.78rem] font-semibold uppercase tracking-wider text-slate-300">{label}</div>
-                <div className="mt-2.5 flex items-start gap-2 text-[0.92rem] text-gold">
+                <div className="mt-2.5 flex items-start gap-2 text-[0.92rem] text-[#d9b441]">
                   <Check className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span><span className="text-gold/70">Matin cash offer:</span> {a}</span>
+                  <span><span className="text-[#d9b441]/70">Matin cash offer:</span> {a}</span>
                 </div>
                 <div className="mt-1.5 flex items-start gap-2 text-[0.92rem] text-slate-300/70">
                   <X className="mt-0.5 h-4 w-4 shrink-0 text-slate-300/40" />
@@ -292,13 +292,13 @@ export default function CashOfferPage() {
             <div>
               <div className="grid grid-cols-[1.4fr_1fr_1fr] bg-ink-800/70 text-[0.8rem] font-semibold uppercase tracking-wider text-slate-300">
                 <div className="px-5 py-3.5" />
-                <div className="px-5 py-3.5 text-gold">Matin cash offer</div>
+                <div className="px-5 py-3.5 text-[#d9b441]">Matin cash offer</div>
                 <div className="px-5 py-3.5 text-slate-300/70">Traditional sale</div>
               </div>
               {compare.map(([label, a, b], i) => (
                 <div key={label} className={`grid grid-cols-[1.4fr_1fr_1fr] items-center text-[0.9rem] ${i % 2 ? "bg-ink-900/40" : "bg-ink-900/70"}`}>
                   <div className="px-5 py-3.5 font-medium text-white">{label}</div>
-                  <div className="flex items-center gap-2 px-5 py-3.5 text-gold">
+                  <div className="flex items-center gap-2 px-5 py-3.5 text-[#d9b441]">
                     <Check className="h-4 w-4 shrink-0" /> {a}
                   </div>
                   <div className="flex items-center gap-2 px-5 py-3.5 text-slate-300/70">
@@ -322,7 +322,7 @@ export default function CashOfferPage() {
       {/* CTA */}
       <Section className="pb-28">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl border border-gold/25 px-8 py-16 text-center md:px-16">
+          <div className="relative overflow-hidden rounded-3xl border border-[#d9b441]/25 px-8 py-16 text-center md:px-16">
             <Image
               src="/matin/exteriors/exteriors-12.jpg"
               alt=""
@@ -332,14 +332,14 @@ export default function CashOfferPage() {
             />
             <div className="absolute inset-0 bg-ink/85" />
             <div className="relative">
-              <Clock className="mx-auto h-8 w-8 text-gold" />
+              <Clock className="mx-auto h-8 w-8 text-[#d9b441]" />
               <h2 className="display-2 mt-4 font-display text-white text-balance">Ready for a real cash offer?</h2>
               <p className="mx-auto mt-4 max-w-xl text-lg text-slate-300">
                 Get your no-obligation number today, backed by a real Portland brokerage. If it&apos;s
                 a fit, you could be closed and paid next week.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <ButtonLink href="#estimate" size="lg" className="bg-gold text-ink hover:bg-gold-bright">
+                <ButtonLink href="#estimate" size="lg" className="bg-[#d9b441] text-ink hover:bg-[#efcb66]">
                   Get my cash offer <ArrowRight className="h-4 w-4" />
                 </ButtonLink>
                 <ButtonLink href="/contact" size="lg" variant="outline-light">Talk to our team</ButtonLink>

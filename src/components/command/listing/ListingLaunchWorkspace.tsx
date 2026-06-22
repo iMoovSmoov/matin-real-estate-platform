@@ -1158,7 +1158,7 @@ function ListingRecordCard({
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <div className="accent-edge overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* 16:9 real hero photo (G-A #6 — deterministic by record id) */}
       <div className="relative">
         <PropertyThumb
@@ -1478,9 +1478,10 @@ function ActionDrawerCard({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink-700 bg-ink-800 text-slate-300 shadow-soft">
+    <div className="surface-ai relative overflow-hidden rounded-2xl text-slate-300">
+      <span className="ai-bloom -right-16 -top-20" aria-hidden />
       {/* Header */}
-      <div className="flex items-start gap-3 border-b border-ink-700 px-5 py-4">
+      <div className="relative z-[1] flex items-start gap-3 border-b border-ink-700 px-5 py-4">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold ring-1 ring-inset ring-gold/30">
           <MatinMark theme="white" className="h-4 w-4" />
         </span>
@@ -1495,7 +1496,7 @@ function ActionDrawerCard({
       </div>
 
       {/* AI explanation */}
-      <div className="space-y-3 px-5 py-4">
+      <div className="relative z-[1] space-y-3 px-5 py-4">
         <p className="text-[0.84rem] leading-relaxed text-slate-300">
           <span className="font-semibold text-slate-300/80">AI: </span>
           {track.aiExplanation}
@@ -1513,18 +1514,20 @@ function ActionDrawerCard({
               onClick={onGenerateKit}
               disabled={kitLoading}
               className={cn(
-                "inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg bg-gold px-3.5 py-2 text-[0.8rem] font-semibold text-ink transition-colors sm:w-auto sm:justify-start",
+                "btn-accent inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-[0.8rem] font-semibold sm:w-auto sm:justify-start",
                 kitLoading
                   ? "cursor-not-allowed opacity-60"
-                  : "hover:bg-gold-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
+                  : "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40",
               )}
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              {kitLoading
-                ? "Generating marketing kit…"
-                : kitGenerated
-                  ? "Regenerate marketing kit"
-                  : "Generate marketing kit"}
+              <MatinMark theme="white" className="h-3.5 w-3.5" />
+              <span>
+                {kitLoading
+                  ? "Generating marketing kit…"
+                  : kitGenerated
+                    ? "Regenerate marketing kit"
+                    : "Generate marketing kit"}
+              </span>
             </button>
           ) : (
             <button

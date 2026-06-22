@@ -727,9 +727,9 @@ export default function ReportingPage() {
               },
             )
           }
-          className="ml-auto inline-flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-gold px-3.5 py-1.5 text-[0.78rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+          className="btn-accent ml-auto inline-flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold"
         >
-          <MatinMark theme="dark" className="h-3.5 w-3.5" />
+          <MatinMark theme="white" className="h-3.5 w-3.5" />
           {/* R6: shorten on phone */}
           <span className="sm:hidden">Ask Matin</span>
           <span className="hidden sm:inline">Ask Matin why this changed</span>
@@ -1313,10 +1313,10 @@ function ReportingDrawer({
             <button
               type="button"
               onClick={() => onAskAi(ask!.context, ask!.drivers, ask!.action)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-3 py-2 text-[0.8rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+              className="btn-accent inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[0.8rem] font-semibold"
             >
-              <MatinMark theme="dark" className="h-3.5 w-3.5" />
-              Ask Matin why
+              <MatinMark theme="white" className="h-3.5 w-3.5" />
+              <span>Ask Matin why</span>
             </button>
             <button
               type="button"

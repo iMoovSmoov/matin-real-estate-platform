@@ -333,17 +333,17 @@ export function EmailComposer({
               type="button"
               onClick={handleGenerate}
               disabled={generating}
-              className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-gold px-3 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright disabled:opacity-60"
+              className="btn-accent ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-[0.76rem] font-semibold disabled:opacity-60"
             >
               {generating ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                  Drafting…
+                  <span>Drafting…</span>
                 </>
               ) : (
                 <>
-                  <MatinMark theme="dark" className="h-3.5 w-3.5" />
-                  Use Matin AI
+                  <MatinMark theme="white" className="h-3.5 w-3.5" />
+                  <span>Use Matin AI</span>
                 </>
               )}
             </button>

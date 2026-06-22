@@ -222,10 +222,13 @@ export function AISidecar() {
         className="absolute inset-0 bg-ink/40"
       />
 
-      {/* Dark panel — figure/ground against the light workspace */}
-      <div className="absolute inset-y-0 right-0 flex w-full max-w-[420px] flex-col bg-ink-900 text-slate-300 shadow-lift">
-        {/* Header — gold accent rail signals an AI surface */}
-        <div className="flex items-start justify-between gap-3 border-b border-ink-700 px-5 py-4">
+      {/* Dark glass AI panel — figure/ground against the light workspace */}
+      <div className="surface-ai absolute inset-y-0 right-0 flex w-full max-w-[420px] flex-col overflow-hidden text-slate-300">
+        {/* Accent bloom — soft AI glow at the brand corner */}
+        <span aria-hidden className="ai-bloom -left-16 -top-16" />
+
+        {/* Header — Matin mark + bound context signal an AI surface */}
+        <div className="relative flex items-start justify-between gap-3 border-b border-ink-700 px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
@@ -324,7 +327,7 @@ export function AISidecar() {
               type="submit"
               aria-label="Send"
               disabled={!draft.trim() || streaming}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold text-ink transition-opacity hover:bg-gold-bright disabled:opacity-40"
+              className="btn-accent flex h-7 w-7 shrink-0 items-center justify-center rounded-lg disabled:opacity-40"
             >
               <ArrowUp className="h-4 w-4" />
             </button>

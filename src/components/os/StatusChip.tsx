@@ -36,7 +36,7 @@ const SOLID: Record<ChipTone, string> = {
   warn: "bg-warn text-cloud ring-warn",
   info: "bg-info text-cloud ring-info",
   ink: "bg-ink text-cloud ring-ink",
-  gold: "bg-gold text-ink ring-gold",
+  gold: "bg-gold text-cloud ring-gold",
 };
 
 export function StatusChip({

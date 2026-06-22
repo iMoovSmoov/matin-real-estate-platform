@@ -17,9 +17,9 @@ import { compactUsd, num } from "@/lib/utils";
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center — Live Pipeline chart (S1.4)
 
-   Replaces the 8 flat ProgressTrack bars with a REAL recharts pipeline: a
-   gold/ink single-hue ramp of open deal value per funnel stage (current) with a
-   faint prior-period area behind it, a dark decomposing tooltip showing $ value
+   Replaces the 8 flat ProgressTrack bars with a REAL recharts pipeline: an
+   estate-green single-hue ramp of open deal value per funnel stage (current)
+   with a faint prior-period area behind it, a dark decomposing tooltip showing $
    AND deal count, and a $ total. Closed stage = success green (terminal money).
    Colors come straight from the §1.1 palette; no rainbow, no animation-for-vibes.
    ────────────────────────────────────────────────────────────────────────── */
@@ -27,19 +27,20 @@ import { compactUsd, num } from "@/lib/utils";
 const GRID = "#ebebea";
 const AXIS = "#8a8a90";
 const INK = "#161617";
-const GOLD = "#b8924a";
-const GOLD_BRIGHT = "#d2a050";
+const ACCENT = "#2f8a60";      // estate green (bright)
+const ACCENT_DEEP = "#1f6b4a"; // estate green (deep accent)
 const SUCCESS = "#56a07d";
 const PRIOR = "#c3c3c9";
 
-// Stage → ramped fill (info→warn→gold→success→ink terminal). Stable per stage.
+// Stage → ramped fill: neutral grays warm into the estate-green accent, then
+// resolve on terminal success green. Single-hue, stable per stage (no rainbow).
 const STAGE_FILL: Record<string, string> = {
   "Pre-Listing": "#9aa0a8",
   Active: "#8a8a90",
-  Pending: "#c1934a",
-  Inspection: "#c79a52",
-  Appraisal: GOLD,
-  Financing: GOLD_BRIGHT,
+  Pending: "#9ec9b4",
+  Inspection: "#5fa585",
+  Appraisal: ACCENT,
+  Financing: ACCENT_DEEP,
   "Clear to Close": "#7bb795",
   Closed: SUCCESS,
 };

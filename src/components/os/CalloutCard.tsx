@@ -52,11 +52,13 @@ export function CalloutCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-ink-700 bg-ink-800 p-5 text-slate-300 shadow-soft",
+        "surface-ai relative overflow-hidden rounded-2xl p-5 text-slate-300",
         className,
       )}
     >
-      <div className="flex items-start gap-3">
+      {/* Accent bloom — soft AI glow in the corner */}
+      <span aria-hidden className="ai-bloom -right-16 -top-16" />
+      <div className="relative flex items-start gap-3">
         <span
           className={cn(
             "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",

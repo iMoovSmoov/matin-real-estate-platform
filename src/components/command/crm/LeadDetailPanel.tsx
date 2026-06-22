@@ -220,7 +220,7 @@ export function LeadDetailPanel({
   }
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
+    <div className="accent-edge relative flex h-full flex-col overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
       {/* Identity header — Avatar + ScoreRing */}
       <div className="flex items-start gap-4 border-b border-mist px-5 py-4">
         <ScoreRing value={lead.score} size={58} />
@@ -541,10 +541,10 @@ function DraftBlock({
           <button
             type="button"
             onClick={onApprove}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-gold px-3 py-1.5 text-[0.76rem] font-semibold text-ink transition-colors hover:bg-gold-bright"
+            className="btn-accent inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.76rem] font-semibold"
           >
             <CircleCheck className="h-3.5 w-3.5" aria-hidden />
-            {state.approved ? "View branded" : "Approve & preview"}
+            <span>{state.approved ? "View branded" : "Approve & preview"}</span>
           </button>
           {/* Copy + Save .txt so the drafted reply is never view-only */}
           <DraftActions
