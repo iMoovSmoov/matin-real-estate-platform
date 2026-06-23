@@ -17,8 +17,98 @@ export function fallbackFor(
   switch (tool) {
 
     /* ── Public concierge / Ask Matin ───────────────────────────────────── */
-    case "ask-matin":
     case "concierge": {
+      const msg = (lastUserMessage || "").toLowerCase();
+
+      if (
+        /listing.*launch|launch.*listing|mls|remarks|seller update|open house|media/.test(msg) &&
+        /buyer agreement|buyer.*agreement|c-565|representation|showing agreement|nar/.test(msg)
+      )
+        return `**MatinOS automation map — Listing Launch + Buyer Agreements**
+
+**Listing Launch**
+- Build the launch checklist from the listing record, state, price band, and seller timeline.
+- Draft MLS remarks, social captions, flyer copy, email blast, open-house invite, and seller update from the same property data.
+- Flag blockers: unsigned disclosures, missing media, seller approval, price-review notes, and campaign pacing.
+- Compile weekly seller reports from traffic, inquiries, showing feedback, and spend.
+
+**Buyer Agreements**
+- Pull buyer/contact/search data from CRM into the Agreement Desk.
+- Auto-fill OREF C-565, agency disclosure, service area, term, compensation language, and showing-related packet items.
+- Flag missing initials, expiration dates, broker-review fields, and compensation-sensitive clauses.
+- Stage e-signature, save the executed copy to the client file, and create follow-up tasks.
+
+The agent-facing workflow should stay simple: review, edit, approve, send, download, print, or request correction. Anything client-facing or compliance-sensitive waits for human approval.`;
+
+      if (/listing.*launch|launch.*listing|mls|remarks|seller update|open house|media/.test(msg))
+        return `**Listing Launch — MatinOS workflow**
+
+MatinOS should already have the listing record, seller, photos/media status, disclosures, MLS fields, campaign plan, showing feedback, and seller-update cadence in one workspace.
+
+**What I would automate next:**
+- Auto-build the launch checklist from the listing type, state, and status.
+- Draft MLS remarks, social captions, flyer copy, email blast, and open-house invite from the property record.
+- Flag missing launch blockers: unsigned disclosures, photo delivery, price-review notes, seller approval, and ad-budget pacing.
+- Prepare the weekly seller report from traffic, inquiries, showing feedback, and campaign spend.
+
+Human approval still controls the final public MLS copy, outbound seller update, ad launch, and any compliance-sensitive language.`;
+
+      if (/buyer agreement|buyer.*agreement|c-565|representation|showing agreement|nar/.test(msg))
+        return `**Buyer Agreements — MatinOS workflow**
+
+The clean product is not a blank form generator. It should be an Agreement Desk where the agent picks the buyer, service area, term, compensation language, showing plan, and broker notes, then MatinOS prepares a branded packet for review.
+
+**What gets automated:**
+- Pull buyer/contact data from CRM.
+- Auto-fill OREF C-565, agency disclosure, brokerage terms, and showing-related packet items.
+- Flag missing initials, term dates, broker-review fields, and compensation-sensitive clauses.
+- Stage e-signature, save a copy to the client file, and add follow-up tasks.
+
+Human work stays simple: review, edit, approve, send, download, print, or request correction.`;
+
+      if (/form|doc|packet|agreement|disclosure|esign|e-?sign|download|print/.test(msg))
+        return `**Forms & Docs — what MatinOS should do**
+
+Use the packet workspace, not scattered PDFs. Pick the transaction/listing/client record, then MatinOS generates the branded packet, shows a real preview, flags missing fields, and stages e-signature.
+
+**Best next actions:**
+- Open the selected packet and review red/missing fields.
+- Run the AI missing-field check if the document is blocked.
+- Mark fields resolved only after human review.
+- Use Download/Save Copy/Print PDF for a tangible artifact.
+- Send for signature only after the broker/compliance gate is clear.`;
+
+      if (/system|integration|zapier|make|n8n|api|connector|webhook|sync|automate/.test(msg))
+        return `**Systems Health — business-facing integration plan**
+
+MatinOS should hide API complexity from agents. The user sees source health, automation runs, failed workflows, stale data, and what business area is affected.
+
+**Likely connected sources:**
+- Website/IDX and lead forms → CRM & Leads.
+- RMLS/NWMLS/property data → Search, Listings, CMA, seller reports.
+- Transaction/e-sign tools → Transactions and Forms & Docs.
+- Google/Meta/Zillow/YouTube campaigns → Marketing Studio and Reports.
+- AI providers → drafts, coaching, document checks, summaries.
+
+Zapier/Make/n8n can stay available as connectors, but the demo should frame them as optional bridges behind MatinOS, not the agent's daily workspace.`;
+
+      if (/today|priority|prioritize|queue|what.*first|risk|deadline/.test(msg))
+        return `**Recommended work order**
+
+1. **Deadlines/risk first:** inspection response, financing/appraisal dates, missing signatures, and any deal with a client update due today.
+2. **Speed-to-lead:** hot buyer/seller inquiries still inside the first-response SLA.
+3. **Launch blockers:** listings with missing disclosures, media, seller approval, or MLS remarks.
+4. **Revenue follow-up:** stale high-value leads, cash-offer opportunities, and seller valuation requests.
+5. **Reporting:** only after the work queue is clear; reports should mostly auto-populate from connected data.
+
+Nothing should leave MatinOS without a human approval gate when it is client-facing or compliance-sensitive.`;
+
+      return `I'm Matin AI inside MatinOS. I can summarize a lead, prioritize today's queue, draft a broker-safe client reply, review a document packet, flag transaction risk, explain a listing-launch blocker, or tell you which connected system is failing.
+
+Give me the record or workspace you are working in — CRM, Listing Launch, Buyer Agreements, Transactions, Forms & Docs, Marketing, Reports, or Systems Health — and I will return the next best action with approval gates.`;
+    }
+
+    case "ask-matin": {
       const msg = (lastUserMessage || "").toLowerCase();
 
       if (/commission|split|co-?broke|compensation|fee/.test(msg))
