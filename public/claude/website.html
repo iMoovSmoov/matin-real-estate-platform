@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#f6f6f5;color:#060606;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:#060606;color:#f6f6f5}
+  .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .fr{font-family:'Fraunces',Georgia,serif}
+  .nolb::-webkit-scrollbar{display:none}
+  .nolb{scrollbar-width:none}
+  @keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13) translateY(-2%)}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,138,96,.5)}50%{box-shadow:0 0 0 6px rgba(47,138,96,0)}}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-thumb{background:rgba(6,6,6,.2);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+  @media (max-width:760px){ [data-navlinks]{gap:2px!important} [data-navlabel]{display:none!important} }
+  @media (max-width:520px){ [data-navlinks] a{padding:7px 9px!important;font-size:12px!important} }
+</style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="min-height:100vh;background:#f6f6f5">
+
+<nav style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,28px);height:58px;background:rgba(246,246,245,.84);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border-bottom:1px solid rgba(6,6,6,.08)">
+  <a href="design-system.html" style="display:flex;align-items:center;gap:11px;text-decoration:none">
+    <span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#060606;color:#fff">M</span>
+    <span data-navlabel style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:#060606">Matin · Website</span>
+  </a>
+  <div data-navlinks style="display:flex;align-items:center;gap:4px">
+    <a href="design-system.html" style="font-size:13px;font-weight:500;color:#34343a;text-decoration:none;padding:8px 13px;border-radius:8px">Foundations</a>
+    <a href="website.html" style="font-size:13px;font-weight:600;color:#1f6b4a;text-decoration:none;padding:8px 13px;border-radius:8px;background:#e7f1ea">Website</a>
+    <a href="matinos.html" style="font-size:13px;font-weight:500;color:#34343a;text-decoration:none;padding:8px 13px;border-radius:8px">MatinOS</a>
+  </div>
+</nav>
+
+<header data-cover style="max-width:1240px;margin:0 auto;padding:clamp(48px,9vw,90px) clamp(20px,5vw,40px) 28px">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+    <span style="height:1px;width:46px;background:linear-gradient(90deg,#060606,transparent)"></span>
+    <span style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:#1f6b4a">02 · The public brand</span>
+  </div>
+  <h1 class="fr" style="font-weight:400;font-size:clamp(2.4rem,6vw,4.8rem);line-height:1.0;letter-spacing:-.02em;max-width:15ch">A website that earns the listing.</h1>
+  <p style="margin-top:22px;max-width:60ch;font-size:clamp(16px,2.2vw,19px);line-height:1.6;color:#34343a">Ten screens, one voice. Image-led and editorial, built to convert buyers and sellers — with the Matin&nbsp;AI concierge woven in, never shouting. Each screen below scales to fit your viewport; tap a chip to jump.</p>
+  <div class="nolb" style="display:flex;gap:8px;margin-top:30px;overflow-x:auto;padding-bottom:4px">
+    <sc-for list="{{ screens }}" as="s" hint-placeholder-count="10">
+      <a href="{{ s.href }}" style="flex:none;font-size:12.5px;font-weight:500;color:#34343a;text-decoration:none;background:#fff;border:1px solid rgba(6,6,6,.1);border-radius:999px;padding:8px 15px;box-shadow:0 1px 2px rgba(20,20,22,.04);white-space:nowrap">{{ s.label }}</a>
+    </sc-for>
+  </div>
+</header>
+
+<!-- HOME -->
+<section id="w-home" style="max-width:1248px;margin:36px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Home">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Home</span>
+    <span style="font-size:12px;color:#9a9aa0">/ matinrealestate.com</span>
+  </div>
+  <div data-fit style="width:100%;overflow:hidden">
+  <div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18)">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)">
+      <span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span>
+      <span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com</span>
+    </div>
+    <div style="position:relative;height:560px;overflow:hidden;background:#0d0d0e">
+      <img loading="lazy" src="{{ heroImg }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb 22s ease-out infinite alternate">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,6,.62) 0%,rgba(6,6,6,.18) 32%,rgba(6,6,6,.30) 70%,rgba(6,6,6,.78) 100%)"></div>
+      <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:18px 32px">
+        <div style="display:flex;align-items:center;gap:30px">
+          <div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fff;color:#060606">M</span><span style="color:#fff;font-size:13px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div>
+          <div style="display:flex;gap:24px"><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Buy</span><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Sell</span><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Cash Offer</span><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Search</span><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Communities</span><span style="color:rgba(255,255,255,.92);font-size:13px;font-weight:500">Agents</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="color:#fff;font-size:13px;font-weight:600" class="tnum">(503) 622-9624</span>
+          <button style="border:none;cursor:pointer;padding:9px 16px;border-radius:9px;color:#eaf6ee;font-family:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0c3a2b 0%,#1f6b4a 52%,#2f8a60 84%,#c9a24b 132%);box-shadow:0 8px 22px rgba(31,107,74,.4),inset 0 1px 0 rgba(255,255,255,.22)"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:5px;background:rgba(255,255,255,.18);font-size:11px">M</span>Ask Matin</button>
+        </div>
+      </div>
+      <div style="position:absolute;left:32px;right:32px;bottom:0;padding-bottom:34px">
+        <div style="max-width:760px">
+          <div style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.82);margin-bottom:16px">Portland &amp; SW Washington</div>
+          <h1 class="fr" style="color:#fff;font-weight:400;font-size:4.4rem;line-height:1.0;letter-spacing:-.02em;text-shadow:0 2px 30px rgba(6,6,6,.4)">Find your place in the Pacific Northwest.</h1>
+        </div>
+        <div style="margin-top:26px;display:flex;align-items:stretch;gap:1px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:6px;max-width:760px;backdrop-filter:blur(12px)">
+          <div style="flex:2;background:#fff;border-radius:9px 0 0 9px;padding:11px 16px"><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#9a9aa0">Location</div><div style="font-size:14px;font-weight:500;color:#060606">West Linn, OR</div></div>
+          <div style="flex:1;background:#fff;padding:11px 16px"><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#9a9aa0">Price</div><div style="font-size:14px;font-weight:500;color:#060606">Any</div></div>
+          <div style="flex:1;background:#fff;padding:11px 16px"><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#9a9aa0">Beds</div><div style="font-size:14px;font-weight:500;color:#060606">3+</div></div>
+          <button style="border:none;cursor:pointer;background:#060606;color:#fff;border-radius:0 9px 9px 0;padding:0 30px;font-family:inherit;font-size:14px;font-weight:600">Search</button>
+        </div>
+        <div style="margin-top:30px;display:flex;gap:48px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px;max-width:760px">
+          <div><div class="fr tnum" style="color:#fff;font-size:30px;line-height:1">$130M+</div><div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:4px">Annual volume</div></div>
+          <div><div class="fr tnum" style="color:#fff;font-size:30px;line-height:1">305+</div><div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:4px">Homes sold</div></div>
+          <div><div class="fr tnum" style="color:#fff;font-size:30px;line-height:1">60+</div><div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:4px">Brokers</div></div>
+          <div><div class="fr tnum" style="color:#fff;font-size:30px;line-height:1">40</div><div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:4px">Cities served</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#f6f6f5;padding:40px 32px 44px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px">
+        <div><div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:#1f6b4a;margin-bottom:8px">Featured listings</div><h2 class="fr" style="font-weight:400;font-size:32px;line-height:1.05;letter-spacing:-.015em">Now on the market</h2></div>
+        <span style="font-size:13px;font-weight:600;color:#060606;border-bottom:1px solid #060606;padding-bottom:2px">View all 58 homes &#8594;</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+        <sc-for list="{{ featured }}" as="l" hint-placeholder-count="3">
+          <div style="border-radius:14px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 14px 36px rgba(20,20,22,.08)">
+            <div style="position:relative;height:218px;overflow:hidden"><img loading="lazy" src="{{ l.img }}" alt="" style="width:100%;height:100%;object-fit:cover"><span style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(6,6,6,.55);backdrop-filter:blur(6px);padding:5px 11px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#56e0a0"></span>{{ l.tag }}</span></div>
+            <div style="padding:17px 18px 18px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><div class="fr tnum" style="font-size:23px;font-weight:500">{{ l.price }}</div><div style="font-size:12px;color:#9a9aa0">{{ l.loc }}</div></div>
+              <div style="font-size:14px;font-weight:500;color:#34343a;margin-top:4px">{{ l.address }}</div>
+              <div class="tnum" style="display:flex;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(6,6,6,.08);font-size:13px;color:#62626a"><span><b style="color:#060606;font-weight:600">{{ l.beds }}</b> bd</span><span><b style="color:#060606;font-weight:600">{{ l.baths }}</b> ba</span><span><b style="color:#060606;font-weight:600">{{ l.sqft }}</b> sqft</span></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+</section>
+
+<!-- BUY -->
+<section id="w-buy" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Buy">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Buy</span><span style="font-size:12px;color:#9a9aa0">/ buy with Matin</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com/buy</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid rgba(6,6,6,.07)"><div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#060606;color:#fff">M</span><span style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div><div style="display:flex;gap:24px"><span style="font-size:13px;font-weight:600;color:#1f6b4a">Buy</span><span style="font-size:13px;font-weight:500;color:#34343a">Sell</span><span style="font-size:13px;font-weight:500;color:#34343a">Search</span><span style="font-size:13px;font-weight:500;color:#34343a">Agents</span></div><span class="tnum" style="font-size:13px;font-weight:600;color:#060606">(503) 622-9624</span></div>
+    <div style="display:grid;grid-template-columns:1.05fr .95fr">
+      <div style="padding:48px 44px">
+        <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:#1f6b4a;margin-bottom:18px">Buyers</div>
+        <h1 class="fr" style="font-weight:400;font-size:3.1rem;line-height:1.02;letter-spacing:-.02em">Win the home, not the bidding war.</h1>
+        <p style="margin-top:18px;font-size:16px;line-height:1.6;color:#34343a;max-width:46ch">Off-market access, AI-matched listings the moment they hit, and a concierge who books your tours. Get pre-approved and start touring this week.</p>
+        <div style="display:flex;gap:12px;margin-top:26px"><button style="border:none;cursor:pointer;padding:12px 22px;border-radius:10px;background:#060606;color:#fff;font-family:inherit;font-size:14px;font-weight:600">Get pre-approved</button><button style="cursor:pointer;padding:12px 20px;border-radius:10px;background:transparent;color:#060606;font-family:inherit;font-size:14px;font-weight:600;border:1px solid rgba(6,6,6,.18)">Browse homes</button></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:34px">
+          <div><div class="fr" style="font-size:13px;color:#1f6b4a">01</div><div style="font-size:14px;font-weight:600;margin-top:5px">Off-market access</div><div style="font-size:12.5px;color:#62626a;line-height:1.5;margin-top:3px">See homes before they list.</div></div>
+          <div><div class="fr" style="font-size:13px;color:#1f6b4a">02</div><div style="font-size:14px;font-weight:600;margin-top:5px">AI-matched</div><div style="font-size:12.5px;color:#62626a;line-height:1.5;margin-top:3px">Alerts tuned to your taste.</div></div>
+          <div><div class="fr" style="font-size:13px;color:#1f6b4a">03</div><div style="font-size:14px;font-weight:600;margin-top:5px">Concierge tours</div><div style="font-size:12.5px;color:#62626a;line-height:1.5;margin-top:3px">Booked around your week.</div></div>
+        </div>
+      </div>
+      <div style="position:relative;min-height:520px"><img loading="lazy" src="{{ buyImg }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(200deg,rgba(6,6,6,0) 45%,rgba(6,6,6,.4) 100%)"></div>
+        <div style="position:absolute;top:22px;right:22px;display:inline-flex;align-items:center;gap:9px;background:rgba(246,246,245,.92);backdrop-filter:blur(10px);border-radius:12px;padding:11px 15px;box-shadow:0 10px 30px rgba(6,6,6,.25)"><span style="width:9px;height:9px;border-radius:50%;background:#1f6b4a;animation:pulse 2s infinite"></span><span style="font-size:13px;font-weight:600;color:#060606">Pre-approval in minutes</span></div>
+      </div>
+    </div>
+    <!-- mortgage + matches -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid rgba(6,6,6,.07)">
+      <div style="padding:30px 44px;border-right:1px solid rgba(6,6,6,.07)">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:16px">Payment calculator</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:10px 13px"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Home price</div><div class="tnum" style="font-size:15px;font-weight:600">$1,200,000</div></div>
+          <div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:10px 13px"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Down · 20%</div><div class="tnum" style="font-size:15px;font-weight:600">$240,000</div></div>
+          <div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:10px 13px"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Rate</div><div class="tnum" style="font-size:15px;font-weight:600">6.75%</div></div>
+          <div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:10px 13px"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Term</div><div class="tnum" style="font-size:15px;font-weight:600">30 yr</div></div>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid rgba(6,6,6,.08)"><span style="font-size:13px;color:#62626a">Est. monthly payment</span><span class="fr tnum" style="font-size:28px;font-weight:500">$6,228<span style="font-size:14px;color:#9a9aa0">/mo</span></span></div>
+      </div>
+      <div style="padding:30px 44px">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:16px">Matched for you</div>
+        <sc-for list="{{ chatCards }}" as="c" hint-placeholder-count="2">
+          <div style="display:flex;gap:13px;align-items:center;margin-bottom:12px"><div style="width:72px;height:56px;border-radius:9px;overflow:hidden;flex:none"><img loading="lazy" src="{{ c.img }}" alt="" style="width:100%;height:100%;object-fit:cover"></div><div style="flex:1;min-width:0"><div class="fr tnum" style="font-size:17px;font-weight:500">{{ c.price }}</div><div style="font-size:12.5px;color:#34343a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.address }}</div><div class="tnum" style="font-size:11.5px;color:#9a9aa0">{{ c.meta }}</div></div><span style="flex:none;font-size:12px;font-weight:600;color:#16523a;background:#e7f1ea;padding:6px 11px;border-radius:8px">Tour</span></div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- SELL -->
+<section id="w-sell" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Sell">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Sell</span><span style="font-size:12px;color:#9a9aa0">/ two ways to sell</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com/sell</span></div>
+    <div style="position:relative;height:340px;overflow:hidden;background:#0d0d0e">
+      <img loading="lazy" src="{{ sellImg }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,6,.5),rgba(6,6,6,.2) 50%,rgba(6,6,6,.6))"></div>
+      <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 36px"><div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#fff;color:#060606">M</span><span style="color:#fff;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div><div style="display:flex;gap:22px"><span style="color:rgba(255,255,255,.9);font-size:13px;font-weight:500">Buy</span><span style="color:#fff;font-size:13px;font-weight:600">Sell</span><span style="color:rgba(255,255,255,.9);font-size:13px;font-weight:500">Search</span></div></div>
+      <div style="position:absolute;left:36px;bottom:30px;right:36px"><div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.82);margin-bottom:12px">Sellers</div><h1 class="fr" style="color:#fff;font-weight:400;font-size:3rem;line-height:1.02;letter-spacing:-.02em;max-width:18ch">Two ways to sell. One brokerage that prices both.</h1></div>
+    </div>
+    <div style="padding:34px 44px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div style="border:1px solid rgba(6,6,6,.1);border-radius:14px;padding:24px;box-shadow:0 1px 2px rgba(20,20,22,.05)">
+          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:#62626a">List on market</div>
+          <div class="fr" style="font-size:24px;margin-top:8px">Maximize your price</div>
+          <p style="font-size:13.5px;color:#62626a;line-height:1.55;margin-top:8px">Full marketing launch — pro photography, 3D tour, targeted ads, and broker open houses. Best when time allows.</p>
+          <div class="tnum" style="display:flex;gap:22px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(6,6,6,.08)"><div><div class="fr" style="font-size:20px">99.2%</div><div style="font-size:11px;color:#9a9aa0">list-to-sold</div></div><div><div class="fr" style="font-size:20px">17 days</div><div style="font-size:11px;color:#9a9aa0">avg on market</div></div></div>
+        </div>
+        <div style="position:relative;overflow:hidden;border:1px solid #cfe3d7;border-radius:14px;padding:24px;background:linear-gradient(180deg,#fbfffc,#f3faf5);box-shadow:0 1px 2px rgba(20,20,22,.05)">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#2f8a60,transparent 62%)"></div>
+          <div style="display:flex;align-items:center;gap:8px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:#1f6b4a;color:#fff;font-size:11px">M</span><span style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:#16523a">Matin Cash Offer</span></div>
+          <div class="fr" style="font-size:24px;margin-top:8px">Sell on your timeline</div>
+          <p style="font-size:13.5px;color:#3f6b54;line-height:1.55;margin-top:8px">A competitive cash offer in 24 hours. Skip showings and prep, close in as few as 14 days.</p>
+          <div class="tnum" style="display:flex;gap:22px;margin-top:18px;padding-top:16px;border-top:1px solid #cfe3d7"><div><div class="fr" style="font-size:20px;color:#1f6b4a">24 hrs</div><div style="font-size:11px;color:#6b8a78">to offer</div></div><div><div class="fr" style="font-size:20px;color:#1f6b4a">$0</div><div style="font-size:11px;color:#6b8a78">prep cost</div></div></div>
+        </div>
+      </div>
+      <!-- estimate band -->
+      <div style="position:relative;overflow:hidden;margin-top:18px;border-radius:14px;padding:22px 26px;background:linear-gradient(155deg,#13231b,#0a1410);border:1px solid #1d3b30;box-shadow:0 14px 36px rgba(0,0,0,.3),inset 0 0 0 1px rgba(31,107,74,.16)">
+        <div style="position:absolute;width:200px;height:200px;border-radius:50%;right:-50px;top:-80px;background:radial-gradient(rgba(31,107,74,.4),transparent 70%);filter:blur(22px)"></div>
+        <div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+          <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:#1f6b4a;color:#fff;font-size:11px">M</span><span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#7fce9f">What your home could bring</span></div><div class="fr tnum" style="color:#fff;font-size:34px;line-height:1">$1.31M &#8211; $1.46M</div><div class="tnum" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:6px">3302 Tannler Dr · priced from 12 live RMLS comps</div></div>
+          <button style="border:none;cursor:pointer;padding:12px 22px;border-radius:10px;color:#eaf6ee;font-family:inherit;font-size:14px;font-weight:600;background:linear-gradient(135deg,#1f6b4a,#2f8a60 70%,#c9a24b 150%);box-shadow:0 8px 22px rgba(31,107,74,.5)">Get both offers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- CASH OFFER -->
+<section id="w-cash" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Cash Offer">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Cash Offer</span><span style="font-size:12px;color:#9a9aa0">/ instant offer for sellers</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 70px 3px 12px">matinrealestate.com/cash-offer</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid rgba(6,6,6,.07)"><div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#060606;color:#fff">M</span><span style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div><div style="display:flex;gap:24px"><span style="font-size:13px;font-weight:500;color:#34343a">Buy</span><span style="font-size:13px;font-weight:600;color:#1f6b4a">Sell</span><span style="font-size:13px;font-weight:500;color:#34343a">Search</span><span style="font-size:13px;font-weight:500;color:#34343a">Agents</span></div><span class="tnum" style="font-size:13px;font-weight:600;color:#060606">(503) 622-9624</span></div>
+    <div style="display:grid;grid-template-columns:1.05fr .95fr">
+      <div style="padding:48px 44px 44px">
+        <div style="display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#16523a;background:#e7f1ea;padding:6px 12px;border-radius:999px;margin-bottom:22px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:4px;background:#1f6b4a;color:#fff;font-size:10px">M</span>Matin Cash Offer</div>
+        <h1 class="fr" style="font-weight:400;font-size:3.3rem;line-height:1.02;letter-spacing:-.02em">Sell on your timeline. Skip the showings.</h1>
+        <p style="margin-top:18px;font-size:16px;line-height:1.6;color:#34343a;max-width:46ch">Get a competitive, no-obligation cash offer in 24 hours — or list on the open market. Matin AI prices both paths from live RMLS comps so you can compare, side by side.</p>
+        <div style="margin-top:30px;border:1px solid rgba(6,6,6,.1);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(20,20,22,.05),0 16px 40px rgba(20,20,22,.08)">
+          <div style="padding:22px 24px 20px;background:#fff">
+            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:14px">Your home</div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:12px 14px;background:#fbfbfa"><span style="width:7px;height:7px;border-radius:50%;background:#1f6b4a"></span><span style="font-size:14px;font-weight:500;color:#060606">3302 Tannler Dr, West Linn, OR 97068</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px"><div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:9px 12px"><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Beds</div><div style="font-size:14px;font-weight:600">5</div></div><div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:9px 12px"><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Baths</div><div style="font-size:14px;font-weight:600">3.5</div></div><div style="border:1px solid rgba(6,6,6,.14);border-radius:10px;padding:9px 12px"><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9a9aa0;font-weight:600">Condition</div><div style="font-size:14px;font-weight:600">Excellent</div></div></div>
+          </div>
+          <div style="position:relative;overflow:hidden;padding:24px;background:linear-gradient(155deg,#11211a 0%,#0a1410 100%);border-top:1px solid #1d3b30">
+            <div style="position:absolute;width:200px;height:200px;border-radius:50%;right:-40px;top:-60px;background:radial-gradient(rgba(31,107,74,.4),transparent 70%);filter:blur(20px)"></div>
+            <div style="position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:#1f6b4a;color:#fff;font-size:11px">M</span><span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#7fce9f">Matin AI estimate</span></div>
+            <div style="position:relative;display:flex;align-items:baseline;justify-content:space-between"><div><div style="font-size:12px;color:rgba(255,255,255,.6)">Estimated cash offer</div><div class="fr tnum" style="color:#fff;font-size:40px;line-height:1.05;margin-top:2px">$1.31M&#8202;&#8211;&#8202;$1.40M</div></div><button style="border:none;cursor:pointer;padding:12px 20px;border-radius:10px;color:#eaf6ee;font-family:inherit;font-size:14px;font-weight:600;background:linear-gradient(135deg,#1f6b4a 0%,#2f8a60 70%,#c9a24b 150%);box-shadow:0 8px 22px rgba(31,107,74,.5);white-space:nowrap">Get my offer</button></div>
+            <div class="tnum" style="position:relative;margin-top:14px;display:flex;gap:18px;font-size:12px;color:rgba(255,255,255,.66)"><span>No obligation</span><span style="color:rgba(255,255,255,.3)">|</span><span>Close in 14 days</span><span style="color:rgba(255,255,255,.3)">|</span><span>From 12 live comps</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;min-height:560px"><img loading="lazy" src="{{ cashImg }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(200deg,rgba(6,6,6,0) 40%,rgba(6,6,6,.45) 100%)"></div>
+        <div style="position:absolute;top:24px;right:24px;display:inline-flex;align-items:center;gap:9px;background:rgba(246,246,245,.92);backdrop-filter:blur(10px);border-radius:12px;padding:11px 15px;box-shadow:0 10px 30px rgba(6,6,6,.25)"><span style="width:9px;height:9px;border-radius:50%;background:#1f6b4a;animation:pulse 2s infinite"></span><span style="font-size:13px;font-weight:600;color:#060606">Instant offer in 24 hours</span></div>
+        <div style="position:absolute;left:24px;right:24px;bottom:24px;display:flex;gap:10px"><div style="flex:1;background:rgba(246,246,245,.92);backdrop-filter:blur(10px);border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(6,6,6,.2)"><div class="fr tnum" style="font-size:22px">2</div><div style="font-size:11px;color:#62626a;margin-top:2px">paths priced</div></div><div style="flex:1;background:rgba(246,246,245,.92);backdrop-filter:blur(10px);border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(6,6,6,.2)"><div class="fr tnum" style="font-size:22px">$0</div><div style="font-size:11px;color:#62626a;margin-top:2px">upfront cost</div></div><div style="flex:1;background:rgba(246,246,245,.92);backdrop-filter:blur(10px);border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(6,6,6,.2)"><div class="fr tnum" style="font-size:22px">14d</div><div style="font-size:11px;color:#62626a;margin-top:2px">to close</div></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(6,6,6,.07)">
+      <div style="padding:26px 36px;border-right:1px solid rgba(6,6,6,.07)"><div class="fr" style="font-size:13px;color:#1f6b4a">01</div><div style="font-size:16px;font-weight:600;margin-top:6px">Share your home</div><div style="font-size:13px;color:#62626a;line-height:1.5;margin-top:4px">A few questions. No walkthroughs, no prep.</div></div>
+      <div style="padding:26px 36px;border-right:1px solid rgba(6,6,6,.07)"><div class="fr" style="font-size:13px;color:#1f6b4a">02</div><div style="font-size:16px;font-weight:600;margin-top:6px">Compare your offers</div><div style="font-size:13px;color:#62626a;line-height:1.5;margin-top:4px">Cash vs. open-market, priced by AI.</div></div>
+      <div style="padding:26px 36px"><div class="fr" style="font-size:13px;color:#1f6b4a">03</div><div style="font-size:16px;font-weight:600;margin-top:6px">Choose your close date</div><div style="font-size:13px;color:#62626a;line-height:1.5;margin-top:4px">Pick the timeline that fits your move.</div></div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- PROPERTY SEARCH -->
+<section id="w-search" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Property Search">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Property Search</span><span style="font-size:12px;color:#9a9aa0">/ 58 live listings + map</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 60px 3px 12px">matinrealestate.com/homes-for-sale</span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(6,6,6,.08)">
+      <div style="display:flex;align-items:center;gap:9px;border:1px solid rgba(6,6,6,.16);border-radius:9px;padding:9px 14px;min-width:230px"><span style="width:7px;height:7px;border-radius:50%;background:#1f6b4a"></span><span style="font-size:14px;font-weight:500;color:#060606">West Linn, OR</span></div>
+      <span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:9px;padding:9px 13px">For Sale &#9662;</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:9px;padding:9px 13px">Price &#9662;</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:9px;padding:9px 13px">Beds &amp; Baths &#9662;</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:9px;padding:9px 13px">Home Type &#9662;</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:9px;padding:9px 13px">More &#9662;</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:14px"><span class="tnum" style="font-size:13px;color:#62626a"><b style="color:#060606;font-weight:600">58</b> homes</span><button style="border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:9px;color:#eaf6ee;font-family:inherit;font-size:13px;font-weight:600;background:linear-gradient(135deg,#0c3a2b,#1f6b4a 60%,#2f8a60 120%);box-shadow:0 6px 16px rgba(31,107,74,.34)"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:4px;background:rgba(255,255,255,.18);font-size:10px">M</span>Save search</button></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.08fr .92fr;height:648px">
+      <div style="overflow-y:auto;padding:20px;background:#f6f6f5">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-size:13px;color:#62626a">Homes in <b style="color:#060606">West Linn</b> &amp; nearby</div><div style="font-size:13px;font-weight:500;color:#34343a">Sort: Price (high) &#9662;</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <sc-for list="{{ search }}" as="l" hint-placeholder-count="6">
+            <div style="border-radius:13px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 26px rgba(20,20,22,.06)">
+              <div style="position:relative;height:148px;overflow:hidden"><img loading="lazy" src="{{ l.img }}" alt="" style="width:100%;height:100%;object-fit:cover"><span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#fff;background:rgba(6,6,6,.55);backdrop-filter:blur(6px);padding:4px 9px;border-radius:999px"><span style="width:5px;height:5px;border-radius:50%;background:{{ l.sc }}"></span>{{ l.status }}</span></div>
+              <div style="padding:13px 14px 14px"><div class="fr tnum" style="font-size:19px;font-weight:500">{{ l.price }}</div><div style="font-size:12.5px;font-weight:500;color:#34343a;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.address }}</div><div style="font-size:11.5px;color:#9a9aa0">{{ l.loc }}</div><div class="tnum" style="display:flex;gap:11px;margin-top:11px;padding-top:11px;border-top:1px solid rgba(6,6,6,.07);font-size:12px;color:#62626a"><span><b style="color:#060606;font-weight:600">{{ l.beds }}</b> bd</span><span><b style="color:#060606;font-weight:600">{{ l.baths }}</b> ba</span><span><b style="color:#060606;font-weight:600">{{ l.sqft }}</b> sf</span></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#e9ece6,#dfe4dc)">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(6,6,6,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(6,6,6,.045) 1px,transparent 1px);background-size:46px 46px"></div>
+        <div style="position:absolute;width:280px;height:230px;left:-40px;bottom:-40px;background:rgba(95,140,95,.22);border-radius:48% 52% 60% 40%/55% 45% 55% 45%"></div>
+        <div style="position:absolute;width:200px;height:170px;right:-30px;top:30px;background:rgba(95,140,95,.16);border-radius:52% 48% 40% 60%/45% 60% 40% 55%"></div>
+        <div style="position:absolute;width:130%;height:54px;left:-15%;top:38%;background:rgba(110,150,180,.28);transform:rotate(-16deg);border-radius:40px"></div>
+        <div style="position:absolute;width:150%;height:3px;left:-25%;top:62%;background:rgba(255,255,255,.85);transform:rotate(-7deg)"></div>
+        <div style="position:absolute;width:150%;height:2px;left:-25%;top:24%;background:rgba(255,255,255,.7);transform:rotate(4deg)"></div>
+        <div style="position:absolute;height:130%;width:3px;top:-15%;left:46%;background:rgba(255,255,255,.8);transform:rotate(9deg)"></div>
+        <div class="fr tnum" style="position:absolute;top:20%;left:28%;background:#1f6b4a;color:#fff;font-size:14px;font-weight:500;padding:7px 13px;border-radius:999px;box-shadow:0 8px 20px rgba(31,107,74,.5);border:2px solid #fff;z-index:3">$3.27M</div>
+        <div class="fr tnum" style="position:absolute;top:13%;left:58%;background:#fff;color:#060606;font-size:13px;padding:6px 12px;border-radius:999px;box-shadow:0 6px 16px rgba(6,6,6,.22);border:1px solid rgba(6,6,6,.08)">$2.19M</div>
+        <div class="fr tnum" style="position:absolute;top:50%;left:18%;background:#fff;color:#060606;font-size:13px;padding:6px 12px;border-radius:999px;box-shadow:0 6px 16px rgba(6,6,6,.22);border:1px solid rgba(6,6,6,.08)">$2.29M</div>
+        <div class="fr tnum" style="position:absolute;top:66%;left:48%;background:#fff;color:#060606;font-size:13px;padding:6px 12px;border-radius:999px;box-shadow:0 6px 16px rgba(6,6,6,.22);border:1px solid rgba(6,6,6,.08)">$1.75M</div>
+        <div class="fr tnum" style="position:absolute;top:40%;left:70%;background:#fff;color:#060606;font-size:13px;padding:6px 12px;border-radius:999px;box-shadow:0 6px 16px rgba(6,6,6,.22);border:1px solid rgba(6,6,6,.08)">$1.58M</div>
+        <div style="position:absolute;top:16px;right:16px;display:flex;flex-direction:column;background:#fff;border-radius:9px;overflow:hidden;box-shadow:0 4px 12px rgba(6,6,6,.18)"><span style="padding:8px 12px;font-size:17px;font-weight:600;color:#34343a;border-bottom:1px solid rgba(6,6,6,.08);text-align:center">+</span><span style="padding:8px 12px;font-size:17px;font-weight:600;color:#34343a;text-align:center">&#8722;</span></div>
+        <div style="position:absolute;left:16px;bottom:16px;width:228px;background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 14px 36px rgba(6,6,6,.28);border:1px solid rgba(6,6,6,.06)"><div style="position:relative;height:104px;overflow:hidden"><img loading="lazy" src="{{ heroImg }}" alt="" style="width:100%;height:100%;object-fit:cover"><span style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:600;color:#fff;background:rgba(31,107,74,.92);padding:3px 8px;border-radius:999px">For Sale</span></div><div style="padding:11px 13px"><div class="fr tnum" style="font-size:18px;font-weight:500">$2,185,000</div><div style="font-size:12px;font-weight:500;color:#34343a;margin-top:2px">5823 Willamette Falls Dr</div><div class="tnum" style="font-size:11.5px;color:#62626a;margin-top:6px">6 bd · 6.5 ba · 5,785 sf</div></div></div>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- LISTING DETAIL -->
+<section id="w-detail" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Listing Detail">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Listing Detail</span><span style="font-size:12px;color:#9a9aa0">/ single property page</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 50px 3px 12px">matinrealestate.com/listing/5823-willamette-falls-dr</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 36px;border-bottom:1px solid rgba(6,6,6,.07)"><div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#060606;color:#fff">M</span><span style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div><span style="font-size:13px;color:#62626a">&#8592; All homes for sale</span></div>
+    <!-- gallery -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px;padding:6px;background:#0d0d0e">
+      <div style="position:relative;height:460px;overflow:hidden;border-radius:6px"><img loading="lazy" src="{{ detailMain }}" alt="" style="width:100%;height:100%;object-fit:cover"><span style="position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(31,107,74,.92);padding:6px 12px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#fff"></span>For Sale · New</span></div>
+      <div style="display:grid;grid-template-rows:1fr 1fr;gap:6px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="overflow:hidden;border-radius:6px"><img loading="lazy" src="{{ detailG1 }}" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+          <div style="overflow:hidden;border-radius:6px"><img loading="lazy" src="{{ detailG2 }}" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="overflow:hidden;border-radius:6px"><img loading="lazy" src="{{ detailG3 }}" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+          <div style="position:relative;overflow:hidden;border-radius:6px"><img loading="lazy" src="{{ detailG4 }}" alt="" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:rgba(6,6,6,.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600">+ 38 photos</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- title bar -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:26px 36px 20px;border-bottom:1px solid rgba(6,6,6,.07);flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="fr tnum" style="font-size:38px;font-weight:500;line-height:1">$2,185,000</div>
+        <div style="font-size:15px;color:#34343a;margin-top:6px">5823 Willamette Falls Dr, West Linn, OR 97068</div>
+        <div class="tnum" style="display:flex;gap:18px;margin-top:14px;font-size:13.5px;color:#62626a">
+          <span><b style="color:#060606;font-weight:600">6</b> beds</span><span style="color:#dededc">·</span><span><b style="color:#060606;font-weight:600">6.5</b> baths</span><span style="color:#dededc">·</span><span><b style="color:#060606;font-weight:600">5,785</b> sqft</span><span style="color:#dededc">·</span><span><b style="color:#060606;font-weight:600">1.91</b> ac</span><span style="color:#dededc">·</span><span>Built <b style="color:#060606;font-weight:600">2003</b></span></div>
+      </div>
+      <div style="display:flex;gap:10px"><span style="font-size:13px;font-weight:600;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:9px;padding:9px 14px">&#9825; Save</span><span style="font-size:13px;font-weight:600;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:9px;padding:9px 14px">Share</span></div>
+    </div>
+    <!-- body -->
+    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:0">
+      <div style="padding:28px 36px;border-right:1px solid rgba(6,6,6,.07)">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:12px">About this home</div>
+        <p style="font-size:15px;line-height:1.7;color:#34343a">Set in West Linn, this 6-bed acreage estate blends timeless design with everyday function. The chef's kitchen anchors the main level, while the primary retreat offers a spa-style bath and generous closet. Nearly two private acres, minutes to parks &amp; trails — a rare offering in one of the region's most-wanted enclaves.</p>
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin:24px 0 12px">Features</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 22px">
+          <sc-for list="{{ detailFeatures }}" as="f" hint-placeholder-count="8">
+            <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:#34343a"><span style="width:16px;height:16px;border-radius:50%;background:#e7f1ea;display:inline-flex;align-items:center;justify-content:center;color:#1f6b4a;font-size:10px;flex:none">&#10003;</span>{{ f }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin:24px 0 12px">Location</div>
+        <div style="position:relative;height:170px;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,#e9ece6,#dfe4dc);border:1px solid rgba(6,6,6,.08)">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(6,6,6,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(6,6,6,.045) 1px,transparent 1px);background-size:40px 40px"></div>
+          <div style="position:absolute;width:130%;height:40px;left:-15%;top:46%;background:rgba(110,150,180,.28);transform:rotate(-12deg);border-radius:30px"></div>
+          <div style="position:absolute;width:150%;height:3px;left:-25%;top:64%;background:rgba(255,255,255,.85);transform:rotate(-6deg)"></div>
+          <div class="fr tnum" style="position:absolute;top:38%;left:46%;background:#1f6b4a;color:#fff;font-size:13px;padding:6px 12px;border-radius:999px;box-shadow:0 8px 20px rgba(31,107,74,.5);border:2px solid #fff">$2.19M</div>
+        </div>
+      </div>
+      <!-- agent / schedule -->
+      <div style="padding:28px 36px">
+        <div style="border:1px solid rgba(6,6,6,.1);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(20,20,22,.05)">
+          <div style="display:flex;align-items:center;gap:13px"><img loading="lazy" src="{{ detailAgent.photo }}" alt="" style="width:54px;height:54px;border-radius:50%;object-fit:cover;background:#eee"><div><div style="font-size:15px;font-weight:600">{{ detailAgent.name }}</div><div style="font-size:12.5px;color:#62626a">{{ detailAgent.title }}</div><div class="tnum" style="font-size:12.5px;color:#1f6b4a;font-weight:600;margin-top:2px">{{ detailAgent.phone }}</div></div></div>
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#62626a;margin:18px 0 10px">Schedule a tour</div>
+          <div style="display:flex;gap:8px"><span style="flex:1;text-align:center;font-size:12px;font-weight:600;color:#fff;background:#060606;border-radius:9px;padding:9px 0">Sat 11a</span><span style="flex:1;text-align:center;font-size:12px;font-weight:600;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:9px;padding:9px 0">Sat 2p</span><span style="flex:1;text-align:center;font-size:12px;font-weight:600;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:9px;padding:9px 0">Sun 10a</span></div>
+          <button style="width:100%;border:none;cursor:pointer;margin-top:12px;padding:12px;border-radius:10px;color:#eaf6ee;font-family:inherit;font-size:14px;font-weight:600;background:linear-gradient(135deg,#1f6b4a,#2f8a60 70%,#c9a24b 150%);box-shadow:0 8px 22px rgba(31,107,74,.4)">Request a tour</button>
+          <button style="width:100%;cursor:pointer;margin-top:9px;padding:11px;border-radius:10px;background:transparent;color:#060606;font-family:inherit;font-size:14px;font-weight:600;border:1px solid rgba(6,6,6,.16)">Ask a question</button>
+        </div>
+        <div style="border:1px solid rgba(6,6,6,.1);border-radius:14px;padding:18px 20px;margin-top:14px;box-shadow:0 1px 2px rgba(20,20,22,.05)">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#62626a">Est. payment</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:8px"><span class="fr tnum" style="font-size:24px;font-weight:500">$11,340<span style="font-size:13px;color:#9a9aa0">/mo</span></span><span class="tnum" style="font-size:12px;color:#9a9aa0">20% down · 6.75%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- COMMUNITIES -->
+<section id="w-communities" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Communities">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Communities</span><span style="font-size:12px;color:#9a9aa0">/ 40 cities served</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 70px 3px 12px">matinrealestate.com/communities</span></div>
+    <div style="position:relative;height:260px;overflow:hidden;background:#0d0d0e">
+      <img loading="lazy" src="{{ communitiesHero }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,6,.45),rgba(6,6,6,.25) 50%,rgba(6,6,6,.55))"></div>
+      <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:16px 36px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#fff;color:#060606">M</span><span style="color:#fff;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div>
+      <div style="position:absolute;left:36px;bottom:28px"><div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.82);margin-bottom:10px">Where we work</div><h1 class="fr" style="color:#fff;font-weight:400;font-size:2.8rem;line-height:1.02;letter-spacing:-.02em">Explore the neighborhoods</h1></div>
+    </div>
+    <div style="padding:30px 36px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+        <sc-for list="{{ communities }}" as="c" hint-placeholder-count="8">
+          <div style="border-radius:13px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 26px rgba(20,20,22,.06)">
+            <div style="position:relative;height:130px;overflow:hidden"><img loading="lazy" src="{{ c.img }}" alt="" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(6,6,6,.6))"></div><div class="fr" style="position:absolute;left:12px;bottom:10px;color:#fff;font-size:18px;font-weight:500">{{ c.name }}</div></div>
+            <div style="padding:13px 14px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;color:#9a9aa0">Median</span><span class="fr tnum" style="font-size:18px;font-weight:500">{{ c.price }}</span></div>
+              <div class="tnum" style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid rgba(6,6,6,.07);font-size:11.5px;color:#62626a"><span>{{ c.listings }} active</span><span>{{ c.dom }}d DOM</span><span style="color:#1f6b4a;font-weight:600">{{ c.schools }}/10</span></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- AGENTS -->
+<section id="w-agents" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Agents">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Agents</span><span style="font-size:12px;color:#9a9aa0">/ 60+ brokers</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com/agents</span></div>
+    <div style="position:relative;height:230px;overflow:hidden;background:#0d0d0e">
+      <img loading="lazy" src="{{ agentsHero }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,6,.45),rgba(6,6,6,.3) 50%,rgba(6,6,6,.6))"></div>
+      <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:16px 36px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#fff;color:#060606">M</span><span style="color:#fff;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div>
+      <div style="position:absolute;left:36px;bottom:26px;right:36px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px"><div><div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.82);margin-bottom:10px">Our team</div><h1 class="fr" style="color:#fff;font-weight:400;font-size:2.8rem;line-height:1.02;letter-spacing:-.02em">Brokers who know this market cold.</h1></div><div class="tnum" style="display:flex;gap:30px"><div><div class="fr" style="color:#fff;font-size:26px">60+</div><div style="color:rgba(255,255,255,.7);font-size:11px">brokers</div></div><div><div class="fr" style="color:#fff;font-size:26px">$130M+</div><div style="color:rgba(255,255,255,.7);font-size:11px">volume</div></div></div></div>
+    </div>
+    <div style="padding:30px 36px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px"><span style="font-size:13px;font-weight:600;color:#fff;background:#060606;border-radius:8px;padding:7px 13px">All</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:8px;padding:7px 13px">Leadership</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:8px;padding:7px 13px">Luxury</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.14);border-radius:8px;padding:7px 13px">Acreage &amp; Land</span><span style="margin-left:auto;font-size:13px;color:#62626a;border:1px solid rgba(6,6,6,.14);border-radius:8px;padding:7px 13px">Search by name &#9662;</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+        <sc-for list="{{ agents }}" as="a" hint-placeholder-count="8">
+          <div style="border-radius:13px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 26px rgba(20,20,22,.06)">
+            <div style="height:185px;overflow:hidden;background:#ececeb"><img loading="lazy" src="{{ a.photo }}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:top"></div>
+            <div style="padding:14px 15px 15px">
+              <div style="font-size:15px;font-weight:600">{{ a.name }}</div>
+              <div style="font-size:12px;color:#62626a">{{ a.title }}</div>
+              <div class="tnum" style="display:flex;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(6,6,6,.07);font-size:11.5px;color:#62626a"><span><b style="color:#060606;font-weight:600">{{ a.vol }}</b> vol</span><span><b style="color:#060606;font-weight:600">{{ a.sold }}</b> sold</span><span style="color:#c1934a;font-weight:600">&#9733; {{ a.rating }}</span></div>
+              <div style="font-size:11.5px;color:#9a9aa0;margin-top:8px">{{ a.area }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- CONTACT -->
+<section id="w-contact" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · Contact">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">Contact</span><span style="font-size:12px;color:#9a9aa0">/ two offices</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com/contact</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid rgba(6,6,6,.07)"><div style="display:flex;align-items:center;gap:10px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#060606;color:#fff">M</span><span style="font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:600">Matin</span></div><span class="tnum" style="font-size:13px;font-weight:600;color:#060606">(503) 622-9624</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <div style="padding:40px 44px;border-right:1px solid rgba(6,6,6,.07)">
+        <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;color:#1f6b4a;margin-bottom:12px">Get in touch</div>
+        <h1 class="fr" style="font-weight:400;font-size:2.4rem;line-height:1.05;letter-spacing:-.015em">Let's talk about your move.</h1>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#62626a">Full name</label><div style="margin-top:5px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:11px 13px;font-size:14px;color:#34343a;background:#fbfbfa">Jordan Avery</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#62626a">Email</label><div style="margin-top:5px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:11px 13px;font-size:14px;color:#34343a;background:#fbfbfa">jordan@email.com</div></div><div><label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#62626a">Phone</label><div class="tnum" style="margin-top:5px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:11px 13px;font-size:14px;color:#34343a;background:#fbfbfa">(503) 555-0148</div></div></div>
+          <div><label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#62626a">I'm interested in</label><div style="margin-top:7px;display:flex;gap:8px"><span style="font-size:13px;font-weight:600;color:#fff;background:#1f6b4a;border-radius:8px;padding:8px 14px">Buying</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:8px;padding:8px 14px">Selling</span><span style="font-size:13px;font-weight:500;color:#34343a;border:1px solid rgba(6,6,6,.16);border-radius:8px;padding:8px 14px">Cash Offer</span></div></div>
+          <div><label style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#62626a">Message</label><div style="margin-top:5px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:11px 13px;font-size:14px;color:#9a9aa0;background:#fbfbfa;height:74px">Looking to buy in West Linn this spring…</div></div>
+          <button style="border:none;cursor:pointer;margin-top:4px;padding:13px;border-radius:10px;background:#060606;color:#fff;font-family:inherit;font-size:14px;font-weight:600">Send message</button>
+        </div>
+      </div>
+      <div style="padding:40px 44px">
+        <div style="position:relative;height:200px;border-radius:13px;overflow:hidden;background:linear-gradient(160deg,#e9ece6,#dfe4dc);border:1px solid rgba(6,6,6,.08);margin-bottom:20px">
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(6,6,6,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(6,6,6,.045) 1px,transparent 1px);background-size:42px 42px"></div>
+          <div style="position:absolute;width:130%;height:46px;left:-15%;top:44%;background:rgba(110,150,180,.28);transform:rotate(-13deg);border-radius:30px"></div>
+          <div style="position:absolute;width:150%;height:3px;left:-25%;top:60%;background:rgba(255,255,255,.85);transform:rotate(-6deg)"></div>
+          <div class="fr" style="position:absolute;top:36%;left:42%;background:#1f6b4a;color:#fff;font-size:12px;padding:6px 11px;border-radius:999px;box-shadow:0 8px 20px rgba(31,107,74,.5);border:2px solid #fff">West Linn HQ</div>
+        </div>
+        <sc-for list="{{ offices }}" as="o" hint-placeholder-count="2">
+          <div style="border:1px solid rgba(6,6,6,.1);border-radius:13px;padding:18px 20px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,20,22,.05)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:600">Matin Real Estate — {{ o.name }}</span></div>
+            <div style="font-size:13px;color:#62626a;margin-top:5px;line-height:1.5">{{ o.addr }}</div>
+            <div class="tnum" style="display:flex;gap:16px;margin-top:10px;font-size:12.5px;color:#34343a"><span style="color:#1f6b4a;font-weight:600">(503) 622-9624</span><span style="color:#9a9aa0">Mon–Sun · 8am–8pm</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!-- AI CONCIERGE -->
+<section id="w-concierge" style="max-width:1248px;margin:44px auto 0;padding:0 clamp(16px,4vw,40px);scroll-margin-top:70px" data-screen-label="Website · AI Concierge">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#060606">AI Concierge</span><span style="font-size:12px;color:#9a9aa0">/ client chat</span></div>
+  <div data-fit style="width:100%;overflow:hidden"><div data-fit-inner style="width:1200px">
+  <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(6,6,6,.12);box-shadow:0 2px 4px rgba(20,20,22,.06),0 28px 70px rgba(20,20,22,.18);background:#fff">
+    <div style="height:38px;background:#e6e6e4;display:flex;align-items:center;padding:0 14px;gap:7px;border-bottom:1px solid rgba(6,6,6,.08)"><span style="width:11px;height:11px;border-radius:50%;background:#d8584c"></span><span style="width:11px;height:11px;border-radius:50%;background:#dca64a"></span><span style="width:11px;height:11px;border-radius:50%;background:#5bab74"></span><span style="margin:0 auto;font-size:12px;color:#62626a;background:#f6f6f5;border:1px solid rgba(6,6,6,.08);border-radius:6px;padding:3px 80px 3px 12px">matinrealestate.com/concierge</span></div>
+    <div style="display:grid;grid-template-columns:.82fr 1.18fr;min-height:600px">
+      <!-- brand panel -->
+      <div style="position:relative;overflow:hidden;padding:40px 36px;background:linear-gradient(165deg,#13231b 0%,#0a1410 100%)">
+        <div style="position:absolute;width:280px;height:280px;border-radius:50%;left:-80px;bottom:-80px;background:radial-gradient(rgba(31,107,74,.4),transparent 70%);filter:blur(30px)"></div>
+        <div style="position:relative">
+          <span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1f6b4a,#2f8a60);color:#fff;font-size:22px;box-shadow:0 0 28px rgba(31,107,74,.5)">M</span>
+          <h1 class="fr" style="color:#fff;font-weight:400;font-size:2.3rem;line-height:1.08;letter-spacing:-.015em;margin-top:24px">Your concierge, on call around the clock.</h1>
+          <p style="color:#b9c2bc;font-size:14.5px;line-height:1.6;margin-top:14px">Ask anything about buying, selling, or a specific home. Matin AI pulls live listings, books tours, and hands off to the right broker — instantly.</p>
+          <div style="margin-top:26px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:rgba(47,138,96,.18);display:inline-flex;align-items:center;justify-content:center;color:#7fce9f;font-size:12px">&#10003;</span><div style="color:#e2e6e3;font-size:14px;line-height:1.4">Live listings &amp; instant matches</div></div>
+            <div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:rgba(47,138,96,.18);display:inline-flex;align-items:center;justify-content:center;color:#7fce9f;font-size:12px">&#10003;</span><div style="color:#e2e6e3;font-size:14px;line-height:1.4">Book tours in the chat</div></div>
+            <div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:rgba(47,138,96,.18);display:inline-flex;align-items:center;justify-content:center;color:#7fce9f;font-size:12px">&#10003;</span><div style="color:#e2e6e3;font-size:14px;line-height:1.4">Warm hand-off to a local broker</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- chat -->
+      <div style="display:flex;flex-direction:column;background:#fafafa">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 22px;border-bottom:1px solid rgba(6,6,6,.07);background:#fff"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1f6b4a,#2f8a60);color:#fff">M</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Matin AI Concierge</div><div style="font-size:11px;color:#56a07d;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#2f8a60;animation:pulse 2s infinite"></span>Online</div></div></div>
+        <div style="flex:1;padding:22px;display:flex;flex-direction:column;gap:14px">
+          <!-- ai -->
+          <div style="display:flex;gap:9px;align-items:flex-end;max-width:84%"><span class="fr" style="flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#1f6b4a;color:#fff;font-size:13px">M</span><div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:4px 14px 14px 14px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:#34343a;box-shadow:0 1px 2px rgba(20,20,22,.04)">Welcome to Matin. I'm your concierge — tell me what you're looking for and I'll pull live listings, book tours, and connect you with the right broker.</div></div>
+          <!-- me -->
+          <div style="align-self:flex-end;max-width:80%"><div style="background:#060606;color:#fff;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:13.5px;line-height:1.5">Looking for a 4-bed under $1.2M near good schools in West Linn.</div></div>
+          <!-- ai + cards -->
+          <div style="display:flex;gap:9px;align-items:flex-end;max-width:88%"><span class="fr" style="flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#1f6b4a;color:#fff;font-size:13px">M</span><div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:4px 14px 14px 14px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:#34343a;box-shadow:0 1px 2px rgba(20,20,22,.04)">Great brief. West Linn schools rate 8–10. Two active homes inside your budget, both walkable to top-rated schools:</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-left:33px;max-width:520px">
+            <sc-for list="{{ chatCards }}" as="c" hint-placeholder-count="2">
+              <div style="border-radius:12px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 8px 22px rgba(20,20,22,.06)">
+                <div style="height:96px;overflow:hidden"><img loading="lazy" src="{{ c.img }}" alt="" style="width:100%;height:100%;object-fit:cover"></div>
+                <div style="padding:10px 12px"><div class="fr tnum" style="font-size:16px;font-weight:500">{{ c.price }}</div><div style="font-size:12px;font-weight:500;color:#34343a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.address }}</div><div class="tnum" style="font-size:11px;color:#9a9aa0;margin-top:3px">{{ c.meta }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <!-- me -->
+          <div style="align-self:flex-end;max-width:80%"><div style="background:#060606;color:#fff;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:13.5px;line-height:1.5">Can I tour the Tannler Dr one this weekend?</div></div>
+          <!-- ai + booking -->
+          <div style="display:flex;gap:9px;align-items:flex-end;max-width:88%"><span class="fr" style="flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#1f6b4a;color:#fff;font-size:13px">M</span><div><div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:4px 14px 14px 14px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:#34343a;box-shadow:0 1px 2px rgba(20,20,22,.04)">Yes — Saturday 11:00am or 2:00pm with Chase Bright, our West Linn buyer specialist. Want me to book it and send a calendar invite?</div><div style="display:flex;gap:8px;margin-top:9px"><button style="border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;color:#eaf6ee;background:linear-gradient(135deg,#1f6b4a,#2f8a60);box-shadow:0 6px 16px rgba(31,107,74,.4)">Book Sat 11:00am</button><button style="border:1px solid rgba(6,6,6,.16);background:#fff;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;color:#34343a">See more times</button></div></div></div>
+        </div>
+        <!-- chips + input -->
+        <div class="nolb" style="display:flex;gap:8px;padding:0 22px 12px;overflow-x:auto">
+          <sc-for list="{{ chatChips }}" as="c" hint-placeholder-count="4">
+            <span style="flex:none;font-size:12.5px;font-weight:500;color:#16523a;background:#e7f1ea;border:1px solid #cfe3d7;border-radius:999px;padding:7px 13px;white-space:nowrap">{{ c }}</span>
+          </sc-for>
+        </div>
+        <div style="padding:14px 22px 18px;border-top:1px solid rgba(6,6,6,.07);background:#fff"><div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(6,6,6,.16);border-radius:12px;padding:11px 14px;background:#fbfbfa"><span style="flex:1;font-size:13.5px;color:#9a9aa0">Ask Matin anything…</span><span style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#1f6b4a,#2f8a60);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:15px">&#8593;</span></div></div>
+      </div>
+    </div>
+  </div>
+  </div></div>
+</section>
+
+<!--SECTIONS-->
+
+<footer style="border-top:1px solid rgba(6,6,6,.08);margin-top:48px;padding:36px;text-align:center;color:#9a9aa0;font-size:12px;letter-spacing:.04em">
+  Matin Real Estate · <a href="design-system.html" style="color:#1f6b4a;text-decoration:none">Foundations</a> · <a href="matinos.html" style="color:#1f6b4a;text-decoration:none">MatinOS</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  fit = () => {
+    const r = this.rootRef.current; if (!r) return;
+    r.querySelectorAll('[data-fit]').forEach(w => {
+      const inner = w.querySelector('[data-fit-inner]'); if (!inner) return;
+      const dw = inner.offsetWidth || 1; const avail = w.clientWidth;
+      const s = Math.min(1, avail / dw);
+      inner.style.transformOrigin = 'top left';
+      inner.style.transform = 'scale(' + s + ')';
+      inner.style.marginLeft = Math.max(0, (avail - dw * s) / 2) + 'px';
+      w.style.height = (inner.offsetHeight * s) + 'px';
+    });
+  };
+  componentDidMount() {
+    this.fit();
+    window.addEventListener('resize', this.fit);
+    [120, 400, 1000, 2200].forEach(t => setTimeout(this.fit, t));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(this.fit);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.fit); }
+
+  renderVals() {
+    const B = 'https://matin-realestate.vercel.app';
+    const ex = n => `${B}/matin/exteriors/exteriors-${String(n).padStart(2,'0')}.jpg`;
+    const intr = n => `${B}/matin/interiors/interiors-${String(n).padStart(2,'0')}.jpg`;
+    const sc = n => `${B}/matin/scenics/scenics-${String(n).padStart(2,'0')}.jpg`;
+    const ag = s => `${B}/matin/agents/${s}.jpg`;
+
+    return {
+      rootRef: this.rootRef, ex, intr, sc, ag,
+      heroImg: ex(11), cashImg: ex(2), sellImg: ex(6), buyImg: ex(14),
+      contactImg: sc(2), communitiesHero: sc(1), agentsHero: sc(4), conciergeImg: ex(17),
+
+      screens: [
+        {label:'Home', href:'#w-home'},{label:'Buy', href:'#w-buy'},{label:'Sell', href:'#w-sell'},
+        {label:'Cash Offer', href:'#w-cash'},{label:'Property Search', href:'#w-search'},{label:'Listing Detail', href:'#w-detail'},
+        {label:'Communities', href:'#w-communities'},{label:'Agents', href:'#w-agents'},{label:'Contact', href:'#w-contact'},{label:'AI Concierge', href:'#w-concierge'},
+      ],
+
+      featured: [
+        {address:'5823 Willamette Falls Dr', loc:'West Linn, OR', price:'$2,185,000', beds:6, baths:'6.5', sqft:'5,785', tag:'New', img:ex(11)},
+        {address:'740 SE Columbia Way', loc:'Vancouver, WA', price:'$2,290,000', beds:3, baths:'2.5', sqft:'3,609', tag:'For Sale', img:ex(2)},
+        {address:'8457 NW Lakeshore Ave', loc:'Vancouver, WA', price:'$1,580,000', beds:5, baths:'4', sqft:'2,624', tag:'Coming Soon', img:ex(9)},
+      ],
+      search: [
+        {address:'4298 NW 185th Ave', loc:'Beaverton, OR', price:'$3,265,000', beds:4, baths:'2', sqft:'5,866', status:'Coming Soon', sc:'#1f6b4a', img:ex(0)},
+        {address:'5823 Willamette Falls Dr', loc:'West Linn, OR', price:'$2,185,000', beds:6, baths:'6.5', sqft:'5,785', status:'For Sale', sc:'#56a07d', img:ex(11)},
+        {address:'740 SE Columbia Way', loc:'Vancouver, WA', price:'$2,290,000', beds:3, baths:'2.5', sqft:'3,609', status:'For Sale', sc:'#56a07d', img:ex(2)},
+        {address:'7353 Summit Ridge Ct', loc:'West Linn, OR', price:'$1,750,000', beds:4, baths:'4', sqft:'3,531', status:'For Sale', sc:'#56a07d', img:ex(17)},
+        {address:'8457 NW Lakeshore Ave', loc:'Vancouver, WA', price:'$1,580,000', beds:5, baths:'4', sqft:'2,624', status:'Coming Soon', sc:'#1f6b4a', img:ex(9)},
+        {address:'7143 Tannler Dr', loc:'West Linn, OR', price:'$1,200,000', beds:4, baths:'4.5', sqft:'2,423', status:'For Sale', sc:'#56a07d', img:ex(1)},
+      ],
+
+      communities: [
+        {name:'West Linn', price:'$1.09M', listings:159, dom:25, schools:8, img:sc(0)},
+        {name:'Lake Oswego', price:'$1.18M', listings:85, dom:37, schools:9, img:sc(1)},
+        {name:'Portland', price:'$505K', listings:57, dom:30, schools:7, img:sc(2)},
+        {name:'Happy Valley', price:'$955K', listings:53, dom:25, schools:9, img:sc(3)},
+        {name:'Beaverton', price:'$1.09M', listings:138, dom:21, schools:9, img:sc(4)},
+        {name:'Hillsboro', price:'$1.08M', listings:177, dom:26, schools:8, img:sc(5)},
+        {name:'Oregon City', price:'$835K', listings:15, dom:31, schools:9, img:sc(6)},
+        {name:'Tualatin', price:'$635K', listings:169, dom:18, schools:9, img:sc(0)},
+      ],
+
+      agents: [
+        {name:'Jordan Matin', title:'Founder · Principal Broker', vol:'$308M', sold:356, rating:'4.9', area:'West Linn · Lake Oswego', photo:ag('jordan-matin')},
+        {name:'Alicia Smith', title:'Managing Principal Broker', vol:'$307M', sold:356, rating:'4.84', area:'Newberg · Vancouver', photo:ag('alicia-smith')},
+        {name:'Boston Bate', title:'Acreage & Waterfront', vol:'$130M', sold:209, rating:'4.73', area:'McMinnville · L.O.', photo:ag('boston-bate')},
+        {name:'Amanda Conlon', title:'Luxury Homes', vol:'$125M', sold:156, rating:'4.71', area:'Ridgefield · Hillsboro', photo:ag('amanda-conlon')},
+        {name:'Andy Wilcox', title:'Acreage & Land', vol:'$73M', sold:121, rating:'4.8', area:'Wilsonville · Sherwood', photo:ag('andy-wilcox')},
+        {name:'Chase Bright', title:'Buyer Specialist', vol:'$58M', sold:88, rating:'4.85', area:'Beaverton · Tigard', photo:ag('chase-bright')},
+        {name:'Amy Mead', title:'Relocation · 55+', vol:'$42M', sold:46, rating:'4.94', area:'Lake Oswego · Sherwood', photo:ag('amy-mead')},
+        {name:'Ben Fabian', title:'Multi-Family', vol:'$12M', sold:18, rating:'4.88', area:'Sherwood · Portland', photo:ag('benjamin-fabian')},
+      ],
+
+      detailPhotos: [intr(2), intr(13), exteriorThumb => null].filter(Boolean),
+      detailMain: ex(11), detailG1: intr(2), detailG2: intr(13), detailG3: ex(8), detailG4: intr(11),
+      detailThumbs: [intr(2), intr(13), ex(8), intr(11)],
+      detailFeatures: ['Chef\u2019s kitchen','Primary on main','Hardwoods throughout','Heated floors','ADU / guest suite','1.91-acre lot','Vaulted ceilings','Covered patio'],
+      detailAgent: {name:'Boston Bate', title:'Acreage & Waterfront Specialist', photo:ag('boston-bate'), phone:'(541) 965-0159'},
+
+      offices: [
+        {name:'Oregon — Headquarters', addr:'18825 Willamette Dr, West Linn, OR 97068', role:'Principal Broker Oregon', hq:true},
+        {name:'Washington', addr:'1220 Main Street Suite 400, Vancouver, WA 98660', role:'Managing Broker Washington', hq:false},
+      ],
+
+      chat: [
+        {who:'ai', text:'Welcome to Matin. I\u2019m your concierge \u2014 tell me what you\u2019re looking for and I\u2019ll pull live listings, book tours, and connect you with the right broker.'},
+        {who:'me', text:'Looking for a 4-bed under $1.2M near good schools in West Linn.'},
+        {who:'ai', text:'Great brief. West Linn schools rate 8\u201310. Here are two active homes inside your budget \u2014 both walkable to top-rated schools:'},
+        {who:'me', text:'Can I tour the Tannler Dr one this weekend?'},
+        {who:'ai', text:'Yes \u2014 Saturday 11:00am or 2:00pm with Chase Bright, our West Linn buyer specialist. Want me to book it and send a calendar invite?'},
+      ],
+      chatCards: [
+        {address:'7143 Tannler Dr', price:'$1,200,000', meta:'4 bd · 4.5 ba · 2,423 sf', img:ex(1)},
+        {address:'7353 Summit Ridge Ct', price:'$1,750,000', meta:'4 bd · 4 ba · 3,531 sf', img:ex(17)},
+      ],
+      chatChips: ['Show me cash-offer eligible homes','Schedule a tour','What\u2019s my home worth?','Talk to a broker'],
+    };
+  }
+}
+</script>
+</body>
+</html>
+

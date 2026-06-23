@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#f6f6f5;color:#060606;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:#060606;color:#f6f6f5}
+  .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .fr{font-family:'Fraunces',Georgia,serif}
+  @keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13) translateY(-2%)}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,138,96,.5)}50%{box-shadow:0 0 0 6px rgba(47,138,96,0)}}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-thumb{background:rgba(6,6,6,.2);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(6,6,6,.36);background-clip:content-box}
+  @media (max-width:760px){ [data-navlabel]{display:none!important} }
+  @media (max-width:520px){ [data-navlinks] a{padding:7px 9px!important;font-size:12px!important} }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#f6f6f5">
+
+<nav style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,28px);height:58px;background:rgba(246,246,245,.84);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border-bottom:1px solid rgba(6,6,6,.08)">
+  <div style="display:flex;align-items:center;gap:11px">
+    <span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#060606;color:#fff">M</span>
+    <span data-navlabel style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:#060606">Matin · Design System</span>
+  </div>
+  <div data-navlinks style="display:flex;align-items:center;gap:4px">
+    <a href="design-system.html" style="font-size:13px;font-weight:600;color:#1f6b4a;text-decoration:none;padding:8px 13px;border-radius:8px;background:#e7f1ea">Foundations</a>
+    <a href="website.html" style="font-size:13px;font-weight:500;color:#34343a;text-decoration:none;padding:8px 13px;border-radius:8px">Website</a>
+    <a href="matinos.html" style="font-size:13px;font-weight:500;color:#34343a;text-decoration:none;padding:8px 13px;border-radius:8px">MatinOS</a>
+  </div>
+</nav>
+
+<header style="max-width:1240px;margin:0 auto;padding:clamp(48px,9vw,90px) clamp(20px,5vw,40px) 28px">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+    <span style="height:1px;width:46px;background:linear-gradient(90deg,#060606,transparent)"></span>
+    <span style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:#1f6b4a">A cohesive design language</span>
+  </div>
+  <h1 class="fr" style="font-weight:400;font-size:clamp(2.6rem,6.4vw,5.4rem);line-height:1.0;letter-spacing:-.02em;max-width:16ch">The most advanced brokerage in Oregon — by design.</h1>
+  <p style="margin-top:24px;max-width:60ch;font-size:clamp(16px,2.2vw,19px);line-height:1.6;color:#34343a">One language across two surfaces: a Compass-caliber public brand that converts buyers and sellers, and <span style="color:#1f6b4a;font-weight:600">MatinOS</span> — the AI brokerage operating system 60+ brokers run their day inside. Estate green, rationed strictly to intelligence. Real photography, real data, soft real depth.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:34px">
+    <span style="display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid rgba(6,6,6,.1);font-size:13px;font-weight:500;box-shadow:0 1px 2px rgba(20,20,22,.05)"><span style="width:13px;height:13px;border-radius:4px;background:#1f6b4a"></span>Estate Green · #1F6B4A</span>
+    <span style="display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid rgba(6,6,6,.1);font-size:13px;font-weight:500;box-shadow:0 1px 2px rgba(20,20,22,.05)"><span class="fr" style="font-style:italic;font-size:15px">Fraunces</span> + <span style="font-weight:600">Inter</span></span>
+    <span style="display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid rgba(6,6,6,.1);font-size:13px;font-weight:500;box-shadow:0 1px 2px rgba(20,20,22,.05)">2 surfaces · 22 screens</span>
+  </div>
+</header>
+
+<section id="foundations" style="max-width:1240px;margin:0 auto;padding:32px clamp(20px,5vw,40px) 24px;scroll-margin-top:70px" data-screen-label="Foundations">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span class="fr" style="font-size:13px;color:#1f6b4a">01</span><span style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:#62626a">Foundations</span></div>
+  <h2 class="fr" style="font-weight:400;font-size:clamp(2rem,3.6vw,3rem);line-height:1.04;letter-spacing:-.015em">Color, type, components, depth.</h2>
+  <p style="margin-top:14px;max-width:64ch;font-size:16px;line-height:1.6;color:#34343a">A clean monochrome luxury base — true ink, paper whites — with Estate Green reserved as the single voice of intelligence and selection. Status is carried by color; depth by soft, real shadows.</p>
+
+  <div style="margin-top:32px;background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:16px;box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 30px rgba(20,20,15,.05);padding:28px 30px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:28px 34px">
+      <div>
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:14px">Ink</div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ inks }}" as="s" hint-placeholder-count="5"><div style="flex:1;min-width:0"><div style="height:58px;border-radius:8px;background:{{ s.h }};border:1px solid rgba(6,6,6,.08)"></div><div style="margin-top:8px;font-size:11px;font-weight:600;color:#060606;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.n }}</div><div class="tnum" style="font-size:10px;color:#a3a3a8">{{ s.h }}</div></div></sc-for></div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:14px">Neutrals</div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ neutrals }}" as="s" hint-placeholder-count="4"><div style="flex:1;min-width:0"><div style="height:58px;border-radius:8px;background:{{ s.h }};border:1px solid rgba(6,6,6,.1)"></div><div style="margin-top:8px;font-size:11px;font-weight:600;color:#060606;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.n }}</div><div class="tnum" style="font-size:10px;color:#a3a3a8">{{ s.h }}</div></div></sc-for></div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#1f6b4a">Estate Green</span><span style="font-size:10px;font-weight:500;color:#16523a;background:#e7f1ea;padding:2px 8px;border-radius:999px">AI &amp; active only</span></div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ greens }}" as="s" hint-placeholder-count="5"><div style="flex:1;min-width:0"><div style="height:58px;border-radius:8px;background:{{ s.h }};border:1px solid rgba(6,6,6,.08)"></div><div style="margin-top:8px;font-size:11px;font-weight:600;color:#060606;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.n }}</div><div class="tnum" style="font-size:10px;color:#a3a3a8">{{ s.h }}</div></div></sc-for></div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:14px">Status</div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ statuses }}" as="s" hint-placeholder-count="4"><div style="flex:1;min-width:0"><div style="height:58px;border-radius:8px;background:{{ s.h }};border:1px solid rgba(6,6,6,.08)"></div><div style="margin-top:8px;font-size:11px;font-weight:600;color:#060606;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.n }}</div><div class="tnum" style="font-size:10px;color:#a3a3a8">{{ s.h }}</div></div></sc-for></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+    <div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:16px;box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 30px rgba(20,20,15,.05);padding:28px 30px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:18px">Type pairing</div>
+      <div style="display:flex;align-items:flex-end;gap:20px;border-bottom:1px solid rgba(6,6,6,.08);padding-bottom:20px"><div class="fr" style="font-size:84px;line-height:.8;font-weight:400">Aa</div><div style="padding-bottom:6px"><div class="fr" style="font-size:15px;font-weight:600">Fraunces</div><div style="font-size:12px;color:#62626a;margin-top:2px">Display serif · titles &amp; headings</div><div style="font-size:12px;color:#62626a">Optical · 400 / 500 / 600 · italic</div></div></div>
+      <div class="fr" style="font-size:30px;line-height:1.1;letter-spacing:-.01em;margin-top:18px">Find your place in the Pacific Northwest.</div>
+      <div style="display:flex;align-items:flex-end;gap:20px;margin-top:22px;border-top:1px solid rgba(6,6,6,.08);padding-top:20px"><div style="font-size:60px;line-height:.8;font-weight:600">Aa</div><div style="padding-bottom:6px"><div style="font-size:15px;font-weight:700">Inter</div><div style="font-size:12px;color:#62626a;margin-top:2px">UI &amp; body · 400–700</div><div style="font-size:12px;color:#62626a">Tabular numerals for all data</div></div></div>
+      <div style="display:flex;gap:28px;margin-top:18px"><div><div style="font-size:11px;color:#9a9aa0;margin-bottom:4px">Proportional</div><div style="font-size:22px;font-weight:600">$2,185,000</div></div><div><div style="font-size:11px;color:#1f6b4a;margin-bottom:4px">Tabular ·&nbsp;aligned</div><div class="tnum" style="font-size:22px;font-weight:600">$2,185,000</div></div></div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:16px;box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 30px rgba(20,20,15,.05);padding:28px 30px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:18px">Components</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+        <button style="border:none;cursor:pointer;padding:11px 20px;border-radius:10px;background:#060606;color:#fff;font-family:inherit;font-size:14px;font-weight:600">Book a tour</button>
+        <button style="position:relative;overflow:hidden;border:none;cursor:pointer;padding:11px 18px;border-radius:10px;color:#eaf6ee;font-family:inherit;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#0c3a2b 0%,#1f6b4a 52%,#2f8a60 84%,#c9a24b 132%);box-shadow:0 8px 22px rgba(31,107,74,.34),inset 0 1px 0 rgba(255,255,255,.22)"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.16);font-size:12px">M</span>Ask Matin</button>
+        <button style="cursor:pointer;padding:11px 18px;border-radius:10px;background:transparent;color:#060606;font-family:inherit;font-size:14px;font-weight:600;border:1px solid rgba(6,6,6,.18)">Save search</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px">
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#16523a;background:#e7f1ea;padding:5px 11px;border-radius:999px"><span class="fr" style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:4px;background:#1f6b4a;color:#fff;font-size:9px">M</span>AI handled</span>
+        <span style="font-size:12px;font-weight:600;color:#8a6a25;background:#f6ecd9;padding:5px 11px;border-radius:999px">Pending</span>
+        <span style="font-size:12px;font-weight:600;color:#9a3528;background:#f7e3df;padding:5px 11px;border-radius:999px">At risk</span>
+        <span style="font-size:12px;font-weight:600;color:#3f6b54;background:#fff;border:1px solid #cfe3d7;padding:5px 11px;border-radius:999px">Coming soon</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#3f7d5e;background:#fff;border:1px solid rgba(6,6,6,.1);padding:5px 11px;border-radius:999px">&#8593; 12%</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#b04a3c;background:#fff;border:1px solid rgba(6,6,6,.1);padding:5px 11px;border-radius:999px">&#8595; 3%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:22px;margin-top:22px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:14px"><div style="width:62px;height:62px;border-radius:50%;background:conic-gradient(#1f6b4a 0 84%, #e7f1ea 0);display:flex;align-items:center;justify-content:center"><div style="width:46px;height:46px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px" class="tnum">84</div></div><div><div style="font-size:12px;font-weight:600">Lead score</div><div style="font-size:11px;color:#62626a">Score ring · conic</div></div></div>
+        <div style="flex:1;min-width:160px"><label style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#62626a">Address</label><div style="margin-top:6px;display:flex;align-items:center;gap:8px;border:1px solid rgba(6,6,6,.16);border-radius:10px;padding:10px 12px;background:#fbfbfa"><span style="width:7px;height:7px;border-radius:50%;background:#1f6b4a"></span><span style="font-size:14px;color:#34343a">West Linn, OR 97068</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+    <div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:16px;box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 30px rgba(20,20,15,.05);padding:28px 30px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:22px">Depth &amp; elevation</div>
+      <div style="display:flex;gap:24px">
+        <div style="flex:1;text-align:center"><div style="height:78px;border-radius:12px;background:#fff;border:1px solid rgba(6,6,6,.06);box-shadow:0 1px 2px rgba(20,20,22,.05),0 8px 24px rgba(20,20,22,.07)"></div><div style="margin-top:12px;font-size:12px;font-weight:600">Soft</div><div style="font-size:11px;color:#9a9aa0">cards, tiles</div></div>
+        <div style="flex:1;text-align:center"><div style="height:78px;border-radius:12px;background:#fff;border:1px solid rgba(6,6,6,.06);box-shadow:0 2px 4px rgba(20,20,22,.06),0 18px 50px rgba(20,20,22,.17)"></div><div style="margin-top:12px;font-size:12px;font-weight:600">Lift</div><div style="font-size:11px;color:#9a9aa0">drawers, hover</div></div>
+        <div style="flex:1;text-align:center"><div style="height:78px;border-radius:12px;background:linear-gradient(160deg,#10201a,#0a1410);box-shadow:0 18px 44px rgba(0,0,0,.4),inset 0 0 0 1px rgba(31,107,74,.18),0 0 30px rgba(31,107,74,.34)"></div><div style="margin-top:12px;font-size:12px;font-weight:600;color:#1f6b4a">AI surface</div><div style="font-size:11px;color:#9a9aa0">dark · green bloom</div></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(6,6,6,.08);border-radius:16px;box-shadow:0 1px 2px rgba(20,20,22,.05),0 10px 30px rgba(20,20,15,.05);padding:28px 30px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#62626a;margin-bottom:18px">Radii &amp; motion</div>
+      <div style="display:flex;align-items:flex-end;gap:10px"><div style="width:26px;height:26px;border-radius:4px;background:#ececeb;border:1px solid rgba(6,6,6,.1)"></div><div style="width:34px;height:34px;border-radius:6px;background:#ececeb;border:1px solid rgba(6,6,6,.1)"></div><div style="width:42px;height:42px;border-radius:10px;background:#ececeb;border:1px solid rgba(6,6,6,.1)"></div><div style="width:52px;height:52px;border-radius:16px;background:#ececeb;border:1px solid rgba(6,6,6,.1)"></div><div style="width:60px;height:60px;border-radius:24px;background:#ececeb;border:1px solid rgba(6,6,6,.1)"></div></div>
+      <div class="tnum" style="font-size:11px;color:#9a9aa0;margin-top:8px">4 · 6 · 10 · 16 · 24 px</div>
+      <div style="margin-top:18px;font-size:13px;line-height:1.6;color:#34343a">Entrances fade &amp; rise <span class="tnum" style="color:#9a9aa0">(y 14&#8594;0, 520ms)</span>. Easing <span class="fr" style="font-style:italic">cubic-bezier(.16,1,.3,1)</span>. No bounce.</div>
+    </div>
+  </div>
+</section>
+
+<!-- INDEX -->
+<section style="max-width:1240px;margin:48px auto 0;padding:0 clamp(20px,5vw,40px)" data-screen-label="Explore">
+  <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span class="fr" style="font-size:13px;color:#1f6b4a">02</span><span style="font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;color:#62626a">Explore the surfaces</span></div>
+  <h2 class="fr" style="font-weight:400;font-size:clamp(2rem,3.6vw,3rem);line-height:1.04;letter-spacing:-.015em">Two surfaces, one system.</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:22px;margin-top:28px">
+    <a href="website.html" style="text-decoration:none;color:inherit;display:block;border-radius:18px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 16px 44px rgba(20,20,22,.1)">
+      <div style="position:relative;height:230px;overflow:hidden"><img loading="lazy" src="{{ heroImg }}" alt="" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,6,6,.25),rgba(6,6,6,.7))"></div><div style="position:absolute;left:22px;bottom:18px;right:22px"><div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:rgba(255,255,255,.82)">The public brand</div><div class="fr" style="color:#fff;font-size:30px;font-weight:500;margin-top:4px">Website</div></div><span style="position:absolute;top:16px;right:16px;font-size:12px;font-weight:600;color:#fff;background:rgba(6,6,6,.5);backdrop-filter:blur(6px);padding:6px 12px;border-radius:999px">10 screens</span></div>
+      <div style="padding:20px 22px"><div style="display:flex;flex-wrap:wrap;gap:7px"><sc-for list="{{ webList }}" as="w" hint-placeholder-count="10"><span style="font-size:12px;font-weight:500;color:#34343a;background:#f4f4f2;border:1px solid rgba(6,6,6,.06);border-radius:999px;padding:5px 11px">{{ w }}</span></sc-for></div><div style="margin-top:16px;font-size:13px;font-weight:600;color:#1f6b4a">Open the website &#8594;</div></div>
+    </a>
+    <a href="matinos.html" style="text-decoration:none;color:inherit;display:block;border-radius:18px;overflow:hidden;background:#fff;border:1px solid rgba(6,6,6,.08);box-shadow:0 1px 2px rgba(20,20,22,.05),0 16px 44px rgba(20,20,22,.1)">
+      <div style="position:relative;height:230px;overflow:hidden;background:linear-gradient(155deg,#13231b 0%,#0a1410 100%)"><div style="position:absolute;width:300px;height:300px;border-radius:50%;right:-60px;top:-80px;background:radial-gradient(rgba(31,107,74,.5),transparent 70%);filter:blur(30px)"></div><span class="fr" style="position:absolute;left:22px;top:22px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1f6b4a,#2f8a60);color:#fff;font-size:22px;box-shadow:0 0 28px rgba(31,107,74,.5)">M</span><div style="position:absolute;left:22px;bottom:18px;right:22px"><div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;color:#7fce9f">The operating system</div><div class="fr" style="color:#fff;font-size:30px;font-weight:500;margin-top:4px">MatinOS</div></div><span style="position:absolute;top:16px;right:16px;font-size:12px;font-weight:600;color:#eaf6ee;background:rgba(47,138,96,.25);border:1px solid rgba(47,138,96,.4);padding:6px 12px;border-radius:999px">12 sections</span></div>
+      <div style="padding:20px 22px"><div style="display:flex;flex-wrap:wrap;gap:7px"><sc-for list="{{ osList }}" as="o" hint-placeholder-count="12"><span style="font-size:12px;font-weight:500;color:#34343a;background:#f4f4f2;border:1px solid rgba(6,6,6,.06);border-radius:999px;padding:5px 11px">{{ o }}</span></sc-for></div><div style="margin-top:16px;font-size:13px;font-weight:600;color:#1f6b4a">Open MatinOS &#8594;</div></div>
+    </a>
+  </div>
+</section>
+
+<footer style="border-top:1px solid rgba(6,6,6,.08);margin-top:48px;padding:36px;text-align:center;color:#9a9aa0;font-size:12px;letter-spacing:.04em">
+  Matin Real Estate · West Linn &amp; Vancouver · <a href="website.html" style="color:#1f6b4a;text-decoration:none">Website</a> · <a href="matinos.html" style="color:#1f6b4a;text-decoration:none">MatinOS</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals() {
+    const B = 'https://matin-realestate.vercel.app';
+    return {
+      heroImg: `${B}/matin/exteriors/exteriors-11.jpg`,
+      inks: [{n:'ink',h:'#060606'},{n:'ink-800',h:'#161617'},{n:'ink-600',h:'#34343a'},{n:'ink-500',h:'#5a5a64'},{n:'slate',h:'#62626a'}],
+      neutrals: [{n:'cloud',h:'#ffffff'},{n:'paper',h:'#f6f6f5'},{n:'paper-200',h:'#ececeb'},{n:'mist',h:'#dededc'}],
+      greens: [{n:'green-deep',h:'#0c3a2b'},{n:'estate green',h:'#1f6b4a'},{n:'green-bright',h:'#2f8a60'},{n:'green-soft',h:'#e7f1ea'},{n:'brass',h:'#c9a24b'}],
+      statuses: [{n:'success / up',h:'#56a07d'},{n:'pending',h:'#c1934a'},{n:'at-risk / down',h:'#c0584a'},{n:'info',h:'#7b818a'}],
+      webList: ['Home','Buy','Sell','Cash Offer','Property Search','Listing Detail','Communities','Agents','Contact','AI Concierge'],
+      osList: ['Today','CRM & Leads','Cash-Offer Pipeline','Listing Launch','Buyer Agreements','Transactions','Forms & Docs','Marketing Studio','Coaching','Reports','Systems Health','Admin'],
+    };
+  }
+}
+</script>
+</body>
+</html>
+

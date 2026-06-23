@@ -117,7 +117,7 @@ export function usePaneSwitcher(
     (key: string) => {
       if (keySet.split("|").includes(key)) setActive(key);
     },
-    [keySet],
+    [keySet, setActive],
   );
 
   const is = (key: string) => key === active;

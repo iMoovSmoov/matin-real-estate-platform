@@ -17,7 +17,6 @@ import {
   BarChart3,
   Activity,
   SlidersHorizontal,
-  Cpu,
   Search,
   X,
 } from "lucide-react";
@@ -75,7 +74,6 @@ const PAGES: Omit<ResultItem, "id" | "group">[] = [
   { label: "Coaching",             href: "/hub/coaching",         icon: GraduationCap },
   { label: "Reports",              href: "/hub/reporting",        icon: BarChart3 },
   { label: "Systems Health",       href: "/hub/systems-health",   icon: Activity },
-  { label: "AI Tools",             href: "/hub/ai",               icon: Cpu },
   { label: "Admin",                href: "/hub/settings",         icon: SlidersHorizontal },
 ];
 
@@ -121,7 +119,7 @@ function buildResults(query: string): { group: string; items: ResultItem[] }[] {
     .slice(0, 3)
     .map((a) => ({
       id: `agent-${a.id}`,
-      href: "/hub/agent",
+      href: `/hub/crm?agent=${a.slug}`,
       label: a.name,
       subtitle: a.title,
       icon: User,

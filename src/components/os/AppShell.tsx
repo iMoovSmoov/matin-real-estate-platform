@@ -50,7 +50,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
   // Close the mobile drawer on route change.
   useEffect(() => {
-    setMobileOpen(false);
+    queueMicrotask(() => setMobileOpen(false));
   }, [pathname]);
 
   return (

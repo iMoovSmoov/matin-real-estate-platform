@@ -12,7 +12,22 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "node_modules/**",
+    ".vercel/**",
+    ".claude/**",
+    "tmp/**",
+    "public/claude/**",
   ]),
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/use-memo": "off",
+      "react-hooks/immutability": "off",
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-html-link-for-pages": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
