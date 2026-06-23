@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -10,9 +11,13 @@ import {
   CartesianGrid,
   Tooltip,
   Cell,
+  RadialBarChart,
+  RadialBar,
+  PolarAngleAxis,
 } from "recharts";
 import { reportMetrics } from "@/lib/data";
 import { compactUsd, num } from "@/lib/utils";
+import { useCountUp } from "./useCountUp";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Today Command Center — Live Pipeline chart (S1.4)
@@ -138,5 +143,83 @@ export function LivePipelineChart() {
         </Bar>
       </ComposedChart>
     </ResponsiveContainer>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Goal-pace radial (briefing band, §2) — a single estate-green arc on ink
+
+   A recharts RadialBar gauge bound to reportMetrics.companyScorecard.goalPacing.
+   The arc + center number are the brokerage's REAL volume-to-goal pace
+   (volumeActual / volumeGoal → volumePacePct), with an honest forecast delta
+   chip rendered by the caller. Designed to sit on the dark hero image: faint
+   white track, green arc, light center text. Single sweep on load (recharts),
+   center number count-up — both gated on prefers-reduced-motion.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Subscribe to the reduced-motion media query via an external store (the
+   idiomatic React pattern) — no setState-in-effect, SSR snapshot = false. */
+const RM_QUERY = "(prefers-reduced-motion: reduce)";
+function subscribeReducedMotion(onChange: () => void): () => void {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return () => {};
+  const mq = window.matchMedia(RM_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+function usePrefersReducedMotion(): boolean {
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia(RM_QUERY).matches,
+    () => false,
+  );
+}
+
+export function GoalPaceRadial({ size = 148 }: { size?: number }) {
+  const pace = reportMetrics.companyScorecard.goalPacing;
+  const value = Math.max(0, Math.min(100, pace.volumePacePct));
+  const reduce = usePrefersReducedMotion();
+  const shown = useCountUp(value, 950);
+  const ring = Math.max(7, Math.round(size * 0.085));
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <RadialBarChart
+        width={size}
+        height={size}
+        cx="50%"
+        cy="50%"
+        innerRadius="72%"
+        outerRadius="100%"
+        barSize={ring}
+        data={[{ name: "pace", value }]}
+        startAngle={90}
+        endAngle={-270}
+      >
+        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+        <RadialBar
+          background={{ fill: "rgba(255,255,255,0.14)" }}
+          dataKey="value"
+          cornerRadius={ring}
+          angleAxisId={0}
+          fill={ACCENT}
+          isAnimationActive={!reduce}
+          animationDuration={950}
+        />
+      </RadialBarChart>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <span
+          className="font-sans font-semibold leading-none text-cloud tabular-nums"
+          style={{ fontSize: Math.round(size * 0.24) }}
+        >
+          {Math.round(shown)}
+          <span className="align-top" style={{ fontSize: Math.round(size * 0.12) }}>
+            %
+          </span>
+        </span>
+        <span className="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-slate-300/80">
+          to goal
+        </span>
+      </div>
+    </div>
   );
 }
