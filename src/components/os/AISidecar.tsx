@@ -38,10 +38,18 @@ import { streamAi } from "@/lib/ai/client";
 
 const DEFAULT_CONTEXT = "Working on: Matin Brokerage OS";
 
+/** An action CTA can hand the sidecar a prompt to auto-run on open (the nonce
+    lets the panel re-run the same prompt on a later click). */
+type PendingPrompt = { prompt: string; nonce: number };
+
 type AiSidecarValue = {
   open: boolean;
   context: string;
-  openAi: (context?: string) => void;
+  pending: PendingPrompt | null;
+  /** openAi(context?, autoPrompt?) — passing autoPrompt makes the panel open AND
+      immediately ask Matin AI that prompt (so a CTA performs a real action, not
+      just an empty chat). Omit autoPrompt to merely dock to a record. */
+  openAi: (context?: string, autoPrompt?: string) => void;
   closeAi: () => void;
   setContext: (context: string) => void;
 };
@@ -49,6 +57,7 @@ type AiSidecarValue = {
 const AiSidecarContext = createContext<AiSidecarValue>({
   open: false,
   context: DEFAULT_CONTEXT,
+  pending: null,
   openAi: () => {},
   closeAi: () => {},
   setContext: () => {},
@@ -67,10 +76,16 @@ export function AiSidecarProvider({
 }) {
   const [open, setOpen] = useState(false);
   const [context, setContext] = useState(defaultContext);
+  const [pending, setPending] = useState<PendingPrompt | null>(null);
+  const nonceRef = useRef(0);
 
   const openAi = useCallback(
-    (next?: string) => {
+    (next?: string, autoPrompt?: string) => {
       if (next) setContext(next);
+      if (autoPrompt && autoPrompt.trim()) {
+        nonceRef.current += 1;
+        setPending({ prompt: autoPrompt.trim(), nonce: nonceRef.current });
+      }
       setOpen(true);
     },
     [],
@@ -78,8 +93,8 @@ export function AiSidecarProvider({
   const closeAi = useCallback(() => setOpen(false), []);
 
   const value = useMemo<AiSidecarValue>(
-    () => ({ open, context, openAi, closeAi, setContext }),
-    [open, context, openAi, closeAi],
+    () => ({ open, context, pending, openAi, closeAi, setContext }),
+    [open, context, pending, openAi, closeAi],
   );
 
   return (
@@ -109,7 +124,7 @@ function greetingFor(context: string): string {
 }
 
 export function AISidecar() {
-  const { open, context, closeAi } = useAiSidecar();
+  const { open, context, closeAi, pending } = useAiSidecar();
   const [turns, setTurns] = useState<Turn[]>([
     { role: "ai", text: greetingFor(context) },
   ]);
@@ -150,60 +165,80 @@ export function AISidecar() {
     };
   }, [open, closeAi]);
 
-  const send = useCallback(async () => {
-    const text = draft.trim();
-    if (!text || streaming) return;
+  // Core send — streams an answer for an explicit text (used by the composer AND
+  // by action CTAs that auto-run a prompt on open).
+  const sendText = useCallback(
+    async (raw: string) => {
+      const text = raw.trim();
+      if (!text || streaming) return;
 
-    // Build the transcript streamAi expects (user/assistant content strings),
-    // dropping prior error lines. The transcript MUST start with a user turn
-    // (Anthropic rejects a leading assistant message), so strip the local
-    // greeting + any leading assistant turns.
-    const history = turns
-      .filter((t) => !t.error)
-      .map((t) => ({
-        role: (t.role === "ai" ? "assistant" : "user") as "assistant" | "user",
-        content: t.text,
-      }));
-    while (history.length && history[0].role === "assistant") history.shift();
-    const messages = [
-      ...history,
-      {
-        role: "user" as const,
-        content: `[${context}]\n${text}`,
-      },
-    ];
+      // Build the transcript streamAi expects (user/assistant content strings),
+      // dropping prior error lines. The transcript MUST start with a user turn
+      // (Anthropic rejects a leading assistant message), so strip the local
+      // greeting + any leading assistant turns.
+      const history = turns
+        .filter((t) => !t.error)
+        .map((t) => ({
+          role: (t.role === "ai" ? "assistant" : "user") as "assistant" | "user",
+          content: t.text,
+        }));
+      while (history.length && history[0].role === "assistant") history.shift();
+      const messages = [
+        ...history,
+        {
+          role: "user" as const,
+          content: `[${context}]\n${text}`,
+        },
+      ];
 
-    setDraft("");
-    setStreaming(true);
-    // Push the user turn + an empty AI turn we stream into.
-    setTurns((prev) => [
-      ...prev,
-      { role: "user", text },
-      { role: "ai", text: "" },
-    ]);
+      setStreaming(true);
+      // Push the user turn + an empty AI turn we stream into.
+      setTurns((prev) => [
+        ...prev,
+        { role: "user", text },
+        { role: "ai", text: "" },
+      ]);
 
-    try {
-      await streamAi({ tool: "concierge", messages }, (_chunk, full) => {
+      try {
+        await streamAi({ tool: "concierge", messages }, (_chunk, full) => {
+          setTurns((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = { role: "ai", text: full };
+            return next;
+          });
+        });
+      } catch {
         setTurns((prev) => {
           const next = [...prev];
-          next[next.length - 1] = { role: "ai", text: full };
+          next[next.length - 1] = {
+            role: "ai",
+            text: "Matin AI is unavailable right now. Please try again in a moment.",
+            error: true,
+          };
           return next;
         });
-      });
-    } catch {
-      setTurns((prev) => {
-        const next = [...prev];
-        next[next.length - 1] = {
-          role: "ai",
-          text: "Matin AI is unavailable right now. Please try again in a moment.",
-          error: true,
-        };
-        return next;
-      });
-    } finally {
-      setStreaming(false);
-    }
-  }, [draft, streaming, turns, context]);
+      } finally {
+        setStreaming(false);
+      }
+    },
+    [streaming, turns, context],
+  );
+
+  const send = useCallback(() => {
+    const text = draft.trim();
+    if (!text) return;
+    setDraft("");
+    void sendText(text);
+  }, [draft, sendText]);
+
+  // Auto-run a CTA's prompt once the panel is open (e.g. "Ask AI to prioritize
+  // my day"). The nonce guard runs each distinct click exactly once.
+  const ranNonce = useRef(0);
+  useEffect(() => {
+    if (!open || !pending || pending.nonce === ranNonce.current) return;
+    ranNonce.current = pending.nonce;
+    void sendText(pending.prompt);
+  }, [open, pending, sendText]);
 
   if (!open) return null;
 

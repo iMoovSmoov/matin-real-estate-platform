@@ -84,7 +84,10 @@ export function TodayFocusCard() {
           <button
             type="button"
             onClick={() =>
-              openAi(`Working on: Today / next-best lead — ${lead.sellerName} (seller-intent ${lead.sellerScore})`)
+              openAi(
+                `Today · Next-best lead — ${lead.sellerName}`,
+                `Prep me for a call with ${lead.sellerName} (seller-intent score ${lead.sellerScore}). Summarize who they are and the signals behind that score, then give me a tight call plan: an opener, the 2–3 points to make, the objections to expect with how to handle each, and the goal of the call.`,
+              )
             }
             className="btn-accent inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[0.8rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
           >

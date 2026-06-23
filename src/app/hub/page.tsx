@@ -384,7 +384,8 @@ export default function TodayCommandCenter() {
                 type="button"
                 onClick={() =>
                   openAi(
-                    "Working on: Today / Human Work Queue — prioritize my queue and explain what to do first",
+                    "Today · Human Work Queue",
+                    "Prioritize my work queue and explain what to do first — weigh each task's urgency, value, and risk, then give me the order to work them with a one-line reason for each.",
                   )
                 }
                 className="btn-accent inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.78rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"

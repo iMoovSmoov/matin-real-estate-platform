@@ -101,7 +101,7 @@ export function BriefingBand() {
             suppressHydrationWarning
             className="mt-3 font-display text-[1.9rem] font-normal leading-[1.05] text-cloud hero-text-shadow sm:text-[2.4rem]"
           >
-            {greetWord(now)}, Talon
+            {greetWord(now)}, Jordan
           </h2>
           <span aria-hidden className="mt-2.5 block h-px w-14 bg-gradient-to-r from-gold-bright to-transparent" />
           <p suppressHydrationWarning className="mt-2 text-[0.85rem] text-slate-300">
@@ -124,7 +124,12 @@ export function BriefingBand() {
           <div className="mt-6 flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center">
             <button
               type="button"
-              onClick={() => openAi("Prioritize my day")}
+              onClick={() =>
+                openAi(
+                  "Today · Command Center",
+                  "Prioritize my day. Look across my work queue — new leads, hot seller signals, listings in flight, at-risk transactions, AI drafts waiting for approval, and any workflow errors — and tell me the top 3–5 things to handle right now, in order, each with a one-line reason why.",
+                )
+              }
               className="btn-accent inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[0.85rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
             >
               <MatinMark theme="white" className="h-4 w-4" />
