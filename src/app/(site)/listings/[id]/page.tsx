@@ -10,6 +10,7 @@ import {
 import { Container, Section } from "@/components/ui/section";
 import { StatusBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
+import { AskMatinButton } from "@/components/site/AskMatinButton";
 import { ListingCard } from "@/components/site/ListingCard";
 import { Gallery } from "@/components/site/property/Gallery";
 import { getListing, getAgent, getCommunity, listings, listingsInCommunity } from "@/lib/data";
@@ -32,6 +33,15 @@ export async function generateMetadata({
     title: `${listing.address}, ${listing.city} — ${usd(listing.price)} | Matin Real Estate`,
     description: listing.description,
   };
+}
+
+/** Design's small tracked section label (eyebrow) used down the left column. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate">
+      {children}
+    </div>
+  );
 }
 
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -60,7 +70,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   return (
     <>
       {/* ---------- BREADCRUMB ---------- */}
-      <div className="border-b border-ink/[0.06] bg-paper pt-24 pb-4">
+      <div className="border-b border-ink/[0.06] bg-paper pt-6 pb-4">
         <Container>
           <nav className="flex flex-wrap items-center gap-1.5 text-[0.82rem] text-slate">
             <Link href="/property-search" className="hover:text-ink">Property search</Link>
@@ -85,92 +95,111 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
       <Section className="pt-8 pb-24 md:pt-12 md:pb-16 lg:pt-14">
         <Container>
-          <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_360px]">
+          <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1.55fr_1fr]">
             {/* ===== MAIN COLUMN ===== */}
-            <div>
-              {/* Header */}
-              <div className="border-b border-ink/[0.08] pb-8">
+            <div className="min-w-0 lg:border-r lg:border-ink/[0.07] lg:pr-12">
+              {/* Title bar — price, address, inline facts row, Ask Matin */}
+              <div className="border-b border-ink/[0.08] pb-7">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                   <StatusBadge status={listing.status} />
                   {listing.daysOnMarket === 0 && (
-                    <span className="rounded-full bg-azure/10 px-2.5 py-0.5 text-[0.72rem] font-semibold uppercase tracking-wide text-azure">
+                    <span className="inline-flex items-center rounded-full border border-[#cfe3d7] bg-gold-soft px-2.5 py-0.5 text-[0.72rem] font-semibold uppercase tracking-wide text-gold-ink">
                       Just listed
                     </span>
                   )}
                 </div>
-                <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl md:text-4xl lg:text-5xl leading-none tracking-tight">
-                  {usd(listing.price)}
-                </h1>
-                {listing.pricePerSqft > 0 && (
-                  <p className="mt-1 font-display text-base text-slate sm:text-lg">
-                    <span className="text-ink/50">${num(listing.pricePerSqft)}/sqft</span>
-                  </p>
-                )}
-                <p className="mt-3 flex items-center gap-1.5 text-base sm:text-lg text-ink/80">
-                  <MapPin className="h-4 w-4 shrink-0 text-azure" /> {listing.address}
-                </p>
-                <p className="mt-0.5 text-slate">{listing.city}, {listing.state} {listing.zip}</p>
 
-                {/* Quick stats row */}
-                <div className="mt-5 flex flex-wrap items-center gap-2">
-                  <StatPill icon={BedDouble} value={listing.beds} label="beds" />
-                  <StatPill icon={Bath} value={listing.baths} label="baths" />
-                  <StatPill icon={Maximize} value={num(listing.sqft)} label="sqft" />
-                  {listing.garage > 0 && <StatPill icon={Car} value={listing.garage} label="garage" />}
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div className="min-w-0">
+                    <h1 className="font-display text-[clamp(2.1rem,5vw,3.2rem)] font-medium leading-none tracking-tight text-ink tabular-nums">
+                      {usd(listing.price)}
+                    </h1>
+                    <p className="mt-2.5 flex items-center gap-1.5 text-base text-ink/80 sm:text-[1.05rem]">
+                      <MapPin className="h-4 w-4 shrink-0 text-gold" /> {listing.address}, {listing.city},{" "}
+                      {listing.state} {listing.zip}
+                    </p>
+                  </div>
+                  {/* Design's Save/Share slot → the real Ask Matin concierge */}
+                  <AskMatinButton className="shrink-0" label="Ask Matin" />
+                </div>
+
+                {/* Inline facts row — beds · baths · sqft · lot · built */}
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.92rem] tabular-nums text-slate">
+                  <span><b className="font-semibold text-ink">{listing.beds}</b> beds</span>
+                  <span className="text-mist">·</span>
+                  <span><b className="font-semibold text-ink">{listing.baths}</b> baths</span>
+                  <span className="text-mist">·</span>
+                  <span><b className="font-semibold text-ink">{num(listing.sqft)}</b> sqft</span>
+                  {listing.lotSize && (
+                    <>
+                      <span className="text-mist">·</span>
+                      <span><b className="font-semibold text-ink">{listing.lotSize}</b> lot</span>
+                    </>
+                  )}
+                  <span className="text-mist">·</span>
+                  <span>Built <b className="font-semibold text-ink">{listing.yearBuilt}</b></span>
+                  {listing.pricePerSqft > 0 && (
+                    <>
+                      <span className="text-mist">·</span>
+                      <span className="text-ink/55">${num(listing.pricePerSqft)}/sqft</span>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Key facts grid */}
-              <div className="mt-8 sm:mt-10">
-                <h2 className="font-display text-xl sm:text-2xl text-ink">Property details</h2>
-                <dl className="mt-5 sm:mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-ink/[0.06] ring-1 ring-ink/[0.06] sm:grid-cols-3">
+              {/* Property details — real data in the design's hairline card grid */}
+              <div className="mt-8">
+                <SectionLabel>Property details</SectionLabel>
+                <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] bg-ink/[0.06] ring-1 ring-ink/[0.06] sm:grid-cols-3">
                   {facts.map((f) => (
-                    <div key={f.label} className="bg-cloud p-4 sm:p-5">
-                      <dt className="flex items-center gap-2 text-[0.78rem] uppercase tracking-wide text-slate">
-                        <f.icon className="h-4 w-4 shrink-0 text-azure" /> {f.label}
+                    <div key={f.label} className="bg-white p-4 sm:p-5">
+                      <dt className="flex items-center gap-2 text-[0.72rem] uppercase tracking-wide text-slate">
+                        <f.icon className="h-4 w-4 shrink-0 text-gold" /> {f.label}
                       </dt>
-                      <dd className="mt-2 font-display text-lg sm:text-xl text-ink">{f.value}</dd>
+                      <dd className="mt-2 font-display text-lg text-ink sm:text-xl tabular-nums">{f.value}</dd>
                     </div>
                   ))}
                 </dl>
               </div>
 
-              {/* Description */}
-              <div className="mt-8 sm:mt-12">
-                <h2 className="font-display text-xl sm:text-2xl text-ink">About this home</h2>
-                <p className="mt-4 sm:mt-5 max-w-prose text-base leading-relaxed text-ink/85 text-pretty">{listing.description}</p>
+              {/* About this home */}
+              <div className="mt-9">
+                <SectionLabel>About this home</SectionLabel>
+                <p className="mt-3 max-w-prose text-[0.98rem] leading-[1.7] text-ink-600 text-pretty">
+                  {listing.description}
+                </p>
               </div>
 
-              {/* Features */}
+              {/* Features — green check chips, exactly the design's treatment */}
               {listing.features.length > 0 && (
-                <div className="mt-8 sm:mt-12">
-                  <h2 className="font-display text-xl sm:text-2xl text-ink">Features &amp; highlights</h2>
-                  <ul className="mt-5 sm:mt-6 grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2">
+                <div className="mt-9">
+                  <SectionLabel>Features</SectionLabel>
+                  <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
                     {listing.features.map((feat) => (
-                      <li key={feat} className="flex items-center gap-3 text-[0.94rem] sm:text-[0.95rem] text-ink/85 py-1">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-azure/10 text-azure">
-                          <Check className="h-3.5 w-3.5" />
+                      <div key={feat} className="flex items-center gap-2.5 text-[0.94rem] text-ink-600">
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-gold-soft text-[10px] text-gold">
+                          <Check className="h-2.5 w-2.5" strokeWidth={3} />
                         </span>
                         {feat}
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
 
-              {/* Mortgage calculator — shown inline on mobile (sidebar is below on mobile) */}
-              <div className="mt-8 sm:mt-12 lg:hidden">
+              {/* Mortgage calculator — inline on mobile (sidebar carries it on desktop) */}
+              <div className="mt-9 lg:hidden">
                 <MortgageCalc listingPrice={listing.price} />
               </div>
 
-              {/* Map */}
-              <div className="mt-8 sm:mt-12">
-                <h2 className="font-display text-xl sm:text-2xl text-ink">Location</h2>
-                <div className="mt-5 sm:mt-6 overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]">
+              {/* Location — real Google map */}
+              <div className="mt-9">
+                <SectionLabel>Location</SectionLabel>
+                <div className="mt-4 overflow-hidden rounded-[14px] shadow-soft ring-1 ring-ink/[0.07]">
                   <iframe
                     title={`Map of ${listing.address}`}
                     src={`https://www.google.com/maps?q=${listing.lat},${listing.lng}&z=14&output=embed`}
-                    className="h-48 sm:h-64 md:h-[400px] w-full border-0"
+                    className="h-48 w-full border-0 sm:h-64 md:h-[380px]"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
@@ -179,91 +208,112 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* ===== AGENT SIDEBAR ===== */}
-            <aside className="agent-sidebar mt-8 lg:mt-0 lg:sticky lg:top-28 lg:self-start space-y-4">
-              {/* Mortgage calculator — sidebar (desktop only; mobile version is inline above) */}
-              <div className="hidden lg:block">
-                <MortgageCalc listingPrice={listing.price} />
-              </div>
-
+            <aside className="agent-sidebar mt-8 min-w-0 space-y-4 lg:mt-0 lg:sticky lg:top-24 lg:self-start">
+              {/* Agent card */}
               {agent ? (
-                <div className="overflow-hidden rounded-2xl bg-cloud shadow-lift ring-1 ring-ink/[0.06]">
-                  {/* Agent photo + info strip */}
-                  <div className="flex items-center gap-4 border-b border-ink/[0.07] p-5">
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-azure/20">
+                <div className="rounded-[14px] border border-ink/[0.1] bg-white p-5 shadow-[0_1px_2px_rgba(20,20,22,.05)]">
+                  {/* Agent identity */}
+                  <div className="flex items-center gap-3.5">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-paper-200 ring-2 ring-gold/15">
                       <Image
                         src={agent.photo}
                         alt={agent.name}
                         fill
-                        sizes="64px"
+                        sizes="56px"
                         className="object-cover object-top"
                       />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-azure">
+                      <div className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-gold">
                         Listing agent
                       </div>
-                      <h3 className="mt-0.5 font-display text-xl text-ink leading-tight">{agent.name}</h3>
-                      <p className="text-[0.82rem] text-slate truncate">{agent.title}</p>
-                      {agent.rating > 0 && (
-                        <div className="mt-1 flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                          <span className="text-[0.75rem] font-medium text-ink/70">{agent.rating.toFixed(1)}</span>
-                          {agent.reviews > 0 && (
-                            <span className="text-[0.72rem] text-slate">({agent.reviews})</span>
-                          )}
-                        </div>
-                      )}
+                      <h2 className="mt-0.5 font-display text-lg leading-tight text-ink">{agent.name}</h2>
+                      <p className="truncate text-[0.8rem] text-slate">{agent.title}</p>
                     </div>
                   </div>
 
+                  {agent.rating > 0 && (
+                    <div className="mt-3 flex items-center gap-1.5 text-[0.8rem]">
+                      <Star className="h-3.5 w-3.5 fill-warn text-warn" />
+                      <span className="font-semibold tabular-nums text-ink/80">{agent.rating.toFixed(1)}</span>
+                      {agent.reviews > 0 && (
+                        <span className="tabular-nums text-slate">({agent.reviews} reviews)</span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Contact links */}
-                  <div className="space-y-2 px-5 py-4 border-b border-ink/[0.07]">
-                    <a href={`tel:${agent.phone}`} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.88rem] text-ink/85 transition hover:bg-azure/5 hover:text-azure">
-                      <Phone className="h-4 w-4 text-azure shrink-0" /> {agent.phone}
+                  <div className="mt-4 space-y-1.5 border-t border-ink/[0.07] pt-4">
+                    <a
+                      href={`tel:${agent.phone}`}
+                      className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-[0.88rem] text-ink/85 transition hover:bg-gold-soft hover:text-gold-ink"
+                    >
+                      <Phone className="h-4 w-4 shrink-0 text-gold" />{" "}
+                      <span className="tabular-nums">{agent.phone}</span>
                     </a>
-                    <a href={`mailto:${agent.email}`} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.88rem] text-ink/85 transition hover:bg-azure/5 hover:text-azure break-all">
-                      <Mail className="h-4 w-4 text-azure shrink-0" /> {agent.email}
+                    <a
+                      href={`mailto:${agent.email}`}
+                      className="flex items-center gap-2.5 break-all rounded-lg px-2 py-2 text-[0.88rem] text-ink/85 transition hover:bg-gold-soft hover:text-gold-ink"
+                    >
+                      <Mail className="h-4 w-4 shrink-0 text-gold" /> {agent.email}
                     </a>
                   </div>
 
-                  {/* CTAs */}
-                  <div className="flex flex-col gap-2.5 p-5">
-                    <ButtonLink href={`/contact?listing=${listing.id}`} variant="primary" className="w-full">
-                      <CalendarCheck className="h-4 w-4" /> Schedule a Showing
-                    </ButtonLink>
-                    <ButtonLink href={`/agents/${agent.slug}`} variant="outline" className="w-full">
+                  {/* CTAs — green→brass primary (Request a tour) + ghost secondary */}
+                  <div className="mt-4 flex flex-col gap-2.5">
+                    <Link
+                      href={`/contact?listing=${listing.id}`}
+                      className="btn-accent inline-flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-[0.92rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-bright/70 focus-visible:ring-offset-2"
+                    >
+                      <CalendarCheck className="h-4 w-4" /> Schedule a showing
+                    </Link>
+                    <Link
+                      href={`/agents/${agent.slug}`}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] border border-ink/[0.16] px-5 py-3 text-[0.92rem] font-semibold text-ink transition hover:border-ink/40 hover:bg-ink/[0.04]"
+                    >
                       View agent profile <ArrowRight className="h-4 w-4" />
-                    </ButtonLink>
+                    </Link>
                   </div>
 
                   {/* Agent stats */}
                   {(agent.homesSold > 0 || agent.yearsExperience > 0) && (
-                    <div className="grid grid-cols-2 divide-x divide-ink/[0.07] border-t border-ink/[0.07]">
-                      <div className="px-5 py-3 text-center">
-                        <div className="font-display text-xl text-ink">{agent.homesSold}</div>
-                        <div className="text-[0.68rem] uppercase tracking-wide text-slate">Homes sold</div>
+                    <div className="mt-4 grid grid-cols-2 divide-x divide-ink/[0.07] border-t border-ink/[0.07] pt-1">
+                      <div className="px-2 py-3 text-center">
+                        <div className="font-display text-xl text-ink tabular-nums">{agent.homesSold}</div>
+                        <div className="text-[0.66rem] uppercase tracking-wide text-slate">Homes sold</div>
                       </div>
-                      <div className="px-5 py-3 text-center">
-                        <div className="font-display text-xl text-ink">{agent.yearsExperience}yr</div>
-                        <div className="text-[0.68rem] uppercase tracking-wide text-slate">Experience</div>
+                      <div className="px-2 py-3 text-center">
+                        <div className="font-display text-xl text-ink tabular-nums">{agent.yearsExperience}yr</div>
+                        <div className="text-[0.66rem] uppercase tracking-wide text-slate">Experience</div>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="rounded-2xl bg-cloud p-6 shadow-soft ring-1 ring-ink/[0.06]">
-                  <h3 className="font-display text-xl text-ink">Interested in this home?</h3>
-                  <p className="mt-2 text-[0.9rem] text-slate">Connect with a Matin broker to schedule a private showing.</p>
-                  <ButtonLink href="/agents" variant="primary" className="mt-5 w-full">
-                    <CalendarCheck className="h-4 w-4" /> Schedule a Showing
-                  </ButtonLink>
+                <div className="rounded-[14px] border border-ink/[0.1] bg-white p-6 shadow-[0_1px_2px_rgba(20,20,22,.05)]">
+                  <h2 className="font-display text-xl text-ink">Interested in this home?</h2>
+                  <p className="mt-2 text-[0.9rem] text-slate">
+                    Connect with a Matin broker to schedule a private showing.
+                  </p>
+                  <Link
+                    href={`/contact?listing=${listing.id}`}
+                    className="btn-accent mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-[0.92rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-bright/70 focus-visible:ring-offset-2"
+                  >
+                    <CalendarCheck className="h-4 w-4" /> Schedule a showing
+                  </Link>
                 </div>
               )}
 
+              {/* Mortgage calculator — desktop sidebar (mobile version is inline above) */}
+              <div className="hidden lg:block">
+                <MortgageCalc listingPrice={listing.price} />
+              </div>
+
+              {/* Explore the community */}
               {community && (
                 <Link
                   href={`/communities/${community.slug}`}
-                  className="group block overflow-hidden rounded-2xl shadow-soft ring-1 ring-ink/[0.06]"
+                  className="group block overflow-hidden rounded-[14px] shadow-soft ring-1 ring-ink/[0.07]"
                 >
                   <div className="relative aspect-[16/9]">
                     <Image src={community.thumb} alt={community.name} fill sizes="360px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -286,8 +336,10 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
           <Container>
             <div className="flex items-end justify-between gap-6 border-t border-ink/[0.07] pt-10 sm:pt-16">
               <div>
-                <span className="eyebrow">Similar homes</span>
-                <h2 className="mt-3 font-display text-2xl sm:text-3xl text-ink">
+                <span className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-gold">
+                  Similar homes
+                </span>
+                <h2 className="mt-3 font-display text-2xl text-ink sm:text-3xl">
                   You may also like
                 </h2>
                 <p className="mt-1.5 text-[0.9rem] text-slate">
@@ -316,15 +368,5 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         </Section>
       )}
     </>
-  );
-}
-
-function StatPill({ icon: Icon, value, label }: { icon: typeof BedDouble; value: string | number; label: string }) {
-  return (
-    <div className="flex items-center gap-2 rounded-full bg-cloud px-4 py-2 shadow-soft ring-1 ring-ink/[0.07]">
-      <Icon className="h-4 w-4 text-azure shrink-0" />
-      <span className="font-display text-base text-ink">{value}</span>
-      <span className="text-[0.78rem] text-slate">{label}</span>
-    </div>
   );
 }

@@ -46,6 +46,8 @@ export function SiteFooter() {
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo theme="white" className="h-10" />
+          {/* Design's accent rule — green→transparent hairline (echoes .rule-accent) */}
+          <span aria-hidden className="mt-5 block h-px w-14 bg-gradient-to-r from-gold-bright to-transparent" />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-300">
             {company.tagline} {company.stats.annualVolume} in annual sales and the largest locally owned real estate
             website in the Portland area.
@@ -74,7 +76,7 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-slate-300">
               {c.links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="transition hover:text-azure-bright">
+                  <Link href={href} className="transition hover:text-gold-bright">
                     {label}
                   </Link>
                 </li>
@@ -92,7 +94,7 @@ export function SiteFooter() {
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-white/70" />
-              <a href="tel:+15036229624" className="hover:text-white">
+              <a href={`tel:+1${company.phoneRaw}`} className="tabular-nums hover:text-white">
                 {company.phone}
               </a>
             </li>
@@ -121,7 +123,7 @@ export function SiteFooter() {
         <div className="container-x flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 py-4 text-[0.72rem] text-slate-300/70">
           <span className="font-semibold uppercase tracking-wider text-slate-300/85">The Matin network</span>
           {["PortlandRealEstate.com", "PortlandLuxuryRealEstate.com", "OregonRealEstate.com", "WashingtonRealEstate.com", "MatinCareers.com"].map((s) => (
-            <a key={s} href={`https://www.${s.toLowerCase()}`} target="_blank" rel="noopener" className="transition hover:text-azure-bright">
+            <a key={s} href={`https://www.${s.toLowerCase()}`} target="_blank" rel="noopener" className="transition hover:text-gold-bright">
               {s}
             </a>
           ))}
@@ -132,7 +134,7 @@ export function SiteFooter() {
           <p>
             © {company.founded}–2026 {company.name}. Equal Housing Opportunity. Licensed in OR & WA.
           </p>
-          <p className="text-slate-300/70">
+          <p className="tabular-nums text-slate-300/70">
             {company.address.street}, {company.address.city}, {company.address.state} · {company.phone}
           </p>
         </div>

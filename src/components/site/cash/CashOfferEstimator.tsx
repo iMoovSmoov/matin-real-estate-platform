@@ -1,39 +1,71 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, BadgeCheck, Clock, Copy, Check, Download } from "lucide-react";
-import { prefersReducedMotion, scrollIntoViewSafe } from "@/components/site/useScrollReveal";
+import { useState } from "react";
+import { Minus, Plus, Copy, Check, Download } from "lucide-react";
+import { company } from "@/lib/data";
 import { downloadTextFile } from "@/lib/download";
 
-const fmt = (n: number) => "$" + Math.round(n).toLocaleString();
+/*
+  Cash-offer estimator — faithful port of the design's `#w-cash` estimator card
+  (tmp/ds/website.html). A white "Your home" panel (address + bed/bath/condition
+  facts) sitting above a dark "Matin AI estimate" surface that shows a live cash
+  range and the green→brass "Get my offer" CTA. The range is always visible and
+  updates with the inputs (like the design); "Get my offer" reveals the real,
+  non-dead-end keep-the-offer actions (copy / download / lock-it-in by phone).
+*/
+
+const CONDITIONS = ["Fair", "Good", "Excellent"] as const;
+type Condition = (typeof CONDITIONS)[number];
+
+// As-is cash band by condition (low%, high% of the owner's rough value). The
+// Excellent default (0.88–0.94) reproduces the design's $1.31M–$1.40M at the
+// default $1.49M value — a realistic, defensible as-is range, not a fixed quote.
+const BANDS: Record<Condition, [number, number]> = {
+  Fair: [0.82, 0.88],
+  Good: [0.85, 0.91],
+  Excellent: [0.88, 0.94],
+};
+
+const fmtFull = (n: number) => "$" + Math.round(n).toLocaleString();
+const fmtCompact = (n: number) =>
+  n >= 1_000_000 ? "$" + (n / 1_000_000).toFixed(2) + "M" : "$" + Math.round(n / 1000) + "K";
 
 export function CashOfferEstimator() {
-  const [value, setValue] = useState(650000);
+  const [address, setAddress] = useState("3302 Tannler Dr, West Linn, OR 97068");
+  const [beds, setBeds] = useState(5);
+  const [baths, setBaths] = useState(3.5);
+  const [condition, setCondition] = useState<Condition>("Excellent");
+  const [value, setValue] = useState(1_490_000);
   const [revealed, setRevealed] = useState(false);
-  const [shown, setShown] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const raf = useRef<number | null>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
 
-  const low = value * 0.9;
-  const high = value * 0.94;
+  const [lowPct, highPct] = BANDS[condition];
+  const low = value * lowPct;
+  const high = value * highPct;
+
+  function cycleCondition() {
+    const i = CONDITIONS.indexOf(condition);
+    setCondition(CONDITIONS[(i + 1) % CONDITIONS.length]);
+  }
 
   function buildOfferText(): string {
-    const line = "—".repeat(44);
+    const line = "—".repeat(46);
     return [
-      "CASH IS KING HOME BUYERS — by Matin Real Estate",
+      `${company.name.toUpperCase()} — CASH OFFER`,
       "NO-OBLIGATION CASH OFFER ESTIMATE",
       line,
-      `Estimated home value:  ${fmt(value)}`,
-      `Cash offer range:      ${fmt(low)} – ${fmt(high)}`,
+      `Home:        ${address}`,
+      `Details:     ${beds} bd · ${baths} ba · ${condition} condition`,
+      `Rough value: ${fmtFull(value)}`,
+      `Cash range:  ${fmtFull(low)} – ${fmtFull(high)}`,
       line,
       "• No repairs, no showings, no fees",
-      "• Close in as little as 7 days, on your date",
+      "• Close in as little as 14 days, on your date",
+      "• Or compare it side-by-side with an open-market listing",
       "",
-      "This is a preliminary range — we firm it up with real local",
-      "comps within 24 hours.",
-      "Lock it in: (503) 622-9624 · matinrealestate.com",
+      "This is a preliminary range — a licensed Matin broker firms it up",
+      "from live RMLS comps within 24 hours.",
+      `Lock it in: ${company.phone} · matinrealestate.com`,
     ].join("\n");
   }
 
@@ -47,134 +79,172 @@ export function CashOfferEstimator() {
     }
   }
 
-  function getOffer() {
-    if (submitting) return;
-    setRevealed(true);
-    // On stacked (narrow) layouts the result sits below the button — bring it
-    // into view so the user actually SEES their number appear.
-    scrollIntoViewSafe(resultRef.current, { block: "center", onlyBelowLg: true });
-
-    // Honor reduced-motion: skip the count-up ramp, show the final number.
-    if (prefersReducedMotion()) {
-      setShown(high);
-      return;
-    }
-
-    setSubmitting(true);
-    const start = performance.now();
-    const from = 0;
-    const to = high;
-    const dur = 1100;
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setShown(from + (to - from) * eased);
-      if (p < 1) {
-        raf.current = requestAnimationFrame(tick);
-      } else {
-        setSubmitting(false);
-      }
-    };
-    if (raf.current) cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(tick);
-  }
-
-  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
-
   return (
-    <div className="mx-auto grid max-w-4xl gap-6 rounded-3xl border border-white/10 bg-ink-900/80 p-6 shadow-lift backdrop-blur md:grid-cols-2 md:p-8">
-      {/* Input */}
-      <div className="flex flex-col justify-center">
-        <label className="eyebrow-light">Estimate in seconds</label>
-        <h3 className="mt-2 font-display text-2xl text-white">What&apos;s your home worth?</h3>
-        <p className="mt-1 text-[0.9rem] text-slate-300">Drag to your home&apos;s rough value — we&apos;ll show your no-obligation cash range.</p>
+    <div className="overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-soft">
+      {/* Your home */}
+      <div className="p-5 sm:p-6">
+        <div className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate">Your home</div>
 
-        <div className="mt-6">
+        <label className="mt-3.5 flex items-center gap-2.5 rounded-[10px] border border-ink/15 bg-[#fbfbfa] px-3.5 py-3">
+          <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-gold" aria-hidden />
+          <input
+            value={address}
+            onChange={(e) => { setAddress(e.target.value); setRevealed(false); }}
+            aria-label="Your home address"
+            className="min-w-0 flex-1 bg-transparent text-[0.9rem] font-medium text-ink outline-none placeholder:text-slate/60"
+            placeholder="Enter your address"
+          />
+        </label>
+
+        <div className="mt-2.5 grid grid-cols-3 gap-2.5">
+          <Stepper label="Beds" value={beds} step={1} min={1} max={12}
+            onChange={(v) => { setBeds(v); setRevealed(false); }} fmt={(v) => String(v)} />
+          <Stepper label="Baths" value={baths} step={0.5} min={1} max={12}
+            onChange={(v) => { setBaths(v); setRevealed(false); }} fmt={(v) => String(v)} />
+          <button
+            type="button"
+            onClick={() => { cycleCondition(); setRevealed(false); }}
+            className="rounded-[10px] border border-ink/14 px-3 py-2.5 text-left transition-colors hover:border-gold/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+            aria-label={`Condition: ${condition}. Tap to change.`}
+          >
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate/70">Condition</div>
+            <div className="mt-0.5 text-[0.9rem] font-semibold text-ink">{condition}</div>
+          </button>
+        </div>
+
+        {/* The one real price input — rough value (the design's card has no slider;
+            an honest estimator needs the owner's ballpark to price from). */}
+        <div className="mt-4">
           <div className="flex items-baseline justify-between">
-            <span className="text-[0.78rem] font-medium text-slate-300">Estimated value</span>
-            <span className="font-display text-xl text-white">{fmt(value)}</span>
+            <span className="text-[0.72rem] font-medium text-slate">Your rough value</span>
+            <span className="font-display text-[1.05rem] text-ink tabular-nums">{fmtFull(value)}</span>
           </div>
           <input
             type="range"
-            min={250000}
-            max={2500000}
-            step={10000}
+            min={300_000}
+            max={3_000_000}
+            step={10_000}
             value={value}
-            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); setSubmitting(false); setCopied(false); }}
+            onChange={(e) => { setValue(Number(e.target.value)); setRevealed(false); setCopied(false); }}
             className="mt-2 w-full accent-gold"
+            aria-label="Your home's rough value"
           />
-          <div className="mt-1 flex justify-between text-[0.66rem] text-slate-300/50">
-            <span>$250k</span><span>$2.5M</span>
+          <div className="mt-1 flex justify-between text-[0.62rem] text-slate/60 tabular-nums">
+            <span>$300K</span><span>$3M</span>
           </div>
         </div>
-
-        <button
-          onClick={getOffer}
-          disabled={submitting}
-          className="mt-6 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#d9b441] px-6 py-3 font-semibold text-ink shadow-[0_10px_30px_rgba(202,166,78,.35)] transition hover:bg-[#efcb66] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
-        >
-          Get my cash offer <ArrowRight className="h-4 w-4" />
-        </button>
       </div>
 
-      {/* Result */}
+      {/* Matin AI estimate */}
       <div
-        ref={resultRef}
-        aria-live="polite"
-        className="flex scroll-mt-24 flex-col items-center justify-center rounded-2xl border border-[#d9b441]/20 bg-gradient-to-br from-ink-800/60 to-ink-900/40 p-6 text-center"
+        className="relative overflow-hidden p-5 sm:p-6"
+        style={{ background: "linear-gradient(155deg,#11211a 0%,#0a1410 100%)", borderTop: "1px solid #1d3b30" }}
       >
-        {revealed ? (
-          <>
-            <span className="eyebrow-light text-[#d9b441]/80">Your cash offer range</span>
-            <div className="mt-2 font-display text-4xl text-white tabular-nums motion-safe:[animation:countup-glow_2.4s_ease-in-out_infinite] md:text-5xl">
-              {fmt(shown)}
-            </div>
-            <div className="mt-1 text-[0.86rem] text-slate-300">
-              between <span className="font-semibold text-[#d9b441]">{fmt(low)}</span> and{" "}
-              <span className="font-semibold text-[#d9b441]">{fmt(high)}</span>
-            </div>
-            <div className="mt-5 space-y-2 text-left text-[0.82rem] text-slate-300">
-              <p className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-[#d9b441]" /> No repairs, no showings, no fees</p>
-              <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#d9b441]" /> Close in as little as 7 days</p>
-            </div>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-14 h-52 w-52 rounded-full"
+          style={{ background: "radial-gradient(rgba(31,107,74,.4),transparent 70%)", filter: "blur(20px)" }}
+        />
 
-            {/* Keep the offer — real copy/download, not a dead end */}
-            <div className="mt-5 flex w-full flex-wrap gap-2.5">
+        <div className="relative flex items-center gap-2">
+          <span className="font-display inline-flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-gold text-[11px] leading-none text-white" aria-hidden>M</span>
+          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[#7fce9f]">Matin AI estimate</span>
+        </div>
+
+        <div className="relative mt-2.5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-[0.78rem] text-white/60">Estimated cash offer</div>
+            <div className={`font-display tabular-nums leading-none text-white text-[2.1rem] sm:text-[2.4rem] mt-1 ${revealed ? "motion-safe:[animation:countup-glow_2.6s_ease-in-out_infinite]" : ""}`}>
+              {fmtCompact(low)}&#8202;&#8211;&#8202;{fmtCompact(high)}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setRevealed(true)}
+            className="btn-accent inline-flex shrink-0 items-center justify-center rounded-[10px] px-5 py-3 text-[0.9rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-bright/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1410]"
+          >
+            <span>Get my offer</span>
+          </button>
+        </div>
+
+        <div className="relative mt-3.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[0.72rem] text-white/65 tabular-nums">
+          <span>No obligation</span>
+          <span className="text-white/25">|</span>
+          <span>Close in 14 days</span>
+          <span className="text-white/25">|</span>
+          <span>From 12 live comps</span>
+        </div>
+
+        {/* Keep the offer — real, non-dead-end actions revealed on request. */}
+        {revealed && (
+          <div className="relative mt-5 border-t border-white/10 pt-4" aria-live="polite">
+            <p className="text-[0.78rem] text-white/70">
+              Your no-obligation range is ready. Keep it — a licensed Matin broker firms it up from live comps within 24 hours.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={copyOffer}
                 aria-live="polite"
-                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-[#d9b441]/40 bg-[#d9b441]/10 px-4 py-2.5 text-[0.82rem] font-medium text-[#d9b441] transition hover:bg-[#d9b441]/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+                className="inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] border border-[#2f8a60]/45 bg-[#1f6b4a]/15 px-4 py-2.5 text-[0.82rem] font-medium text-[#7fce9f] transition hover:bg-[#1f6b4a]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-bright/60"
               >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4" /> Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" /> Copy offer
-                  </>
-                )}
+                {copied ? (<><Check className="h-4 w-4" /> Copied</>) : (<><Copy className="h-4 w-4" /> Copy offer</>)}
               </button>
               <button
                 type="button"
-                onClick={() => downloadTextFile("cash-is-king-offer-estimate.txt", buildOfferText())}
-                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full bg-[#d9b441] px-4 py-2.5 text-[0.82rem] font-semibold text-ink transition hover:bg-[#efcb66] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d9b441] focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+                onClick={() => downloadTextFile("matin-cash-offer-estimate.txt", buildOfferText())}
+                className="btn-accent inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-4 py-2.5 text-[0.82rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-bright/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1410]"
               >
-                <Download className="h-4 w-4" /> Download
+                <Download className="h-4 w-4" /> <span>Download</span>
               </button>
             </div>
-
-            <a href="tel:+15036229624" className="mt-4 text-[0.82rem] font-semibold text-[#d9b441] hover:text-[#d9b441]">
-              Lock it in → (503) 622-9624
+            <a href={`tel:+1${company.phoneRaw}`} className="mt-3.5 inline-block text-[0.82rem] font-semibold text-[#7fce9f] hover:text-white">
+              Lock it in → {company.phone}
             </a>
-          </>
-        ) : (
-          <div className="flex flex-col items-center text-slate-300/70">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d9b441]/30 bg-[#d9b441]/10 font-display text-2xl text-[#d9b441]">$</span>
-            <p className="mt-4 max-w-[16rem] text-[0.88rem]">Set your value and hit <span className="font-semibold text-white">Get my cash offer</span> to see your number.</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function Stepper({
+  label, value, step, min, max, onChange, fmt,
+}: {
+  label: string;
+  value: number;
+  step: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+  fmt: (v: number) => string;
+}) {
+  const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v * 2) / 2));
+  return (
+    <div className="rounded-[10px] border border-ink/14 px-3 py-2.5">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate/70">{label}</div>
+      <div className="mt-0.5 flex items-center justify-between gap-1">
+        <span className="text-[0.9rem] font-semibold text-ink tabular-nums">{fmt(value)}</span>
+        <span className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onChange(clamp(value - step))}
+            disabled={value <= min}
+            aria-label={`Decrease ${label}`}
+            className="flex h-[22px] w-[22px] items-center justify-center rounded-md border border-ink/15 text-ink transition-colors hover:border-gold/50 hover:text-gold disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+          >
+            <Minus className="h-3 w-3" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange(clamp(value + step))}
+            disabled={value >= max}
+            aria-label={`Increase ${label}`}
+            className="flex h-[22px] w-[22px] items-center justify-center rounded-md border border-ink/15 text-ink transition-colors hover:border-gold/50 hover:text-gold disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+          >
+            <Plus className="h-3 w-3" />
+          </button>
+        </span>
       </div>
     </div>
   );

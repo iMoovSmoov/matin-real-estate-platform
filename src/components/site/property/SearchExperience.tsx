@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useMemo, useRef, useState } from "react";
 import {
   Bath,
@@ -17,9 +18,19 @@ import {
 } from "lucide-react";
 import { ListingCard } from "@/components/site/ListingCard";
 import { scrollIntoViewSafe } from "@/components/site/useScrollReveal";
-import { cn, compactUsd, num, usd } from "@/lib/utils";
+import { cn, num, usd } from "@/lib/utils";
 import { listingPhoto } from "@/lib/data";
 import type { Listing, ListingStatus } from "@/lib/types";
+
+// Real interactive map (Leaflet) — client-only, lazy-loaded with the exact
+// `dynamic(..., { ssr: false })` split the repo uses for CommunityMap →
+// PropertyMap, so it never blocks SSR or the build. The design's #w-search
+// shows a map with live price pins + a featured-listing overlay; this renders
+// the real map (real lat/lng pins) inside the design's rounded frame.
+const PropertyMap = dynamic(() => import("@/components/site/PropertyMap"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const TYPES = ["Single Family", "Condo", "Townhouse", "Acreage Estate"] as const;
 const STATUSES: ListingStatus[] = ["Active", "New", "Pending", "Coming Soon", "Sold"];
@@ -40,18 +51,22 @@ export function SearchExperience({
   listings,
   initialQuery = "",
   initialType = "",
+  initialMinBeds = 0,
+  initialMaxPrice = "",
 }: {
   listings: Listing[];
   initialQuery?: string;
   initialType?: string;
+  initialMinBeds?: number;
+  initialMaxPrice?: string;
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [type, setType] = useState(initialType);
   const [status, setStatus] = useState<string>("");
-  const [minBeds, setMinBeds] = useState<number>(0);
+  const [minBeds, setMinBeds] = useState<number>(initialMinBeds);
   const [minBaths, setMinBaths] = useState<number>(0);
   const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>(initialMaxPrice);
   const [sort, setSort] = useState<Sort>("price-desc");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<View>("map");
@@ -121,7 +136,7 @@ export function SearchExperience({
         <div className="container-x py-3">
           <div className="flex flex-col gap-2 rounded-2xl border border-ink/[0.08] bg-cloud p-3 shadow-soft lg:flex-row lg:items-center">
             <label className="flex min-h-10 flex-1 items-center gap-2 rounded-[9px] border border-ink/[0.14] px-3.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="h-1.5 w-1.5 rounded-full bg-gold" />
               <span className="sr-only">Search location</span>
               <input
                 value={query}
@@ -259,7 +274,7 @@ export function SearchExperience({
           </div>
         ) : view === "map" ? (
           <div className="grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-            <div className="h-auto overflow-y-auto rounded-2xl bg-paper lg:h-[648px] lg:pr-1">
+            <div className="h-auto min-w-0 overflow-y-auto rounded-2xl bg-paper lg:h-[648px] lg:pr-1">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <p className="text-[0.84rem] text-slate">
                   Homes in <b className="text-ink">West Linn</b> & nearby
@@ -277,8 +292,8 @@ export function SearchExperience({
                 ))}
               </div>
             </div>
-            <ClaudeMap
-              listings={results.slice(0, 6)}
+            <ResultsMap
+              listings={results.slice(0, 10)}
               selected={selected}
               onSelect={setSelectedId}
             />
@@ -316,8 +331,8 @@ function SearchGridCard({
       onMouseEnter={onFocus}
       onFocus={onFocus}
       className={cn(
-        "group block overflow-hidden rounded-[13px] border bg-white shadow-[0_1px_2px_rgba(20,20,22,.05),0_10px_26px_rgba(20,20,22,.06)] transition-all hover:-translate-y-0.5 hover:shadow-lift",
-        active ? "border-success/45 ring-2 ring-success/10" : "border-ink/[0.08]",
+        "group block min-w-0 overflow-hidden rounded-[13px] border bg-white shadow-[0_1px_2px_rgba(20,20,22,.05),0_10px_26px_rgba(20,20,22,.06)] transition-all hover:-translate-y-0.5 hover:shadow-lift",
+        active ? "border-gold/45 ring-2 ring-gold/10" : "border-ink/[0.08]",
       )}
     >
       <div className="relative h-[148px] overflow-hidden">
@@ -329,7 +344,7 @@ function SearchGridCard({
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-ink/55 px-2.5 py-1 text-[0.65rem] font-semibold text-white backdrop-blur-md">
-          <span className={cn("h-1.5 w-1.5 rounded-full", listing.status === "Coming Soon" ? "bg-[#d6ad55]" : "bg-[#56e0a0]")} />
+          <span className="h-1.5 w-1.5 rounded-full bg-[#56e0a0]" />
           {listing.status === "Active" ? "For Sale" : listing.status}
         </span>
       </div>
@@ -347,7 +362,7 @@ function SearchGridCard({
   );
 }
 
-function ClaudeMap({
+function ResultsMap({
   listings,
   selected,
   onSelect,
@@ -356,63 +371,31 @@ function ClaudeMap({
   selected?: Listing;
   onSelect: (id: string) => void;
 }) {
-  const pins = [
-    { top: "20%", left: "28%" },
-    { top: "13%", left: "58%" },
-    { top: "50%", left: "18%" },
-    { top: "66%", left: "48%" },
-    { top: "40%", left: "70%" },
-    { top: "78%", left: "33%" },
-  ];
+  // Faithful port of #w-search's right column: the design's rounded map frame
+  // (its decorative grid/blob base shows under load as the green-grey gradient)
+  // with the real Leaflet map (live price pins from each listing's lat/lng) and
+  // the design's signature featured-listing card overlaid bottom-left.
   const card = selected ?? listings[0];
 
   return (
-    <div className="relative h-[420px] overflow-hidden rounded-2xl border border-ink/[0.08] bg-[linear-gradient(160deg,#e9ece6,#dfe4dc)] shadow-soft lg:sticky lg:top-[172px] lg:h-[648px]">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,6,6,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(6,6,6,.045)_1px,transparent_1px)] bg-[size:46px_46px]" />
-      <div className="absolute -bottom-10 -left-10 h-[230px] w-[280px] rounded-[48%_52%_60%_40%/55%_45%_55%_45%] bg-[rgba(95,140,95,.22)]" />
-      <div className="absolute -right-8 top-8 h-[170px] w-[200px] rounded-[52%_48%_40%_60%/45%_60%_40%_55%] bg-[rgba(95,140,95,.16)]" />
-      <div className="absolute left-[-15%] top-[38%] h-[54px] w-[130%] rotate-[-16deg] rounded-full bg-[rgba(110,150,180,.28)]" />
-      <div className="absolute left-[-25%] top-[62%] h-[3px] w-[150%] rotate-[-7deg] bg-white/85" />
-      <div className="absolute left-[-25%] top-[24%] h-[2px] w-[150%] rotate-[4deg] bg-white/70" />
-      <div className="absolute left-[46%] top-[-15%] h-[130%] w-[3px] rotate-[9deg] bg-white/80" />
-
-      {listings.map((l, i) => {
-        const active = card?.id === l.id;
-        const pos = pins[i % pins.length];
-        return (
-          <button
-            type="button"
-            key={l.id}
-            onClick={() => onSelect(l.id)}
-            className={cn(
-              "absolute z-10 rounded-full px-3 py-1.5 font-display text-[0.82rem] shadow-[0_6px_16px_rgba(6,6,6,.22)] ring-1 ring-ink/[0.08] transition-transform hover:scale-105",
-              active ? "border-2 border-white bg-success text-white shadow-[0_8px_20px_rgba(31,107,74,.5)]" : "bg-white text-ink",
-            )}
-            style={{ top: pos.top, left: pos.left }}
-          >
-            {compactUsd(l.price)}
-          </button>
-        );
-      })}
-
-      <div className="absolute right-4 top-4 z-20 overflow-hidden rounded-[9px] bg-white shadow-[0_4px_12px_rgba(6,6,6,.18)]">
-        <button type="button" className="block px-3 py-2 text-[1rem] font-semibold text-ink/75">+</button>
-        <button type="button" className="block border-t border-ink/[0.08] px-3 py-2 text-[1rem] font-semibold text-ink/75">-</button>
-      </div>
+    <div className="relative h-[420px] min-w-0 overflow-hidden rounded-2xl border border-ink/[0.08] bg-[linear-gradient(160deg,#e9ece6,#dfe4dc)] shadow-soft lg:sticky lg:top-[172px] lg:h-[648px]">
+      <PropertyMap listings={listings} selectedId={card?.id} onSelect={onSelect} />
 
       {card ? (
         <Link
           href={`/listings/${card.id}`}
-          className="absolute bottom-4 left-4 z-20 w-[228px] overflow-hidden rounded-[13px] border border-ink/[0.06] bg-white shadow-[0_14px_36px_rgba(6,6,6,.28)]"
+          className="absolute bottom-4 left-4 z-[550] w-[228px] max-w-[calc(100%-2rem)] overflow-hidden rounded-[13px] border border-ink/[0.06] bg-white shadow-[0_14px_36px_rgba(6,6,6,.28)] transition-transform hover:-translate-y-0.5"
         >
           <div className="relative h-[104px] overflow-hidden">
             <Image src={listingPhoto(card)} alt={card.address} fill sizes="228px" className="object-cover" />
-            <span className="absolute left-2 top-2 rounded-full bg-success/95 px-2 py-1 text-[0.62rem] font-semibold text-white">For Sale</span>
+            <span className="absolute left-2 top-2 rounded-full bg-gold/95 px-2 py-1 text-[0.62rem] font-semibold text-white">
+              {card.status === "Active" ? "For Sale" : card.status}
+            </span>
           </div>
           <div className="p-3">
             <div className="font-display text-[1.12rem] font-medium leading-none text-ink">{usd(card.price)}</div>
             <div className="mt-1 truncate text-[0.75rem] font-medium text-ink/80">{card.address}</div>
-            <div className="mt-1.5 text-[0.72rem] text-slate">{card.beds} bd · {card.baths} ba · {num(card.sqft)} sf</div>
+            <div className="mt-1.5 text-[0.72rem] text-slate tabular-nums">{card.beds} bd · {card.baths} ba · {num(card.sqft)} sf</div>
           </div>
         </Link>
       ) : null}
@@ -470,7 +453,7 @@ function SearchResultRow({
       </div>
       <div className="flex items-end justify-between gap-3 sm:flex-col sm:items-end sm:self-stretch">
         <div className="font-display text-[1.45rem] font-semibold leading-none text-ink">{usd(listing.price)}</div>
-        <span className="rounded-xl bg-[#d6ad55] px-3.5 py-2 text-[0.82rem] font-bold text-ink transition-colors group-hover:bg-[#e4bf69]">
+        <span className="rounded-xl bg-gold px-3.5 py-2 text-[0.82rem] font-bold text-white transition-colors group-hover:bg-gold-bright">
           Tour {listing.address.split(" ")[0]}
         </span>
       </div>

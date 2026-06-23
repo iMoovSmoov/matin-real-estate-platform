@@ -11,11 +11,17 @@ export const metadata: Metadata = {
 export default async function PropertySearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; type?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; price?: string; beds?: string }>;
 }) {
-  const { q = "", type = "" } = await searchParams;
+  const { q = "", type = "", price = "", beds = "" } = await searchParams;
 
   return (
-    <SearchExperience listings={listings} initialQuery={q} initialType={type} />
+    <SearchExperience
+      listings={listings}
+      initialQuery={q}
+      initialType={type}
+      initialMinBeds={beds ? Number(beds) : 0}
+      initialMaxPrice={price}
+    />
   );
 }

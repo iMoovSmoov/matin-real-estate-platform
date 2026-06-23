@@ -26,18 +26,21 @@ const MOBILE_EXTRA = [
   { label: "Contact", href: "/contact" },
 ];
 
-/* Routes that opt into the transparent-overlay header (white nav over a
-   full-bleed hero). Today only Home; add routes here to extend. The header
-   self-detects via the route so the layout/page need wire nothing. */
+/* Routes whose page LEADS WITH A FULL-BLEED DARK HERO, so the header rides over
+   it as a transparent white overlay (then solidifies into the paper bar on
+   scroll). Per the design these are exactly the four screens with a photo hero
+   behind the nav: Home, Sell, Communities, Agents. EVERY other route (Buy, Cash
+   Offer, Property Search, Listing detail, Contact, About, Blog) shows the SOLID
+   translucent-paper bar in normal flow — matching the design's inner-page navs
+   (dark ink links on light, never white-on-white). The header reads this
+   synchronously from the route (no hydration flash, zero per-page wiring); a
+   new page that leads with a full-bleed dark hero opts in by adding its route
+   here. Pages MUST lead with that hero for the white nav to stay legible. */
 const OVERLAY_ROUTES = new Set<string>([
   "/",
-  "/buy",
   "/sell",
-  "/cash-offer",
   "/communities",
   "/agents",
-  "/about",
-  "/contact",
 ]);
 
 const PHONE_TEL = `tel:+1${company.phoneRaw}`;

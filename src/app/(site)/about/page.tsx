@@ -15,21 +15,22 @@ import { compactUsd, num } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "About Matin Real Estate | West Linn, OR",
   description:
-    "Jordan Matin founded Matin Real Estate in 2014 in West Linn. 20+ years of experience, $130M annual volume, 40+ agents, and the largest locally owned Portland real estate website.",
+    "Jordan Matin founded Matin Real Estate in 2014 in West Linn. 20+ years of experience, $130M annual volume, 60+ agents, and the largest locally owned Portland real estate website.",
 };
 
-const stats = [
-  ["$130M+", "Annual sales volume"],
-  ["305+", "Properties sold each year"],
-  ["100+", "Active listings"],
-  ["35%", "Business growth this year"],
-  ["$2.4M", "Annual marketing budget"],
+// Real published figures (no hardcoded fabrication) — sourced from company.stats.
+const stats: [string, string][] = [
+  [String(company.stats.annualVolume), "Annual sales volume"],
+  [String(company.stats.propertiesSold), "Properties sold each year"],
+  [String(company.stats.activeListings), "Active listings"],
+  [String(company.stats.growth), "Business growth this year"],
+  [String(company.stats.marketing), "Annual marketing budget"],
 ];
 
 const milestones = [
   { year: "2014", title: "Founded in West Linn", body: "Jordan Matin opens Matin Real Estate with a simple thesis: treat a brokerage like a tech company and clients win." },
   { year: "2018", title: "Built the largest local website", body: "We grow into the largest locally owned real-estate website in the Portland area — more homes, sooner, for every client." },
-  { year: "2021", title: "Recognized for growth", body: "Named to the Portland Business Journal's Fastest Growing Private Companies as the team scales past 40 brokers." },
+  { year: "2021", title: "Recognized for growth", body: "Named to the Portland Business Journal's Fastest Growing Private Companies as the team keeps scaling." },
   { year: "Today", title: "Built to keep getting better", body: "We continue to invest in superior marketing, data tools, and talent — staying ahead of the market so clients close faster and net more." },
 ];
 
@@ -56,18 +57,15 @@ const values = [
   },
 ];
 
+// Curated display set — every name is a real Matin-served community.
 const neighborhoods = [
   "West Linn", "Lake Oswego", "Tualatin", "Wilsonville",
-  "Tigard", "Beaverton", "SW Portland", "Vancouver", "Camas", "Battle Ground",
+  "Beaverton", "Happy Valley", "Oregon City", "Vancouver",
+  "Camas", "Ridgefield", "Sherwood", "Hillsboro",
 ];
 
-const recognitionChips = [
-  "Top 1% Portland Brokers",
-  "4.9-Star Rated",
-  "$130M+ Annual Sales",
-  "PBJ Fastest-Growing Private Co.",
-  "RealTrends America's Best",
-];
+// Recognition chips — real annual-sales figure + the real award roster.
+const recognitionChips = [`${company.stats.annualVolume} Annual Sales`, ...company.awards];
 
 // Put the founder first.
 const orderedLeadership = [...leadership].sort((a) =>
@@ -78,7 +76,7 @@ export default function AboutPage() {
   return (
     <>
       {/* ---------- HERO ---------- */}
-      <section className="relative flex min-h-[70vh] items-center overflow-hidden">
+      <section className="relative flex min-h-[64vh] items-center overflow-hidden bg-ink">
         <div className="absolute inset-0">
           <Image
             src={company.officeMeeting}
@@ -89,9 +87,9 @@ export default function AboutPage() {
             className="ken-burns object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/10 to-ink/50" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/78 via-ink/40 to-transparent" />
         </div>
-        <Container className="relative z-10 pb-20 pt-24 sm:pb-20 sm:pt-32">
+        <Container className="relative z-10 pb-16 pt-14 sm:pb-20 sm:pt-20">
           <div className="max-w-3xl">
             <Reveal>
               <span className="eyebrow eyebrow-light">Our story</span>
@@ -99,24 +97,26 @@ export default function AboutPage() {
             <Reveal delay={0.08}>
               <h1 className="display-1 mt-5 font-display text-white text-balance">
                 Portland&apos;s most{" "}
-                <span className="italic text-azure-bright">data-driven</span>{" "}
+                <span className="italic text-gold-bright">data-driven</span>{" "}
                 real estate team.
               </h1>
             </Reveal>
             <Reveal delay={0.16}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 text-pretty">
                 Founded in {company.founded} in West Linn by {company.founder}, Matin Real Estate operates
-                the largest locally owned real estate website in the Portland area — with 40+ agents,
-                $130M in annual volume, and 20+ years of local market experience.
+                the largest locally owned real estate website in the Portland area — with{" "}
+                <span className="tabular-nums">{company.stats.agents}+</span> agents,{" "}
+                <span className="tabular-nums">{company.stats.annualVolume}</span> in annual volume, and 20+
+                years of local market experience.
               </p>
             </Reveal>
             <Reveal delay={0.24}>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">
                 <span className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-azure-bright" /> {company.address.city}, {company.address.state}
+                  <MapPin className="h-4 w-4 text-gold-bright" /> {company.address.city}, {company.address.state}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-azure-bright" /> PBJ Fastest-Growing Private Company
+                  <Award className="h-4 w-4 text-gold-bright" /> PBJ Fastest-Growing Private Company
                 </span>
               </div>
             </Reveal>
@@ -125,12 +125,12 @@ export default function AboutPage() {
       </section>
 
       {/* ---------- STAT BAND ---------- */}
-      <div className="border-y border-ink/[0.07] bg-cloud">
+      <div className="border-y border-ink/[0.07] bg-white">
         <Container>
           <dl className="grid grid-cols-2 [&>*:nth-child(5)]:col-span-2 divide-y divide-ink/[0.07] py-10 md:grid-cols-5 md:[&>*:nth-child(5)]:col-span-1 md:divide-x md:divide-y-0">
             {stats.map(([n, l], i) => (
               <Reveal key={l} delay={i * 0.06} className="px-4 py-3 text-center">
-                <dt className="font-display text-4xl text-ink md:text-[2.6rem]">{n}</dt>
+                <dt className="font-display text-4xl text-ink tabular-nums md:text-[2.6rem]">{n}</dt>
                 <dd className="mt-1 text-[0.82rem] leading-tight text-slate">{l}</dd>
               </Reveal>
             ))}
@@ -151,8 +151,8 @@ export default function AboutPage() {
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
                 />
-                <div className="absolute bottom-5 left-5 rounded-2xl bg-cloud/95 px-5 py-4 shadow-lift backdrop-blur">
-                  <div className="font-display text-3xl text-ink">{company.founded}</div>
+                <div className="absolute bottom-5 left-5 rounded-2xl bg-white/95 px-5 py-4 shadow-lift backdrop-blur">
+                  <div className="font-display text-3xl text-ink tabular-nums">{company.founded}</div>
                   <div className="text-[0.8rem] text-slate">Founded in West Linn, OR</div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function AboutPage() {
                 </p>
                 <blockquote
                   className="my-7 border-l-4 pl-5"
-                  style={{ borderColor: "rgba(210,160,80,0.75)" }}
+                  style={{ borderColor: "rgba(31,107,74,0.65)" }}
                 >
                   <p className="font-display text-xl leading-snug text-ink sm:text-2xl text-balance">
                     &ldquo;We built the largest locally owned real-estate website in the Portland area because
@@ -183,10 +183,11 @@ export default function AboutPage() {
                   </cite>
                 </blockquote>
                 <p>
-                  A decade later, that thesis has compounded. We employ 40+ full-time brokers across Oregon and
-                  Washington, and close <strong className="text-ink">{company.stats.annualVolume}</strong> in
+                  A decade later, that thesis has compounded. We employ{" "}
+                  {company.stats.agents}+ full-time brokers across Oregon and Washington, and close{" "}
+                  <strong className="text-ink tabular-nums">{company.stats.annualVolume}</strong> in
                   volume every year — all while reinvesting{" "}
-                  <strong className="text-ink">{company.stats.marketing}</strong> into reaching the right
+                  <strong className="text-ink tabular-nums">{company.stats.marketing}</strong> into reaching the right
                   buyers for our sellers.
                 </p>
                 <p>
@@ -218,12 +219,9 @@ export default function AboutPage() {
           <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
               <Reveal key={v.title} delay={i * 0.07}>
-                <div className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
-                    style={{ background: "rgba(210,160,80,0.12)" }}
-                  >
-                    <v.Icon className="h-6 w-6" style={{ color: "rgba(210,160,80,1)" }} />
+                <div className="flex h-full flex-col rounded-2xl bg-white p-7 shadow-soft ring-1 ring-ink/[0.06]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-soft">
+                    <v.Icon className="h-6 w-6 text-gold" />
                   </div>
                   <h3 className="mt-5 font-display text-lg text-ink">{v.title}</h3>
                   <p className="mt-2 flex-1 text-[0.88rem] leading-relaxed text-slate">{v.body}</p>
@@ -245,9 +243,9 @@ export default function AboutPage() {
           <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {milestones.map((m, i) => (
               <Reveal key={m.year} delay={(i % 4) * 0.08}>
-                <div className="flex h-full flex-col rounded-2xl bg-cloud p-7 shadow-soft ring-1 ring-ink/[0.06]">
-                  <div className="font-display text-3xl text-azure-deep">{m.year}</div>
-                  <div className="mt-3 h-px w-10 rounded bg-azure/40" />
+                <div className="flex h-full flex-col rounded-2xl bg-white p-7 shadow-soft ring-1 ring-ink/[0.06]">
+                  <div className="font-display text-3xl text-gold tabular-nums">{m.year}</div>
+                  <div className="mt-3 h-px w-10 rounded bg-gold/40" />
                   <h3 className="mt-4 font-display text-lg text-ink">{m.title}</h3>
                   <p className="mt-2 flex-1 text-[0.9rem] leading-relaxed text-slate">{m.body}</p>
                 </div>
@@ -278,7 +276,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div>
-              <p className="mb-5 text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-slate">
+              <p className="mb-5 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-gold">
                 Communities we serve
               </p>
               <div className="flex flex-wrap gap-x-1 gap-y-0.5">
@@ -289,11 +287,7 @@ export default function AboutPage() {
                   >
                     {n}
                     {i < neighborhoods.length - 1 && (
-                      <span
-                        className="mx-2 font-sans text-[1rem] font-normal"
-                        style={{ color: "rgba(210,160,80,0.8)" }}
-                        aria-hidden
-                      >
+                      <span className="mx-2 font-sans text-[1rem] font-normal text-gold/50" aria-hidden>
                         ·
                       </span>
                     )}
@@ -306,14 +300,13 @@ export default function AboutPage() {
       </Section>
 
       {/* ---------- RECOGNITION CHIPS ---------- */}
-      <div className="border-y border-ink/[0.07] bg-cloud py-7">
+      <div className="border-y border-ink/[0.07] bg-white py-7">
         <Container>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {recognitionChips.map((chip) => (
               <span
                 key={chip}
-                className="rounded-full border px-5 py-2 text-[0.8rem] font-semibold tracking-wide text-ink"
-                style={{ borderColor: "rgba(210,160,80,0.55)" }}
+                className="rounded-full border border-[#cfe3d7] bg-gold-soft px-5 py-2 text-[0.8rem] font-semibold tracking-wide text-gold-ink"
               >
                 {chip}
               </span>
@@ -334,7 +327,7 @@ export default function AboutPage() {
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
             {orderedLeadership.map((person, i) => (
               <Reveal key={person.slug} delay={i * 0.1}>
-                <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-cloud shadow-soft ring-1 ring-ink/[0.06] transition-shadow duration-300 hover:shadow-lift sm:flex-row">
+                <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-soft ring-1 ring-ink/[0.06] transition-shadow duration-300 hover:shadow-lift sm:flex-row">
                   <div className="relative aspect-[3/2] w-full shrink-0 bg-paper-200 sm:aspect-auto sm:w-56">
                     <Image
                       src={person.photo}
@@ -346,16 +339,16 @@ export default function AboutPage() {
                   </div>
                   <div className="flex flex-1 flex-col p-6 sm:p-7">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
+                      <div className="min-w-0">
                         <h3 className="font-display text-xl text-ink sm:text-2xl">{person.name}</h3>
                         <div className="mt-0.5 text-[0.85rem] text-ink/60 sm:text-[0.9rem]">{person.title}</div>
                       </div>
                       <Badge tone="neutral">Leadership</Badge>
                     </div>
                     <p className="mt-4 flex-1 text-[0.9rem] leading-relaxed text-slate sm:text-[0.92rem]">{person.bio}</p>
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-ink/[0.07] pt-4 text-[0.8rem] text-ink/60">
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 border-t border-ink/[0.07] pt-4 text-[0.8rem] text-ink/60 tabular-nums">
                       <span className="flex items-center gap-1.5">
-                        <Star className="h-3.5 w-3.5 fill-current text-ink/70" /> {person.rating} · {person.reviews} reviews
+                        <Star className="h-3.5 w-3.5 fill-warn text-warn" /> {person.rating} · {person.reviews} reviews
                       </span>
                       <span>{person.yearsExperience} yrs experience</span>
                       <span>{num(person.homesSold)} homes sold</span>
@@ -369,10 +362,10 @@ export default function AboutPage() {
                         View profile <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                       <span className="text-ink/20">·</span>
-                      <a href={`tel:${person.phone}`} className="inline-flex items-center gap-1.5 text-[0.8rem] text-slate hover:text-ink">
+                      <a href={`tel:${person.phone}`} className="inline-flex items-center gap-1.5 text-[0.8rem] tabular-nums text-slate hover:text-gold">
                         <Phone className="h-3.5 w-3.5" /> {person.phone}
                       </a>
-                      <a href={`mailto:${person.email}`} className="inline-flex items-center gap-1.5 text-[0.8rem] text-slate hover:text-ink">
+                      <a href={`mailto:${person.email}`} className="inline-flex items-center gap-1.5 text-[0.8rem] text-slate hover:text-gold">
                         <Mail className="h-3.5 w-3.5" /> Email
                       </a>
                     </div>
@@ -383,11 +376,11 @@ export default function AboutPage() {
           </div>
           <p className="mt-6 text-center text-[0.9rem] text-slate">
             Day-to-day operations are led by <strong className="text-ink">Alicia Smith</strong>, who keeps
-            our 40-broker team — and every transaction — running on time.
+            our team — and every transaction — running on time.
           </p>
 
           {/* Join our team CTA */}
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl border border-ink/[0.08] bg-cloud px-6 py-10 text-center shadow-soft sm:flex-row sm:text-left">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl border border-ink/[0.08] bg-white px-6 py-10 text-center shadow-soft sm:flex-row sm:text-left">
             <div className="flex-1">
               <h3 className="font-display text-xl text-ink">Want to join the Matin team?</h3>
               <p className="mt-2 text-[0.92rem] leading-relaxed text-slate">
@@ -420,22 +413,14 @@ export default function AboutPage() {
             <ul className="space-y-4">
               {company.awards.map((award, i) => (
                 <Reveal key={award} delay={i * 0.08}>
-                  <li className="flex items-center gap-4 rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06]">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-paper-200 text-ink">
+                  <li className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-soft ring-1 ring-ink/[0.06]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold-soft text-gold">
                       <Trophy className="h-6 w-6" />
                     </div>
                     <span className="font-medium text-ink">{award}</span>
                   </li>
                 </Reveal>
               ))}
-              <Reveal delay={company.awards.length * 0.08}>
-                <li className="flex items-center gap-4 rounded-2xl bg-cloud p-5 shadow-soft ring-1 ring-ink/[0.06]">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-paper-200 text-ink">
-                    <Star className="h-6 w-6 fill-current" />
-                  </div>
-                  <span className="font-medium text-ink">4.9-star average across 700+ client reviews</span>
-                </li>
-              </Reveal>
             </ul>
           </div>
         </Container>

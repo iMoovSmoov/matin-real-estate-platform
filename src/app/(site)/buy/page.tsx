@@ -5,15 +5,40 @@ import {
   TrendingUp, Cpu, Users, Building2, BadgeCheck, CalendarClock, Wallet, ClipboardList, CheckCircle2,
   BadgeDollarSign, MapPin, Calculator, HelpCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { Badge } from "@/components/ui/badge";
-import { PropertySearchBar } from "@/components/site/PropertySearchBar";
 import { ListingCard } from "@/components/site/ListingCard";
 import { ProcessSteps } from "@/components/site/marketing/ProcessSteps";
 import { BuyStickyCta } from "@/components/site/buy/BuyStickyCta";
-import { company, featuredListings } from "@/lib/data";
+import { company, featuredListings, listingPhoto } from "@/lib/data";
+import { usd, num } from "@/lib/utils";
+
+/* Faithful to the design's 10px rectangular buttons (#w-buy) — solid ink +
+   ghost outline, distinct from the site's older pill CTAs. */
+const BTN_INK =
+  "inline-flex items-center justify-center gap-2 rounded-[10px] bg-ink px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-ink-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:ring-offset-2";
+const BTN_GHOST =
+  "inline-flex items-center justify-center gap-2 rounded-[10px] border border-ink/[0.18] bg-transparent px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-ink/40 hover:bg-ink/[0.04] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2";
+
+/* Hero feature trio + payment-calculator preview fields (design #w-buy). */
+const heroFeatures = [
+  { n: "01", title: "Off-market access", body: "See homes before they list." },
+  { n: "02", title: "AI-matched", body: "Alerts tuned to your taste." },
+  { n: "03", title: "Concierge tours", body: "Booked around your week." },
+];
+
+const paymentFields = [
+  { label: "Home price", value: "$1,200,000" },
+  { label: "Down · 20%", value: "$240,000" },
+  { label: "Rate", value: "6.75%" },
+  { label: "Term", value: "30 yr" },
+];
+
+const HERO_BLUR =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=";
 
 export const metadata: Metadata = {
   title: "Buy a Home | Matin Real Estate",
@@ -107,57 +132,158 @@ const buyingTools = [
 export default function BuyPage() {
   return (
     <>
-      {/* ---------- HERO (unchanged — keep existing hero) ---------- */}
-      <section className="relative flex min-h-[78vh] items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/matin/interiors/interiors-00.jpg"
-            alt="Bright, modern home interior"
-            fill
-            priority
-            sizes="100vw"
-            className="ken-burns object-cover"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k="
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/55 to-ink/85" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/80 to-transparent" />
-        </div>
-        <Container className="relative z-10 pt-20 pb-16 sm:pt-28 sm:pb-20">
-          <div className="max-w-3xl">
-            <Reveal>
-              <span className="eyebrow eyebrow-light">Buy with Matin</span>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="display-1 mt-5 font-display text-white text-balance">
-                Find your next home in{" "}
-                <span className="italic text-white/80">Portland&apos;s best communities.</span>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.16}>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
-                Off-market access, expert negotiation, and 40+ brokers who live where they sell — so you win
-                the home you love without overpaying.
-              </p>
-            </Reveal>
-            <Reveal delay={0.24}>
-              <div className="mt-8">
-                <PropertySearchBar dark />
-              </div>
-            </Reveal>
-            <Reveal delay={0.32}>
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">
-                <span className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 text-white/70" /> 305+ families moved each year
-                </span>
-                <span className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-white/70" /> 40+ full-time OR &amp; WA brokers
-                </span>
+      {/* ---------- HERO — design #w-buy (split, light, solid header) ---------- */}
+      <Section className="pt-9 pb-12 sm:pt-12 md:pt-16">
+        <Container>
+          <div className="grid items-stretch gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            {/* Left — copy */}
+            <div className="flex min-w-0 flex-col justify-center">
+              <Reveal>
+                <span className="eyebrow text-gold">Buyers</span>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <h1 className="mt-4 font-display text-[clamp(2.2rem,5vw,3.1rem)] font-normal leading-[1.02] tracking-[-0.02em] text-ink text-balance">
+                  Win the home, not the bidding war.
+                </h1>
+              </Reveal>
+              <Reveal delay={0.14}>
+                <p className="mt-5 max-w-[46ch] text-[1.0625rem] leading-relaxed text-ink-600 text-pretty">
+                  Off-market access, AI-matched listings the moment they hit, and a concierge who books your
+                  tours. Get pre-approved and start touring this week.
+                </p>
+              </Reveal>
+              <Reveal delay={0.2}>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Link href="/contact" className={BTN_INK}>
+                    Get pre-approved
+                  </Link>
+                  <Link href="/property-search" className={BTN_GHOST}>
+                    Browse homes
+                  </Link>
+                </div>
+              </Reveal>
+              <Reveal delay={0.26}>
+                <div className="mt-9 grid grid-cols-3 gap-4 sm:gap-6">
+                  {heroFeatures.map((f) => (
+                    <div key={f.n} className="min-w-0">
+                      <div className="font-display text-[0.95rem] text-gold tabular-nums">{f.n}</div>
+                      <div className="mt-1.5 text-[0.875rem] font-semibold text-ink">{f.title}</div>
+                      <div className="mt-1 text-[0.8rem] leading-snug text-slate text-pretty">{f.body}</div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            </div>
+
+            {/* Right — image with floating "Pre-approval in minutes" pill */}
+            <Reveal delay={0.12}>
+              <div className="relative h-72 min-w-0 overflow-hidden rounded-2xl shadow-lift sm:h-96 lg:h-full lg:min-h-[480px]">
+                <Image
+                  src="/matin/interiors/interiors-00.jpg"
+                  alt="Bright, modern Portland-area home interior"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover"
+                  placeholder="blur"
+                  blurDataURL={HERO_BLUR}
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(200deg,rgba(6,6,6,0)_45%,rgba(6,6,6,0.4)_100%)]" />
+                <div className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-xl bg-[rgba(246,246,245,0.92)] px-3.5 py-2.5 shadow-[0_10px_30px_rgba(6,6,6,0.25)] backdrop-blur-md">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-bright/60" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold" />
+                  </span>
+                  <span className="text-[0.8rem] font-semibold text-ink">Pre-approval in minutes</span>
+                </div>
               </div>
             </Reveal>
           </div>
         </Container>
-      </section>
+      </Section>
+
+      {/* ---------- PAYMENT CALCULATOR + MATCHED FOR YOU — design #w-buy band ---------- */}
+      <Section className="pt-0 pb-14 md:pb-20">
+        <Container>
+          <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-soft">
+            <div className="grid md:grid-cols-2">
+              {/* Payment calculator preview */}
+              <div className="border-b border-ink/[0.07] p-7 sm:p-8 md:border-b-0 md:border-r">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate">
+                    Payment calculator
+                  </span>
+                  <span className="text-[0.7rem] text-slate/70">Example scenario</span>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-2.5">
+                  {paymentFields.map((f) => (
+                    <div key={f.label} className="min-w-0 rounded-[10px] border border-ink/[0.14] px-3.5 py-2.5">
+                      <div className="text-[0.625rem] font-semibold uppercase tracking-[0.1em] text-slate/70">
+                        {f.label}
+                      </div>
+                      <div className="mt-0.5 text-[0.95rem] font-semibold text-ink tabular-nums">{f.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 flex items-baseline justify-between border-t border-ink/[0.08] pt-4">
+                  <span className="text-[0.85rem] text-slate">Est. monthly payment</span>
+                  <span className="font-display text-[1.75rem] font-medium text-ink tabular-nums">
+                    $6,228<span className="text-[0.85rem] text-slate/70">/mo</span>
+                  </span>
+                </div>
+                <Link
+                  href="/mortgage-calculator"
+                  className="mt-5 inline-flex items-center gap-1.5 text-[0.85rem] font-semibold text-gold transition-colors hover:text-gold-bright"
+                >
+                  Open the full calculator <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+
+              {/* Matched for you — real featured listings */}
+              <div className="p-7 sm:p-8">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate">
+                    Matched for you
+                  </span>
+                  <Link
+                    href="/property-search"
+                    className="text-[0.78rem] font-semibold text-ink transition-colors hover:text-gold"
+                  >
+                    View all
+                  </Link>
+                </div>
+                <div className="mt-4 flex flex-col gap-2">
+                  {featuredListings.slice(0, 3).map((l) => (
+                    <Link
+                      key={l.id}
+                      href={`/listings/${l.id}`}
+                      className="group flex items-center gap-3.5 rounded-xl p-1.5 transition-colors hover:bg-paper"
+                    >
+                      <div className="relative h-14 w-[72px] shrink-0 overflow-hidden rounded-[9px]">
+                        <Image src={listingPhoto(l)} alt={l.address} fill sizes="72px" className="object-cover" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-display text-[1.05rem] font-medium text-ink tabular-nums">
+                          {usd(l.price)}
+                        </div>
+                        <div className="truncate text-[0.8rem] text-ink-600">
+                          {l.address}, {l.city}
+                        </div>
+                        <div className="text-[0.72rem] text-slate tabular-nums">
+                          {l.beds} bd · {l.baths} ba · {num(l.sqft)} sqft
+                        </div>
+                      </div>
+                      <span className="shrink-0 rounded-lg bg-gold-soft px-2.5 py-1.5 text-[0.72rem] font-semibold text-gold-ink ring-1 ring-[#cfe3d7] transition-colors group-hover:bg-[#dcefe1]">
+                        Tour
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </Section>
 
       {/* ---------- HOW BUYING WORKS WITH MATIN — 4-step journey ---------- */}
       <Section className="bg-paper-200/60">
