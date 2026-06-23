@@ -23,11 +23,7 @@ import { useAiSidecar } from "./AISidecar";
 /* ──────────────────────────────────────────────────────────────────────────
    MatinOS — SidebarNav  (ref §1.3)
 
-   Fixed full-height charcoal rail (~280px), collapsible to a ~64px icon rail.
-   Quiet brand block: MATIN over "Brokerage OS". Canonical nav order — DO NOT
-   reorder — then a divider, then de-emphasized Admin. Active = solid white
-   pill, ink text; inactive = slate-300; hover = white 6% wash. Bottom block =
-   Role/Team context line + gold-outline "AI Assist: Ready" pill.
+   Fixed full-height charcoal rail matched to the Claude MatinOS beta.
 
    NAV_ITEMS / BOTTOM_TABS are exported so the command bar can derive the page
    H1 from the route and the mobile bottom bar can reuse the new labels.
@@ -87,12 +83,11 @@ export function SidebarNav({
 
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-ink-800 to-ink-900 text-slate-300">
-      {/* Brand block — quiet wordmark. Right padding leaves room for the
-          collapse toggle that floats on the rail's edge (never overlaps). */}
+      {/* Brand block — quiet MatinOS wordmark. */}
       <div
         className={cn(
           "flex h-14 items-center border-b border-white/[0.06]",
-          collapsed ? "justify-center px-0" : "gap-2.5 pl-4 pr-8",
+          collapsed ? "justify-center px-0" : "gap-2.5 px-4",
         )}
       >
         {/* Brand mark seated in a faceted chip — subtle gradient + brass
@@ -103,7 +98,7 @@ export function SidebarNav({
         {!collapsed ? (
           <div className="min-w-0 leading-tight">
             <span className="block truncate font-sans text-[0.92rem] font-bold uppercase tracking-[0.14em] text-cloud">
-              Matin
+              MatinOS
             </span>
             <span className="block truncate text-[0.66rem] font-medium tracking-wide text-slate-300/70">
               Brokerage OS
@@ -164,7 +159,7 @@ export function SidebarNav({
         ) : (
           <>
             <p className="px-1 text-[0.68rem] leading-tight text-slate-300/60">
-              <span className="text-slate-300/90">Jordan Matin</span> · Principal Broker
+              <span className="text-slate-300/90">Chase Bright</span> · Broker · West Linn
             </p>
             <button
               type="button"

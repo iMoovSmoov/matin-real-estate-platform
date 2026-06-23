@@ -95,7 +95,12 @@ export function SiteHeader() {
         Skip to content
       </a>
 
-      <div className="container-x flex h-[58px] items-center justify-between gap-4">
+      <div
+        className={cn(
+          "flex h-[58px] w-full items-center justify-between gap-4",
+          isOverlayRoute ? "px-8 lg:px-[72px]" : "container-x",
+        )}
+      >
         {/* Brand lockup — M chip + Matin wordmark, theme-flipped per mode */}
         <Link
           href="/"
@@ -163,18 +168,6 @@ export function SiteHeader() {
           </a>
 
           <AskMatinButton className="hidden sm:inline-flex" />
-
-          <Link
-            href="/hub"
-            className={cn(
-              "hidden rounded-[9px] px-4 py-2.5 text-[0.82rem] font-semibold leading-none transition-colors sm:inline-flex",
-              overlay
-                ? "bg-white/12 text-white ring-1 ring-white/22 backdrop-blur-md hover:bg-white/18"
-                : "bg-ink text-white shadow-soft hover:bg-ink-800",
-            )}
-          >
-            Agent Platform
-          </Link>
 
           {/* Compact phone for the smallest screens */}
           <a
@@ -244,12 +237,6 @@ export function SiteHeader() {
           </a>
 
           <AskMatinButton className="mt-2 w-full justify-center py-3" />
-          <Link
-            href="/hub"
-            className="mt-1 flex min-h-[44px] w-full items-center justify-center rounded-lg bg-ink px-3 text-[0.95rem] font-semibold text-white"
-          >
-            Agent Platform
-          </Link>
         </nav>
       </div>
     </header>

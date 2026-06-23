@@ -1,7 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
-import { StatusBadge } from "@/components/ui/badge";
 import { usd, num } from "@/lib/utils";
 import { listingPhoto } from "@/lib/data";
 import type { Listing } from "@/lib/types";
@@ -14,10 +12,9 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden border border-ink/[0.08] bg-white hover:shadow-lift transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azure"
+      className="group block overflow-hidden rounded-[14px] border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,20,22,.05),0_14px_36px_rgba(20,20,22,.08)] transition-shadow hover:shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
     >
-      {/* Image */}
-      <div className="relative overflow-hidden rounded-t-2xl aspect-[4/3]">
+      <div className="relative h-[218px] overflow-hidden">
         <Image
           src={hero}
           alt={listing.address}
@@ -25,32 +22,27 @@ export function ListingCard({ listing }: { listing: Listing }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        {/* Status badge */}
-        <div className="absolute top-3 left-3">
-          <StatusBadge status={listing.status} />
-        </div>
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-ink/55 px-2.5 py-1 text-[0.68rem] font-semibold text-white backdrop-blur-md">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#56e0a0]" />
+          {listing.status === "Active" ? "For Sale" : listing.status}
+        </span>
       </div>
 
-      {/* Body */}
-      <div className="p-4">
-        <div className="font-display font-bold text-xl text-ink">{usd(listing.price)}</div>
-        <div className="mt-1 text-sm font-medium text-ink truncate">{listing.address}</div>
-        <div className="mt-0.5 flex items-center gap-1 text-xs text-slate truncate">
-          <MapPin className="h-3 w-3 shrink-0" />
-          {listing.city}, {listing.state}
+      <div className="p-[18px]">
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="font-display text-[1.45rem] font-medium leading-none text-ink">{usd(listing.price)}</div>
+          <div className="truncate text-[0.75rem] text-slate">{listing.city}, {listing.state}</div>
         </div>
-        <div className="mt-3 flex items-center gap-3 border-t border-ink/[0.07] pt-3 text-xs text-slate flex-wrap">
+        <div className="mt-2 truncate text-[0.9rem] font-medium text-ink/80">{listing.address}</div>
+        <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-ink/[0.07] pt-4 text-[0.78rem] text-slate">
           <span className="flex items-center gap-1.5">
-            <BedDouble className="h-4 w-4 text-azure" /> {listing.beds} bd
+            <b className="font-semibold text-ink">{listing.beds}</b> bd
           </span>
           <span className="flex items-center gap-1.5">
-            <Bath className="h-4 w-4 text-azure" /> {listing.baths} ba
+            <b className="font-semibold text-ink">{listing.baths}</b> ba
           </span>
           <span className="flex items-center gap-1.5">
-            <Maximize className="h-4 w-4 text-azure" /> {num(listing.sqft)} sf
-          </span>
-          <span className="ml-auto flex items-center gap-1 text-xs font-medium text-ink">
-            View listing <ArrowRight className="h-3 w-3" />
+            <b className="font-semibold text-ink">{num(listing.sqft)}</b> sqft
           </span>
         </div>
       </div>

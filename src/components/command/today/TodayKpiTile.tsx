@@ -71,25 +71,25 @@ export function TodayKpiTile({
     <button
       type="button"
       onClick={onDrill}
-      className="card-elevated group flex min-w-0 flex-col p-3.5 text-left transition-colors hover:border-ink/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 sm:p-5"
+      className="card-elevated group relative flex min-w-0 flex-col p-4 text-left transition-colors hover:border-ink/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
     >
       <span
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
+          "absolute right-4 top-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-1 ring-inset",
           CHIP[tone],
         )}
       >
         {icon}
       </span>
 
-      <p className="mt-3 line-clamp-2 text-[0.66rem] font-semibold uppercase leading-tight tracking-[0.07em] text-slate sm:text-[0.7rem] sm:tracking-[0.1em]">
+      <p className="line-clamp-2 max-w-[9rem] pr-8 text-[0.66rem] font-semibold uppercase leading-tight tracking-[0.11em] text-slate">
         {label}
       </p>
 
-      <div className="mt-1.5 flex items-baseline gap-2">
+      <div className="mt-2 flex items-baseline gap-2">
         <span
           className={cn(
-            "font-sans text-[1.85rem] font-bold leading-none tabular-nums sm:text-[2.2rem]",
+            "font-sans text-[1.82rem] font-bold leading-none tabular-nums",
             VALUE[tone],
           )}
         >
@@ -97,17 +97,17 @@ export function TodayKpiTile({
         </span>
       </div>
 
-      <p className="mt-2 line-clamp-2 text-[0.74rem] leading-snug text-slate">{context}</p>
+      <p className="mt-1.5 line-clamp-2 text-[0.72rem] leading-snug text-slate">{context}</p>
 
       {ratio ? (
-        <div className="mt-3">
-          <span className="relative block h-1.5 w-full overflow-hidden rounded-full bg-paper-200">
+        <div className="mt-2">
+          <span className="relative block h-1 w-full overflow-hidden rounded-full bg-paper-200">
             <span
               className={cn("absolute inset-y-0 left-0 rounded-full", BAR[ratio.tone ?? "neutral"])}
               style={{ width: `${pct}%` }}
             />
           </span>
-          <p className="mt-1.5 text-[0.68rem] font-medium text-slate tabular-nums">{ratio.label}</p>
+          <p className="mt-1.5 truncate text-[0.67rem] font-medium text-slate tabular-nums">{ratio.label}</p>
         </div>
       ) : null}
     </button>

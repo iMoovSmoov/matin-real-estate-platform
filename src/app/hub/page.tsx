@@ -349,9 +349,62 @@ export default function TodayCommandCenter() {
   );
 
   return (
-    <div className="space-y-5 px-4 py-5 md:px-6 lg:px-8">
-      {/* ── 1 · Image-led briefing band (full-bleed office hero) ───────────── */}
-      <BriefingBand />
+    <div className="space-y-[18px] px-4 py-[22px] md:px-[22px]">
+      <section className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-display text-[2rem] font-normal leading-[1.05] tracking-[-0.015em] text-ink md:text-[2.35rem]">
+            Good morning, Chase.
+          </h1>
+          <p className="mt-1.5 text-[0.86rem] leading-snug text-slate">
+            5 things need you today · pipeline is healthy · response time is beating target.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-ink/10 bg-cloud px-3.5 py-2.5 shadow-soft">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[conic-gradient(#1f6b4a_0_92%,#e7f1ea_0)]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cloud text-[0.82rem] font-bold text-ink tabular-nums">
+              92
+            </div>
+          </div>
+          <div>
+            <p className="text-[0.7rem] leading-none text-slate">Brokerage vitals</p>
+            <p className="mt-1 text-[0.84rem] font-semibold text-success">Strong</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="surface-ai relative overflow-hidden rounded-2xl border border-[#1d3b30] p-5 shadow-[0_18px_44px_rgba(0,0,0,.28),0_0_30px_rgba(31,107,74,.18)] md:px-6">
+        <span aria-hidden className="ai-bloom -right-16 -top-20" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-success text-cloud shadow-[0_0_20px_rgba(31,107,74,.45)]">
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
+              </span>
+              <span className="eyebrow text-[0.66rem] text-[#7fce9f]">
+                Matin AI · Overnight briefing
+              </span>
+            </div>
+            <p className="max-w-[46ch] font-display text-[1.42rem] font-normal leading-[1.22] text-cloud md:text-[1.72rem]">
+              While you slept, I handled 7 routine tasks and surfaced{" "}
+              <span className="text-[#86d2a4]">3 that need your eyes</span> - a closing at risk,
+              a hot buyer, and a high-equity seller.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-6 text-[0.72rem] text-slate-400">
+              <span><strong className="block text-[1.25rem] leading-none text-cloud">7</strong> auto-handled</span>
+              <span><strong className="block text-[1.25rem] leading-none text-[#86d2a4]">3</strong> need approval</span>
+              <span><strong className="block text-[1.25rem] leading-none text-cloud">41</strong> new leads</span>
+              <span><strong className="block text-[1.25rem] leading-none text-cloud">4 min</strong> avg response</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => goToTab("AI Drafts")}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1f6b4a,#2f8a60_70%,#c9a24b_150%)] px-4 text-[0.86rem] font-semibold text-cloud shadow-[0_10px_26px_rgba(31,107,74,.42)] transition-transform hover:-translate-y-0.5"
+          >
+            Review 3 actions -&gt;
+          </button>
+        </div>
+      </section>
 
       {/* ── 2 · KPI strip — 6-across desktop, 2×3 grid on phone ────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">

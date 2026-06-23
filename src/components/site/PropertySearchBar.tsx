@@ -6,10 +6,10 @@ import { Search, MapPin, Loader2 } from "lucide-react";
 
 export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
   const router = useRouter();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState("West Linn, OR");
   const [type, setType] = useState("");
   const [price, setPrice] = useState("");
-  const [beds, setBeds] = useState("");
+  const [beds, setBeds] = useState("3");
   const [searchError, setSearchError] = useState("");
   const [navigating, setNavigating] = useState(false);
 

@@ -15,9 +15,9 @@ import {
 
 const heroStats = [
   [company.stats.annualVolume, "Annual volume"],
-  [company.stats.activeListings, "Active listings"],
-  [company.stats.propertiesSold, "Properties sold"],
-  [`${company.stats.agents}+`, "OR + WA brokers"],
+  [company.stats.propertiesSold, "Homes sold"],
+  [`${company.stats.agents}+`, "Brokers"],
+  [String(company.stats.citiesServed), "Cities served"],
 ];
 
 const values = [
@@ -59,7 +59,7 @@ export default function HomePage() {
 
             <div className="relative z-10 flex min-h-[calc(100svh_-_56px_-_66vw)] w-full flex-col justify-end px-5 pb-12 pt-7">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/72">
-                Portland · Lake Oswego · SW Washington
+                Portland & SW Washington
               </p>
               <h1 className="hero-text-shadow mt-4 font-display text-[2.2rem] font-normal leading-[0.98] text-white text-balance">
                 Find your place in the Pacific Northwest.
@@ -80,7 +80,7 @@ export default function HomePage() {
         </div>
 
         {/* ── DESKTOP: full-bleed overlay (unchanged) ── */}
-        <div className="relative hidden sm:block min-h-[92vh] overflow-hidden bg-[#0d0d0e]">
+        <div className="relative hidden min-h-[560px] overflow-hidden bg-[#0d0d0e] sm:block">
           <div className="absolute inset-0 ken-burns">
             <Image
               src={claudeHomeHero}
@@ -91,37 +91,31 @@ export default function HomePage() {
               className="object-cover object-[center_40%]"
             />
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(6,6,6,.62)_0%,rgba(6,6,6,.18)_32%,rgba(6,6,6,.30)_70%,rgba(6,6,6,.78)_100%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(210,160,80,0.08),transparent)]" />
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-overlay"
             style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "150px" }}
           />
 
-          <div className="relative z-10 flex min-h-[92vh] items-end">
-            <Container className="pt-20">
-              <div className="w-full pb-14 lg:pb-16 max-w-3xl">
+          <div className="relative z-10 flex min-h-[560px] items-end">
+            <div className="w-full px-8 pt-20 lg:px-[72px]">
+              <div className="w-full max-w-3xl pb-10">
                 <Reveal>
-                  <span className="hero-text-shadow eyebrow eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
+                  <span className="hero-text-shadow eyebrow eyebrow-light">Portland & SW Washington</span>
                 </Reveal>
                 <Reveal delay={0.08}>
-                  <h1 className="hero-text-shadow mt-5 max-w-[760px] font-display text-[clamp(3.1rem,6vw,5rem)] font-normal leading-[0.98] text-white text-balance">
+                  <h1 className="hero-text-shadow mt-5 max-w-[760px] font-display text-[clamp(3.1rem,5.6vw,4.4rem)] font-normal leading-[1] tracking-[-0.02em] text-white text-balance">
                     Find your place in the Pacific Northwest.
                   </h1>
                 </Reveal>
-                <Reveal delay={0.16}>
-                  <p className="mt-6 max-w-[610px] text-base leading-relaxed text-white/82 text-pretty sm:text-lg">
-                    The Portland area&apos;s most technologically advanced brokerage: real local guidance, cinematic
-                    property marketing, and an AI concierge that helps you move faster.
-                  </p>
-                </Reveal>
                 <Reveal delay={0.24}>
-                  <div className="mt-8">
+                  <div className="mt-7">
                     <PropertySearchBar dark />
                   </div>
                 </Reveal>
                 <Reveal delay={0.32}>
-                  <div className="mt-8 flex max-w-[760px] flex-wrap gap-x-10 gap-y-4 border-t border-white/18 pt-6">
+                  <div className="mt-7 flex max-w-[760px] flex-wrap gap-x-10 gap-y-4 border-t border-white/18 pt-6">
                     {heroStats.map(([n, l]) => (
                       <div key={l}>
                         <div className="font-display text-[1.85rem] leading-none text-white tabular-nums">{n}</div>
@@ -131,13 +125,7 @@ export default function HomePage() {
                   </div>
                 </Reveal>
               </div>
-            </Container>
-          </div>
-
-          {/* Scroll indicator — desktop only */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-white/50">
-            <span className="text-[0.65rem] uppercase tracking-widest">Scroll</span>
-            <div className="h-10 w-px bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
+            </div>
           </div>
         </div>
       </section>
@@ -149,8 +137,7 @@ export default function HomePage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <SectionHeading
               eyebrow="Featured listings"
-              title="Homes worth coming home to"
-              intro="A curated look at what's moving across the metro right now."
+              title="Now on the market"
             />
             <ButtonLink href="/property-search" variant="outline" className="hidden shrink-0 sm:inline-flex">
               View all listings <ArrowRight className="h-4 w-4" />
