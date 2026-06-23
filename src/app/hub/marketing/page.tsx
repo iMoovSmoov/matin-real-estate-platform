@@ -609,7 +609,7 @@ export default function MarketingStudioPage() {
 
       {/* KPI strip — every tile drills into the campaigns table or a record.
           R4: scroll-snap rail on phone so 6 tiles never orphan. */}
-      <KpiStrip cols={6} rail>
+      <KpiStrip cols={6}>
         <KpiCard
           label="Campaigns live"
           value={kpi.liveCount}

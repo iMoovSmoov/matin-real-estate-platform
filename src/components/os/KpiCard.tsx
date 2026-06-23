@@ -68,35 +68,41 @@ export function KpiCard({
   const interactive = typeof onDrill === "function";
   const body = (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[0.74rem] font-medium leading-none text-slate">{label}</p>
-        {/* R4: hide the icon chip on the smallest screens to tighten tiles. */}
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[0.72rem] font-medium leading-tight text-slate">{label}</p>
+        {/* Icon chip — hidden on phone to keep tiles tight; shown from sm up. */}
         {icon ? (
           <span className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-paper-200 text-slate ring-1 ring-inset ring-mist sm:flex">
             {icon}
           </span>
         ) : null}
       </div>
-      <div className="mt-3 flex items-end gap-2">
+      <div className="mt-1.5 flex flex-wrap items-end gap-x-2 gap-y-0.5 sm:mt-2.5">
         <span
           className={cn(
-            "font-sans text-[1.9rem] font-bold leading-none tabular-nums",
+            "font-sans text-[1.55rem] font-bold leading-none tabular-nums sm:text-[1.9rem]",
             VALUE_TONE[valueTone],
           )}
         >
           {value}
         </span>
-        {delta != null ? <span className="mb-1"><DeltaCaption delta={delta} tone={deltaTone} /></span> : null}
+        {delta != null ? (
+          <span className="mb-0.5">
+            <DeltaCaption delta={delta} tone={deltaTone} />
+          </span>
+        ) : null}
       </div>
+      {/* Secondary context line — hidden on phone (label+value+delta is enough at
+          a glance), shown from sm up where there's room. Keeps mobile tiles tight. */}
       {hint != null ? (
-        <p className="mt-1.5 text-[0.72rem] leading-tight text-slate">{hint}</p>
+        <p className="mt-1.5 hidden text-[0.72rem] leading-tight text-slate sm:block">{hint}</p>
       ) : null}
     </>
   );
 
-  // R4: tighter padding on phone, full padding from sm up.
-  const base =
-    "rounded-2xl border border-mist bg-cloud p-4 text-left shadow-soft sm:p-5";
+  // Premium depth via the elevation kit (hover-lift on desktop). Tight padding on
+  // phone so a 2-up grid of tiles is compact; full padding from sm up.
+  const base = "card-elevated p-3.5 text-left sm:p-5";
 
   if (interactive) {
     return (

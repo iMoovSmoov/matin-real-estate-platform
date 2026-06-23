@@ -15,7 +15,6 @@ import {
   CircleCheck,
   Search,
   X,
-  ChevronDown,
 } from "lucide-react";
 import { MatinMark, Logo } from "@/components/brand/Logo";
 import {
@@ -176,7 +175,6 @@ export default function TodayCommandCenter() {
 
   const [activeTab, setActiveTab] = useState<string>("My Work");
   const [query, setQuery] = useState("");
-  const [showMoreKpis, setShowMoreKpis] = useState(false);
 
   /* The Human Work Queue lives at the bottom of a long, single-column stack
      below xl. A KPI drill / "Review drafts" / tab change that swaps its content
@@ -411,34 +409,10 @@ export default function TodayCommandCenter() {
         approvals, and system failures.
       </p>
 
-      {/* ── KPI strip — 3 hero tiles on phone + "More metrics"; all 6 from sm ── */}
+      {/* ── KPI strip — compact 2-up grid on phone (all 6 visible at a glance,
+            no "More metrics" wall), 3-up at sm/lg, single 6-up row at xl. ── */}
       <div className="mt-4">
-        {/* phone: 3 hero tiles, rest behind a "More metrics" expander (R4 — no
-            orphaned tile: single-column hero set, expander reveals the rest) */}
-        <div className="sm:hidden">
-          <div className="grid grid-cols-1 gap-3">
-            {kpiTiles.slice(0, 3).map((t) => (
-              <Fragment key={t.key}>{t.el}</Fragment>
-            ))}
-            {showMoreKpis
-              ? kpiTiles.slice(3).map((t) => <Fragment key={t.key}>{t.el}</Fragment>)
-              : null}
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowMoreKpis((s) => !s)}
-            className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-mist bg-cloud px-3 text-[0.8rem] font-medium text-slate transition-colors hover:text-ink"
-          >
-            {showMoreKpis ? "Fewer metrics" : "More metrics"}
-            <ChevronDown
-              className={cn("h-3.5 w-3.5 transition-transform", showMoreKpis && "rotate-180")}
-              aria-hidden
-            />
-          </button>
-        </div>
-        {/* sm+: 3-up through the lg band (1024–1279 would cram 6 tiles beside
-            the rail), 6-up only at xl. 6 = 2·3 = clean rows, no orphaned tile. */}
-        <KpiStrip className="hidden sm:grid lg:grid-cols-3 xl:grid-cols-6">
+        <KpiStrip className="lg:grid-cols-3 xl:grid-cols-6">
           {kpiTiles.map((t) => (
             <Fragment key={t.key}>{t.el}</Fragment>
           ))}

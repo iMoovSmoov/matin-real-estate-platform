@@ -1295,7 +1295,7 @@ export default function BuyerAgreementBuilder() {
 
       {/* ── KPI strip (ticket 6 — money sub-stats, no orphan) ─────────────── */}
       <div className="mt-4">
-        <KpiStrip cols={5} rail>
+        <KpiStrip cols={5}>
           <KpiCard
             label="All agreements"
             value={kpis.out}

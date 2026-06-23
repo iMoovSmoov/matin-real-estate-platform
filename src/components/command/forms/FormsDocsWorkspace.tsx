@@ -500,7 +500,7 @@ export function FormsDocsWorkspace() {
       </div>
 
       {/* KPI strip — each tile FILTERS the packet list (saved-view drilldown). */}
-      <KpiStrip cols={5} rail>
+      <KpiStrip cols={5}>
         <KpiCard
           label="Packets in progress"
           value={m.inProgress}

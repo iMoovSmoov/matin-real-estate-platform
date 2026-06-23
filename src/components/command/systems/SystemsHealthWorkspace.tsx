@@ -524,7 +524,7 @@ export function SystemsHealthWorkspace({
       {/* ════════════ LEFT — the plumbing, inspectable ════════════ */}
       <div className="order-2 min-w-0 space-y-5 xl:order-1">
         {/* KPI strip — scroll-snap rail on phone (R4), trend deltas (ticket 4) */}
-        <KpiStrip cols={5} rail>
+        <KpiStrip cols={5}>
           <KpiCard
             label="Integrations connected"
             value={connected}

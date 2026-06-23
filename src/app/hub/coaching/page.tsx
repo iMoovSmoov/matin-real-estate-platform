@@ -183,7 +183,7 @@ export default function CoachingPage() {
           R4: 5 tiles is odd, so a 2-up phone grid would orphan the 5th tile;
           use a horizontal scroll-snap RAIL on phone (no orphan) that reverts to
           a clean 3-up grid at sm and a 5-up row at lg. */}
-      <KpiStrip cols={5} rail>
+      <KpiStrip cols={5}>
         <KpiCard
           label="Practice sessions"
           value={k.practiceSessions}

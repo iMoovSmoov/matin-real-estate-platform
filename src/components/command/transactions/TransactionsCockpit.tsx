@@ -233,7 +233,7 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
   return (
     <div className="space-y-5">
       {/* KPI strip — count + attributed $, scroll-snap rail on phone (R4) */}
-      <KpiStrip cols={5} rail>
+      <KpiStrip cols={5}>
         <KpiCard
           label="Under contract"
           value={kpis.underContract}
