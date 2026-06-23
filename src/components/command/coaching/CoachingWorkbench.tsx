@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useScrollIntoView, prefersReducedMotion } from "./useScrollIntoView";
 import {
   ArrowUp,
@@ -325,15 +325,23 @@ function nudgeFromReply(text: string): Partial<Record<string, number>> {
   return nudge;
 }
 
-export function CoachingWorkbench({
-  scenarios,
-  onAskAi,
-}: {
+/** Imperative handle so a parent CTA (the dark roleplay hero band on the
+    Coaching page) can load a scenario and start a live practice — WITHOUT
+    lifting the workbench's roleplay state or opening the global sidecar. */
+export type CoachingWorkbenchHandle = {
+  /** Load a scenario by id and immediately start a live practice session. */
+  startScenario: (id: string) => void;
+};
+
+type CoachingWorkbenchProps = {
   scenarios: CoachingScenario[];
   /** Explicit "Ask Matin" affordance — the ONLY path allowed to open the global
       AI sidecar (the live roleplay itself streams inline, never the sidecar). */
   onAskAi?: (context: string) => void;
-}) {
+};
+
+export const CoachingWorkbench = forwardRef<CoachingWorkbenchHandle, CoachingWorkbenchProps>(
+  function CoachingWorkbench({ scenarios, onAskAi }, ref) {
   // Library = broker-approved records + the synthetic Zillow ghosting drill,
   // ordered to match the wireframe storyline.
   const library = useMemo<CoachingScenario[]>(() => {
@@ -539,6 +547,38 @@ export function CoachingWorkbench({
   }
 
   const scenarioSlug = (active?.id ?? activeId).toLowerCase();
+
+  // Parent-driven start (the page's dark "Start roleplay" hero). Loads the
+  // scenario (without selectScenario's practicing-reset) and opens the live
+  // composer — the same inline practice flow the in-pane button triggers.
+  useImperativeHandle(
+    ref,
+    () => ({
+      startScenario(id: string) {
+        if (id !== activeId) {
+          setActiveId(id);
+          setLiveTurns([]);
+          setLiveCoach(null);
+          setDraft("");
+          setAgentTurnCount(0);
+          setLiveScores(scoresFromSeed(seedFor(id)));
+          setSwapKey((k) => k + 1);
+        }
+        setPracticing(true);
+        // Always surface the roleplay pane (even on desktop) so the CTA result
+        // is visible, then focus the composer to invite the first reply.
+        scrollTranscriptIntoView({ always: true });
+        requestAnimationFrame(() => {
+          composerRef.current?.focus();
+          scrollRef.current?.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: prefersReducedMotion() ? "auto" : "smooth",
+          });
+        });
+      },
+    }),
+    [activeId, scrollTranscriptIntoView],
+  );
 
   return (
     // R8: real responsive Tailwind — 1-col phone, md two-column, xl three-column.
@@ -916,7 +956,9 @@ export function CoachingWorkbench({
       </section>
     </div>
   );
-}
+  },
+);
+CoachingWorkbench.displayName = "CoachingWorkbench";
 
 /** Turn the plan sentence into discrete, assignable CRM-task drills. */
 function buildPlanDrills(_title: string, seed: Seed): string[] {

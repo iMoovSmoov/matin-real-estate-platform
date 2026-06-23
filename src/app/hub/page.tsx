@@ -56,7 +56,6 @@ import { LivePipelineChart } from "@/components/command/today/TodayCharts";
 import { RecentActivityFeed } from "@/components/command/today/RecentActivityFeed";
 import { BriefingBand } from "@/components/command/today/BriefingBand";
 import { TodayKpiTile } from "@/components/command/today/TodayKpiTile";
-import { AiOvernightSummary } from "@/components/command/today/AiOvernightSummary";
 import { TodayFocusCard } from "@/components/command/today/TodayFocusCard";
 import { FeaturedListings } from "@/components/command/today/FeaturedListings";
 import { AgentLeaderboard } from "@/components/command/today/AgentLeaderboard";
@@ -105,6 +104,12 @@ const VIEWS: SavedView[] = TAB_KEYS.map((t) => ({
 /* ── Pipeline $ total (chart header) ─────────────────────────────────────── */
 const PIPELINE_TOTAL = reportMetrics.pipeline.reduce((s, p) => s + p.value, 0);
 const PIPELINE_DEALS = reportMetrics.pipeline.reduce((s, p) => s + p.deals, 0);
+
+/* ── Overnight-briefing stat row — every figure DERIVED (no fabricated metric):
+      QUEUE_TOTAL reconciles to the work-queue length, drafts/new-leads to the
+      todayKpis bundle, avg-response to the real automation scorecard. ───────── */
+const QUEUE_TOTAL = workQueue.length;
+const SPEED_TO_LEAD_MIN = reportMetrics.automationImpact.speedToLeadMin;
 
 /* ── Brokerage Calendar + Risk Alerts — BACKED BY REAL DATA (S1.9) ────────── */
 type AlertRow = {
@@ -339,74 +344,72 @@ export default function TodayCommandCenter() {
     </>
   );
 
-  /* AI block (overnight summary + today's focus) — shown above the queue on
-     mobile and at the top of the sticky rail on desktop. Same elements reused. */
-  const aiBlock = (
-    <>
-      <AiOvernightSummary onReviewDrafts={() => goToTab("AI Drafts")} />
-      <TodayFocusCard />
-    </>
-  );
+  /* AI focus card — the single next-best seller to work. Shown above the queue
+     on mobile and at the top of the sticky rail on desktop. The overnight
+     briefing now lives full-width at the top of the page (design's signature
+     card), so the rail carries the next-best-action insight, not a 2nd summary. */
+  const aiBlock = <TodayFocusCard />;
 
   return (
     <div className="space-y-[18px] px-4 py-[22px] md:px-[22px]">
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-[2rem] font-normal leading-[1.05] tracking-[-0.015em] text-ink md:text-[2.35rem]">
-            Good morning, Chase.
-          </h1>
-          <p className="mt-1.5 text-[0.86rem] leading-snug text-slate">
-            5 things need you today · pipeline is healthy · response time is beating target.
-          </p>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-ink/10 bg-cloud px-3.5 py-2.5 shadow-soft">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[conic-gradient(#1f6b4a_0_92%,#e7f1ea_0)]">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cloud text-[0.82rem] font-bold text-ink tabular-nums">
-              92
-            </div>
-          </div>
-          <div>
-            <p className="text-[0.7rem] leading-none text-slate">Brokerage vitals</p>
-            <p className="mt-1 text-[0.84rem] font-semibold text-success">Strong</p>
-          </div>
-        </div>
-      </section>
+      {/* ── 1 · Image-led briefing hero — real West Linn office photography, the
+            time-aware "Good morning, Jordan" greeting, real open-pipeline figure +
+            goal-pace radial, and the AI/human CTAs. Richer than the design's plain
+            greeting row; the brokerage-vital score lives in the rail below. ──── */}
+      <BriefingBand />
 
-      <section className="surface-ai relative overflow-hidden rounded-2xl border border-[#1d3b30] p-5 shadow-[0_18px_44px_rgba(0,0,0,.28),0_0_30px_rgba(31,107,74,.18)] md:px-6">
-        <span aria-hidden className="ai-bloom -right-16 -top-20" />
+      {/* ── 2 · Overnight briefing — the design's signature dark green-black AI
+            card (linear-gradient #13231b→#0a1410). Every figure DERIVED: items in
+            queue, drafts pending, new leads, real avg speed-to-lead. The CTA jumps
+            the work queue to the AI Drafts saved view (preserved behavior). ──── */}
+      <section className="relative overflow-hidden rounded-2xl border border-[#1d3b30] bg-[linear-gradient(155deg,#13231b,#0a1410)] p-[22px] shadow-[0_18px_44px_rgba(0,0,0,.34),inset_0_0_0_1px_rgba(31,107,74,.16),0_0_30px_rgba(31,107,74,.22)] sm:px-6">
+        <span aria-hidden className="ai-bloom -right-12 -top-20" />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <div className="mb-3 flex items-center gap-2.5">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-success text-cloud shadow-[0_0_20px_rgba(31,107,74,.45)]">
+              <span className="flex h-[22px] w-[22px] items-center justify-center rounded-md bg-gold text-cloud shadow-[0_0_20px_rgba(31,107,74,.45)]">
                 <MatinMark theme="white" className="h-3.5 w-3.5" />
               </span>
-              <span className="eyebrow text-[0.66rem] text-[#7fce9f]">
+              <span className="text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-[#7fce9f]">
                 Matin AI · Overnight briefing
               </span>
             </div>
-            <p className="max-w-[46ch] font-display text-[1.42rem] font-normal leading-[1.22] text-cloud md:text-[1.72rem]">
-              While you slept, I handled 7 routine tasks and surfaced{" "}
-              <span className="text-[#86d2a4]">3 that need your eyes</span> - a closing at risk,
-              a hot buyer, and a high-equity seller.
+            <p className="max-w-[48ch] font-display text-[1.3rem] font-normal leading-[1.3] text-cloud sm:text-[1.42rem]">
+              While you slept, I triaged your overnight activity into{" "}
+              <span className="text-[#86d2a4]">{QUEUE_TOTAL} items that need you</span> and
+              drafted {K.aiDraftsWaiting} replies for review — nothing has gone to a client yet.
             </p>
-            <div className="mt-4 flex flex-wrap gap-6 text-[0.72rem] text-slate-400">
-              <span><strong className="block text-[1.25rem] leading-none text-cloud">7</strong> auto-handled</span>
-              <span><strong className="block text-[1.25rem] leading-none text-[#86d2a4]">3</strong> need approval</span>
-              <span><strong className="block text-[1.25rem] leading-none text-cloud">41</strong> new leads</span>
-              <span><strong className="block text-[1.25rem] leading-none text-cloud">4 min</strong> avg response</span>
+            <div className="mt-4 flex flex-wrap gap-x-[26px] gap-y-3 tabular-nums">
+              <span className="block">
+                <span className="block text-[1.2rem] font-semibold leading-none text-cloud">{QUEUE_TOTAL}</span>
+                <span className="mt-1 block text-[0.7rem] text-white/55">need you</span>
+              </span>
+              <span className="block">
+                <span className="block text-[1.2rem] font-semibold leading-none text-[#86d2a4]">{K.aiDraftsWaiting}</span>
+                <span className="mt-1 block text-[0.7rem] text-white/55">drafts ready</span>
+              </span>
+              <span className="block">
+                <span className="block text-[1.2rem] font-semibold leading-none text-cloud">{K.newLeads}</span>
+                <span className="mt-1 block text-[0.7rem] text-white/55">new leads</span>
+              </span>
+              <span className="block">
+                <span className="block text-[1.2rem] font-semibold leading-none text-cloud">{SPEED_TO_LEAD_MIN} min</span>
+                <span className="mt-1 block text-[0.7rem] text-white/55">avg response</span>
+              </span>
             </div>
           </div>
           <button
             type="button"
             onClick={() => goToTab("AI Drafts")}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1f6b4a,#2f8a60_70%,#c9a24b_150%)] px-4 text-[0.86rem] font-semibold text-cloud shadow-[0_10px_26px_rgba(31,107,74,.42)] transition-transform hover:-translate-y-0.5"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#1f6b4a,#2f8a60_70%,#c9a24b_150%)] px-4 text-[0.86rem] font-semibold text-cloud shadow-[0_10px_26px_rgba(31,107,74,.42)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
           >
-            Review 3 actions -&gt;
+            <span>Review {K.aiDraftsWaiting} drafts</span>
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
       </section>
 
-      {/* ── 2 · KPI strip — 6-across desktop, 2×3 grid on phone ────────────── */}
+      {/* ── 3 · KPI strip — 6-across desktop, 2×3 grid on phone ────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
         {kpiTiles}
       </div>
@@ -414,7 +417,7 @@ export default function TodayCommandCenter() {
       {/* AI block — mobile: floats above the work queue. Desktop: in the rail. */}
       <div className="space-y-5 lg:hidden">{aiBlock}</div>
 
-      {/* ── 3 · Two-region workspace ──────────────────────────────────────── */}
+      {/* ── 4 · Two-region workspace ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {/* PRIMARY (left, 8-col) — Work Queue → Live Pipeline → Calendar+Risk */}
         <div className="flex min-w-0 flex-col gap-5">
@@ -611,10 +614,10 @@ export default function TodayCommandCenter() {
         </div>
       </div>
 
-      {/* ── 4 · Featured listings carousel — full width ───────────────────── */}
+      {/* ── 5 · Featured listings carousel — full width ───────────────────── */}
       <FeaturedListings />
 
-      {/* ── 5 · Recent activity feed — full width ─────────────────────────── */}
+      {/* ── 6 · Recent activity feed — full width ─────────────────────────── */}
       <RecentActivityFeed limit={8} />
 
       {/* ── Record drawer (row click) ─────────────────────────────────────── */}

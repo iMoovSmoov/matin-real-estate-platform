@@ -195,6 +195,39 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
     };
   }, [transactions]);
 
+  /* ── Pipeline-by-stage (design os-tx) — real stage counts, ordered by the
+     deal's own stageIndex so the bar ramps lightest→deepest along the
+     contract-to-close progression. ───────────────────────────────────────── */
+  const pipeline = useMemo(() => {
+    // Estate-green ramp (lightest early-stage → deepest closing), per design.
+    const RAMP = ["#cfe0d7", "#a9cdba", "#7fb499", "#549a78", "#2f8a60", "#1f6b4a"];
+    const counts = new Map<string, number>();
+    const order = new Map<string, number>();
+    for (const t of transactions) {
+      counts.set(t.stage, (counts.get(t.stage) ?? 0) + 1);
+      const cur = order.get(t.stage);
+      if (cur == null || t.stageIndex < cur) order.set(t.stage, t.stageIndex);
+    }
+    const rows = [...counts.keys()]
+      .sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0))
+      .map((stage, i) => ({
+        stage,
+        deals: counts.get(stage) ?? 0,
+        color: RAMP[Math.min(i, RAMP.length - 1)],
+      }));
+    return { rows, total: transactions.length };
+  }, [transactions]);
+
+  /* ── Deal radar (design os-tx dark AI band) — the single highest-risk deal,
+     pinned to 8912 SE Hawthorne when it carries a flag, else any flagged deal. */
+  const radar = useMemo(
+    () =>
+      transactions.find((t) => t.id === HIGH_RISK_ID && t.riskFlag != null) ??
+      transactions.find((t) => t.riskFlag != null) ??
+      null,
+    [transactions],
+  );
+
   /* ── List: filter by view + search, then order (high-risk pinned) ─────── */
   const list = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -279,6 +312,97 @@ export function TransactionsCockpit({ transactions }: { transactions: Transactio
           onDrill={resetFilters}
         />
       </KpiStrip>
+
+      {/* Pipeline by stage (design os-tx) — stacked stage bar from real counts.
+          A data visualization (not a KPI tile), so it reads, it doesn't drill. */}
+      <div className="rounded-2xl border border-mist bg-cloud p-4 shadow-soft sm:p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-[0.84rem] font-semibold text-ink">Pipeline by stage</p>
+          <span className="text-[0.72rem] text-slate tabular-nums">
+            {pipeline.total} deals · contract to close
+          </span>
+        </div>
+        <div className="flex h-3 gap-[3px] overflow-hidden rounded-md">
+          {pipeline.rows.map((s) => (
+            <div
+              key={s.stage}
+              className="min-w-[3px]"
+              style={{ flexGrow: s.deals, flexBasis: 0, background: s.color }}
+              title={`${s.stage}: ${s.deals}`}
+            />
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2.5">
+          {pipeline.rows.map((s) => (
+            <div key={s.stage} className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-[3px]"
+                  style={{ background: s.color }}
+                />
+                <span className="truncate text-[0.72rem] text-slate">{s.stage}</span>
+              </div>
+              <div className="mt-0.5 pl-[14px] text-[0.86rem] font-semibold text-ink tabular-nums">
+                {s.deals}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Deal radar — dark AI band (design os-tx). Surfaces the live at-risk deal
+          with the same Matin treatment as the design: View deal routes into the
+          cockpit; Ask Matin opens the sidecar with an auto-prompt to draft the
+          inspection-response addendum (preserves openAi(context, autoPrompt)). */}
+      {radar ? (
+        <CalloutCard
+          tone="ai"
+          title={
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+              <span>
+                {radar.address.replace(/, .*$/, "")}
+                {radar.riskFlag
+                  ? ` — ${radar.riskFlag.split(/[;,]/)[0].trim().toLowerCase()}`
+                  : ""}
+              </span>
+              <StatusChip tone="danger" variant="solid">
+                <TriangleAlert className="h-2.5 w-2.5" /> At risk
+              </StatusChip>
+            </span>
+          }
+          action={
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => selectDeal(radar.id)}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/20 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-cloud"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+                View deal
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  openAi(
+                    `Working on: Transactions / ${radar.address.replace(/, .*$/, "")} (${radar.id})`,
+                    `Draft the inspection-response repair addendum for ${radar.address.replace(/, .*$/, "")} from the inspection thread, then summarize exactly what needs my approval before it goes out for e-signature.`,
+                  )
+                }
+                className="btn-accent inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold"
+              >
+                <MatinMark theme="white" className="h-3.5 w-3.5" />
+                <span>Ask Matin</span>
+              </button>
+            </div>
+          }
+        >
+          <p>
+            {radar.riskFlag ? `${radar.riskFlag}. ` : ""}Matin can draft the
+            inspection-response addendum from the email thread for your approval
+            before it goes out for e-signature.
+          </p>
+        </CalloutCard>
+      ) : null}
 
       {/* Main split: list + one-deal screen — stacks at lg (R1) */}
       <div className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">

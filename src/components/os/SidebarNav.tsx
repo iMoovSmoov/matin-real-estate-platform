@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MatinMark } from "@/components/brand/Logo";
+import { roles, getAgent, derived, sellerLeads } from "@/lib/data";
+import { Avatar } from "./Avatar";
 import { useAiSidecar } from "./AISidecar";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -68,6 +70,25 @@ export function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/* ── Live nav badges — REAL counts only (design's segmented nav with counts).
+   Every value is a derived count off the canonical rows (anti-fabrication §3.2),
+   so a badge can never drift from the section it summarizes. `warn` tone is
+   carried by color only when a section holds a real blocker. */
+type NavBadge = { count: number; tone?: "warn" };
+const NAV_BADGES: Record<string, NavBadge> = {
+  "/hub/crm": { count: derived.newLeads }, // leads in "New" stage
+  "/hub/cash-offer": { count: sellerLeads.length }, // active cash-offer opportunities
+  "/hub/listing-launch": {
+    count: derived.listingLaunches, // launches still in flight
+    tone: derived.launchesBlocked > 0 ? "warn" : undefined,
+  },
+  "/hub/buyer-agreements": { count: derived.agreementsAwaitingSignature }, // awaiting e-sign
+  "/hub/transactions": { count: derived.openTransactions }, // open deals
+};
+
+/** Real brokerage owner (principal broker) — the signed-in operator. */
+const OWNER_NAME = getAgent(roles.principalBroker)?.name ?? "Jordan Matin";
+
 export function SidebarNav({
   pathname,
   collapsed = false,
@@ -82,25 +103,24 @@ export function SidebarNav({
   const { openAi } = useAiSidecar();
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-ink-800 to-ink-900 text-slate-300">
-      {/* Brand block — quiet MatinOS wordmark. */}
+    <div className="flex h-full flex-col bg-ink-900 text-slate-300">
+      {/* Brand block — white M chip + quiet MatinOS wordmark (design treatment:
+          the brand mark flips to a bright chip on the charcoal rail). */}
       <div
         className={cn(
-          "flex h-14 items-center border-b border-white/[0.06]",
-          collapsed ? "justify-center px-0" : "gap-2.5 px-4",
+          "flex h-14 items-center",
+          collapsed ? "justify-center px-0" : "gap-2.5 px-3.5",
         )}
       >
-        {/* Brand mark seated in a faceted chip — subtle gradient + brass
-            ring + inset highlight for depth on the dark rail. */}
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-ink-700 to-ink-900 ring-1 ring-brass/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-          <MatinMark className="h-[1.1rem] w-[1.1rem]" theme="white" />
+        <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-cloud shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+          <MatinMark className="h-[1.05rem] w-[1.05rem]" theme="dark" />
         </span>
         {!collapsed ? (
           <div className="min-w-0 leading-tight">
-            <span className="block truncate font-sans text-[0.92rem] font-bold uppercase tracking-[0.14em] text-cloud">
+            <span className="block truncate font-sans text-[0.78rem] font-semibold uppercase tracking-[0.16em] text-cloud">
               MatinOS
             </span>
-            <span className="block truncate text-[0.66rem] font-medium tracking-wide text-slate-300/70">
+            <span className="block truncate text-[0.62rem] font-medium tracking-wide text-[#6c6c74]">
               Brokerage OS
             </span>
           </div>
@@ -142,35 +162,57 @@ export function SidebarNav({
         </ul>
       </nav>
 
-      {/* Bottom context block */}
+      {/* Bottom block — design's Ask-Matin pill (preserves openAi) over the
+          signed-in operator identity (real principal broker). */}
       <div className={cn("border-t border-white/[0.06]", collapsed ? "p-2" : "p-3")}>
         {collapsed ? (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2.5">
             <button
               type="button"
               onClick={() => openAi("Working on: Matin Brokerage OS")}
               title="Ask Matin"
               aria-label="Ask Matin"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gold/35 bg-gold/[0.10] shadow-[0_6px_16px_-6px_rgba(31,107,74,0.5)] transition-colors hover:bg-gold/[0.18]"
+              className="btn-accent flex h-8 w-8 items-center justify-center rounded-lg"
             >
               <MatinMark theme="white" className="h-4 w-4" />
             </button>
+            <Avatar
+              name={OWNER_NAME}
+              slug={roles.principalBroker}
+              size={30}
+              className="rounded-full ring-1 ring-white/10"
+            />
           </div>
         ) : (
           <>
-            <p className="px-1 text-[0.68rem] leading-tight text-slate-300/60">
-              <span className="text-slate-300/90">Chase Bright</span> · Broker · West Linn
-            </p>
             <button
               type="button"
               onClick={() => openAi("Working on: Matin Brokerage OS")}
-              className="mt-2 inline-flex w-full items-center gap-2 rounded-lg border border-gold/35 bg-gold/[0.10] px-3 py-2 text-left shadow-[0_6px_18px_-6px_rgba(31,107,74,0.5)] transition-colors hover:bg-gold/[0.16]"
+              className="btn-accent flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 text-left"
             >
-              <MatinMark theme="white" className="h-3.5 w-3.5 shrink-0" />
-              <span className="text-[0.74rem] font-semibold text-gold-bright">
+              <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-white/[0.16]">
+                <MatinMark theme="white" className="h-3 w-3" />
+              </span>
+              <span className="text-[0.8rem] font-semibold text-[#eaf6ee]">
                 Ask Matin
               </span>
             </button>
+            <div className="mt-3 flex items-center gap-2.5">
+              <Avatar
+                name={OWNER_NAME}
+                slug={roles.principalBroker}
+                size={30}
+                className="rounded-full ring-1 ring-white/10"
+              />
+              <div className="min-w-0 leading-tight">
+                <div className="truncate text-[0.74rem] font-semibold text-cloud">
+                  {OWNER_NAME}
+                </div>
+                <div className="truncate text-[0.62rem] text-[#6c6c74]">
+                  Principal Broker · West Linn
+                </div>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -192,6 +234,8 @@ function NavLink({
   deemphasized?: boolean;
 }) {
   const Icon = item.icon;
+  const badge = NAV_BADGES[item.href];
+  const showBadge = Boolean(badge && badge.count > 0);
 
   if (collapsed) {
     return (
@@ -204,7 +248,7 @@ function NavLink({
           className={cn(
             "group relative flex items-center justify-center rounded-lg py-2 transition-colors",
             active
-              ? "bg-gold/[0.15] text-gold-bright"
+              ? "bg-[rgba(47,138,96,0.15)] text-[#86d2a4]"
               : "text-slate-300/70 hover:bg-cloud/[0.06] hover:text-cloud",
           )}
         >
@@ -233,10 +277,10 @@ function NavLink({
         className={cn(
           "group relative flex items-center gap-2.5 rounded-lg px-3 py-[0.46rem] text-[0.78rem] font-medium transition-colors",
           active
-            ? "bg-gold/[0.15] text-gold-bright"
+            ? "bg-[rgba(47,138,96,0.15)] text-[#86d2a4]"
             : cn(
                 "hover:bg-cloud/[0.06] hover:text-cloud",
-                deemphasized ? "text-slate-300/55" : "text-slate-300/85",
+                deemphasized ? "text-slate-300/50" : "text-slate-300/75",
               ),
         )}
       >
@@ -249,10 +293,24 @@ function NavLink({
         <Icon
           className={cn(
             "h-[1.05rem] w-[1.05rem] shrink-0 transition-colors",
-            active ? "text-gold-bright" : "text-slate-300/55 group-hover:text-cloud",
+            active ? "text-[#86d2a4]" : "text-slate-300/45 group-hover:text-cloud",
           )}
         />
-        <span className="truncate">{item.label}</span>
+        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        {showBadge ? (
+          <span
+            className={cn(
+              "shrink-0 tabular-nums text-[0.62rem] font-semibold",
+              active
+                ? "text-[#86d2a4]"
+                : badge!.tone === "warn"
+                  ? "text-warn"
+                  : "text-slate-300/45",
+            )}
+          >
+            {badge!.count}
+          </span>
+        ) : null}
       </Link>
     </li>
   );

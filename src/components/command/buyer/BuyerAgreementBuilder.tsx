@@ -409,6 +409,16 @@ export default function BuyerAgreementBuilder() {
 
   const tmpl = TEMPLATES.find((t) => t.key === template) ?? TEMPLATES[1];
 
+  // Cross-record AI "next action" radar (design os-buyer dark band): the most
+  // actionable agreement — an envelope awaiting signature, else the next draft
+  // ready to prep & send. Real records only.
+  const radar =
+    records.find((b) => b.agreementStatus === "Sent") ??
+    records.find((b) => b.agreementStatus === "Not Signed") ??
+    null;
+  const radarSent = radar?.agreementStatus === "Sent";
+  const radarMonths = radar ? repMonths(radar.timeline) : 0;
+
   /* ── Mutations ─────────────────────────────────────────────────────────── */
   function patchSelected(patch: Partial<BuyerAgreement>) {
     setRecords((prev) => prev.map((b) => (b.id === buyer!.id ? { ...b, ...patch } : b)));
@@ -1337,6 +1347,59 @@ export default function BuyerAgreementBuilder() {
           />
         </KpiStrip>
       </div>
+
+      {/* Deal radar — dark AI band (design os-buyer). Same Matin treatment as the
+          design's "ready to send" card: Open record loads it into the builder;
+          Ask Matin opens the sidecar with an auto-prompt (preserves
+          openAi(context, autoPrompt)). Real records only. */}
+      {radar ? (
+        <div className="mt-[18px]">
+          <CalloutCard
+            tone="ai"
+            title={
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span>{radar.name} —</span>
+                <span className="text-[#86d2a4]">
+                  {radarSent ? "awaiting signature" : "buyer rep ready to send"}
+                </span>
+              </span>
+            }
+            action={
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => selectRecord(radar.id)}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/20 bg-white/[0.04] px-3 py-1.5 text-[0.78rem] font-medium text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-cloud"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Open record
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openAi(
+                      `Working on: Buyer Agreements / ${radar.name} · OREF C-565`,
+                      radarSent
+                        ? `Draft a warm e-signature reminder to ${radar.name} for the buyer representation agreement, and tell me if anything is blocking signature.`
+                        : `Prep ${radar.name}'s OREF C-565 buyer representation agreement for e-signature — confirm the ${radarMonths}-month term and compensation comply with our broker rules, and flag any missing fields before I send.`,
+                    )
+                  }
+                  className="btn-accent inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[0.78rem] font-semibold"
+                >
+                  <MatinMark theme="white" className="h-3.5 w-3.5" />
+                  <span>Ask Matin</span>
+                </button>
+              </div>
+            }
+          >
+            <p>
+              {radarSent
+                ? `Envelope delivered to ${radar.email} · auto-reminder armed. ${radar.agentName.split(" ")[0]} can nudge now, or have Matin draft the follow-up.`
+                : `Pre-filled from the CRM — ${radarMonths}-month term, ${compactUsd(radar.budgetMin)}–${compactUsd(radar.budgetMax)} band, NAR-compliant language verified. Open to review, or have Matin prep it for e-signature.`}
+            </p>
+          </CalloutCard>
+        </div>
+      ) : null}
 
       {/* Mobile pane switcher (R1) */}
       <div className="mt-4 lg:hidden">

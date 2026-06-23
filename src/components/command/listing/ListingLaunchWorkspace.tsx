@@ -710,10 +710,27 @@ export function ListingLaunchWorkspace({ listings }: { listings: ListingPipeline
 
   return (
     <div className="space-y-5">
-      {/* Subtitle / eyebrow */}
-      <p className="text-[13px] text-slate">
-        Automated listing workflow: intake → docs → photos → MLS → marketing → seller updates.
-      </p>
+      {/* Subtitle + primary launch CTA — matches the design's #os-listing header.
+          "Launch to MLS" docks the working Matin AI sidecar with a launch-readiness
+          auto-prompt for the selected record (real openAi behavior, preserved). */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13px] text-slate">
+          Automated listing workflow: intake → docs → photos → MLS → marketing → seller updates.
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            openAi(
+              contextLine,
+              `Run the MLS launch-readiness check for ${selected.address}: confirm what's complete and list every item still blocking publish.`,
+            )
+          }
+          className="btn-accent inline-flex shrink-0 items-center gap-1.5 rounded-[9px] px-[15px] py-[9px] text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+        >
+          <MatinMark theme="white" className="h-3.5 w-3.5" />
+          Launch to MLS
+        </button>
+      </div>
 
       {/* KPI strip — 2-up phone, 3-up sm + lg (the 1024–1279 'lg band' would
           cram six tiles into ~120px each beside the 280px rail), 6-up only at
@@ -1159,7 +1176,9 @@ function ListingRecordCard({
 
   return (
     <div className="accent-edge overflow-hidden rounded-2xl border border-mist bg-cloud shadow-soft">
-      {/* 16:9 real hero photo (G-A #6 — deterministic by record id) */}
+      {/* 16:9 real hero photo (G-A #6 — deterministic by record id) with the
+          design's #os-listing price + specs overlay (gradient scrim, Fraunces
+          price, beds/baths/sqft line). */}
       <div className="relative">
         <PropertyThumb
           src={heroPhoto}
@@ -1167,6 +1186,18 @@ function ListingRecordCard({
           rounded={false}
           alt={`${listing.address}, ${listing.city}`}
         />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/65 via-ink/10 to-transparent"
+          aria-hidden
+        />
+        <div className="pointer-events-none absolute inset-x-4 bottom-3">
+          <p className="font-display text-[1.25rem] font-medium leading-none text-cloud tabular-nums">
+            ${listing.price.toLocaleString()}
+          </p>
+          <p className="mt-1 text-[0.74rem] font-medium tabular-nums text-cloud/85">
+            {listing.beds} bd · {listing.baths} ba · {listing.sqft.toLocaleString()} sf
+          </p>
+        </div>
         <span className="absolute right-3 top-3">
           <StatusChip tone={stageTone(listing)} variant="solid">
             {listing.stage}

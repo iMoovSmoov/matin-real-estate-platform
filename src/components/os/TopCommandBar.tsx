@@ -78,7 +78,7 @@ export function TopCommandBar({
         <span className="hidden text-[0.76rem] tabular-nums text-slate sm:inline">
           Tue, Jun 23
         </span>
-        <Avatar name="Chase Bright" slug="chase-bright" size={31} className="rounded-lg" />
+        <Avatar name="Jordan Matin" slug="jordan-matin" size={31} className="rounded-lg" />
       </div>
     </header>
   );

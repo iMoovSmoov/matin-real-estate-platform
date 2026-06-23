@@ -18,12 +18,10 @@ import {
   KpiCard,
   StatusChip,
   Dot,
-  DataTable,
   AiPanel,
   Avatar,
   EmptyState,
   Skeleton,
-  type Column,
   type AIAction,
 } from "@/components/os";
 import type { ReactNode } from "react";
@@ -428,71 +426,6 @@ export function SystemsHealthWorkspace({
     ]);
   }
 
-  // ── Integration table columns ────────────────────────────────────────────
-  const integrationColumns: Column<Integration>[] = [
-    {
-      key: "name",
-      header: "System",
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-2.5">
-          {/* Real vendor mark in a white chip (ticket 1) */}
-          <VendorMark provider={row.provider ?? row.name} name={row.name} size={22} />
-          <div className="min-w-0">
-            <div className="truncate text-[0.84rem] font-semibold leading-tight text-ink">
-              {row.name}
-            </div>
-            <div className="truncate text-[0.72rem] leading-tight text-slate">
-              {row.category}
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "provider",
-      header: "Provider",
-      render: (row) => (
-        <span className="text-[0.8rem] text-slate">{row.provider ?? row.name}</span>
-      ),
-    },
-    {
-      key: "status",
-      header: "Status",
-      sortable: true,
-      primary: true,
-      render: (row) => (
-        <StatusChip tone={HEALTH_TONE[row.status]}>
-          <Dot tone={HEALTH_TONE[row.status]} />
-          {row.status}
-        </StatusChip>
-      ),
-    },
-    {
-      key: "records",
-      header: "Records",
-      align: "right",
-      sortable: true,
-      render: (row) => (
-        <span className="text-[0.82rem] tabular-nums text-slate">
-          {fmtRecords(row.recordsSynced ?? row.records)}
-        </span>
-      ),
-    },
-    {
-      key: "lastSync",
-      header: "Sync",
-      render: (row) => {
-        const bad = row.status !== "Healthy";
-        return (
-          <span className={cn("text-[0.8rem] tabular-nums", bad ? "text-danger" : "text-slate")}>
-            {row.lastSync ?? "—"}
-          </span>
-        );
-      },
-    },
-  ];
-
   // ── Skeleton ──────────────────────────────────────────────────────────────
   if (!ready) {
     return (
@@ -630,28 +563,79 @@ export function SystemsHealthWorkspace({
             </div>
           </header>
 
-          <DataTable<Integration>
-            columns={integrationColumns}
-            rows={sortedIntegrations}
-            getRowId={(r) => r.name}
-            responsive
-            onRowClick={(r) => setActiveIntegrationName(r.name)}
-            utilityRight={
-              <span className="inline-flex items-center gap-3 text-[0.74rem] tabular-nums">
-                <span className="inline-flex items-center gap-1.5 text-success">
-                  <Dot tone="success" /> {connected} healthy
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-warn">
-                  <Dot tone="warn" />{" "}
-                  {integrations.filter((i) => i.status === "Needs auth").length} needs auth
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-danger">
-                  <Dot tone="danger" />{" "}
-                  {integrations.filter((i) => i.status === "Failing").length} failing
-                </span>
+          {/* Design's integration card grid — sorted trouble-first; each card
+              opens the real IntegrationDrawer (Test / Reauthorize). The vendor
+              mark in a white chip reads as a real integrations marketplace. */}
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            {sortedIntegrations.map((row) => {
+              const bad = row.status !== "Healthy";
+              return (
+                <button
+                  key={row.name}
+                  type="button"
+                  onClick={() => setActiveIntegrationName(row.name)}
+                  className={cn(
+                    "card-elevated rounded-[13px] p-[15px] text-left transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30",
+                    bad && "ring-1 ring-inset ring-danger/20",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <VendorMark
+                        provider={row.provider ?? row.name}
+                        name={row.name}
+                        size={22}
+                      />
+                      <div className="min-w-0">
+                        <div className="truncate text-[0.875rem] font-semibold leading-tight text-ink">
+                          {row.name}
+                        </div>
+                        <div className="mt-0.5 truncate text-[0.72rem] leading-tight text-slate">
+                          {row.category}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 text-[0.7rem] font-semibold text-ink/80">
+                      <Dot tone={HEALTH_TONE[row.status]} />
+                      {row.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-2 border-t border-ink/[0.06] pt-2.5">
+                    <span
+                      className={cn(
+                        "min-w-0 truncate text-[0.7rem] tabular-nums",
+                        bad ? "text-danger" : "text-slate",
+                      )}
+                    >
+                      Last sync · {row.lastSync ?? "—"}
+                    </span>
+                    {(row.recordsSynced ?? row.records) != null ? (
+                      <span className="shrink-0 text-[0.7rem] tabular-nums text-slate">
+                        {fmtRecords(row.recordsSynced ?? row.records)} rec
+                      </span>
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Health legend (the table's utility row, kept as a footer). */}
+          <div className="flex justify-end">
+            <span className="inline-flex items-center gap-3 text-[0.74rem] tabular-nums">
+              <span className="inline-flex items-center gap-1.5 text-success">
+                <Dot tone="success" /> {connected} healthy
               </span>
-            }
-          />
+              <span className="inline-flex items-center gap-1.5 text-warn">
+                <Dot tone="warn" />{" "}
+                {integrations.filter((i) => i.status === "Needs auth").length} needs auth
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-danger">
+                <Dot tone="danger" />{" "}
+                {integrations.filter((i) => i.status === "Failing").length} failing
+              </span>
+            </span>
+          </div>
         </section>
 
         {/* Data quality rules */}

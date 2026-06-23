@@ -29,6 +29,7 @@ export default function AdminSettingsPage() {
   const [active, setActive] = useState<CategoryKey>("routing");
 
   const totalUsers = roleDefs.reduce((sum, r) => sum + r.members, 0);
+  const officeCount = new Set(teamRows.map((t) => t.office)).size;
   const activeRules = routingRules.filter((r) => r.status === "active").length;
   const totalRouted = routingRules.reduce((s, r) => s + r.leadsRouted30d, 0);
   const pendingInvites = userRows.filter((u) => u.status === "invited").length;
@@ -39,10 +40,15 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 px-4 py-5 md:px-6">
-      {/* Eyebrow subtitle (TopCommandBar owns the H1) */}
+      {/* Eyebrow subtitle (TopCommandBar owns the H1) — design's stat-driven
+          line with real counts. */}
       <p className="text-[0.8rem] text-slate">
-        Users, teams, roles, routing rules, templates, brand kit, AI policies, and audit — the
-        operator back office.
+        <span className="tabular-nums">{totalUsers}</span> members
+        <span className="mx-1.5 text-mist">·</span>
+        <span className="tabular-nums">{teamRows.length}</span> teams across{" "}
+        <span className="tabular-nums">{officeCount}</span> offices
+        <span className="mx-1.5 text-mist">·</span>
+        roles, AI policies &amp; full audit trail
       </p>
 
       {/* KPI strip — every tile drills into its source category (S12 #8).

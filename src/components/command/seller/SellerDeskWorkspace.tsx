@@ -10,7 +10,6 @@ import {
   ChevronRight,
   LayoutGrid,
   Rows3,
-  CirclePlus,
 } from "lucide-react";
 import { sellerLeads as seedLeads, derived, listingPhoto } from "@/lib/data";
 import type { SellerLead } from "@/lib/types";
@@ -186,20 +185,35 @@ export function SellerDeskWorkspace() {
     return Math.round((1280 + likelyCount) * perOwner);
   }, [likelyEquity, likelyCount]);
 
+  // Header summary stat line (matches the design's #os-cash subtitle) — every
+  // figure is real, derived from the live records.
+  const activeOpps = useMemo(() => leads.filter((l) => l.stage !== "Dead").length, [leads]);
+  const potential = useMemo(
+    () => leads.filter((l) => l.stage !== "Dead").reduce((s, l) => s + l.estValue, 0),
+    [leads],
+  );
+  const acceptedCount = useMemo(
+    () =>
+      leads.filter((l) => l.stage === "Accepted" || l.stage === "Converted to Listing").length,
+    [leads],
+  );
+
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-6">
-      {/* Subtitle (no h1 — TopCommandBar owns the section title) + create action */}
+      {/* Subtitle (no h1 — TopCommandBar owns the section title) + create action.
+          Numeric summary stat line + ink "New opportunity" button match the
+          design's #os-cash header treatment. */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.82rem] text-slate">
-          Find homeowners who may be ready to sell, fill in the details, start outreach, and route the hottest opportunities — from first signal to signed listing.
+        <p className="text-[13px] tabular-nums text-slate">
+          {activeOpps} active opportunities · {compactUsd(potential)} potential ·{" "}
+          {acceptedCount} offers accepted
         </p>
         <button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+          className="shrink-0 rounded-[9px] bg-ink px-[15px] py-[9px] text-[13px] font-semibold text-cloud transition-colors hover:bg-ink-800"
         >
-          <CirclePlus className="h-4 w-4" aria-hidden />
-          Add opportunity
+          New opportunity
         </button>
       </div>
 

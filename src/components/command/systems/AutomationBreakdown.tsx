@@ -52,6 +52,9 @@ export function AutomationBreakdown({
     automations.find((a) => a.id === selectedId) ?? automations[0] ?? null;
   const owner = selected ? AUTOMATION_OWNER[selected.id] : null;
   const isPaused = selected?.status === "paused";
+  // Busiest automation → scales the design's per-row activity bar (real run
+  // volume share; the exact count is shown as text, so the bar adds no claim).
+  const maxRuns = Math.max(1, ...automations.map((a) => a.runsThisMonth));
 
   // On a stacked (sub-lg) layout the detail pane renders below the list, so a
   // selection updates content off-screen. Scroll the detail into view so the
@@ -123,6 +126,19 @@ export function AutomationBreakdown({
                       <span className="tabular-nums">
                         {a.runsThisMonth.toLocaleString("en-US")} runs/mo
                       </span>
+                    </div>
+                    {/* Design's green activity bar — width = share of the
+                        busiest automation's monthly runs; mist when paused. */}
+                    <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-paper-200">
+                      <div
+                        className={cn(
+                          "h-full rounded-full",
+                          paused ? "bg-mist" : "bg-gold",
+                        )}
+                        style={{
+                          width: `${Math.max(4, Math.round((a.runsThisMonth / maxRuns) * 100))}%`,
+                        }}
+                      />
                     </div>
                   </div>
                   <StatusChip tone={paused ? "info" : "success"}>

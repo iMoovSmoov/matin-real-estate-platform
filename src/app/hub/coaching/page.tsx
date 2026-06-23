@@ -10,6 +10,7 @@ import {
   CircleCheck,
   CalendarClock,
   FileText,
+  Mic,
 } from "lucide-react";
 import { useAiSidecar } from "@/components/os";
 import {
@@ -30,7 +31,10 @@ import {
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn, compactUsd } from "@/lib/utils";
-import { CoachingWorkbench } from "@/components/command/coaching/CoachingWorkbench";
+import {
+  CoachingWorkbench,
+  type CoachingWorkbenchHandle,
+} from "@/components/command/coaching/CoachingWorkbench";
 import { CoachingPacingChart } from "@/components/command/coaching/CoachingPacingChart";
 import { RoiLeaderboard } from "@/components/command/coaching/RoiLeaderboard";
 import { CoachingPlanDoc } from "@/components/command/coaching/CoachingPlanDoc";
@@ -78,6 +82,10 @@ const ROSTER_META: Record<RosterView, { title: string; sub: string }> = {
 export default function CoachingPage() {
   const { openAi } = useAiSidecar();
   const standings = coachingStandings;
+
+  // Lets the dark "Start roleplay" hero band drive the workbench's own inline
+  // roleplay (no state lift, no sidecar) — see CoachingWorkbenchHandle.
+  const workbenchRef = useRef<CoachingWorkbenchHandle>(null);
 
   const [selected, setSelected] = useState<CoachingStanding | null>(null);
   const [drawerTab, setDrawerTab] = useState("plan");
@@ -238,9 +246,51 @@ export default function CoachingPage() {
         />
       </KpiStrip>
 
+      {/* Dark AI roleplay hero band — the design's #os-coach signature treatment
+          (green-tinted glass + Matin mark + .btn-accent). "Start roleplay" loads
+          the multiple-offer drill and starts a LIVE practice in the workbench
+          below (preserves the inline roleplay + scoring; never the sidecar). */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-5 sm:p-6"
+        style={{
+          background: "linear-gradient(155deg,#13231b,#0a1410)",
+          border: "1px solid #1d3b30",
+          boxShadow:
+            "0 18px 44px rgba(0,0,0,.34), inset 0 0 0 1px rgba(31,107,74,.16), 0 0 30px rgba(31,107,74,.22)",
+        }}
+      >
+        <span aria-hidden className="ai-bloom -right-12 -top-20" />
+        <div className="relative flex flex-wrap items-center gap-4">
+          <span
+            className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px]"
+            style={{ background: "#1f6b4a", boxShadow: "0 0 20px rgba(31,107,74,.5)" }}
+          >
+            <MatinMark theme="white" className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1 basis-[220px]">
+            <p className="text-[0.9rem] font-semibold leading-snug text-cloud">
+              Roleplay: multiple-offer strategy
+            </p>
+            <p className="mt-1 text-[0.78rem] leading-relaxed text-[#b9c2bc]">
+              Matin AI plays a hesitant seller and scores your framing, objection
+              handling, and close — then coaches the gaps.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => workbenchRef.current?.startScenario("CS-006")}
+            className="btn-accent inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[0.84rem] font-semibold"
+          >
+            <Mic className="h-4 w-4" aria-hidden />
+            Start roleplay
+          </button>
+        </div>
+      </div>
+
       {/* Three-pane coaching workbench (live roleplay streams inline here).
           Consolidated scenario library (S9 ticket 3) — one source. */}
       <CoachingWorkbench
+        ref={workbenchRef}
         scenarios={coachingScenarioLibrary}
         onAskAi={(ctx) => openAi(ctx)}
       />

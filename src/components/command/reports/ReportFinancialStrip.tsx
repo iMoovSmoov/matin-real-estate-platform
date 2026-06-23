@@ -44,49 +44,53 @@ export function ReportFinancialStrip({
   return (
     <div
       className={cn(
-        // R8: real responsive columns — 2-up phone, 4-up sm+. No inline
-        // gridTemplateColumns (the bug we're fixing). Cell borders come from a
-        // 1px gap over an ink/mist backdrop so dividers render cleanly in both
-        // the 2x2 phone grid and the 1x4 desktop row.
-        "accent-edge grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-mist bg-mist shadow-lift sm:grid-cols-4",
+        // Design #os-reports KPI strip: separate gradient `.card-elevated` tiles
+        // on a 13px gap — 2-up phone, 4-up sm+ (R8: real responsive columns, no
+        // inline gridTemplateColumns). Matches the OS-wide KpiCard tile treatment.
+        "grid grid-cols-2 gap-[13px] sm:grid-cols-4",
         className,
       )}
     >
       {cells.map((c) => {
         const interactive = typeof c.onDrill === "function";
+        const hasDelta = typeof c.deltaPct === "number";
         const up = (c.deltaPct ?? 0) >= 0;
         const body = (
           <>
-            <p className="text-[0.74rem] font-medium uppercase tracking-[0.1em] leading-none text-slate">
+            <p className="truncate text-[0.72rem] font-medium uppercase tracking-[0.08em] leading-none text-slate">
               {c.label}
             </p>
             <p
               className={cn(
-                "mt-2.5 font-sans text-[2.1rem] font-bold leading-none tabular-nums sm:text-[2.5rem]",
+                "mt-2.5 font-sans text-[1.55rem] font-bold leading-none tabular-nums sm:text-[1.9rem]",
                 c.tone === "success" ? "text-success" : "text-ink",
               )}
             >
               {c.money ? <span className="text-slate">$</span> : null}
               {c.value}
             </p>
-            <div className="mt-2 flex items-center gap-2">
-              {c.sub != null ? (
-                <p className="text-[0.72rem] leading-tight text-slate">{c.sub}</p>
-              ) : null}
-              {typeof c.deltaPct === "number" ? (
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {/* Design's green up-pill delta (text #3f7d5e on gold-soft); a real
+                  negative prints a soft danger pill (status carried by color). */}
+              {hasDelta ? (
                 <span
                   className={cn(
-                    "ml-auto inline-flex items-center gap-0.5 text-[0.72rem] font-semibold tabular-nums",
-                    up ? "text-success" : "text-danger",
+                    "inline-flex items-center gap-0.5 rounded-full px-[7px] py-0.5 text-[0.7rem] font-semibold tabular-nums",
+                    up ? "bg-gold-soft text-[#3f7d5e]" : "bg-danger/10 text-danger",
                   )}
                 >
-                  {up ? "▲" : "▼"} {Math.abs(c.deltaPct)}%
+                  {up ? "↑" : "↓"} {Math.abs(c.deltaPct ?? 0)}%
                 </span>
+              ) : null}
+              {c.sub != null ? (
+                <p className="min-w-0 flex-1 truncate text-[0.7rem] leading-tight text-slate">
+                  {c.sub}
+                </p>
               ) : null}
             </div>
           </>
         );
-        const base = "bg-cloud px-5 py-5 text-left sm:py-6";
+        const base = "card-elevated rounded-2xl p-4 text-left sm:p-5";
         return interactive ? (
           <button
             key={c.key}
@@ -94,7 +98,7 @@ export function ReportFinancialStrip({
             onClick={c.onDrill}
             className={cn(
               base,
-              "transition-colors hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/20",
+              "group transition-colors hover:border-ink/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/20",
             )}
           >
             {body}

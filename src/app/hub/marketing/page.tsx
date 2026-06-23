@@ -601,11 +601,28 @@ export default function MarketingStudioPage() {
         <CreateParamWatcher value="campaign" onMatch={openCreate} />
       </Suspense>
 
-      {/* Subtitle (no page-level h1 — TopCommandBar owns the title) */}
-      <p className="text-[0.82rem] leading-snug text-slate">
-        Brand-controlled templates generate email, web, print, social, ad, and
-        seller-update assets.
-      </p>
+      {/* Section header — design #os-mkt: Fraunces 27px title + tabular-nums
+          real-data subtitle + ink primary. (TopCommandBar carries the 13px tab
+          title; the design shows this larger workspace header beneath it.) */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-[1.55rem] font-normal leading-[1.05] tracking-[-0.015em] text-ink sm:text-[1.7rem]">
+            Marketing Studio
+          </h1>
+          <p className="mt-1.5 text-[0.82rem] tabular-nums text-slate">
+            {kpi.liveCount} live campaign{kpi.liveCount === 1 ? "" : "s"} ·{" "}
+            {compactUsd(kpi.attributed)} attributed pipeline · {kpi.avgOpen.toFixed(1)}% avg open
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setCreateOpen(true)}
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[9px] bg-ink px-[15px] py-[9px] text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          New campaign
+        </button>
+      </div>
 
       <section className="surface-ai relative overflow-hidden rounded-2xl p-4 shadow-[0_18px_54px_rgba(0,0,0,.24)] sm:p-5">
         <img

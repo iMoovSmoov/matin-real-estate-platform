@@ -73,6 +73,19 @@ const BEHAVIORAL_VIEWS: { key: SavedViewKey; label: string }[] = [
 
 const CANONICAL_LEAD = "LD-1999"; // Daniel Cho (84)
 
+/* Pipeline-by-stage funnel (design's segmented bar) — a forward lifecycle order
+   with the sanctioned Estate-Green ramp deepening toward the most-committed
+   stage (lightest New → deepest Under Contract). Counts are derived live from
+   the leads array, so the bar + legend always reconcile to the table. */
+const STAGE_FUNNEL: { stage: Lead["stage"]; color: string }[] = [
+  { stage: "New", color: "#cfe0d7" },
+  { stage: "Nurture", color: "#a9cdba" },
+  { stage: "Active", color: "#7fb499" },
+  { stage: "Showing", color: "#549a78" },
+  { stage: "Offer", color: "#2f8a60" },
+  { stage: "Under Contract", color: "#1f6b4a" },
+];
+
 export default function CrmPage() {
   return (
     <Suspense fallback={null}>
@@ -134,6 +147,13 @@ function CrmPageInner() {
   );
 
   const kpis = useMemo(() => crmKpis(leads), [leads]);
+
+  // Pipeline-by-stage counts (live) for the design's segmented funnel bar.
+  const stageCounts = useMemo(
+    () => STAGE_FUNNEL.map((s) => ({ ...s, n: leads.filter((l) => l.stage === s.stage).length })),
+    [leads],
+  );
+  const funnelTotal = useMemo(() => stageCounts.reduce((sum, s) => sum + s.n, 0), [stageCounts]);
 
   // Behavioral + real location smart-lists, each with a live count.
   const locViews = useMemo(() => locationViews(leads, 4), [leads]);
@@ -273,10 +293,12 @@ function CrmPageInner() {
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5 md:px-6">
-      {/* Subtitle (no h1 — the TopCommandBar owns the section title) */}
+      {/* Subtitle (no h1 — the TopCommandBar owns the section title). Data-rich
+          line matching the design: real totals from the live leads array. */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[0.82rem] text-slate">
-          Daily lead conversion cockpit — smart lists, scoring, activity, routing, AI next actions.
+        <p className="text-[0.82rem] text-slate tabular-nums">
+          {leads.length} leads · {kpis.newLeads} new today · {viewCounts.unassigned ?? 0} unassigned
+          · {kpis.avgFirstResponse}m avg speed-to-lead
         </p>
         <button
           type="button"
@@ -345,6 +367,43 @@ function CrmPageInner() {
           }
         />
       </KpiStrip>
+
+      {/* Pipeline by stage — the design's segmented green-ramp funnel bar. Each
+          segment is flex-weighted by its REAL live lead count; the ramp deepens
+          toward the most-committed stage. Display-only; reconciles to the table. */}
+      <section className="card-elevated p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-[1.02rem] font-normal leading-tight text-ink">
+            Pipeline by stage
+          </h2>
+          <span className="text-[0.72rem] text-slate tabular-nums">{funnelTotal} in funnel</span>
+        </div>
+        <div className="mt-3 flex h-3 gap-[3px] overflow-hidden rounded-md">
+          {stageCounts.map((s) =>
+            s.n > 0 ? (
+              <span
+                key={s.stage}
+                className="min-w-0"
+                style={{ flexGrow: s.n, flexBasis: 0, backgroundColor: s.color }}
+                aria-hidden
+              />
+            ) : null,
+          )}
+        </div>
+        <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+          {stageCounts.map((s) => (
+            <li key={s.stage} className="flex min-w-0 items-center gap-1.5">
+              <span
+                className="h-2 w-2 shrink-0 rounded-[2px]"
+                style={{ backgroundColor: s.color }}
+                aria-hidden
+              />
+              <span className="truncate text-[0.74rem] text-slate">{s.stage}</span>
+              <span className="text-[0.82rem] font-semibold text-ink tabular-nums">{s.n}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* Master–detail — splits at lg (≥1024) so the 1024–1279 band gets the real
           two-pane workspace, not a cramped single column. Below lg the detail is

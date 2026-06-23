@@ -18,13 +18,35 @@ export const metadata = { title: "Systems Health" };
    ────────────────────────────────────────────────────────────────────────── */
 
 export default function SystemsHealthPage() {
+  // Design's stat-driven subtitle ("5 of 6 integrations healthy · …") — real
+  // derived counts, not hand-authored literals.
+  const totalIntegrations = integrations.length;
+  const healthy = integrations.filter((i) => i.status === "Healthy").length;
+  const needsAttention = totalIntegrations - healthy;
+  const automationRunsThisMonth = automations.reduce(
+    (sum, a) => sum + a.runsThisMonth,
+    0,
+  );
+
   return (
     <div className="px-4 pb-10 pt-4 md:px-6">
-      <p className="mb-5 max-w-3xl text-[0.82rem] leading-relaxed text-slate">
-        A business-friendly control room for the tools feeding MatinOS. Leads,
-        CRM, transactions, marketing, documents, and AI runs are monitored here
-        so the team sees what is healthy, what needs attention, and which
-        automations are already doing the busywork.
+      <p className="mb-5 text-[0.82rem] text-slate">
+        <span className="tabular-nums">{healthy}</span> of{" "}
+        <span className="tabular-nums">{totalIntegrations}</span> integrations
+        healthy
+        <span className="mx-1.5 text-mist">·</span>
+        <span className="tabular-nums">
+          {automationRunsThisMonth.toLocaleString("en-US")}
+        </span>{" "}
+        automation runs this month
+        <span className="mx-1.5 text-mist">·</span>
+        {needsAttention > 0 ? (
+          <span className="font-medium text-danger tabular-nums">
+            {needsAttention} need{needsAttention === 1 ? "s" : ""} attention
+          </span>
+        ) : (
+          <span className="font-medium text-success">all systems healthy</span>
+        )}
       </p>
 
       <SystemsHealthWorkspace

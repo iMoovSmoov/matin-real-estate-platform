@@ -153,7 +153,7 @@ function AIActionRail() {
       <div className="relative flex items-start justify-between gap-3 border-b border-white/[0.07] px-4 py-4">
         <span aria-hidden className="ai-bloom -left-20 -top-20 opacity-80" />
         <div className="relative flex min-w-0 items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success text-cloud shadow-[0_0_20px_rgba(31,107,74,.35)]">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#1f6b4a,#2f8a60)] text-cloud shadow-[0_0_20px_rgba(31,107,74,.5)]">
             <MatinMark theme="white" className="h-4 w-4" />
           </span>
           <div className="min-w-0">
@@ -161,8 +161,8 @@ function AIActionRail() {
             <p className="mt-1.5 truncate text-[0.66rem] text-slate-400">Context · Today</p>
           </div>
         </div>
-        <span className="relative mt-1 inline-flex items-center gap-1.5 rounded-full bg-success/15 px-2 py-1 text-[0.62rem] font-semibold text-[#7fce9f]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#7fce9f]" />
+        <span className="relative mt-1 inline-flex items-center gap-1.5 rounded-full bg-[rgba(47,138,96,0.15)] px-2 py-1 text-[0.62rem] font-semibold text-[#7fce9f]">
+          <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-[#2f8a60]" />
           Live
         </span>
       </div>

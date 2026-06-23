@@ -410,10 +410,19 @@ export function FormsDocsWorkspace() {
     return (
       <div className="space-y-5 px-4 pb-10 pt-4 md:px-6">
         <TopTabs topTab={topTab} onTab={setTopTab} templatesCount={m.templates} />
+        {/* Section header — matches design #os-forms type/hierarchy. */}
+        <div className="min-w-0">
+          <h1 className="font-display text-[1.55rem] font-normal leading-[1.05] tracking-[-0.015em] text-ink sm:text-[1.7rem]">
+            Forms &amp; Docs
+          </h1>
+          <p className="mt-1.5 text-[0.82rem] tabular-nums text-slate">
+            {m.templates} templates · OREF + Matin form library
+          </p>
+        </div>
         <p className="max-w-2xl text-[0.82rem] leading-snug text-slate">
-          The OREF + Matin template library. Pick a form to open the branded,
-          editable document — auto-fill from a real listing or lead, generate
-          clause language with AI, and send for e-signature.
+          Pick a form to open the branded, editable document — auto-fill from a
+          real listing or lead, generate clause language with AI, and send for
+          e-signature.
         </p>
         <FormsLibrary />
       </div>
@@ -484,17 +493,23 @@ export function FormsDocsWorkspace() {
     <div className="space-y-5 px-4 pb-10 pt-4 md:px-6">
       <TopTabs topTab={topTab} onTab={setTopTab} templatesCount={m.templates} />
 
-      {/* Subtitle / eyebrow + create */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="max-w-2xl text-[0.82rem] leading-snug text-slate">
-          Document packets, e-signature, and compliance — replacing scattered
-          PDFs and Google Forms. Pick a packet, inspect a real branded document,
-          and send it for signature when it&apos;s clean.
-        </p>
+      {/* Section header — design #os-forms: Fraunces 27px title + tabular-nums
+          real-data subtitle + ink primary. (TopCommandBar carries the 13px tab
+          title; the design shows this larger workspace header beneath it.) */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-[1.55rem] font-normal leading-[1.05] tracking-[-0.015em] text-ink sm:text-[1.7rem]">
+            Forms &amp; Docs
+          </h1>
+          <p className="mt-1.5 text-[0.82rem] tabular-nums text-slate">
+            {m.inProgress} active packet{m.inProgress === 1 ? "" : "s"} ·{" "}
+            {m.awaitingSignature} awaiting signature · OREF + Matin forms library
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setNewOpen(true)}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-ink px-3.5 py-2 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[9px] bg-ink px-[15px] py-[9px] text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800"
         >
           <Plus className="h-4 w-4" />
           New packet
