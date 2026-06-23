@@ -8,6 +8,8 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [type, setType] = useState("");
+  const [price, setPrice] = useState("");
+  const [beds, setBeds] = useState("");
   const [searchError, setSearchError] = useState("");
   const [navigating, setNavigating] = useState(false);
 
@@ -22,7 +24,99 @@ export function PropertySearchBar({ dark = false }: { dark?: boolean }) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (type) params.set("type", type);
+    if (price) params.set("price", price);
+    if (beds) params.set("beds", beds);
     router.push(`/property-search?${params.toString()}`);
+  }
+
+  if (dark) {
+    return (
+      <div className="w-full max-w-[760px]">
+        <form
+          onSubmit={go}
+          noValidate
+          className="grid w-full grid-cols-1 gap-px rounded-[14px] border border-white/25 bg-white/15 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,.28)] backdrop-blur-xl sm:grid-cols-[2fr_1fr_1fr_auto]"
+        >
+          <label className="rounded-[10px] bg-white px-4 py-3 sm:rounded-r-none">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate">
+              Location
+            </span>
+            <span className="mt-0.5 flex items-center gap-2">
+              <MapPin className="h-4 w-4 shrink-0 text-gold" />
+              <input
+                value={q}
+                onChange={(e) => {
+                  setQ(e.target.value);
+                  if (e.target.value.trim()) setSearchError("");
+                }}
+                placeholder="City, address, or ZIP"
+                aria-label="Search by city, neighborhood, or ZIP"
+                aria-describedby={searchError ? "psb-error" : undefined}
+                className="w-full bg-transparent text-[0.95rem] font-medium text-ink placeholder:text-slate/70 focus:outline-none"
+              />
+            </span>
+          </label>
+
+          <label className="bg-white px-4 py-3">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate">
+              Price
+            </span>
+            <select
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              aria-label="Maximum price"
+              className="mt-0.5 w-full bg-transparent text-[0.95rem] font-medium text-ink focus:outline-none"
+            >
+              <option value="">Any</option>
+              <option value="750000">$750K</option>
+              <option value="1000000">$1M</option>
+              <option value="1500000">$1.5M</option>
+              <option value="2500000">$2.5M+</option>
+            </select>
+          </label>
+
+          <label className="bg-white px-4 py-3 sm:rounded-r-none">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-slate">
+              Beds
+            </span>
+            <select
+              value={beds}
+              onChange={(e) => setBeds(e.target.value)}
+              aria-label="Minimum bedrooms"
+              className="mt-0.5 w-full bg-transparent text-[0.95rem] font-medium text-ink focus:outline-none"
+            >
+              <option value="">Any</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+              <option value="5">5+</option>
+            </select>
+          </label>
+
+          <button
+            type="submit"
+            aria-label="Search properties"
+            disabled={navigating}
+            className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[10px] bg-ink px-7 text-[0.95rem] font-semibold text-white transition hover:bg-ink-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70 sm:rounded-l-none"
+          >
+            {navigating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Searching
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" aria-hidden="true" /> Search
+              </>
+            )}
+          </button>
+        </form>
+        {searchError && (
+          <p id="psb-error" role="alert" className="mt-2 px-2 text-xs font-medium text-red-300">
+            {searchError}
+          </p>
+        )}
+      </div>
+    );
   }
 
   return (

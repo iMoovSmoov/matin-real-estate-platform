@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ArrowRight, Award, ShieldCheck, TrendingUp, Quote, Star, BadgeCheck,
+  ArrowRight, Award, ShieldCheck, TrendingUp, Quote, Star,
 } from "lucide-react";
 import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
@@ -13,12 +13,11 @@ import {
   company, featuredListings, popularCommunities, salesAgents,
 } from "@/lib/data";
 
-const stats = [
-  ["35%", "Business growth this year"],
-  ["100+", "Active listings"],
-  ["305+", "Properties sold"],
-  ["$130M+", "Annual sales volume"],
-  ["$2.4M", "Annual marketing budget"],
+const heroStats = [
+  [company.stats.annualVolume, "Annual volume"],
+  [company.stats.activeListings, "Active listings"],
+  [company.stats.propertiesSold, "Properties sold"],
+  [`${company.stats.agents}+`, "OR + WA brokers"],
 ];
 
 const values = [
@@ -63,15 +62,18 @@ export default function HomePage() {
               Portland · Lake Oswego · SW Washington
             </p>
             <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-white text-balance">
-              Find your place in the{" "}
-              <span className="italic gradient-gold">Pacific Northwest.</span>
+              Find your place in the Pacific Northwest.
             </h1>
             <div className="mt-5">
               <PropertySearchBar dark />
             </div>
-            <div className="mt-4 flex items-center gap-2 text-[0.8rem] text-white/50">
-              <BadgeCheck className="h-4 w-4 text-azure-bright" />
-              <span>4.9 · 700+ reviews · Portland&apos;s #1 tech brokerage</span>
+            <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-white/15 pt-5">
+              {heroStats.map(([n, l]) => (
+                <div key={l}>
+                  <div className="font-display text-2xl leading-none text-white tabular-nums">{n}</div>
+                  <div className="mt-1 text-[0.72rem] text-white/62">{l}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -102,15 +104,14 @@ export default function HomePage() {
                   <span className="hero-text-shadow eyebrow eyebrow-light">Portland · Lake Oswego · West Linn · SW Washington</span>
                 </Reveal>
                 <Reveal delay={0.08}>
-                  <h1 className="hero-text-shadow display-1 mt-5 font-display text-5xl leading-[1.1] text-white text-balance lg:text-[3.5rem]">
-                    Find your place in the{" "}
-                    <span className="italic gradient-gold">Pacific Northwest.</span>
+                  <h1 className="hero-text-shadow mt-5 max-w-[760px] font-display text-[clamp(3.1rem,6vw,5rem)] font-normal leading-[0.98] text-white text-balance">
+                    Find your place in the Pacific Northwest.
                   </h1>
                 </Reveal>
                 <Reveal delay={0.16}>
-                  <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 text-pretty sm:text-lg">
-                    The Portland area&apos;s most technologically advanced brokerage — {company.stats.annualVolume} in
-                    annual sales, 40+ full-time brokers, and an AI concierge that never sleeps.
+                  <p className="mt-6 max-w-[610px] text-base leading-relaxed text-white/82 text-pretty sm:text-lg">
+                    The Portland area&apos;s most technologically advanced brokerage: real local guidance, cinematic
+                    property marketing, and an AI concierge that helps you move faster.
                   </p>
                 </Reveal>
                 <Reveal delay={0.24}>
@@ -119,13 +120,13 @@ export default function HomePage() {
                   </div>
                 </Reveal>
                 <Reveal delay={0.32}>
-                  <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/80">
-                    <span className="flex items-center gap-2">
-                      <BadgeCheck className="h-4 w-4 text-azure-bright" /> 4.9 · 700+ reviews
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-azure-bright" /> Fastest-growing private company
-                    </span>
+                  <div className="mt-8 flex max-w-[760px] flex-wrap gap-x-10 gap-y-4 border-t border-white/18 pt-6">
+                    {heroStats.map(([n, l]) => (
+                      <div key={l}>
+                        <div className="font-display text-[1.85rem] leading-none text-white tabular-nums">{n}</div>
+                        <div className="mt-1 text-[0.78rem] text-white/66">{l}</div>
+                      </div>
+                    ))}
                   </div>
                 </Reveal>
               </div>
@@ -139,24 +140,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ---------- STAT BAND ---------- */}
-      <div className="border-y border-ink/[0.07] bg-paper">
-        <div className="h-[2px] bg-gradient-to-r from-transparent via-ink/20 to-transparent" />
-        <Container>
-          <dl className="grid grid-cols-2 divide-ink/[0.07] py-8 sm:grid-cols-5 md:divide-x md:py-10 [&>*:nth-child(5)]:col-span-2 sm:[&>*:nth-child(5)]:col-span-1">
-            {stats.map(([n, l], i) => (
-              <Reveal key={l} delay={i * 0.06} className="card-luxury relative px-4 py-4 text-center sm:py-3 [&:not(:nth-child(odd))]:before:absolute [&:not(:nth-child(odd))]:before:left-0 [&:not(:nth-child(odd))]:before:top-1/4 [&:not(:nth-child(odd))]:before:h-1/2 [&:not(:nth-child(odd))]:before:w-px [&:not(:nth-child(odd))]:before:bg-ink/[0.08] sm:[&:not(:nth-child(odd))]:before:hidden">
-                <dt className="stat-number font-display text-[1.85rem] leading-none text-ink sm:text-[2.2rem] md:text-[2.8rem]">{n}</dt>
-                <dd className="mt-1.5 text-[0.72rem] leading-snug text-slate sm:text-[0.8rem]">{l}</dd>
-              </Reveal>
-            ))}
-          </dl>
-        </Container>
-      </div>
-
-      {/* thin divider between stat band and listings */}
-      <div className="h-px bg-ink/[0.05]" />
 
       {/* ---------- FEATURED LISTINGS ---------- */}
       <Section className="pt-14 pb-14 md:pt-20 md:pb-20">

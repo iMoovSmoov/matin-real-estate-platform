@@ -3,66 +3,136 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Phone, ArrowRight } from "lucide-react";
-import { Logo } from "@/components/brand/Logo";
+import { Menu, X, Phone } from "lucide-react";
+import { MatinMark } from "@/components/brand/Logo";
+import { AskMatinButton } from "./AskMatinButton";
+import { company } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
+/* Real nav routes, in the design's order (Buy · Sell · Cash Offer · Search ·
+   Communities · Agents). About + Contact live in the mobile menu + footer. */
 const NAV = [
   { label: "Buy", href: "/buy" },
   { label: "Sell", href: "/sell" },
   { label: "Cash Offer", href: "/cash-offer" },
+  { label: "Search", href: "/property-search" },
   { label: "Communities", href: "/communities" },
   { label: "Agents", href: "/agents" },
-  { label: "About", href: "/about" },
 ];
 
+/* Extra links surfaced only in the mobile menu (tablet has no bottom MobileNav). */
+const MOBILE_EXTRA = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+/* Routes that opt into the transparent-overlay header (white nav over a
+   full-bleed hero). Today only Home; add routes here to extend. The header
+   self-detects via the route so the layout/page need wire nothing. */
+const OVERLAY_ROUTES = new Set<string>(["/"]);
+
+const PHONE_TEL = `tel:+1${company.phoneRaw}`;
+
+/** Translucent paper bar styling — the design's exact sticky nav surface. */
+const SOLID_BAR_STYLE: React.CSSProperties = {
+  background: "rgba(246,246,245,0.84)",
+  backdropFilter: "blur(16px) saturate(160%)",
+  WebkitBackdropFilter: "blur(16px) saturate(160%)",
+};
+
 export function SiteHeader() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
-  const pathname = usePathname();
+
+  const isOverlayRoute = OVERLAY_ROUTES.has(pathname);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 36);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Collapse the mobile menu on navigation.
   useEffect(() => setMenu(false), [pathname]);
+
+  // Overlay treatment is active only on an overlay route, at the top, with the
+  // mobile menu closed (an open menu always needs the readable solid surface).
+  const overlay = isOverlayRoute && !scrolled && !menu;
+
+  function isActive(href: string) {
+    return pathname === href || (href !== "/" && pathname.startsWith(href));
+  }
 
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-40 transition-all duration-500 bg-[#0d0d0e]",
-        scrolled
-          ? "py-2.5 shadow-[0_1px_0_rgba(255,255,255,0.06)]"
-          : "py-4",
+        "z-50 transition-[background-color,box-shadow,border-color] duration-300",
+        // Home rides over the hero (fixed, out of flow); inner pages push
+        // content down with a sticky bar.
+        isOverlayRoute ? "fixed inset-x-0 top-0" : "sticky top-0",
+        overlay
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-ink/[0.08]",
       )}
+      style={overlay ? undefined : SOLID_BAR_STYLE}
     >
-      {/* Skip to main content — visible on focus, hidden otherwise */}
+      {/* Skip link — visible on focus only */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink focus:outline-none"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none"
       >
         Skip to content
       </a>
 
-      <div className="container-x flex items-center justify-between gap-6">
-        <Link href="/" className="text-white transition-colors">
-          <Logo theme="white" className="h-9" />
+      <div className="container-x flex h-[58px] items-center justify-between gap-4">
+        {/* Brand lockup — M chip + Matin wordmark, theme-flipped per mode */}
+        <Link
+          href="/"
+          aria-label="Matin Real Estate — home"
+          className="flex shrink-0 items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 rounded-sm"
+        >
+          <span
+            className={cn(
+              "inline-flex h-[30px] w-[30px] items-center justify-center rounded-[7px] transition-colors",
+              overlay ? "bg-white" : "bg-ink",
+            )}
+          >
+            <MatinMark className="h-[17px] w-auto" theme={overlay ? "dark" : "white"} />
+          </span>
+          <span
+            className={cn(
+              "text-[13px] font-semibold uppercase tracking-[0.22em] transition-colors",
+              overlay ? "text-white" : "text-ink",
+            )}
+          >
+            Matin
+          </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden items-center gap-7 lg:flex">
+        {/* Desktop nav */}
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
           {NAV.map((n) => {
-            const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
+            const active = isActive(n.href);
             return (
               <Link
                 key={n.href}
                 href={n.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "link-underline text-[0.92rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0e] rounded-sm",
-                  active ? "text-white" : "text-white/65 hover:text-white",
-                  active && "!bg-[100%_1px]",
+                  "rounded-lg px-3 py-2 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+                  overlay
+                    ? cn(
+                        "focus-visible:ring-white/60 focus-visible:ring-offset-transparent",
+                        active ? "font-semibold text-white" : "font-medium text-white/85 hover:text-white",
+                      )
+                    : cn(
+                        "focus-visible:ring-gold/50",
+                        active
+                          ? "bg-gold-soft font-semibold text-gold"
+                          : "font-medium text-ink-600 hover:text-ink",
+                      ),
                 )}
               >
                 {n.label}
@@ -71,71 +141,105 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        {/* Right cluster */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <a
-            href="tel:+15036229624"
-            className="hidden items-center gap-2 text-sm font-medium md:flex text-white/75 hover:text-white transition-colors"
+            href={PHONE_TEL}
+            className={cn(
+              "hidden text-[13px] font-semibold tabular-nums transition-colors md:inline-flex",
+              overlay ? "text-white hover:text-white/80" : "text-ink hover:text-gold",
+            )}
           >
-            <Phone className="h-4 w-4" /> (503) 622-9624
+            {company.phone}
           </a>
+
+          <AskMatinButton className="hidden sm:inline-flex" />
+
           <Link
             href="/hub"
-            className="hidden items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[0.82rem] font-semibold text-ink shadow-[0_4px_16px_rgba(0,0,0,.4)] transition hover:bg-paper sm:inline-flex"
+            className={cn(
+              "hidden rounded-[9px] px-4 py-2.5 text-[0.82rem] font-semibold leading-none transition-colors sm:inline-flex",
+              overlay
+                ? "bg-white/12 text-white ring-1 ring-white/22 backdrop-blur-md hover:bg-white/18"
+                : "bg-ink text-white shadow-soft hover:bg-ink-800",
+            )}
           >
-            Matin Hub <ArrowRight className="h-3.5 w-3.5" />
+            Agent Platform
           </Link>
+
+          {/* Compact phone for the smallest screens */}
           <a
-            href="tel:+15036229624"
+            href={PHONE_TEL}
             aria-label="Call Matin Real Estate"
-            className="flex items-center sm:hidden text-white/80"
+            className={cn(
+              "flex items-center sm:hidden transition-colors",
+              overlay ? "text-white/85" : "text-ink",
+            )}
           >
             <Phone className="h-5 w-5" />
           </a>
+
+          {/* Mobile / tablet menu toggle */}
           <button
-            className="lg:hidden text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0e] rounded-sm"
+            type="button"
             onClick={() => setMenu((m) => !m)}
             aria-label={menu ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={menu}
-            aria-controls="mobile-nav"
+            aria-controls="site-mobile-nav"
+            className={cn(
+              "inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+              overlay
+                ? "bg-white/10 text-white ring-1 ring-white/18 backdrop-blur-md focus-visible:ring-white/60 focus-visible:ring-offset-transparent"
+                : "bg-ink/[0.04] text-ink ring-1 ring-ink/10 focus-visible:ring-gold/50",
+            )}
           >
             {menu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile / tablet dropdown — always the solid surface for readability */}
       <div
-        id="mobile-nav"
+        id="site-mobile-nav"
         className={cn(
-          "overflow-hidden bg-[#0d0d0e] lg:hidden transition-all duration-300",
-          menu ? "max-h-[32rem] border-t border-white/10" : "max-h-0",
+          "overflow-hidden border-ink/[0.08] bg-paper/95 backdrop-blur-md transition-all duration-300 lg:hidden",
+          menu ? "max-h-[34rem] border-t" : "max-h-0",
         )}
         aria-hidden={!menu}
       >
         <nav aria-label="Mobile navigation" className="container-x flex flex-col gap-1 py-4">
-          {NAV.map((n) => {
-            const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
+          {[...NAV, ...MOBILE_EXTRA].map((n) => {
+            const active = isActive(n.href);
             return (
               <Link
                 key={n.href}
                 href={n.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex w-full items-center rounded-lg px-3 min-h-[44px] text-[0.95rem] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2",
-                  active ? "bg-white/10 font-medium text-white" : "text-white/65 hover:bg-white/[0.07] hover:text-white",
+                  "flex min-h-[44px] w-full items-center rounded-lg px-3 text-[0.95rem] transition-colors",
+                  active
+                    ? "bg-gold-soft font-semibold text-gold"
+                    : "font-medium text-ink-600 hover:bg-ink/[0.04] hover:text-ink",
                 )}
               >
                 {n.label}
               </Link>
             );
           })}
-          <Link href="/contact" className="flex w-full items-center rounded-lg px-3 min-h-[44px] text-white/65 text-[0.95rem] hover:bg-white/[0.07] hover:text-white">
-            Contact
-          </Link>
+
+          <a
+            href={PHONE_TEL}
+            className="mt-1 flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 text-[0.95rem] font-medium text-ink-600 hover:bg-ink/[0.04] hover:text-ink"
+          >
+            <Phone className="h-4 w-4 text-gold" /> {company.phone}
+          </a>
+
+          <AskMatinButton className="mt-2 w-full justify-center py-3" />
           <Link
             href="/hub"
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-4 min-h-[44px] font-semibold text-ink"
+            className="mt-1 flex min-h-[44px] w-full items-center justify-center rounded-lg bg-ink px-3 text-[0.95rem] font-semibold text-white"
           >
-            Matin Hub <ArrowRight className="h-4 w-4" />
+            Agent Platform
           </Link>
         </nav>
       </div>

@@ -5,6 +5,7 @@ import { X, Send, Phone, ArrowRight } from "lucide-react";
 import { MatinMark } from "@/components/brand/Logo";
 import { streamAi } from "@/lib/ai/client";
 import { cn } from "@/lib/utils";
+import { ASK_MATIN_OPEN_EVENT } from "./ask-matin-bus";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -28,6 +29,13 @@ export function AskMatin() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
+
+  // Let the header "Ask Matin" CTA (and any page button) open the concierge.
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener(ASK_MATIN_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(ASK_MATIN_OPEN_EVENT, onOpen);
+  }, []);
 
   async function send(text: string) {
     if (!text.trim() || busy) return;
@@ -64,7 +72,7 @@ export function AskMatin() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close concierge" : "Open Matin concierge"}
         className={cn(
-          "fixed bottom-[calc(56px+1.25rem)] right-5 z-50 h-14 w-14 rounded-full sm:bottom-5 sm:right-7",
+          "fixed bottom-[calc(56px+5.75rem)] right-5 z-50 h-14 w-14 rounded-full sm:bottom-5 sm:right-7",
           "bg-ink text-white",
           "shadow-[0_4px_20px_rgba(6,6,6,.45),0_1px_4px_rgba(6,6,6,.25)]",
           "ring-[1.5px] ring-white/20",
