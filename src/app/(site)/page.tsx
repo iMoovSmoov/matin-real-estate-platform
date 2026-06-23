@@ -38,42 +38,38 @@ export default function HomePage() {
       {/* ---------- HERO ---------- */}
       <section id="main-content">
 
-        {/* ── MOBILE: stacked — image on top, text panel below ── */}
+        {/* ── MOBILE: full-bleed editorial hero, matching the Claude concept ── */}
         <div className="sm:hidden">
-          {/* Image zone: 4:3 ratio so the full office interior is visible, no extreme portrait crop */}
-          <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#0d0d0e]">
-            <div className="absolute inset-0 ken-burns">
-              <Image
-                src={company.officeHero}
-                alt="Matin Real Estate office in West Linn"
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover object-[22%_12%]"
-              />
-            </div>
-            {/* Fade bottom edge into the dark panel below */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0d0d0e]" />
-          </div>
+          <div className="relative isolate flex min-h-[calc(100svh-56px)] overflow-hidden bg-[#0d0d0e]">
+            <Image
+              src={company.officeHero}
+              alt="Matin Real Estate office in West Linn"
+              fill
+              priority
+              sizes="100vw"
+              className="ken-burns -z-10 object-cover object-[38%_20%]"
+            />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/18 via-ink/42 to-ink/92" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/58 via-transparent to-transparent" />
 
-          {/* Text panel: dark ink, flush below the image */}
-          <div className="bg-[#0d0d0e] px-5 pt-5 pb-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/45">
-              Portland · Lake Oswego · SW Washington
-            </p>
-            <h1 className="mt-3 font-display text-[1.9rem] font-bold leading-[1.1] text-white text-balance">
-              Find your place in the Pacific Northwest.
-            </h1>
-            <div className="mt-5">
-              <PropertySearchBar dark />
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-white/15 pt-5">
-              {heroStats.map(([n, l]) => (
-                <div key={l}>
-                  <div className="font-display text-2xl leading-none text-white tabular-nums">{n}</div>
-                  <div className="mt-1 text-[0.72rem] text-white/62">{l}</div>
-                </div>
-              ))}
+            <div className="flex w-full flex-col justify-end px-5 pb-24 pt-28">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/72">
+                Portland · Lake Oswego · SW Washington
+              </p>
+              <h1 className="hero-text-shadow mt-4 font-display text-[2.2rem] font-normal leading-[0.98] text-white text-balance">
+                Find your place in the Pacific Northwest.
+              </h1>
+              <div className="mt-6">
+                <PropertySearchBar dark />
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-4 border-t border-white/18 pt-5">
+                {heroStats.map(([n, l]) => (
+                  <div key={l}>
+                    <div className="font-display text-[1.8rem] leading-none text-white tabular-nums">{n}</div>
+                    <div className="mt-1 text-[0.72rem] text-white/65">{l}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
