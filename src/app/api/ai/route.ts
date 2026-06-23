@@ -48,7 +48,7 @@ function textStream(text: string) {
       const words = text.split(/(\s+)/);
       for (const w of words) {
         controller.enqueue(encoder.encode(w));
-        await new Promise((r) => setTimeout(r, 12));
+        await new Promise((r) => setTimeout(r, 2));
       }
       controller.close();
     },

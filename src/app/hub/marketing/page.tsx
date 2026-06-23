@@ -607,6 +607,49 @@ export default function MarketingStudioPage() {
         seller-update assets.
       </p>
 
+      <section className="surface-ai relative overflow-hidden rounded-2xl p-4 shadow-[0_18px_54px_rgba(0,0,0,.24)] sm:p-5">
+        <img
+          src={STUDIO_LISTING.photo}
+          alt=""
+          className="absolute inset-y-0 right-0 hidden h-full w-[38%] object-cover opacity-32 saturate-[.85] md:block"
+        />
+        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(100deg,rgba(8,18,13,.98)_0%,rgba(8,18,13,.9)_54%,rgba(8,18,13,.34)_100%)]" />
+        <span aria-hidden className="ai-bloom -right-16 -top-16" />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-success text-cloud shadow-[0_0_24px_rgba(31,107,74,.5)]">
+                <MatinMark theme="white" className="h-4 w-4" />
+              </span>
+              <div>
+                <p className="eyebrow text-[0.66rem] text-[#a8e6c2]">AI asset studio</p>
+                <p className="mt-0.5 text-[0.72rem] text-slate-300">
+                  {STUDIO_LISTING.address} · {STUDIO_LISTING.cityShort}
+                </p>
+              </div>
+            </div>
+            <h2 className="mt-3 max-w-3xl font-display text-[1.25rem] font-normal leading-tight text-cloud sm:text-[1.55rem]">
+              Generate a full Matin-branded launch kit, then approve every channel before it publishes.
+            </h2>
+            <div className="mt-3 flex flex-wrap gap-2 text-[0.72rem] text-slate-300">
+              {["Email", "Instagram", "Facebook", "Google retargeting", "Print flyer"].map((item) => (
+                <span key={item} className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={generating}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1f6b4a,#2f8a60_70%,#c9a24b_150%)] px-4 text-[0.82rem] font-semibold text-cloud shadow-[0_10px_26px_rgba(31,107,74,.42)] transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-75"
+          >
+            {generating ? "Generating kit..." : "Generate launch kit"}
+          </button>
+        </div>
+      </section>
+
       {/* KPI strip — every tile drills into the campaigns table or a record.
           R4: scroll-snap rail on phone so 6 tiles never orphan. */}
       <KpiStrip cols={6}>

@@ -21,9 +21,10 @@ export default function SystemsHealthPage() {
   return (
     <div className="px-4 pb-10 pt-4 md:px-6">
       <p className="mb-5 max-w-3xl text-[0.82rem] leading-relaxed text-slate">
-        The technical console behind MatinOS — every connected system,
-        automation run, and data check, here for the operator to inspect and
-        fix.
+        A business-friendly control room for the tools feeding MatinOS. Leads,
+        CRM, transactions, marketing, documents, and AI runs are monitored here
+        so the team sees what is healthy, what needs attention, and which
+        automations are already doing the busywork.
       </p>
 
       <SystemsHealthWorkspace

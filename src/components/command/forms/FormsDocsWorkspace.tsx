@@ -146,6 +146,8 @@ export function FormsDocsWorkspace() {
     packets.find((p) => p.id === packetId) ??
     filteredPackets[0] ??
     packets[0];
+  const packetPhoto = packetHero(packet);
+  const packetStatus = packetProgress(packet);
 
   const [docId, setDocId] = useState<string>(firstActionableDoc(packets[0])?.id ?? "");
   const doc =
@@ -498,6 +500,76 @@ export function FormsDocsWorkspace() {
           New packet
         </button>
       </div>
+
+      {topTab === "packets" ? (
+        <section className="relative overflow-hidden rounded-2xl border border-ink/15 bg-ink p-4 text-cloud shadow-[0_24px_70px_rgba(20,20,22,.24)] sm:p-5">
+          <img
+            src={packetPhoto}
+            alt=""
+            className="absolute inset-y-0 right-0 hidden h-full w-[44%] object-cover opacity-45 saturate-[.82] md:block"
+          />
+          <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(100deg,#070707_0%,rgba(7,7,7,.92)_42%,rgba(7,7,7,.38)_100%)]" />
+          <span className="pointer-events-none absolute -right-16 -top-20 h-60 w-60 rounded-full bg-success/25 blur-3xl" />
+          <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-success text-cloud shadow-[0_0_22px_rgba(31,107,74,.45)]">
+                  <MatinMark theme="white" className="h-4 w-4" />
+                </span>
+                <span className="eyebrow text-[0.66rem] text-[#a8e6c2]">
+                  Matin agreement desk
+                </span>
+              </div>
+              <h2 className="mt-3 font-display text-[1.35rem] font-normal leading-tight sm:text-[1.7rem]">
+                {packet.name}: {packet.subject}
+              </h2>
+              <p className="mt-2 max-w-3xl text-[0.84rem] leading-relaxed text-slate-300">
+                Auto-filled from MatinOS records, staged for human review, then ready to preview,
+                download, print, or send for signature.
+              </p>
+              <div className="mt-4 grid max-w-2xl grid-cols-3 gap-2 text-[0.72rem] sm:flex sm:flex-wrap sm:gap-3">
+                <span className="rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2">
+                  <strong className="block text-[1rem] leading-none text-cloud">
+                    {packetStatus.done}/{packetStatus.total}
+                  </strong>
+                  <span className="text-slate-300">docs complete</span>
+                </span>
+                <span className="rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2">
+                  <strong className="block text-[1rem] leading-none text-cloud">
+                    {m.missingFields}
+                  </strong>
+                  <span className="text-slate-300">fields flagged</span>
+                </span>
+                <span className="rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2">
+                  <strong className="block text-[1rem] leading-none text-cloud">
+                    {m.awaitingSignature}
+                  </strong>
+                  <span className="text-slate-300">awaiting sign</span>
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTopTab("packets");
+                  setView_("missing");
+                }}
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-success px-4 text-[0.8rem] font-semibold text-cloud shadow-[0_10px_24px_rgba(31,107,74,.36)] transition-colors hover:bg-success/90"
+              >
+                Review fields
+              </button>
+              <button
+                type="button"
+                onClick={() => doc && setDrawerDocId(doc.id)}
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-white/14 bg-white/[0.08] px-4 text-[0.8rem] font-semibold text-cloud transition-colors hover:bg-white/[0.14]"
+              >
+                Open preview
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* KPI strip — each tile FILTERS the packet list (saved-view drilldown). */}
       <KpiStrip cols={5}>

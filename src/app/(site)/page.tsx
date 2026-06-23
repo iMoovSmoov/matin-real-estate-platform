@@ -32,6 +32,8 @@ const testimonials = [
   { name: "D. Okafor", area: "Camas, WA", quote: "Relocating from out of state, their team made it effortless. The tech and communication were incredible." },
 ];
 
+const claudeHomeHero = "/matin/exteriors/exteriors-11.jpg";
+
 export default function HomePage() {
   return (
     <>
@@ -40,19 +42,22 @@ export default function HomePage() {
 
         {/* ── MOBILE: full-bleed editorial hero, matching the Claude concept ── */}
         <div className="sm:hidden">
-          <div className="relative isolate flex min-h-[calc(100svh-56px)] overflow-hidden bg-[#0d0d0e]">
-            <Image
-              src={company.officeHero}
-              alt="Matin Real Estate office in West Linn"
-              fill
-              priority
-              sizes="100vw"
-              className="ken-burns -z-10 object-cover object-[38%_20%]"
-            />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/18 via-ink/42 to-ink/92" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/58 via-transparent to-transparent" />
+          <div className="relative isolate min-h-[calc(100svh-56px)] overflow-hidden bg-[#0d0d0e]">
+            <div className="relative aspect-[3/2] w-full overflow-hidden">
+              <Image
+                src={claudeHomeHero}
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                aria-hidden
+                className="ken-burns object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/12 to-ink/78" />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0d0d0e]" />
+            </div>
 
-            <div className="flex w-full flex-col justify-end px-5 pb-24 pt-28">
+            <div className="relative z-10 flex min-h-[calc(100svh_-_56px_-_66vw)] w-full flex-col justify-end px-5 pb-12 pt-7">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-white/72">
                 Portland · Lake Oswego · SW Washington
               </p>
@@ -78,8 +83,8 @@ export default function HomePage() {
         <div className="relative hidden sm:block min-h-[92vh] overflow-hidden bg-[#0d0d0e]">
           <div className="absolute inset-0 ken-burns">
             <Image
-              src={company.officeHero}
-              alt="Matin Real Estate office in West Linn"
+              src={claudeHomeHero}
+              alt="Luxury Pacific Northwest home represented by Matin Real Estate"
               fill
               priority
               sizes="100vw"
@@ -197,11 +202,11 @@ export default function HomePage() {
             <Reveal>
               <div className="relative aspect-[5/4] overflow-hidden rounded-2xl shadow-lift sm:rounded-3xl">
                 <Image
-                  src={company.officeMeeting}
-                  alt="Matin Real Estate team"
+                  src={company.officeHero}
+                  alt="Matin Real Estate West Linn office"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
+                  className="object-cover object-center"
                 />
                 <div className="absolute bottom-4 left-4 rounded-2xl bg-cloud/95 px-5 py-4 shadow-lift backdrop-blur sm:bottom-5 sm:left-5">
                   <div className="font-display text-3xl text-ink">{company.founded}</div>

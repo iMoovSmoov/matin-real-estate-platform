@@ -158,10 +158,11 @@ export function AISidecar() {
     };
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const lockBody = window.innerWidth < 1024;
+    if (lockBody) document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      if (lockBody) document.body.style.overflow = prev;
     };
   }, [open, closeAi]);
 
@@ -244,7 +245,7 @@ export function AISidecar() {
 
   return (
     <div
-      className="fixed inset-0 z-[60]"
+      className="fixed inset-0 z-[60] lg:pointer-events-none"
       role="dialog"
       aria-modal="true"
       aria-label="Matin AI"
@@ -254,16 +255,16 @@ export function AISidecar() {
         type="button"
         aria-label="Close Matin AI"
         onClick={closeAi}
-        className="absolute inset-0 bg-ink/40"
+        className="absolute inset-0 bg-ink/40 lg:hidden"
       />
 
       {/* Dark glass AI panel — figure/ground against the light workspace */}
-      <div className="surface-ai absolute inset-y-0 right-0 flex w-full max-w-[420px] flex-col overflow-hidden text-slate-300">
+      <div className="surface-ai absolute inset-y-0 right-0 flex w-full max-w-[420px] flex-col overflow-hidden text-slate-300 lg:pointer-events-auto lg:top-14 lg:w-[300px] lg:max-w-none lg:rounded-l-2xl lg:border-l lg:border-y-0 lg:border-r-0">
         {/* Accent bloom — soft AI glow at the brand corner */}
         <span aria-hidden className="ai-bloom -left-16 -top-16" />
 
         {/* Header — Matin mark + bound context signal an AI surface */}
-        <div className="relative flex items-start justify-between gap-3 border-b border-ink-700 px-5 py-4">
+        <div className="relative flex items-start justify-between gap-3 border-b border-ink-700 px-4 py-3.5">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gold/15 ring-1 ring-inset ring-gold/30">
@@ -286,7 +287,7 @@ export function AISidecar() {
         </div>
 
         {/* Chat scroll */}
-        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
           {turns.map((t, i) => {
             const isLast = i === turns.length - 1;
             if (t.role === "ai") {

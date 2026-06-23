@@ -6,6 +6,7 @@ import { Section, Container, SectionHeading } from "@/components/ui/section";
 import { ButtonLink } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import { ContactForm } from "@/components/site/marketing/ContactForm";
+import { EditorialHero } from "@/components/site/EditorialHero";
 import { company } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -50,34 +51,26 @@ const quickFacts = [
 export default function ContactPage() {
   return (
     <>
-      {/* ---------- HERO ---------- */}
-      <section className="relative overflow-hidden bg-ink pb-20 pt-36 text-white md:pb-24">
-        <div className="absolute inset-0 grid-tech opacity-50" />
-        <div className="absolute -right-32 top-0 h-96 w-96 rounded-full bg-white/[0.05] blur-3xl" />
-        <Container className="relative">
-          <div className="max-w-2xl">
-            <Reveal>
-              <span className="eyebrow-light">Contact us</span>
-            </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="display-1 mt-5 font-display text-white text-balance">
-                Let&apos;s start a{" "}
-                <span className="italic text-azure-bright">conversation.</span>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.16}>
-              <p className="mt-6 text-sm leading-relaxed text-slate-300 text-pretty sm:text-lg">
-                Buying, selling, or just exploring your options — tell us where you are and a Matin broker
-                will reach out within one business day. Prefer to talk now? Call{" "}
-                <a href={`tel:+1${phoneRaw}`} className="font-medium text-azure-bright link-underline">
-                  {phone}
-                </a>
-                .
-              </p>
-            </Reveal>
-          </div>
-        </Container>
-      </section>
+      <EditorialHero
+        eyebrow="Contact us"
+        title={<>Let's start a conversation.</>}
+        intro={
+          <>
+            Buying, selling, or exploring your options — tell us where you are and a Matin broker
+            will reach out within one business day. Prefer to talk now? Call{" "}
+            <a href={`tel:+1${phoneRaw}`} className="font-semibold text-white link-underline">
+              {phone}
+            </a>.
+          </>
+        }
+        image="/matin/scenics/scenics-02.jpg"
+        imageAlt="Pacific Northwest neighborhood view"
+        stats={[
+          { value: "8am–8pm", label: "daily availability" },
+          { value: "OR + WA", label: "licensed coverage" },
+          { value: "1 day", label: "typical response" },
+        ]}
+      />
 
       {/* ---------- FORM + INFO ---------- */}
       <Section>

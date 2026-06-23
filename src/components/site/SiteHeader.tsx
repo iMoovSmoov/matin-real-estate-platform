@@ -29,7 +29,16 @@ const MOBILE_EXTRA = [
 /* Routes that opt into the transparent-overlay header (white nav over a
    full-bleed hero). Today only Home; add routes here to extend. The header
    self-detects via the route so the layout/page need wire nothing. */
-const OVERLAY_ROUTES = new Set<string>(["/"]);
+const OVERLAY_ROUTES = new Set<string>([
+  "/",
+  "/buy",
+  "/sell",
+  "/cash-offer",
+  "/communities",
+  "/agents",
+  "/about",
+  "/contact",
+]);
 
 const PHONE_TEL = `tel:+1${company.phoneRaw}`;
 

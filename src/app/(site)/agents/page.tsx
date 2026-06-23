@@ -19,7 +19,7 @@ export default function AgentsPage() {
       <section className="relative flex min-h-[52vh] items-end overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src={company.officeMeeting}
+            src="/matin/scenics/scenics-04.jpg"
             alt="The Matin Real Estate team"
             fill
             priority

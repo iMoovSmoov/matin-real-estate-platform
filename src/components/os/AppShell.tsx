@@ -58,7 +58,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
       <aside
         className={cn(
           "relative hidden h-full shrink-0 flex-col bg-ink-900 transition-[width] duration-200 lg:flex",
-          collapsed ? "w-16" : "w-[280px]",
+          collapsed ? "w-16" : "w-[210px]",
         )}
       >
         {/* Collapse toggle — pinned to the brand-block hairline at the rail's
@@ -85,7 +85,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             onClick={() => setMobileOpen(false)}
             className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
           />
-          <aside className="absolute inset-y-0 left-0 w-[280px] max-w-[82vw] bg-ink-900 shadow-lift">
+          <aside className="absolute inset-y-0 left-0 w-[268px] max-w-[82vw] bg-ink-900 shadow-lift">
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -108,7 +108,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         />
 
         {/* Back-to-website strip */}
-        <div className="flex shrink-0 items-center border-b border-mist bg-paper px-4 py-1.5 md:px-6">
+        <div className="flex shrink-0 items-center border-b border-mist bg-cloud/72 px-4 py-1.5 backdrop-blur-xl md:px-6">
           <Link
             href="/"
             className="group inline-flex shrink-0 items-center gap-1.5 text-[0.72rem] font-medium text-slate transition-colors hover:text-ink"
@@ -122,7 +122,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             faintly dotted workspace texture (replaces flat bg-paper; the
             utility bg-paper would otherwise win over the component layer). */}
         <main className="workspace-texture flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0">
-          <div className="mx-auto w-full max-w-[1600px]">{children}</div>
+          <div className="mx-auto w-full max-w-[1320px]">{children}</div>
         </main>
       </div>
 

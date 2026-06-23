@@ -47,7 +47,7 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Today", href: "/hub", icon: LayoutDashboard },
   { label: "CRM & Leads", href: "/hub/crm", icon: Users },
-  { label: "Seller / Cash Offers", href: "/hub/cash-offer", icon: HandCoins },
+  { label: "Cash-Offer Pipeline", href: "/hub/cash-offer", icon: HandCoins },
   { label: "Listing Launch", href: "/hub/listing-launch", icon: Building2 },
   { label: "Buyer Agreements", href: "/hub/buyer-agreements", icon: FileSignature },
   { label: "Transactions", href: "/hub/transactions", icon: Handshake },
@@ -91,8 +91,8 @@ export function SidebarNav({
           collapse toggle that floats on the rail's edge (never overlaps). */}
       <div
         className={cn(
-          "flex h-16 items-center border-b border-ink-700",
-          collapsed ? "justify-center px-0" : "gap-2.5 pl-5 pr-9",
+          "flex h-14 items-center border-b border-white/[0.06]",
+          collapsed ? "justify-center px-0" : "gap-2.5 pl-4 pr-8",
         )}
       >
         {/* Brand mark seated in a faceted chip — subtle gradient + brass
@@ -115,9 +115,9 @@ export function SidebarNav({
       {/* Nav */}
       <nav
         aria-label="Primary"
-        className={cn("flex-1 overflow-y-auto py-3", collapsed ? "px-2" : "px-3")}
+        className={cn("flex-1 overflow-y-auto py-3", collapsed ? "px-2" : "px-2.5")}
       >
-        <ul className="space-y-0.5">
+        <ul className="space-y-px">
           {primary.map((item) => (
             <NavLink
               key={item.href}
@@ -130,7 +130,7 @@ export function SidebarNav({
         </ul>
 
         {/* Divider */}
-        <div className={cn("my-3 border-t border-ink-700", collapsed ? "mx-1" : "mx-2")} />
+        <div className={cn("my-3 border-t border-white/[0.06]", collapsed ? "mx-1" : "mx-2")} />
 
         {/* Admin — below the line, de-emphasized */}
         <ul className="space-y-0.5">
@@ -148,7 +148,7 @@ export function SidebarNav({
       </nav>
 
       {/* Bottom context block */}
-      <div className={cn("border-t border-ink-700", collapsed ? "p-2" : "p-3")}>
+      <div className={cn("border-t border-white/[0.06]", collapsed ? "p-2" : "p-3")}>
         {collapsed ? (
           <div className="flex justify-center">
             <button
@@ -207,16 +207,16 @@ function NavLink({
           title={item.label}
           aria-current={active ? "page" : undefined}
           className={cn(
-            "group relative flex items-center justify-center rounded-lg py-2.5 transition-colors",
+            "group relative flex items-center justify-center rounded-lg py-2 transition-colors",
             active
-              ? "bg-cloud text-ink"
+              ? "bg-gold/[0.15] text-gold-bright"
               : "text-slate-300/70 hover:bg-cloud/[0.06] hover:text-cloud",
           )}
         >
           {active ? (
             <span
               aria-hidden
-              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-gold-bright to-gold"
+              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gold-bright"
             />
           ) : null}
           <Icon className="h-[1.05rem] w-[1.05rem] shrink-0" />
@@ -236,9 +236,9 @@ function NavLink({
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-medium transition-colors",
+          "group relative flex items-center gap-2.5 rounded-lg px-3 py-[0.46rem] text-[0.78rem] font-medium transition-colors",
           active
-            ? "bg-cloud text-ink shadow-soft"
+            ? "bg-gold/[0.15] text-gold-bright"
             : cn(
                 "hover:bg-cloud/[0.06] hover:text-cloud",
                 deemphasized ? "text-slate-300/55" : "text-slate-300/85",
@@ -248,13 +248,13 @@ function NavLink({
         {active ? (
           <span
             aria-hidden
-            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gradient-to-b from-gold-bright to-gold"
+            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-gold-bright"
           />
         ) : null}
         <Icon
           className={cn(
             "h-[1.05rem] w-[1.05rem] shrink-0 transition-colors",
-            active ? "text-ink" : "text-slate-300/55 group-hover:text-cloud",
+            active ? "text-gold-bright" : "text-slate-300/55 group-hover:text-cloud",
           )}
         />
         <span className="truncate">{item.label}</span>

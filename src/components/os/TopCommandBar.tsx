@@ -96,7 +96,7 @@ export function TopCommandBar({
   const heading = title ?? titleFromPath(pathname);
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-mist bg-paper px-4 sm:h-16 md:px-6">
+    <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-mist bg-cloud/76 px-4 shadow-[0_1px_0_rgba(20,20,15,.03)] backdrop-blur-xl md:px-6">
       {/* Mobile hamburger */}
       <button
         type="button"
@@ -108,7 +108,7 @@ export function TopCommandBar({
       </button>
 
       {/* Page H1 — Fraunces */}
-      <h1 className="min-w-0 truncate font-display text-[1.15rem] font-normal leading-none text-ink sm:text-[1.35rem]">
+      <h1 className="min-w-0 truncate font-display text-[1.08rem] font-normal leading-none text-ink sm:text-[1.22rem]">
         {heading}
       </h1>
 
@@ -118,10 +118,10 @@ export function TopCommandBar({
           type="button"
           onClick={onOpenPalette}
           aria-label="Search (Command-K)"
-          className="hidden items-center gap-2 rounded-full bg-paper-200 py-1.5 pl-3 pr-2 text-[0.82rem] text-slate ring-1 ring-inset ring-mist transition-colors hover:text-ink md:inline-flex"
+          className="hidden min-w-[270px] items-center gap-2 rounded-[9px] border border-mist bg-cloud py-1.5 pl-3 pr-2 text-[0.82rem] text-slate shadow-[0_1px_2px_rgba(20,20,15,.03)] transition-colors hover:text-ink lg:inline-flex"
         >
           <Search className="h-3.5 w-3.5" />
-          <span className="hidden lg:inline">Search…</span>
+          <span className="min-w-0 flex-1 text-left">Search or ask Matin…</span>
           <kbd className="rounded bg-cloud px-1.5 py-0.5 text-[0.62rem] font-semibold text-slate ring-1 ring-inset ring-mist">
             ⌘K
           </kbd>
@@ -132,7 +132,7 @@ export function TopCommandBar({
           type="button"
           onClick={onOpenPalette}
           aria-label="Search"
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-200 hover:text-ink md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate transition-colors hover:bg-paper-200 hover:text-ink lg:hidden"
         >
           <Search className="h-[1.05rem] w-[1.05rem]" />
         </button>
@@ -144,7 +144,7 @@ export function TopCommandBar({
             onClick={() => setCreateOpen((o) => !o)}
             aria-haspopup="menu"
             aria-expanded={createOpen}
-            className="inline-flex items-center gap-1.5 rounded-full bg-ink py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+            className="inline-flex items-center gap-1.5 rounded-[9px] bg-ink py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold text-cloud transition-colors hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Create</span>
@@ -187,7 +187,7 @@ export function TopCommandBar({
         <button
           type="button"
           onClick={() => openAi("Working on: Matin Brokerage OS")}
-          className="btn-accent inline-flex items-center gap-1.5 rounded-full py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+          className="btn-accent inline-flex items-center gap-1.5 rounded-[9px] py-1.5 pl-3 pr-3.5 text-[0.82rem] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
         >
           {/* Dark green accent surface → white "M" mark */}
           <MatinMark theme="white" className="h-4 w-4" />
