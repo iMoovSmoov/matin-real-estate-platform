@@ -117,7 +117,7 @@ export function SearchExperience({
 
   return (
     <section className="min-h-screen bg-paper">
-      <div className="sticky top-[58px] z-30 border-b border-ink/[0.08] bg-cloud/94 backdrop-blur-xl">
+      <div className="relative z-30 border-b border-ink/[0.08] bg-cloud/94 backdrop-blur-xl lg:sticky lg:top-[58px]">
         <div className="container-x py-3">
           <div className="flex flex-col gap-2 rounded-2xl border border-ink/[0.08] bg-cloud p-3 shadow-soft lg:flex-row lg:items-center">
             <label className="flex min-h-10 flex-1 items-center gap-2 rounded-[9px] border border-ink/[0.14] px-3.5">
